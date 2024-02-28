@@ -1,30 +1,60 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using StravaWebhooksAzureFunctions.Models;
+using StravaWebhooksAzureFunctions.Data.Entities;
+using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
+using StravaWebhooksAzureFunctions.Services;
 
 namespace StravaWebhooksAzureFunctions.Functions;
 
 public class CosmosDBTriggerFunction
 {
+    private readonly IStravaRestHttpClient _stravaRestHttpClient;
+    private readonly UpdateActivityService _updateActivityService;
     private readonly ILogger _logger;
 
-    public CosmosDBTriggerFunction(ILoggerFactory loggerFactory)
+    public CosmosDBTriggerFunction(
+        IStravaRestHttpClient stravaRestHttpClient,
+        UpdateActivityService updateActivityService,
+        ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<CosmosDBTriggerFunction>();
+        _stravaRestHttpClient = stravaRestHttpClient;
+        _updateActivityService = updateActivityService;
     }
 
-    [Function("Function1")]
-    public void Run([CosmosDBTrigger(
+    [Function(nameof(CosmosDBTriggerFunction)]
+    public async Task Run([CosmosDBTrigger(
         databaseName: "strava",
-        containerName: "UserSession",
+        containerName: "WebhookEvent",
         Connection = "AzureWebJobsStorageConnectionString",
         LeaseContainerName = "leases",
-        CreateLeaseContainerIfNotExists = true)] IReadOnlyList<MyDocument> input)
+        CreateLeaseContainerIfNotExists = true)] IReadOnlyList<WebhookEventData> input,
+        FunctionContext executionContext)
     {
-        if (input != null && input.Count > 0)
+        if (input == null || input.Count <= 0)
         {
-            _logger.LogInformation("Documents modified: " + input.Count);
-            _logger.LogInformation("First document Id: " + input[0].id);
+            return;
+        }
+
+        _logger.LogInformation("Documents modified: " + input.Count);
+        foreach (var webhookEventData in input)
+        {
+            if (webhookEventData.AspectType != "create")
+            {
+                _logger.LogInformation("Skip, because AspectType =! create. Aspect type: {AspectType}", webhookEventData.AspectType);
+                return;
+            }
+
+            var athleteId = webhookEventData.OwnerId;
+            var activityId = webhookEventData.ObjectId;
+
+            var activityResponse = await _stravaRestHttpClient.GetActivity(activityId, athleteId);
+
+            if (activityResponse.Type != "Walk")
+            {
+                _logger.LogInformation("Skip activity name: {Name}, id: {Id}, cause it's not walk activity. Type: {Type}", activityResponse.Name, activityResponse.Id, activityResponse.Type);
+            }
+            await _updateActivityService.UpdateActivityVisibilityToOnlyMe(activityId, athleteId, executionContext.CancellationToken);
         }
     }
 }

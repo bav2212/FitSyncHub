@@ -1,16 +1,16 @@
-﻿using System;
-
-namespace StravaWebhooksAzureFunctions.Data.Entities;
+﻿namespace StravaWebhooksAzureFunctions.Data.Entities;
 
 public class WebhookEventData
 {
-    public long Id { get; init; }
-    public string ObjectType { get; init; }
-    public long ObjectId { get; init; }
-    public string AspectType { get; init; }
-    public string Updates { get; init; }
-    public long OwnerId { get; init; }
-    public long SubscriptionId { get; init; }
-    public long EventTime { get; init; }
-    public DateTimeOffset CreatedOn { get; init; }
+#pragma warning disable IDE1006 // Naming Styles
+    public required string id { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
+    public required string ObjectType { get; init; }
+    public required long ObjectId { get; init; }
+    public required string AspectType { get; init; }
+    public required string Updates { get; init; }
+    public required long OwnerId { get; init; }
+    public required long SubscriptionId { get; init; }
+    public required long EventTime { get; init; }
+    public required DateTimeOffset CreatedOn { get; init; }
 }

@@ -36,7 +36,6 @@ var host = new HostBuilder()
         });
         services.AddTransient<IStravaCookieHttpClient, StravaCookieHttpClient>();
 
-        services.AddTransient<RestApiAuthTokenService>();
         services.AddTransient<UpdateActivityService>();
         services.AddTransient<IStravaOAuthService, StravaOAuthService>();
     })

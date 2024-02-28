@@ -87,13 +87,14 @@ public class ExchangeTokenHttpTriggerFunction
     }
 }
 
-public struct ExchangeTokenMultiResponse
+public record ExchangeTokenMultiResponse
 {
     [CosmosDBOutput(
         databaseName: "strava",
         containerName: "PersistedGrant",
         Connection = "AzureWebJobsStorageConnectionString",
-        CreateIfNotExists = true)]
-    public required PersistedGrant Document { get; set; }
-    public required HttpResponseData HttpResponse { get; set; }
+        CreateIfNotExists = true,
+        PartitionKey = "/id")]
+    public required PersistedGrant Document { get; init; }
+    public required HttpResponseData HttpResponse { get; init; }
 }
