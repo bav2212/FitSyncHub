@@ -22,13 +22,14 @@ public class CosmosDBTriggerFunction
         _updateActivityService = updateActivityService;
     }
 
-    [Function(nameof(CosmosDBTriggerFunction)]
-    public async Task Run([CosmosDBTrigger(
-        databaseName: "strava",
-        containerName: "WebhookEvent",
-        Connection = "AzureWebJobsStorageConnectionString",
-        LeaseContainerName = "leases",
-        CreateLeaseContainerIfNotExists = true)] IReadOnlyList<WebhookEventData> input,
+    [Function(nameof(CosmosDBTriggerFunction))]
+    public async Task Run(
+        [CosmosDBTrigger(
+            databaseName: "strava",
+            containerName: "WebhookEvent",
+            Connection = "AzureWebJobsStorageConnectionString",
+            LeaseContainerName = "leases",
+            CreateLeaseContainerIfNotExists = true)] IReadOnlyList<WebhookEventData> input,
         FunctionContext executionContext)
     {
         if (input == null || input.Count <= 0)
