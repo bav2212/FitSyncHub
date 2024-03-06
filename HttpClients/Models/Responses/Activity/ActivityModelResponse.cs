@@ -51,7 +51,7 @@ public class ActivityModelResponse
     public string Description { get; init; }
     public float Calories { get; init; }
     public string? PerceivedExertion { get; init; }
-    public bool PreferPerceivedExertion { get; init; }
+    public bool? PreferPerceivedExertion { get; init; }
     public object[] SegmentEfforts { get; init; }
     public ActivitySplitsMetric[] SplitsMetric { get; init; }
     public ActivitySplitsStandard[] SplitsStandard { get; init; }
