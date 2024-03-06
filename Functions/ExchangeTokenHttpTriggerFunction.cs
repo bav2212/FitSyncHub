@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
-using System.Net;
 
 namespace StravaWebhooksAzureFunctions.Functions;
 
@@ -19,15 +20,19 @@ public class ExchangeTokenHttpTriggerFunction
         "read_all"
     ];
     private readonly IStravaOAuthHttpClient _stravaHttpClient;
+    private readonly CosmosClient _cosmosClient;
 
-    public ExchangeTokenHttpTriggerFunction(IStravaOAuthHttpClient stravaHttpClient)
+    public ExchangeTokenHttpTriggerFunction(
+        IStravaOAuthHttpClient stravaHttpClient,
+        CosmosClient cosmosClient)
     {
         _stravaHttpClient = stravaHttpClient;
+        _cosmosClient = cosmosClient;
     }
 
     [Function(nameof(ExchangeTokenHttpTriggerFunction))]
-    public async Task<ExchangeTokenMultiResponse> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "exchange_token")] HttpRequestData req,
+    public async Task<ActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "exchange_token")] HttpRequest req,
         FunctionContext executionContext)
     {
         var logger = executionContext.GetLogger<ExchangeTokenHttpTriggerFunction>();
@@ -38,20 +43,12 @@ public class ExchangeTokenHttpTriggerFunction
 
         if (scope is null || !_expectedScope.SetEquals(scope.Split(',')))
         {
-            return new ExchangeTokenMultiResponse()
-            {
-                Document = default,
-                HttpResponse = await CreateBadRequestResponse(req, "Invalid scope")
-            };
+            return new BadRequestObjectResult("Invalid scope");
         }
 
         if (code is null)
         {
-            return new ExchangeTokenMultiResponse()
-            {
-                Document = default,
-                HttpResponse = await CreateBadRequestResponse(req, "Code is required")
-            };
+            return new BadRequestObjectResult("Code is required");
         }
 
         var exchangeTokenResponse = await _stravaHttpClient
@@ -62,11 +59,7 @@ public class ExchangeTokenHttpTriggerFunction
         if (athleteId != Constants.MyAthleteId)
         {
             logger.LogWarning("Skipping, because this athlete is not supported");
-            return new ExchangeTokenMultiResponse()
-            {
-                Document = default,
-                HttpResponse = await CreateBadRequestResponse(req, "Athlete is not supported")
-            };
+            return new BadRequestObjectResult("Athlete is not supported");
         }
 
         var persistedGrant = new PersistedGrant
@@ -81,32 +74,9 @@ public class ExchangeTokenHttpTriggerFunction
             AthleteUserName = exchangeTokenResponse.Athlete.Username,
         };
 
-        // Return a response to both HTTP trigger and Azure Cosmos DB output binding.
-        return new ExchangeTokenMultiResponse()
-        {
-            Document = persistedGrant,
-            HttpResponse = req.CreateResponse(HttpStatusCode.OK)
-        };
-    }
+        var persistedGrantContainer = _cosmosClient.GetContainer("strava", nameof(PersistedGrant));
+        await persistedGrantContainer.UpsertItemAsync(persistedGrant);
 
-    // maybe move this to a helper class
-    private static async Task<HttpResponseData> CreateBadRequestResponse(HttpRequestData req, string responseText)
-    {
-        var response = req.CreateResponse(HttpStatusCode.BadRequest);
-        response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-        await response.WriteStringAsync(responseText);
-        return response;
+        return new OkResult();
     }
-}
-
-public record ExchangeTokenMultiResponse
-{
-    [CosmosDBOutput(
-        databaseName: "strava",
-        containerName: "PersistedGrant",
-        Connection = "AzureWebJobsStorageConnectionString",
-        CreateIfNotExists = true,
-        PartitionKey = "/id")]
-    public required PersistedGrant? Document { get; init; }
-    public required HttpResponseData HttpResponse { get; init; }
 }
