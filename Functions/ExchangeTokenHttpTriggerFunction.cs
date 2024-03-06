@@ -1,5 +1,6 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using System.Net;
@@ -29,6 +30,9 @@ public class ExchangeTokenHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "exchange_token")] HttpRequestData req,
         FunctionContext executionContext)
     {
+        var logger = executionContext.GetLogger<ExchangeTokenHttpTriggerFunction>();
+        logger.LogInformation("Started executing function {Function}", nameof(ExchangeTokenHttpTriggerFunction));
+
         string? code = req.Query["code"];
         string? scope = req.Query["scope"];
 
@@ -50,11 +54,19 @@ public class ExchangeTokenHttpTriggerFunction
             };
         }
 
-        var exchangeTokenResponse = await _stravaHttpClient.ExchangeTokenAsync(code, executionContext.CancellationToken);
+        var exchangeTokenResponse = await _stravaHttpClient
+            .ExchangeTokenAsync(code, executionContext.CancellationToken);
+        logger.LogInformation("Exchanged token");
+
         var athleteId = exchangeTokenResponse.Athlete.Id;
         if (athleteId != Constants.MyAthleteId)
         {
-            throw new NotImplementedException();
+            logger.LogWarning("Skipping, because this athlete is not supported");
+            return new ExchangeTokenMultiResponse()
+            {
+                Document = default,
+                HttpResponse = await CreateBadRequestResponse(req, "Athlete is not supported")
+            };
         }
 
         var persistedGrant = new PersistedGrant
@@ -95,6 +107,6 @@ public record ExchangeTokenMultiResponse
         Connection = "AzureWebJobsStorageConnectionString",
         CreateIfNotExists = true,
         PartitionKey = "/id")]
-    public required PersistedGrant Document { get; init; }
+    public required PersistedGrant? Document { get; init; }
     public required HttpResponseData HttpResponse { get; init; }
 }
