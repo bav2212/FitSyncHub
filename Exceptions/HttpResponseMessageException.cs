@@ -1,7 +1,4 @@
-﻿using System;
-using System.Net.Http;
-
-namespace StravaWebhooksAzureFunctions.Exceptions;
+﻿namespace StravaWebhooksAzureFunctions.Exceptions;
 
 public class HttpResponseMessageException : Exception
 {

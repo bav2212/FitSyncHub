@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace StravaWebhooksAzureFunctions.Exceptions;
+﻿namespace StravaWebhooksAzureFunctions.Exceptions;
 
 public class NotFoundException : Exception
 {
