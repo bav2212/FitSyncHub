@@ -1,14 +1,12 @@
-﻿using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
+using System.Net;
 
 namespace StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 
 public interface IStravaCookieHttpClient
 {
     Task<HttpResponseMessage> UpdateActivityVisibilityToOnlyMe(
-         long activityId,
+         ActivityModelResponse activity,
          CookieContainer cookies,
          string authenticityToken,
          CancellationToken cancellationToken);

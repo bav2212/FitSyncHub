@@ -13,13 +13,16 @@ public class StravaOAuthHttpClient : IStravaOAuthHttpClient
     private readonly HttpClient _httpClient;
     private readonly StravaOptions _stravaOptions;
 
-    public StravaOAuthHttpClient(HttpClient httpClient, IOptions<StravaOptions> options)
+    public StravaOAuthHttpClient(HttpClient httpClient,
+        IOptions<StravaOptions> options)
     {
         _httpClient = httpClient;
         _stravaOptions = options.Value;
     }
 
-    public async Task<ExchangeTokenResponse> ExchangeTokenAsync(string code, CancellationToken cancellationToken)
+    public async Task<ExchangeTokenResponse> ExchangeTokenAsync(
+        string code,
+        CancellationToken cancellationToken)
     {
         var request = new ExchangeTokenRequest
         {
@@ -31,11 +34,13 @@ public class StravaOAuthHttpClient : IStravaOAuthHttpClient
 
         var content = JsonContent.Create(request);
         var response = await _httpClient.PostAsync("oauth/token", content, cancellationToken);
-
-        return (await response.HandleJsonResponse<ExchangeTokenResponse>(cancellationToken))!;
+        return await response
+            .HandleJsonResponse<ExchangeTokenResponse>(Constants.StravaApiJsonOptions, cancellationToken);
     }
 
-    public async Task<RefreshTokenResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    public async Task<RefreshTokenResponse> RefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken)
     {
         var request = new RefreshTokenRequest
         {
@@ -48,6 +53,7 @@ public class StravaOAuthHttpClient : IStravaOAuthHttpClient
         var content = JsonContent.Create(request);
         var response = await _httpClient.PostAsync("oauth/token", content, cancellationToken);
 
-        return (await response.HandleJsonResponse<RefreshTokenResponse>(cancellationToken))!;
+        return await response
+            .HandleJsonResponse<RefreshTokenResponse>(Constants.StravaApiJsonOptions, cancellationToken);
     }
 }

@@ -21,11 +21,13 @@ public class WebhookEventReceiverFunction
     }
 
     [Function(nameof(WebhookEventReceiverFunction))]
-    public static async Task<WebhookEventReceiverMultiResponse> Run(
+    public static WebhookEventReceiverMultiResponse Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequestData req,
         [FromBody] WebhookEventDataWebhookRequest request,
         FunctionContext executionContext)
     {
+        _ = executionContext;
+
         if (request.OwnerId != Constants.MyAthleteId)
         {
             return new WebhookEventReceiverMultiResponse
@@ -55,7 +57,6 @@ public class WebhookEventReceiverFunction
         };
     }
 
-
     private static async Task<string> ReadRequestBody(HttpRequest req)
     {
         using StreamReader streamReader = new(req.Body);
@@ -65,25 +66,25 @@ public class WebhookEventReceiverFunction
     public record WebhookEventDataWebhookRequest
     {
         [JsonPropertyName("object_type")]
-        public string ObjectType { get; init; }
+        public required string ObjectType { get; init; }
 
         [JsonPropertyName("object_id")]
-        public long ObjectId { get; init; }
+        public required long ObjectId { get; init; }
 
         [JsonPropertyName("aspect_type")]
-        public string AspectType { get; init; }
+        public required string AspectType { get; init; }
 
         [JsonPropertyName("updates")]
-        public JsonDocument Updates { get; init; }
+        public required JsonDocument Updates { get; init; }
 
         [JsonPropertyName("owner_id")]
-        public long OwnerId { get; init; }
+        public required long OwnerId { get; init; }
 
         [JsonPropertyName("subscription_id")]
-        public long SubscriptionId { get; init; }
+        public required long SubscriptionId { get; init; }
 
         [JsonPropertyName("event_time")]
-        public long EventTime { get; init; }
+        public required long EventTime { get; init; }
     }
 }
 
@@ -95,6 +96,6 @@ public record WebhookEventReceiverMultiResponse
         Connection = "AzureWebJobsStorageConnectionString",
         CreateIfNotExists = true,
         PartitionKey = "/id")]
-    public required WebhookEventData Document { get; init; }
+    public required WebhookEventData? Document { get; init; }
     public required HttpResponseData HttpResponse { get; init; }
 }

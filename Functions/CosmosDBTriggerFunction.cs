@@ -34,10 +34,11 @@ public class CosmosDBTriggerFunction
     {
         if (input == null || input.Count <= 0)
         {
+            _logger.LogInformation("Skipping cause no input from cosmos db trigger");
             return;
         }
 
-        _logger.LogInformation("Documents modified: " + input.Count);
+        _logger.LogInformation("Documents modified: {Count}", input.Count);
         foreach (var webhookEventData in input)
         {
             if (webhookEventData.AspectType != "create")
@@ -49,13 +50,13 @@ public class CosmosDBTriggerFunction
             var athleteId = webhookEventData.OwnerId;
             var activityId = webhookEventData.ObjectId;
 
-            var activityResponse = await _stravaRestHttpClient.GetActivity(activityId, athleteId);
+            var activityResponse = await _stravaRestHttpClient.GetActivity(activityId, athleteId, executionContext.CancellationToken);
 
             if (activityResponse.Type != "Walk")
             {
                 _logger.LogInformation("Skip activity name: {Name}, id: {Id}, cause it's not walk activity. Type: {Type}", activityResponse.Name, activityResponse.Id, activityResponse.Type);
             }
-            await _updateActivityService.UpdateActivityVisibilityToOnlyMe(activityId, athleteId, executionContext.CancellationToken);
+            await _updateActivityService.UpdateActivityVisibilityToOnlyMe(activityResponse, athleteId, executionContext.CancellationToken);
         }
     }
 }

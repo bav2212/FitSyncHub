@@ -4,7 +4,7 @@ namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
 
 public record CookieLoginResponse
 {
-    public bool Success { get; init; }
-    public CookieContainer Cookies { get; init; }
-    public string AuthenticityToken { get; init; }
+    public required bool Success { get; init; }
+    public required CookieContainer Cookies { get; init; }
+    public required string AuthenticityToken { get; init; }
 }

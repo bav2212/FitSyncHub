@@ -18,7 +18,7 @@ public class WebhookHttpTriggerFunction
     }
 
     [Function(nameof(WebhookHttpTriggerFunction))]
-    public async Task<ActionResult> Run(
+    public ActionResult Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "webhook")] HttpRequest req,
         FunctionContext executionContext)
     {

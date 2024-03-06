@@ -11,7 +11,10 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
     private const string _stravaUrlSession = "https://www.strava.com/session";
     private const string _stravaLoggedOutFingerprint = "logged-out";
 
-    public async Task<CookieLoginResponse> Login(string username, string password, CancellationToken cancellationToken)
+    public async Task<CookieLoginResponse> Login(
+        string username,
+        string password,
+        CancellationToken cancellationToken)
     {
         var cookies = new CookieContainer();
         var handler = new HttpClientHandler() { CookieContainer = cookies };
@@ -43,7 +46,10 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
         };
     }
 
-    public async Task<bool> CheckCookiesCorrect(CookieContainer cookies, string authenticityToken, CancellationToken cancellationToken)
+    public async Task<bool> CheckCookiesCorrect(
+        CookieContainer cookies,
+        string authenticityToken,
+        CancellationToken cancellationToken)
     {
         var handler = new HttpClientHandler() { CookieContainer = cookies };
         var client = new HttpClient(handler);

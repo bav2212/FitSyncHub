@@ -1,9 +1,8 @@
-﻿using StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
-using System.Threading.Tasks;
+﻿using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
 
 namespace StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 
 public interface IStravaRestHttpClient
 {
-    Task<ActivityModelResponse> GetActivity(long activityId, long athleteId);
+    Task<ActivityModelResponse> GetActivity(long activityId, long athleteId, CancellationToken cancellationToken);
 }

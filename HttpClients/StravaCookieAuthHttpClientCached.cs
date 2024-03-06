@@ -1,27 +1,34 @@
-﻿using StravaWebhooksAzureFunctions.Data.Entities;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
+using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
 using System.Net;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace StravaWebhooksAzureFunctions.HttpClients;
 
 public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
 {
     private readonly IStravaCookieAuthHttpClient _cookieAuthService;
+    private readonly Container _userSessionContainer;
 
-    public StravaCookieAuthHttpClientCached(StravaCookieAuthHttpClient cookieAuthService)
+    public StravaCookieAuthHttpClientCached(
+        IStravaCookieAuthHttpClient cookieAuthService,
+        CosmosClient cosmosClient)
     {
         _cookieAuthService = cookieAuthService;
+        _userSessionContainer = cosmosClient.GetContainer("strava", "UserSession");
     }
 
-    public async Task<CookieLoginResponse> Login(string username, string password, CancellationToken cancellationToken)
+    public async Task<CookieLoginResponse> Login(
+        string username,
+        string password,
+        CancellationToken cancellationToken)
     {
         var (cookies, authenticityToken) = await GetStoredCookies(username, cancellationToken);
         if (cookies is { } && authenticityToken is { }
-            && await _cookieAuthService.CheckCookiesCorrect(cookies, authenticityToken, cancellationToken))
+            && await CheckCookiesCorrect(cookies, authenticityToken, cancellationToken))
         {
             return new CookieLoginResponse { Success = true, Cookies = cookies, AuthenticityToken = authenticityToken };
         }
@@ -39,51 +46,78 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
         return response;
     }
 
-    public Task<bool> CheckCookiesCorrect(CookieContainer cookies, string authenticityToken, CancellationToken cancellationToken)
+    public Task<bool> CheckCookiesCorrect(
+        CookieContainer cookies,
+        string authenticityToken,
+        CancellationToken cancellationToken)
     {
         return _cookieAuthService.CheckCookiesCorrect(cookies, authenticityToken, cancellationToken);
     }
 
-    private async Task<(CookieContainer? cookies, string? authenticityToken)> GetStoredCookies(string username, CancellationToken cancellationToken)
+    private async Task<(CookieContainer? cookies, string? authenticityToken)> GetStoredCookies(
+        string username,
+        CancellationToken cancellationToken)
     {
-        //var userSession = await _dbContext.Set<UserSession>()
-        //    .Where(x => x.AthleteUserName == username)
-        //    .FirstOrDefaultAsync(cancellationToken);
+        var iterator = _userSessionContainer
+            .GetItemLinqQueryable<UserSession>()
+            .Where(x => x.id == username)
+            .ToFeedIterator();
 
-        //if (userSession is not null)
-        //{
-        //    var cookiesCollection = JsonSerializer.Deserialize<CookieCollection>(userSession.CookiesCollectionRawData)!;
-        //    var cookies = new CookieContainer();
-        //    cookies.Add(cookiesCollection);
+        var results = await iterator.ReadNextAsync(cancellationToken);
+        var userSession = results.SingleOrDefault();
+        if (userSession is not null)
+        {
+            var cookiesCollection = JsonSerializer
+                .Deserialize<CookieCollection>(userSession.CookiesCollectionRawData)!;
+            var cookies = new CookieContainer();
+            cookies.Add(cookiesCollection);
 
-        //    var authenticityToken = userSession.AuthenticityToken;
+            var authenticityToken = userSession.AuthenticityToken;
 
-        //    return (cookies, authenticityToken);
-        //}
+            return (cookies, authenticityToken);
+        }
 
         return (default, default);
     }
 
-    private async Task StoreCookies(string username, CookieContainer cookies, string authenticityToken, CancellationToken cancellationToken)
+    private Task<ItemResponse<UserSession>> StoreCookies(
+        string username,
+        CookieContainer cookies,
+        string authenticityToken,
+        CancellationToken cancellationToken)
     {
         var cookiesCollection = cookies.GetAllCookies();
         var cookiesCollectionJson = JsonSerializer.Serialize(cookiesCollection);
 
         var userSession = new UserSession
         {
+            id = username,
             AthleteUserName = username,
             CookiesCollectionRawData = cookiesCollectionJson,
             AuthenticityToken = authenticityToken
         };
 
-        //_dbContext.Add(userSession);
-        //await _dbContext.SaveChangesAsync(cancellationToken);
+        return _userSessionContainer
+            .CreateItemAsync(userSession, cancellationToken: cancellationToken);
     }
 
-    private async Task DeleteCookies(string username, CancellationToken cancellationToken)
+    private async Task DeleteCookies(
+        string username,
+        CancellationToken cancellationToken)
     {
-        //await _dbContext.Set<UserSession>()
-        //    .Where(x => x.AthleteUserName == username)
-        //    .ExecuteDeleteAsync(cancellationToken);
+        var iterator = _userSessionContainer
+           .GetItemLinqQueryable<UserSession>()
+           .Where(x => x.id == username)
+           .ToFeedIterator();
+
+        while (iterator.HasMoreResults)
+        {
+            var results = await iterator.ReadNextAsync(cancellationToken);
+
+            foreach (var item in results)
+            {
+                await _userSessionContainer.DeleteItemAsync<UserSession>(item.id, PartitionKey.None, cancellationToken: cancellationToken);
+            }
+        }
     }
 }

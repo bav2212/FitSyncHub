@@ -1,57 +1,76 @@
-﻿using StravaWebhooksAzureFunctions.Data.Entities;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
+using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
 using StravaWebhooksAzureFunctions.Services.Interfaces;
-using System;
-using System.Threading.Tasks;
 
 namespace StravaWebhooksAzureFunctions.Services;
 
 public class StravaOAuthService : IStravaOAuthService
 {
     private readonly IStravaOAuthHttpClient _stravaOAuthHttpClient;
+    private readonly Container _persistedGrantContainer;
 
-    public StravaOAuthService(IStravaOAuthHttpClient stravaOAuthHttpClient)
+    public StravaOAuthService(IStravaOAuthHttpClient stravaOAuthHttpClient,
+        CosmosClient cosmosClient)
     {
         _stravaOAuthHttpClient = stravaOAuthHttpClient;
+        _persistedGrantContainer = cosmosClient.GetDatabase("strava").GetContainer("PersistedGrant");
     }
 
-    public async Task<TokenResponseModel> RequestToken(long athleteId)
+    public async Task<TokenResponseModel> RequestToken(long athleteId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var persistedGrant = await GetPersistedGrant(athleteId, cancellationToken)
+            ?? throw new NotImplementedException();
 
-        //var persistedGrant = await _context.Set<PersistedGrant>()
-        //    .AsTracking()
-        //    .Where(x => x.AthleteId == athleteId)
-        //    .FirstOrDefaultAsync()
-        //    ?? throw new NotImplementedException();
+        var timespanSinceEpoch = DateTime.UtcNow - new DateTime(1970, 1, 1);
+        var secondsSinceEpoch = (int)timespanSinceEpoch.TotalSeconds;
 
-        //var timespanSinceEpoch = DateTime.UtcNow - new DateTime(1970, 1, 1);
-        //var secondsSinceEpoch = (int)timespanSinceEpoch.TotalSeconds;
+        if (persistedGrant.ExpiresAt >= secondsSinceEpoch)
+        {
+            return new(persistedGrant.AccessToken);
+        }
 
-        //if (persistedGrant.ExpiresAt >= secondsSinceEpoch)
-        //{
-        //    return new(persistedGrant.AccessToken);
-        //}
-
-        //return await RefreshToken(persistedGrant);
+        return await RefreshToken(persistedGrant, cancellationToken);
     }
 
-    private async Task<TokenResponseModel> RefreshToken(PersistedGrant persistedGrant)
+    private async Task<TokenResponseModel> RefreshToken(PersistedGrant persistedGrant, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var refreshTokenResponse = await _stravaOAuthHttpClient
+            .RefreshTokenAsync(persistedGrant.RefreshToken, cancellationToken);
 
-        //var refreshTokenResponse = await _stravaOAuthHttpClient.RefreshTokenAsync(persistedGrant.RefreshToken);
+        persistedGrant.AccessToken = refreshTokenResponse.AccessToken;
+        persistedGrant.RefreshToken = refreshTokenResponse.RefreshToken;
+        persistedGrant.ExpiresIn = refreshTokenResponse.ExpiresIn;
+        persistedGrant.ExpiresAt = refreshTokenResponse.ExpiresAt;
+        persistedGrant.TokenType = refreshTokenResponse.TokenType;
 
-        //persistedGrant.AccessToken = refreshTokenResponse.AccessToken;
-        //persistedGrant.RefreshToken = refreshTokenResponse.RefreshToken;
-        //persistedGrant.ExpiresIn = refreshTokenResponse.ExpiresIn;
-        //persistedGrant.ExpiresAt = refreshTokenResponse.ExpiresAt;
-        //persistedGrant.TokenType = refreshTokenResponse.TokenType;
+        await _persistedGrantContainer.UpsertItemAsync(persistedGrant, cancellationToken: cancellationToken);
 
-        //_context.Update(persistedGrant);
-        //await _context.SaveChangesAsync();
+        return new(persistedGrant.AccessToken);
+    }
 
-        //return new(persistedGrant.AccessToken);
+    private async Task<PersistedGrant?> GetPersistedGrant(long athleteId, CancellationToken cancellationToken)
+    {
+        var matches = _persistedGrantContainer.GetItemLinqQueryable<PersistedGrant>()
+                .Where(x => x.AthleteId == athleteId);
+
+        // Convert to feed iterator
+        using FeedIterator<PersistedGrant> linqFeed = matches.ToFeedIterator();
+
+        // Iterate query result pages
+        while (linqFeed.HasMoreResults)
+        {
+            var response = await linqFeed.ReadNextAsync(cancellationToken);
+
+            // Iterate query results
+            foreach (var item in response)
+            {
+                return item;
+            }
+        }
+
+        return default;
     }
 }

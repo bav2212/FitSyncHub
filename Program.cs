@@ -1,3 +1,4 @@
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,8 +11,10 @@ using StravaWebhooksAzureFunctions.Services.Interfaces;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
-    .ConfigureServices(services =>
+    .ConfigureServices((hostBuilderContext, services) =>
     {
+        services.AddSingleton(x => new CosmosClient(hostBuilderContext.Configuration["AzureWebJobsStorageConnectionString"]));
+
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
 
@@ -21,9 +24,8 @@ var host = new HostBuilder()
                 configuration.GetSection(StravaOptions.Position).Bind(settings);
             });
 
-        // try to use Scruptor to decorate
-        services.AddScoped<StravaCookieAuthHttpClient>();
-        services.AddScoped<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClientCached>();
+        services.AddScoped<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClient>();
+        services.Decorate<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClientCached>();
 
         services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client =>
         {

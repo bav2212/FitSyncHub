@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
+using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
 using StravaWebhooksAzureFunctions.Options;
 
 namespace StravaWebhooksAzureFunctions.Services;
@@ -24,8 +25,13 @@ public class UpdateActivityService
         _logger = logger;
     }
 
-    public async Task UpdateActivityVisibilityToOnlyMe(long activityId, long athleteId, CancellationToken cancellationToken)
+    public async Task UpdateActivityVisibilityToOnlyMe(
+        ActivityModelResponse activity,
+        long athleteId,
+        CancellationToken cancellationToken)
     {
+        _ = athleteId;
+
         var userName = _stravaOptions.Credentials.Username;
         var password = _stravaOptions.Credentials.Password;
 
@@ -36,8 +42,9 @@ public class UpdateActivityService
             return;
         }
 
+        var activityId = activity.Id;
         var response = await _stravaCookieHttpClient.UpdateActivityVisibilityToOnlyMe(
-            activityId,
+            activity,
             authResponse.Cookies,
             authResponse.AuthenticityToken,
             cancellationToken);

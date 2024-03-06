@@ -1,17 +1,10 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
 
-namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
-
-public class RefreshTokenResponse
+public record RefreshTokenResponse
 {
-    [JsonPropertyName("token_type")]
-    public string TokenType { get; init; }
-    [JsonPropertyName("expires_at")]
-    public int ExpiresAt { get; init; }
-    [JsonPropertyName("expires_in")]
-    public int ExpiresIn { get; init; }
-    [JsonPropertyName("refresh_token")]
-    public string RefreshToken { get; init; }
-    [JsonPropertyName("access_token")]
-    public string AccessToken { get; init; }
+    public required string TokenType { get; init; }
+    public required int ExpiresAt { get; init; }
+    public required int ExpiresIn { get; init; }
+    public required string RefreshToken { get; init; }
+    public required string AccessToken { get; init; }
 }
