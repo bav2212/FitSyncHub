@@ -10,7 +10,7 @@ using StravaWebhooksAzureFunctions.Services;
 using StravaWebhooksAzureFunctions.Services.Interfaces;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication()
+    .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices((hostBuilderContext, services) =>
     {
         services.AddSingleton(x => new CosmosClient(hostBuilderContext.Configuration["AzureWebJobsStorageConnectionString"]));
