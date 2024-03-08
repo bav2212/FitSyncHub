@@ -29,7 +29,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
             new ("activity[description]", activity.Description),
             new ("activity[perceived_exertion]", activity.PerceivedExertion ?? string.Empty),
             new ("activity[prefer_perceived_exertion]", "0"),
-            new ("activity[private_note]", activity.PrivateNote),
+            new ("activity[private_note]", $"{activity.PrivateNote} --hidden"),
             new ("activity[visibility]", "only_me"),
             new ("activity[stats_visibility][calories]", statsVisibilityMapping["calories"]),
             new ("activity[stats_visibility][heart_rate]", statsVisibilityMapping["heart_rate"]),
