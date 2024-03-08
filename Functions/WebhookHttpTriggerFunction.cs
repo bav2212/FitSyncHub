@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.Options;
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace StravaWebhooksAzureFunctions.Functions;
@@ -18,8 +18,8 @@ public class WebhookHttpTriggerFunction
     }
 
     [Function(nameof(WebhookHttpTriggerFunction))]
-    public ActionResult Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "webhook")] HttpRequest req,
+    public async Task<HttpResponseData> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "webhook")] HttpRequestData req,
         FunctionContext executionContext)
     {
         var logger = executionContext.GetLogger<WebhookHttpTriggerFunction>();
@@ -32,24 +32,33 @@ public class WebhookHttpTriggerFunction
         // Checks if a token and mode is in the query string of the request
         if (mode is null || verifyToken is null || challenge is null)
         {
-            return new BadRequestObjectResult("wrong request");
+            return BadRequest("wrong request");
         }
 
         // Verifies that the mode and token sent are valid
         if (mode != "subscribe" || verifyToken != _options.WebhookVerifyToken)
         {
-            return new BadRequestObjectResult("WebhookVerifyToken is wrong");
+            return BadRequest("WebhookVerifyToken is wrong");
         }
 
         // Responds with the challenge token from the request
         logger.LogInformation("WEBHOOK_VERIFIED");
 
-        var response = new WebhookVerificationResponse
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(new WebhookVerificationResponse
         {
             HubChallenge = challenge
-        };
+        });
 
-        return new OkObjectResult(response);
+        return response;
+
+
+        HttpResponseData BadRequest(string responseText)
+        {
+            var response = req.CreateResponse(HttpStatusCode.BadRequest);
+            response.WriteString(responseText);
+            return response;
+        }
     }
 }
 
