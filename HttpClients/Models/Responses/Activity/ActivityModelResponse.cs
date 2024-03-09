@@ -25,15 +25,15 @@ public class ActivityModelResponse
     public int? AthleteCount { get; init; }
     public int? PhotoCount { get; init; }
     public ActivityMap? Map { get; init; }
-    public required bool Trainer { get; init; }
-    public required bool Commute { get; init; }
+    public bool Trainer { get; init; }
+    public bool Commute { get; init; }
     public bool? Manual { get; init; }
     public bool? Private { get; init; }
     public string? Visibility { get; init; }
     public bool? Flagged { get; init; }
     public string? GearId { get; init; }
-    public object[] StartLatlng { get; init; }
-    public object[] EndLatlng { get; init; }
+    public object[]? StartLatlng { get; init; }
+    public object[]? EndLatlng { get; init; }
     public float? AverageSpeed { get; init; }
     public float? MaxSpeed { get; init; }
     public bool? HasHeartrate { get; init; }
@@ -48,18 +48,18 @@ public class ActivityModelResponse
     public int? PrCount { get; init; }
     public int? TotalPhotoCount { get; init; }
     public bool? HasKudoed { get; init; }
-    public required string Description { get; init; }
+    public string? Description { get; init; }
     public float? Calories { get; init; }
     public string? PerceivedExertion { get; init; }
     public bool? PreferPerceivedExertion { get; init; }
-    public object[] SegmentEfforts { get; init; }
-    public ActivitySplitsMetric[] SplitsMetric { get; init; }
-    public ActivitySplitsStandard[] SplitsStandard { get; init; }
+    public object[]? SegmentEfforts { get; init; }
+    public ActivitySplitsMetric[]? SplitsMetric { get; init; }
+    public ActivitySplitsStandard[]? SplitsStandard { get; init; }
     public ActivityPhotos? Photos { get; init; }
-    public ActivityStatsVisibility[] StatsVisibility { get; init; }
+    public required ActivityStatsVisibility[] StatsVisibility { get; init; }
     public bool? HideFromHome { get; init; }
     public string? DeviceName { get; init; }
     public string? EmbedToken { get; init; }
-    public required string PrivateNote { get; init; }
-    public object[] AvailableZones { get; init; }
+    public string? PrivateNote { get; init; }
+    public object[]? AvailableZones { get; init; }
 }

@@ -21,7 +21,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
 
         var statsVisibilityMapping = activity.StatsVisibility.ToDictionary(x => x.Type, x => x.Visibility);
 
-        IEnumerable<KeyValuePair<string, string>> nameValueCollection = [
+        IEnumerable<KeyValuePair<string, string?>> nameValueCollection = [
             new ("utf8", "✓"),
             new ("_method", "patch"),
             new ("authenticity_token", authenticityToken),
@@ -29,7 +29,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
             new ("activity[description]", activity.Description),
             new ("activity[perceived_exertion]", activity.PerceivedExertion ?? string.Empty),
             new ("activity[prefer_perceived_exertion]", "0"),
-            new ("activity[private_note]", $"{activity.PrivateNote} --hidden"),
+            new ("activity[private_note]", $"{activity.PrivateNote ?? string.Empty} --hidden"),
             new ("activity[visibility]", "only_me"),
             new ("activity[stats_visibility][calories]", statsVisibilityMapping["calories"]),
             new ("activity[stats_visibility][heart_rate]", statsVisibilityMapping["heart_rate"]),
