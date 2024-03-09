@@ -54,8 +54,10 @@ public class CosmosDBTriggerFunction
 
             if (activityResponse.Type != "Walk")
             {
-                _logger.LogInformation("Skip activity name: {Name}, id: {Id}, cause it's not walk activity. Type: {Type}", activityResponse.Name, activityResponse.Id, activityResponse.Type);
+                _logger.LogInformation("Skip activity with name: {Name}, id: {Id}, cause it's not walk activity. Type: {Type}", activityResponse.Name, activityResponse.Id, activityResponse.Type);
+                return;
             }
+
             await _updateActivityService.UpdateActivityVisibilityToOnlyMe(activityResponse, athleteId, executionContext.CancellationToken);
         }
     }
