@@ -8,7 +8,7 @@ public class ActivityModelResponse
     public float? Distance { get; init; }
     public int? MovingTime { get; init; }
     public int? ElapsedTime { get; init; }
-    public int? TotalElevationGain { get; init; }
+    public float? TotalElevationGain { get; init; }
     public string? Type { get; init; }
     public required string SportType { get; init; }
     public long? Id { get; init; }
