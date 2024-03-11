@@ -50,7 +50,8 @@ public class CosmosDBTriggerFunction
             var athleteId = webhookEventData.OwnerId;
             var activityId = webhookEventData.ObjectId;
 
-            var activityResponse = await _stravaRestHttpClient.GetActivity(activityId, athleteId, executionContext.CancellationToken);
+            var activityResponse = await _stravaRestHttpClient
+                .GetActivity(activityId, athleteId, executionContext.CancellationToken);
 
             if (activityResponse.Type != "Walk")
             {
@@ -58,7 +59,8 @@ public class CosmosDBTriggerFunction
                 return;
             }
 
-            await _updateActivityService.UpdateActivityVisibilityToOnlyMe(activityResponse, athleteId, executionContext.CancellationToken);
+            await _updateActivityService
+                .UpdateActivityVisibilityToOnlyMe(activityResponse, athleteId, executionContext.CancellationToken);
         }
     }
 }
