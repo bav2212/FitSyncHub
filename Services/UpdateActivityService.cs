@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
 using StravaWebhooksAzureFunctions.Options;
+using System.Text;
 
 namespace StravaWebhooksAzureFunctions.Services;
 
@@ -26,13 +28,10 @@ public class UpdateActivityService
     }
 
     public async Task UpdateActivityVisibilityToOnlyMe(
+        WebhookEventData webhookEventData,
         ActivityModelResponse activity,
-        long athleteId,
-        Func<string> privateNoteFormatter,
         CancellationToken cancellationToken)
     {
-        _ = athleteId;
-
         var userName = _stravaOptions.Credentials.Username;
         var password = _stravaOptions.Credentials.Password;
 
@@ -44,11 +43,12 @@ public class UpdateActivityService
         }
 
         var activityId = activity.Id;
+
         var response = await _stravaCookieHttpClient.UpdateActivityVisibilityToOnlyMe(
             activity,
             authResponse.Cookies,
             authResponse.AuthenticityToken,
-            privateNoteFormatter,
+            PrivateNoteFormatter,
             cancellationToken);
 
         if (!response.IsSuccessStatusCode)
@@ -58,6 +58,25 @@ public class UpdateActivityService
         else
         {
             _logger.LogInformation("Activity {ActivityId} updated to only me", activityId);
+        }
+
+        string PrivateNoteFormatter(DateTime utcNow)
+        {
+            var eventTime = TimeOnly
+                .FromDateTime(DateTimeOffset.FromUnixTimeSeconds(webhookEventData.EventTime).UtcDateTime);
+            var webhookReceivedAt = TimeOnly
+                .FromDateTime(webhookEventData.CreatedOn.UtcDateTime);
+            var now = TimeOnly.FromDateTime(utcNow);
+
+            var sb = new StringBuilder();
+            sb.Append("Activity saved at ");
+            sb.Append(eventTime.ToLongTimeString());
+            sb.Append(", webhook proceed at ");
+            sb.Append(webhookReceivedAt.ToLongTimeString());
+            sb.Append(", activity updated at ");
+            sb.Append(now.ToLongTimeString());
+
+            return sb.ToString();
         }
     }
 }

@@ -13,7 +13,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         ActivityModelResponse activity,
         CookieContainer cookies,
         string authenticityToken,
-        Func<string> privateNoteFormatter,
+        Func<DateTime, string> privateNoteFormatter,
         CancellationToken cancellationToken)
     {
         var handler = new HttpClientHandler() { CookieContainer = cookies };
@@ -29,7 +29,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         {
             privateNoteSb.AppendLine(activity.PrivateNote);
         }
-        privateNoteSb.AppendLine(privateNoteFormatter());
+        privateNoteSb.AppendLine(privateNoteFormatter(DateTime.UtcNow));
 
         IEnumerable<KeyValuePair<string, string?>> nameValueCollection = [
             new ("utf8", "✓"),
