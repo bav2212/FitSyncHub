@@ -24,10 +24,7 @@ public class StravaOAuthService : IStravaOAuthService
         var persistedGrant = await GetPersistedGrant(athleteId, cancellationToken)
             ?? throw new NotImplementedException();
 
-        var timespanSinceEpoch = DateTime.UtcNow - new DateTime(1970, 1, 1);
-        var secondsSinceEpoch = (int)timespanSinceEpoch.TotalSeconds;
-
-        if (persistedGrant.ExpiresAt >= secondsSinceEpoch)
+        if (DateTimeOffset.FromUnixTimeSeconds(persistedGrant.ExpiresAt) >= DateTimeOffset.UtcNow)
         {
             return new(persistedGrant.AccessToken);
         }

@@ -1,4 +1,6 @@
-﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
+﻿using System.Text.Json.Serialization;
+
+namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
 
 public class ActivityModelResponse
 {
@@ -14,7 +16,8 @@ public class ActivityModelResponse
     public long? Id { get; init; }
     public DateTime? StartDate { get; init; }
     public DateTime? StartDateLocal { get; init; }
-    public string? Timezone { get; init; }
+    [JsonPropertyName("timezone")]
+    public string? TimeZone { get; init; }
     public float? UtcOffset { get; init; }
     public object? LocationCity { get; init; }
     public object? LocationState { get; init; }
@@ -32,15 +35,19 @@ public class ActivityModelResponse
     public string? Visibility { get; init; }
     public bool? Flagged { get; init; }
     public string? GearId { get; init; }
-    public object[]? StartLatlng { get; init; }
-    public object[]? EndLatlng { get; init; }
+    [JsonPropertyName("start_latlng")]
+    public object[]? StartLatitudeLongitude { get; init; }
+    [JsonPropertyName("end_latlng")]
+    public object[]? EndLatitudeLongitude { get; init; }
     public float? AverageSpeed { get; init; }
     public float? MaxSpeed { get; init; }
     public bool? HasHeartrate { get; init; }
     public bool? HeartrateOptOut { get; init; }
     public bool? DisplayHideHeartrateOption { get; init; }
-    public float? ElevHigh { get; init; }
-    public float? ElevLow { get; init; }
+    [JsonPropertyName("elev_high")]
+    public float? ElevationHigh { get; init; }
+    [JsonPropertyName("elev_low")]
+    public float? ElevationLow { get; init; }
     public long? UploadId { get; init; }
     public string? UploadIdStr { get; init; }
     public string? ExternalId { get; init; }

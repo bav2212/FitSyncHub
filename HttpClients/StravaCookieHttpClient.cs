@@ -1,6 +1,7 @@
 ﻿using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
 using System.Net;
+using System.Text;
 
 namespace StravaWebhooksAzureFunctions.HttpClients;
 
@@ -12,6 +13,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         ActivityModelResponse activity,
         CookieContainer cookies,
         string authenticityToken,
+        Func<string> privateNoteFormatter,
         CancellationToken cancellationToken)
     {
         var handler = new HttpClientHandler() { CookieContainer = cookies };
@@ -21,6 +23,14 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
 
         var statsVisibilityMapping = activity.StatsVisibility.ToDictionary(x => x.Type, x => x.Visibility);
 
+        var privateNoteSb = new StringBuilder();
+
+        if (!string.IsNullOrWhiteSpace(activity.PrivateNote))
+        {
+            privateNoteSb.AppendLine(activity.PrivateNote);
+        }
+        privateNoteSb.AppendLine(privateNoteFormatter());
+
         IEnumerable<KeyValuePair<string, string?>> nameValueCollection = [
             new ("utf8", "✓"),
             new ("_method", "patch"),
@@ -29,7 +39,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
             new ("activity[description]", activity.Description),
             new ("activity[perceived_exertion]", activity.PerceivedExertion ?? string.Empty),
             new ("activity[prefer_perceived_exertion]", "0"),
-            new ("activity[private_note]", $"{activity.PrivateNote ?? string.Empty} --hidden"),
+            new ("activity[private_note]", privateNoteSb.ToString()),
             new ("activity[visibility]", "only_me"),
             new ("activity[stats_visibility][calories]", statsVisibilityMapping["calories"]),
             new ("activity[stats_visibility][heart_rate]", statsVisibilityMapping["heart_rate"]),

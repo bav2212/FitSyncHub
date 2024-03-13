@@ -28,6 +28,7 @@ public class UpdateActivityService
     public async Task UpdateActivityVisibilityToOnlyMe(
         ActivityModelResponse activity,
         long athleteId,
+        Func<string> privateNoteFormatter,
         CancellationToken cancellationToken)
     {
         _ = athleteId;
@@ -47,6 +48,7 @@ public class UpdateActivityService
             activity,
             authResponse.Cookies,
             authResponse.AuthenticityToken,
+            privateNoteFormatter,
             cancellationToken);
 
         if (!response.IsSuccessStatusCode)

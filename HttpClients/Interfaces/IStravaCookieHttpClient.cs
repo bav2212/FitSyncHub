@@ -9,5 +9,6 @@ public interface IStravaCookieHttpClient
          ActivityModelResponse activity,
          CookieContainer cookies,
          string authenticityToken,
+         Func<string> privateNoteFormatter,
          CancellationToken cancellationToken);
 }

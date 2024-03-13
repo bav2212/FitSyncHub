@@ -60,7 +60,19 @@ public class CosmosDBTriggerFunction
             }
 
             await _updateActivityService
-                .UpdateActivityVisibilityToOnlyMe(activityResponse, athleteId, executionContext.CancellationToken);
+                .UpdateActivityVisibilityToOnlyMe(activityResponse, athleteId, PrivateNoteFormatter, executionContext.CancellationToken);
+
+            string PrivateNoteFormatter()
+            {
+                var eventTime = DateTimeOffset.FromUnixTimeSeconds(webhookEventData.EventTime);
+                var webhookReceivedAt = webhookEventData.CreatedOn;
+
+                var now = DateTimeOffset.UtcNow;
+
+                var message = $"Activity saved at {eventTime}, webhook proceed at {webhookReceivedAt}, activity updated at {now}";
+                return message;
+            }
+
         }
     }
 }
