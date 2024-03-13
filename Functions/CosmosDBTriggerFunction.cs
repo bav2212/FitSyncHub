@@ -64,13 +64,13 @@ public class CosmosDBTriggerFunction
 
             string PrivateNoteFormatter()
             {
-                var eventTime = DateTimeOffset.FromUnixTimeSeconds(webhookEventData.EventTime);
-                var webhookReceivedAt = webhookEventData.CreatedOn;
+                var eventTime = TimeOnly
+                    .FromDateTime(DateTimeOffset.FromUnixTimeSeconds(webhookEventData.EventTime).UtcDateTime);
+                var webhookReceivedAt = TimeOnly
+                    .FromDateTime(webhookEventData.CreatedOn.UtcDateTime);
+                var now = DateTime.UtcNow;
 
-                var now = DateTimeOffset.UtcNow;
-
-                var message = $"Activity saved at {eventTime}, webhook proceed at {webhookReceivedAt}, activity updated at {now}";
-                return message;
+                return $"Activity saved at {eventTime}, webhook proceed at {webhookReceivedAt}, activity updated at {now}";
             }
 
         }
