@@ -39,7 +39,7 @@ public class WebhookEventReceiverFunction
 
         var webhookEventData = new WebhookEventData
         {
-            id = request.ObjectId.ToString(),
+            id = Guid.NewGuid().ToString(),
             ObjectType = request.ObjectType,
             ObjectId = request.ObjectId,
             AspectType = request.AspectType,
