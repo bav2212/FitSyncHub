@@ -1,18 +1,9 @@
-﻿using System.Text.Json.Serialization;
-
-namespace StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
+﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
 
 public record ExchangeTokenRequest
 {
-    [JsonPropertyName("client_id")]
-    public string ClientId { get; init; }
-
-    [JsonPropertyName("client_secret")]
-    public string ClientSecret { get; init; }
-
-    [JsonPropertyName("code")]
-    public string Code { get; init; }
-
-    [JsonPropertyName("grant_type")]
-    public string GrantType { get; init; }
+    public required string ClientId { get; init; }
+    public required string ClientSecret { get; init; }
+    public required string Code { get; init; }
+    public required string GrantType { get; init; }
 }

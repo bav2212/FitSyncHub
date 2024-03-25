@@ -1,4 +1,4 @@
-﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
+﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 
 public class ActivityMap
 {

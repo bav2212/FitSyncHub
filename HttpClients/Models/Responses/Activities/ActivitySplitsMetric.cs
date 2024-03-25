@@ -1,6 +1,6 @@
-﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
+﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 
-public class ActivitySplitsStandard
+public class ActivitySplitsMetric
 {
     public float? Distance { get; init; }
     public int? ElapsedTime { get; init; }

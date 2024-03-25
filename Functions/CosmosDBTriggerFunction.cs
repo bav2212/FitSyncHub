@@ -53,14 +53,7 @@ public class CosmosDBTriggerFunction
             var activityResponse = await _stravaRestHttpClient
                 .GetActivity(activityId, athleteId, executionContext.CancellationToken);
 
-            if (activityResponse.Type != "Walk")
-            {
-                _logger.LogInformation("Skip activity with name: {Name}, id: {Id}, cause it's not walk activity. Type: {Type}", activityResponse.Name, activityResponse.Id, activityResponse.Type);
-                return;
-            }
-
-            await _updateActivityService
-                .UpdateActivityVisibilityToOnlyMe(webhookEventData, activityResponse, executionContext.CancellationToken);
+            await _updateActivityService.UpdateActivity(webhookEventData, activityResponse, executionContext.CancellationToken);
         }
     }
 }

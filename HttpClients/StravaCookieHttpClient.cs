@@ -1,5 +1,5 @@
 ﻿using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
-using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
+using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 using System.Net;
 using System.Text;
 

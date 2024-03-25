@@ -2,7 +2,8 @@
 using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
-using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
+using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
+using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 using StravaWebhooksAzureFunctions.Options;
 using System.Text;
 
@@ -12,25 +13,48 @@ public class UpdateActivityService
 {
     private readonly IStravaCookieAuthHttpClient _authService;
     private readonly IStravaCookieHttpClient _stravaCookieHttpClient;
+    private readonly IStravaRestHttpClient _stravaRestHttpClient;
     private readonly StravaOptions _stravaOptions;
     private readonly ILogger<UpdateActivityService> _logger;
 
     public UpdateActivityService(
         IStravaCookieAuthHttpClient authService,
         IStravaCookieHttpClient stravaCookieHttpClient,
+        IStravaRestHttpClient stravaRestHttpClient,
         IOptions<StravaOptions> options,
         ILogger<UpdateActivityService> logger)
     {
         _authService = authService;
         _stravaCookieHttpClient = stravaCookieHttpClient;
+        _stravaRestHttpClient = stravaRestHttpClient;
         _stravaOptions = options.Value;
         _logger = logger;
     }
 
-    public async Task UpdateActivityVisibilityToOnlyMe(
+    public async Task UpdateActivity(
         WebhookEventData webhookEventData,
         ActivityModelResponse activity,
         CancellationToken cancellationToken)
+    {
+        if (activity.Type == Constants.StravaActivityType.Walk)
+        {
+            await UpdateActivityVisibilityToOnlyMe(webhookEventData, activity, cancellationToken);
+            return;
+        }
+
+        if (activity.Type == Constants.StravaActivityType.Ride)
+        {
+            //await UpdateGearIfNeeded(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
+            return;
+        }
+
+        _logger.LogInformation("Skip activity with name: {Name}, id: {Id}, cause it's not walk or ride activity. Type: {Type}", activity.Name, activity.Id, activity.Type);
+    }
+
+    private async Task UpdateActivityVisibilityToOnlyMe(
+       WebhookEventData webhookEventData,
+       ActivityModelResponse activity,
+       CancellationToken cancellationToken)
     {
         var userName = _stravaOptions.Credentials.Username;
         var password = _stravaOptions.Credentials.Password;
@@ -78,5 +102,28 @@ public class UpdateActivityService
 
             return sb.ToString();
         }
+    }
+
+    private async Task UpdateGearIfNeeded(
+        long athleteId,
+        long activityId,
+        ActivityModelResponse activity,
+        CancellationToken cancellationToken)
+    {
+        var bikes = _stravaRestHttpClient.GetBikes(athleteId, cancellationToken);
+
+        var updateModel = new UpdatableActivityRequest()
+        {
+            Commute = activity.Commute,
+            Trainer = activity.Trainer,
+            HideFromHome = true,
+            Description = activity.Description,
+            Name = activity.Name,
+            Type = activity.Type!,
+            SportType = activity.SportType,
+            GearId = activity.GearId
+        };
+
+        await _stravaRestHttpClient.UpdateActivity(activityId, athleteId, updateModel, cancellationToken);
     }
 }

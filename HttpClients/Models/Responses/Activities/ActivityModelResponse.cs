@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activity;
+namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 
 public class ActivityModelResponse
 {

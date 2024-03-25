@@ -24,6 +24,12 @@ var host = new HostBuilder()
                 configuration.GetSection(StravaOptions.Position).Bind(settings);
             });
 
+        services.AddOptions<BodyMeasurementsOptions>()
+            .Configure<IConfiguration>((settings, configuration) =>
+            {
+                configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings);
+            });
+
         services.AddScoped<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClient>();
         services.Decorate<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClientCached>();
 
