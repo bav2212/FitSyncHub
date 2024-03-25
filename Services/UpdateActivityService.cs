@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.Data.Entities;
+using StravaWebhooksAzureFunctions.Helpers;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
+using StravaWebhooksAzureFunctions.Models;
 using StravaWebhooksAzureFunctions.Options;
 using System.Text;
 
@@ -44,7 +46,7 @@ public class UpdateActivityService
 
         if (activity.Type == Constants.StravaActivityType.Ride)
         {
-            //await UpdateGearIfNeeded(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
+            await UpdateGearIfNeeded(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
             return;
         }
 
@@ -110,7 +112,21 @@ public class UpdateActivityService
         ActivityModelResponse activity,
         CancellationToken cancellationToken)
     {
-        var bikes = _stravaRestHttpClient.GetBikes(athleteId, cancellationToken);
+        var mapPolyline = activity.Map!.Polyline!;
+        var coordinates = Polyline.Decode(mapPolyline);
+
+        var isCityRide = IsCityRide(coordinates, activity);
+        if (!isCityRide)
+        {
+            _logger.LogInformation("Skip cause ride {RideId} is not city ride", activity.Id);
+            return;
+        }
+
+        if (activity.GearId == Constants.MyCityBikeGearId)
+        {
+            _logger.LogInformation("Skip cause needed GearId is already settled");
+            return;
+        }
 
         var updateModel = new UpdatableActivityRequest()
         {
@@ -121,9 +137,35 @@ public class UpdateActivityService
             Name = activity.Name,
             Type = activity.Type!,
             SportType = activity.SportType,
-            GearId = activity.GearId
+            GearId = Constants.MyCityBikeGearId
         };
 
         await _stravaRestHttpClient.UpdateActivity(activityId, athleteId, updateModel, cancellationToken);
+    }
+
+    private static bool IsCityRide(List<Coordinate> coordinates, ActivityModelResponse activity)
+    {
+        var boundaries = Constants.MyMapBoundaries;
+
+        var inBoundariesCoordinatesCount = coordinates.Where(c =>
+            c.Latitude >= boundaries.MinLatitude &&
+            c.Latitude <= boundaries.MaxLatitude &&
+            c.Longitude >= boundaries.MinLongitude &&
+            c.Longitude <= boundaries.MaxLongitude).Count();
+
+        if (inBoundariesCoordinatesCount == coordinates.Count)
+        {
+            return true;
+        }
+
+        var distanceInKm = activity.Distance / 1000;
+
+        // distance < 15km && mostly in my boundaries
+        if (distanceInKm < 15 && (double)inBoundariesCoordinatesCount / coordinates.Count > 0.6)
+        {
+            return true;
+        }
+
+        return false;
     }
 }

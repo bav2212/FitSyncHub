@@ -1,10 +1,20 @@
-﻿using System.Text.Json;
+﻿using StravaWebhooksAzureFunctions.Models;
+using System.Text.Json;
 
 namespace StravaWebhooksAzureFunctions;
 
 public class Constants
 {
     public const long MyAthleteId = 50156776;
+    // Marin Nicasio 2 id
+    public const string MyCityBikeGearId = "b9320665";
+
+    public static Boundaries MyMapBoundaries => new(
+        26.098528,
+        50.1026653,
+        26.129767,
+        50.1384141
+    );
 
     public readonly static JsonSerializerOptions StravaApiJsonOptions = new()
     {
