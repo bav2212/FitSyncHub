@@ -1,11 +1,15 @@
-﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Athletes;
+﻿using System.Text.Json.Serialization;
 
-internal class DetailedAthleteResponse
+namespace StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Athletes;
+
+public class DetailedAthleteResponse
 {
     public long Id { get; init; }
     public int ResourceState { get; init; }
-    public string? Firstname { get; init; }
-    public string? Lastname { get; init; }
+    [JsonPropertyName("firstname")]
+    public string? FirstName { get; init; }
+    [JsonPropertyName("lastname")]
+    public string? LastName { get; init; }
     public string? ProfileMedium { get; init; }
     public string? Profile { get; init; }
     public string? City { get; init; }

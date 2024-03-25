@@ -27,6 +27,33 @@ public class StravaRestHttpClient : IStravaRestHttpClient
         _stravaOAuthService = stravaOAuthService;
     }
 
+    public async Task<DetailedAthleteResponse> UpdateAthlete(
+        long athleteId,
+        float weight,
+        CancellationToken cancellationToken)
+    {
+        var tokenResponse = await _stravaOAuthService.RequestToken(athleteId, cancellationToken);
+
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"athlete?weight={weight}");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.Token);
+
+        var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+
+        try
+        {
+            return await response
+                 .HandleJsonResponse<DetailedAthleteResponse>(Constants.StravaApiJsonOptions, cancellationToken);
+        }
+        catch (JsonException)
+        {
+            var responseContent = response.Content.ReadAsStringAsync(cancellationToken);
+
+            _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(ActivityModelResponse), responseContent);
+            throw;
+        }
+    }
+
+
     public async Task<ActivityModelResponse> GetActivity(
         long activityId,
         long athleteId,

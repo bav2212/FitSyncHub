@@ -2,6 +2,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.Options;
 using System.Net;
 
@@ -10,10 +11,14 @@ namespace StravaWebhooksAzureFunctions.Functions;
 public class WeightHttpTriggerFunction
 {
     private readonly BodyMeasurementsOptions _options;
+    private readonly IStravaRestHttpClient _stravaRestHttpClient;
 
-    public WeightHttpTriggerFunction(IOptions<BodyMeasurementsOptions> options)
+    public WeightHttpTriggerFunction(
+        IStravaRestHttpClient stravaRestHttpClient,
+        IOptions<BodyMeasurementsOptions> options)
     {
         _options = options.Value;
+        _stravaRestHttpClient = stravaRestHttpClient;
     }
 
     [Function(nameof(WeightHttpTriggerFunction))]
@@ -25,9 +30,10 @@ public class WeightHttpTriggerFunction
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
         string? weight = req.Query["weight"];
+        string? athleteId = req.Query["athlete_id"];
         string? verifyToken = req.Query["verify_token"];
 
-        if (verifyToken is null || weight is null)
+        if (weight is null || athleteId is null || verifyToken is null)
         {
             return BadRequest("wrong request");
         }
@@ -37,18 +43,32 @@ public class WeightHttpTriggerFunction
             return BadRequest("VerifyToken is wrong");
         }
 
-        if (!double.TryParse(weight, out _))
+        if (!float.TryParse(weight, out var parsedWeight))
         {
             return BadRequest("Weight has wrong format");
         }
 
+        if (string.IsNullOrWhiteSpace(athleteId) || !long.TryParse(athleteId, out var parsedAthleteId))
+        {
+            return BadRequest("Athlete id is not valid");
+        }
+
         logger.LogInformation("Weight is {weight} kg", weight);
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteStringAsync(weight);
+        try
+        {
+            await _stravaRestHttpClient.UpdateAthlete(parsedAthleteId, parsedWeight, executionContext.CancellationToken);
 
-        return response;
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            await response.WriteStringAsync(weight);
 
+            return response;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Cannot update athlete weight");
+            return BadRequest("Cannot update athlete weight");
+        }
 
         HttpResponseData BadRequest(string responseText)
         {

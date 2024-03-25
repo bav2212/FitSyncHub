@@ -6,6 +6,11 @@ namespace StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 
 public interface IStravaRestHttpClient
 {
+    Task<DetailedAthleteResponse> UpdateAthlete(
+        long athleteId,
+        float weight,
+        CancellationToken cancellationToken);
+
     Task<ActivityModelResponse> GetActivity(
         long activityId,
         long athleteId,
