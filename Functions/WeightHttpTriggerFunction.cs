@@ -23,7 +23,7 @@ public class WeightHttpTriggerFunction
 
     [Function(nameof(WeightHttpTriggerFunction))]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "weight")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "weight")] HttpRequestData req,
         FunctionContext executionContext)
     {
         var logger = executionContext.GetLogger<WeightHttpTriggerFunction>();
