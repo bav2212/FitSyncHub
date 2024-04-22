@@ -32,10 +32,9 @@ public class StravaOAuthHttpClient : IStravaOAuthHttpClient
             GrantType = "authorization_code"
         };
 
-        var content = JsonContent.Create(request, options: Constants.StravaApiJsonOptions);
+        var content = JsonContent.Create(request, StravaRestApiSerializerContext.Default.ExchangeTokenRequest);
         var response = await _httpClient.PostAsync("oauth/token", content, cancellationToken);
-        return await response
-            .HandleJsonResponse<ExchangeTokenResponse>(Constants.StravaApiJsonOptions, cancellationToken);
+        return await response.HandleJsonResponse(StravaRestApiSerializerContext.Default.ExchangeTokenResponse, cancellationToken);
     }
 
     public async Task<RefreshTokenResponse> RefreshTokenAsync(
@@ -50,10 +49,9 @@ public class StravaOAuthHttpClient : IStravaOAuthHttpClient
             RefreshToken = refreshToken
         };
 
-        var content = JsonContent.Create(request, options: Constants.StravaApiJsonOptions);
+        var content = JsonContent.Create(request, StravaRestApiSerializerContext.Default.RefreshTokenRequest);
         var response = await _httpClient.PostAsync("oauth/token", content, cancellationToken);
 
-        return await response
-            .HandleJsonResponse<RefreshTokenResponse>(Constants.StravaApiJsonOptions, cancellationToken);
+        return await response.HandleJsonResponse(StravaRestApiSerializerContext.Default.RefreshTokenResponse, cancellationToken);
     }
 }

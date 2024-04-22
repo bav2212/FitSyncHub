@@ -8,6 +8,7 @@ using StravaWebhooksAzureFunctions.Services.Interfaces;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace StravaWebhooksAzureFunctions.HttpClients;
 
@@ -39,20 +40,8 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
-        try
-        {
-            return await response
-                 .HandleJsonResponse<DetailedAthleteResponse>(Constants.StravaApiJsonOptions, cancellationToken);
-        }
-        catch (JsonException)
-        {
-            var responseContent = response.Content.ReadAsStringAsync(cancellationToken);
-
-            _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(ActivityModelResponse), responseContent);
-            throw;
-        }
+        return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
     }
-
 
     public async Task<ActivityModelResponse> GetActivity(
         long activityId,
@@ -66,18 +55,7 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
-        try
-        {
-            return await response
-                 .HandleJsonResponse<ActivityModelResponse>(Constants.StravaApiJsonOptions, cancellationToken);
-        }
-        catch (JsonException)
-        {
-            var responseContent = response.Content.ReadAsStringAsync(cancellationToken);
-
-            _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(ActivityModelResponse), responseContent);
-            throw;
-        }
+        return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
     }
 
     public async Task<List<SummaryGearResponse>> GetBikes(
@@ -91,21 +69,10 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
-        try
-        {
-            var content = await response
-                 .HandleJsonResponse<DetailedAthleteResponse>(Constants.StravaApiJsonOptions, cancellationToken);
+        var detailedAthlete =
+            await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
 
-            return content.Bikes;
-        }
-        catch (JsonException)
-        {
-            var responseContent = response.Content.ReadAsStringAsync(cancellationToken);
-
-            _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(ActivityModelResponse), responseContent);
-            throw;
-        }
-
+        return detailedAthlete.Bikes;
     }
 
     public async Task<ActivityModelResponse> UpdateActivity(
@@ -118,20 +85,25 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         using var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"activities/{activityId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.Token);
-        requestMessage.Content = JsonContent.Create(model, options: Constants.StravaApiJsonOptions);
+        requestMessage.Content = JsonContent.Create(model, StravaBrowserSessionSerializerContext.Default.UpdatableActivityRequest);
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
+        return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
+    }
+
+
+    private async Task<T> HandleJsonResponse<T>(HttpResponseMessage response, JsonTypeInfo<T> jsonTypeInfo, CancellationToken cancellationToken)
+    {
         try
         {
-            return await response
-                 .HandleJsonResponse<ActivityModelResponse>(Constants.StravaApiJsonOptions, cancellationToken);
+            return await response.HandleJsonResponse(jsonTypeInfo, cancellationToken);
         }
         catch (JsonException)
         {
             var responseContent = response.Content.ReadAsStringAsync(cancellationToken);
 
-            _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(ActivityModelResponse), responseContent);
+            _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(T), responseContent);
             throw;
         }
     }

@@ -2,7 +2,7 @@
 
 public class SummaryGearResponse
 {
-    public string Id { get; init; }
+    public string Id { get; init; } = null!;
     public int ResourceState { get; init; }
     public bool Primary { get; init; }
     public string? Name { get; init; }

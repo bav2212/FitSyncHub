@@ -1,22 +1,20 @@
 ﻿using StravaWebhooksAzureFunctions.Exceptions;
 using System.Net.Http.Json;
-using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace StravaWebhooksAzureFunctions.Extensions;
 
 public static class HttpResponseMessageExtensions
 {
-    public static Task<T> HandleJsonResponse<T>(this HttpResponseMessage response, CancellationToken cancellationToken = default)
-    {
-        return HandleJsonResponse<T>(response, null!, cancellationToken);
-    }
-
-    public static async Task<T> HandleJsonResponse<T>(this HttpResponseMessage response, JsonSerializerOptions jsonSerializerOptions, CancellationToken cancellationToken = default)
+    public static async Task<T> HandleJsonResponse<T>(
+        this HttpResponseMessage response,
+        JsonTypeInfo<T> jsonTypeInfo,
+        CancellationToken cancellationToken)
     {
         try
         {
             response.EnsureSuccessStatusCode();
-            return (await response.Content.ReadFromJsonAsync<T>(jsonSerializerOptions, cancellationToken))!;
+            return (await response.Content.ReadFromJsonAsync(jsonTypeInfo, cancellationToken))!;
         }
         catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
         {

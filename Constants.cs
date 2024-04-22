@@ -1,5 +1,4 @@
 ﻿using StravaWebhooksAzureFunctions.Models;
-using System.Text.Json;
 
 namespace StravaWebhooksAzureFunctions;
 
@@ -15,11 +14,6 @@ public class Constants
         26.129767,
         50.1384141
     );
-
-    public readonly static JsonSerializerOptions StravaApiJsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
 
     public class StravaActivityType
     {
