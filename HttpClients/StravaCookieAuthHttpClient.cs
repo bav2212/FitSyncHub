@@ -1,7 +1,7 @@
-﻿using HtmlAgilityPack;
+﻿using System.Net;
+using HtmlAgilityPack;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
-using System.Net;
 
 namespace StravaWebhooksAzureFunctions.HttpClients;
 
@@ -29,10 +29,10 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
 
         var content = new FormUrlEncodedContent(
         [
-            new ("email", username),
-            new ("password", password),
-            new ("utf8", "✓"),
-            new ("authenticity_token", authenticityToken)
+            new("email", username),
+            new("password", password),
+            new("utf8", "✓"),
+            new("authenticity_token", authenticityToken)
         ]);
 
         response = await client.PostAsync(_stravaUrlSession, content, cancellationToken);

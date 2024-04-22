@@ -1,5 +1,5 @@
-﻿using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
-using System.Net;
+﻿using System.Net;
+using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 
 namespace StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 

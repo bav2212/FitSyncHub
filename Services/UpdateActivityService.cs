@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.Helpers;
@@ -7,7 +8,6 @@ using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 using StravaWebhooksAzureFunctions.Models;
 using StravaWebhooksAzureFunctions.Options;
-using System.Text;
 
 namespace StravaWebhooksAzureFunctions.Services;
 

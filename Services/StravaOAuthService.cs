@@ -54,7 +54,7 @@ public class StravaOAuthService : IStravaOAuthService
                 .Where(x => x.AthleteId == athleteId);
 
         // Convert to feed iterator
-        using FeedIterator<PersistedGrant> linqFeed = matches.ToFeedIterator();
+        using var linqFeed = matches.ToFeedIterator();
 
         // Iterate query result pages
         while (linqFeed.HasMoreResults)

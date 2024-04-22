@@ -1,5 +1,5 @@
-﻿using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
 
 namespace StravaWebhooksAzureFunctions;
 

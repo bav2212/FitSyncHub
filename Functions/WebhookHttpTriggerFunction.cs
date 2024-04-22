@@ -1,10 +1,10 @@
+﻿using System.Net;
+using System.Text.Json.Serialization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.Options;
-using System.Net;
-using System.Text.Json.Serialization;
 
 namespace StravaWebhooksAzureFunctions.Functions;
 
@@ -25,9 +25,9 @@ public class WebhookHttpTriggerFunction
         var logger = executionContext.GetLogger<WebhookHttpTriggerFunction>();
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        string? mode = req.Query["hub.mode"];
-        string? verifyToken = req.Query["hub.verify_token"];
-        string? challenge = req.Query["hub.challenge"];
+        var mode = req.Query["hub.mode"];
+        var verifyToken = req.Query["hub.verify_token"];
+        var challenge = req.Query["hub.challenge"];
 
         // Checks if a token and mode is in the query string of the request
         if (mode is null || verifyToken is null || challenge is null)

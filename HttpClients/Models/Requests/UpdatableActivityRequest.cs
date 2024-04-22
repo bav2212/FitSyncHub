@@ -10,5 +10,4 @@ public record UpdatableActivityRequest
     public required string Type { get; init; }
     public required string SportType { get; init; }
     public required string? GearId { get; init; }
-
 }

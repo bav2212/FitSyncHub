@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Net.Http.Json;
+using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.Extensions;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
 using StravaWebhooksAzureFunctions.Options;
-using System.Net.Http.Json;
 
 namespace StravaWebhooksAzureFunctions.HttpClients;
 

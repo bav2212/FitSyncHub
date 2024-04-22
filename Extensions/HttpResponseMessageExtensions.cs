@@ -1,6 +1,6 @@
-﻿using StravaWebhooksAzureFunctions.Exceptions;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json.Serialization.Metadata;
+using StravaWebhooksAzureFunctions.Exceptions;
 
 namespace StravaWebhooksAzureFunctions.Extensions;
 

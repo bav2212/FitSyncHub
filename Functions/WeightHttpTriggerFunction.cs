@@ -1,10 +1,10 @@
+﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.Options;
-using System.Net;
 
 namespace StravaWebhooksAzureFunctions.Functions;
 
@@ -29,9 +29,9 @@ public class WeightHttpTriggerFunction
         var logger = executionContext.GetLogger<WeightHttpTriggerFunction>();
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        string? weight = req.Query["weight"];
-        string? athleteId = req.Query["athlete_id"];
-        string? verifyToken = req.Query["verify_token"];
+        var weight = req.Query["weight"];
+        var athleteId = req.Query["athlete_id"];
+        var verifyToken = req.Query["verify_token"];
 
         if (weight is null || athleteId is null || verifyToken is null)
         {

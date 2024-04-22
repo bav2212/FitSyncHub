@@ -1,10 +1,10 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using System.Net;
+using System.Text.Json;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
-using System.Net;
-using System.Text.Json;
 
 namespace StravaWebhooksAzureFunctions.HttpClients;
 

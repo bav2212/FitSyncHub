@@ -1,4 +1,4 @@
-using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;

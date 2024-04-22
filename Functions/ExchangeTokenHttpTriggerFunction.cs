@@ -1,9 +1,9 @@
+﻿using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
-using System.Net;
 
 namespace StravaWebhooksAzureFunctions.Functions;
 
@@ -33,8 +33,8 @@ public class ExchangeTokenHttpTriggerFunction
         var logger = executionContext.GetLogger<ExchangeTokenHttpTriggerFunction>();
         logger.LogInformation("Started executing function {Function}", nameof(ExchangeTokenHttpTriggerFunction));
 
-        string? code = req.Query["code"];
-        string? scope = req.Query["scope"];
+        var code = req.Query["code"];
+        var scope = req.Query["scope"];
 
         if (scope is null || !_expectedScope.SetEquals(scope.Split(',')))
         {

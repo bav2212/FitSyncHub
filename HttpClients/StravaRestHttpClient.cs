@@ -1,14 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.Extensions;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Athletes;
 using StravaWebhooksAzureFunctions.Services.Interfaces;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 
 namespace StravaWebhooksAzureFunctions.HttpClients;
 

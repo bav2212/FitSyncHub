@@ -1,12 +1,12 @@
+﻿using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.Options;
-using System.Net;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 namespace StravaWebhooksAzureFunctions.Functions;
