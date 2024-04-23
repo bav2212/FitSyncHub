@@ -7,7 +7,7 @@ namespace StravaWebhooksAzureFunctions.HttpClients;
 
 public class StravaCookieHttpClient : IStravaCookieHttpClient
 {
-    private const string _stravaUpdateActivityUrlPattern = "https://www.strava.com/activities/{0}";
+    private const string StravaUpdateActivityUrlPattern = "https://www.strava.com/activities/{0}";
 
     public async Task<HttpResponseMessage> UpdateActivityVisibilityToOnlyMe(
         ActivityModelResponse activity,
@@ -19,7 +19,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         var handler = new HttpClientHandler() { CookieContainer = cookies };
         var client = new HttpClient(handler);
 
-        var url = string.Format(_stravaUpdateActivityUrlPattern, activity.Id);
+        var url = string.Format(StravaUpdateActivityUrlPattern, activity.Id);
 
         var statsVisibilityMapping = activity.StatsVisibility.ToDictionary(x => x.Type, x => x.Visibility);
 

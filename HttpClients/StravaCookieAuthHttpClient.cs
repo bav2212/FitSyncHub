@@ -7,9 +7,9 @@ namespace StravaWebhooksAzureFunctions.HttpClients;
 
 public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
 {
-    private const string _stravaUrlLogin = "https://www.strava.com/login";
-    private const string _stravaUrlSession = "https://www.strava.com/session";
-    private const string _stravaLoggedOutFingerprint = "logged-out";
+    private const string StravaUrlLogin = "https://www.strava.com/login";
+    private const string StravaUrlSession = "https://www.strava.com/session";
+    private const string StravaLoggedOutFingerprint = "logged-out";
 
     public async Task<CookieLoginResponse> Login(
         string username,
@@ -20,7 +20,7 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
         var handler = new HttpClientHandler() { CookieContainer = cookies };
         var client = new HttpClient(handler);
 
-        var response = await client.GetAsync(_stravaUrlLogin, cancellationToken);
+        var response = await client.GetAsync(StravaUrlLogin, cancellationToken);
         var doc = new HtmlDocument();
         doc.LoadHtml(await response.Content.ReadAsStringAsync(cancellationToken));
 
@@ -35,7 +35,7 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
             new("authenticity_token", authenticityToken)
         ]);
 
-        response = await client.PostAsync(_stravaUrlSession, content, cancellationToken);
+        response = await client.PostAsync(StravaUrlSession, content, cancellationToken);
         _ = response;
 
         return new CookieLoginResponse
@@ -57,6 +57,6 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
         var dashboardResponse = await client.GetAsync("https://www.strava.com/dashboard", cancellationToken);
         var dashboardHtml = await dashboardResponse.Content.ReadAsStringAsync(cancellationToken);
 
-        return !dashboardHtml.Contains(_stravaLoggedOutFingerprint);
+        return !dashboardHtml.Contains(StravaLoggedOutFingerprint);
     }
 }

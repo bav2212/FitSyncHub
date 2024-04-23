@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Options;
@@ -55,12 +54,6 @@ public class WebhookEventReceiverFunction
             Document = webhookEventData,
             HttpResponse = req.CreateResponse(HttpStatusCode.OK)
         };
-    }
-
-    private static async Task<string> ReadRequestBody(HttpRequest req)
-    {
-        using StreamReader streamReader = new(req.Body);
-        return await streamReader.ReadToEndAsync();
     }
 
     public record WebhookEventDataWebhookRequest

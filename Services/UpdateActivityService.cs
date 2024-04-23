@@ -50,7 +50,10 @@ public class UpdateActivityService
             return;
         }
 
-        _logger.LogInformation("Skip activity with name: {Name}, id: {Id}, cause it's not walk or ride activity. Type: {Type}", activity.Name, activity.Id, activity.Type);
+        _logger.LogInformation("Skip activity with name: {Name}, id: {Id}, cause it's not walk or ride activity. Type: {Type}",
+            activity.Name,
+            activity.Id,
+            activity.Type);
     }
 
     private async Task UpdateActivityVisibilityToOnlyMe(

@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.Data.Entities;
+using StravaWebhooksAzureFunctions.Extensions;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 
 namespace StravaWebhooksAzureFunctions.Functions;
@@ -41,7 +42,7 @@ public class ExchangeTokenHttpTriggerFunction
             return new ExchangeTokenMultiResponse()
             {
                 Document = default,
-                HttpResponse = await CreateBadRequestResponse(req, "Invalid scope")
+                HttpResponse = req.CreateBadRequest("Invalid scope")
             };
         }
 
@@ -50,7 +51,7 @@ public class ExchangeTokenHttpTriggerFunction
             return new ExchangeTokenMultiResponse()
             {
                 Document = default,
-                HttpResponse = await CreateBadRequestResponse(req, "Code is required")
+                HttpResponse = req.CreateBadRequest("Code is required")
             };
         }
 
@@ -65,7 +66,7 @@ public class ExchangeTokenHttpTriggerFunction
             return new ExchangeTokenMultiResponse()
             {
                 Document = default,
-                HttpResponse = await CreateBadRequestResponse(req, "Athlete is not supported")
+                HttpResponse = req.CreateBadRequest("Athlete is not supported")
             };
         }
 
@@ -87,15 +88,6 @@ public class ExchangeTokenHttpTriggerFunction
             Document = persistedGrant,
             HttpResponse = req.CreateResponse(HttpStatusCode.OK)
         };
-    }
-
-    // maybe move this to a helper class
-    private static async Task<HttpResponseData> CreateBadRequestResponse(HttpRequestData req, string responseText)
-    {
-        var response = req.CreateResponse(HttpStatusCode.BadRequest);
-        response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-        await response.WriteStringAsync(responseText);
-        return response;
     }
 }
 
