@@ -1,5 +1,9 @@
 ﻿using System.Net;
 using System.Text;
+using System.Text.Json;
+using System.Web;
+using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 
@@ -7,7 +11,18 @@ namespace StravaWebhooksAzureFunctions.HttpClients;
 
 public class StravaCookieHttpClient : IStravaCookieHttpClient
 {
-    private const string StravaUpdateActivityUrlPattern = "https://www.strava.com/activities/{0}";
+    private const string StravaActivityUrlPattern = "https://www.strava.com/activities/{0}";
+    private const string StravaActivitySwapElevationStreamUrlPattern =
+        "https://www.strava.com/activities/{0}/swap_elevation_stream?from_source={1}";
+
+    private const string DeviceSource = "device";
+    private const string LookupSource = "lookup";
+    private readonly ILogger<StravaCookieHttpClient> _logger;
+
+    public StravaCookieHttpClient(ILogger<StravaCookieHttpClient> logger)
+    {
+        _logger = logger;
+    }
 
     public async Task<HttpResponseMessage> UpdateActivityVisibilityToOnlyMe(
         ActivityModelResponse activity,
@@ -19,7 +34,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         var handler = new HttpClientHandler() { CookieContainer = cookies };
         var client = new HttpClient(handler);
 
-        var url = string.Format(StravaUpdateActivityUrlPattern, activity.Id);
+        var url = string.Format(StravaActivityUrlPattern, activity.Id);
 
         var statsVisibilityMapping = activity.StatsVisibility.ToDictionary(x => x.Type, x => x.Visibility);
 
@@ -51,6 +66,82 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
             new("activity[trainer]", ConvertBoolean(activity.Trainer)),
             new("activity[athlete_gear_id]", activity.GearId ?? string.Empty),
             new("commit", "Save"),
+        ];
+        var content = new FormUrlEncodedContent(nameValueCollection);
+
+        var response = await client.PostAsync(url, content, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Can not update activity {ActivityId}", activity.Id);
+        }
+        else
+        {
+            _logger.LogInformation("Activity {ActivityId} updated to only me", activity.Id);
+        }
+
+        return response;
+    }
+
+    public async Task<HttpResponseMessage?> CorrectElevationIfNeeded(
+        long activityId,
+        CookieContainer cookies,
+        string authenticityToken,
+        CancellationToken cancellationToken)
+    {
+        var handler = new HttpClientHandler() { CookieContainer = cookies };
+        var client = new HttpClient(handler);
+
+        var url = string.Format(StravaActivityUrlPattern, activityId);
+        var getActivityResponse = await client.GetAsync(url, cancellationToken);
+
+        var doc = new HtmlDocument();
+        doc.LoadHtml(await getActivityResponse.Content.ReadAsStringAsync(cancellationToken));
+
+        var tokenNode = doc.DocumentNode.SelectSingleNode("//div[@data-react-class='CorrectElevation']");
+        if (tokenNode is null)
+        {
+            _logger.LogWarning("Can not correct elevation data for activity {ActivityId}. No button for this", activityId);
+            return default;
+        }
+
+        var correctElevationJsonStringEncoded = tokenNode.GetAttributeValue("data-react-props", "");
+        var correctElevationJsonString = HttpUtility.HtmlDecode(correctElevationJsonStringEncoded);
+        var correctElevationJson = JsonSerializer.Deserialize(correctElevationJsonString,
+            StravaBrowserSessionOnPageJsonSerializerContext.Default.CorrectElevationOnPageModel);
+
+        var needCorrection = correctElevationJson is { }
+           && correctElevationJson.LookupExists && correctElevationJson.ActiveSource == DeviceSource;
+        if (!needCorrection)
+        {
+            _logger.LogWarning("Skip {ActivityId}, because it does not need correction", activityId);
+            return default;
+        }
+
+        var response = await SwapElevation(activityId, authenticityToken, client, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Can not update activity {ActivityId}", activityId);
+        }
+        else
+        {
+            _logger.LogInformation("Activity {ActivityId} elevation swapped", activityId);
+        }
+
+        return response;
+    }
+
+    private static async Task<HttpResponseMessage> SwapElevation(
+        long activityId,
+        string authenticityToken,
+        HttpClient client,
+        CancellationToken cancellationToken)
+    {
+        var url = string.Format(StravaActivitySwapElevationStreamUrlPattern, activityId, DeviceSource);
+
+        IEnumerable<KeyValuePair<string, string?>> nameValueCollection = [
+            new("_method", "put"),
+            new("authenticity_token", authenticityToken),
         ];
         var content = new FormUrlEncodedContent(nameValueCollection);
 

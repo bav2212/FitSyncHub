@@ -1,4 +1,4 @@
-﻿using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
+﻿using StravaWebhooksAzureFunctions.HttpClients.Models.BrowserSession;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Athletes;
 
@@ -9,6 +9,14 @@ public interface IStravaRestHttpClient
     Task<DetailedAthleteResponse> UpdateAthlete(
         long athleteId,
         float weight,
+        CancellationToken cancellationToken);
+
+    Task<List<SummaryActivityModelResponse>> GetActivities(
+        long athleteId,
+        long before,
+        long after,
+        int page,
+        int perPage,
         CancellationToken cancellationToken);
 
     Task<ActivityModelResponse> GetActivity(

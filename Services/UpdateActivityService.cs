@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.Helpers;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
-using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
+using StravaWebhooksAzureFunctions.HttpClients.Models.BrowserSession;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 using StravaWebhooksAzureFunctions.Models;
 using StravaWebhooksAzureFunctions.Options;
@@ -16,6 +16,7 @@ public class UpdateActivityService
     private readonly IStravaCookieAuthHttpClient _authService;
     private readonly IStravaCookieHttpClient _stravaCookieHttpClient;
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
+    private readonly CorrectElevationService _correctElevationService;
     private readonly StravaOptions _stravaOptions;
     private readonly ILogger<UpdateActivityService> _logger;
 
@@ -23,12 +24,14 @@ public class UpdateActivityService
         IStravaCookieAuthHttpClient authService,
         IStravaCookieHttpClient stravaCookieHttpClient,
         IStravaRestHttpClient stravaRestHttpClient,
+        CorrectElevationService correctElevationService,
         IOptions<StravaOptions> options,
         ILogger<UpdateActivityService> logger)
     {
         _authService = authService;
         _stravaCookieHttpClient = stravaCookieHttpClient;
         _stravaRestHttpClient = stravaRestHttpClient;
+        _correctElevationService = correctElevationService;
         _stravaOptions = options.Value;
         _logger = logger;
     }
@@ -47,6 +50,7 @@ public class UpdateActivityService
         if (activity.Type == Constants.StravaActivityType.Ride)
         {
             await UpdateGearIfNeeded(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
+            await _correctElevationService.CorrectElevation(webhookEventData.ObjectId, cancellationToken);
             return;
         }
 
@@ -67,7 +71,7 @@ public class UpdateActivityService
         var authResponse = await _authService.Login(userName, password, cancellationToken);
         if (!authResponse.Success)
         {
-            _logger.LogError("Failed to login to Strava");
+            _logger.LogError("Failed login to Strava");
             return;
         }
 
@@ -79,15 +83,6 @@ public class UpdateActivityService
             authResponse.AuthenticityToken,
             PrivateNoteFormatter,
             cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogWarning("Can not update activity {ActivityId}, Username: {Username}", activityId, userName);
-        }
-        else
-        {
-            _logger.LogInformation("Activity {ActivityId} updated to only me", activityId);
-        }
 
         string PrivateNoteFormatter(DateTime utcNow)
         {

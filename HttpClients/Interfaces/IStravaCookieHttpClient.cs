@@ -11,4 +11,10 @@ public interface IStravaCookieHttpClient
          string authenticityToken,
          Func<DateTime, string> privateNoteFormatter,
          CancellationToken cancellationToken);
+
+    Task<HttpResponseMessage?> CorrectElevationIfNeeded(
+         long activityId,
+         CookieContainer cookies,
+         string authenticityToken,
+         CancellationToken cancellationToken);
 }

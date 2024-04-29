@@ -15,6 +15,12 @@ public class Constants
         50.1384141
     );
 
+    public class StravaRestApi
+    {
+        public const int AthleteActivitiesPerPage = 30;
+        public const int AthleteActivitiesFirstPage = 1;
+    }
+
     public class StravaActivityType
     {
         public const string AlpineSki = "AlpineSki";

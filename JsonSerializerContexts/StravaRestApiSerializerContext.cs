@@ -8,6 +8,7 @@ namespace StravaWebhooksAzureFunctions;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(ActivityModelResponse))]
+[JsonSerializable(typeof(List<SummaryActivityModelResponse>))]
 [JsonSerializable(typeof(DetailedAthleteResponse))]
 [JsonSerializable(typeof(ExchangeTokenRequest))]
 [JsonSerializable(typeof(ExchangeTokenResponse))]

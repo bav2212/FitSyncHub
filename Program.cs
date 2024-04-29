@@ -44,6 +44,8 @@ var host = new HostBuilder()
         });
         services.AddTransient<IStravaCookieHttpClient, StravaCookieHttpClient>();
 
+        services.AddTransient<CorrectElevationService>();
+        services.AddTransient<StoreActivitiesService>();
         services.AddTransient<UpdateActivityService>();
         services.AddTransient<IStravaOAuthService, StravaOAuthService>();
     })
