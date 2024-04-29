@@ -5,7 +5,7 @@ using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.Extensions;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
-using StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
+using StravaWebhooksAzureFunctions.HttpClients.Models.BrowserSession;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Athletes;
 using StravaWebhooksAzureFunctions.Services.Interfaces;
@@ -41,6 +41,34 @@ public class StravaRestHttpClient : IStravaRestHttpClient
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
         return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
+    }
+
+    public async Task<List<SummaryActivityModelResponse>> GetActivities(
+        long athleteId,
+        long before,
+        long after,
+        int page,
+        int perPage,
+        CancellationToken cancellationToken)
+    {
+        var tokenResponse = await _stravaOAuthService.RequestToken(athleteId, cancellationToken);
+
+        var queryParams = new Dictionary<string, string>()
+        {
+            { "before", before.ToString() },
+            { "after", after.ToString() },
+            { "page",  page.ToString() },
+            { "per_page",  perPage.ToString() }
+        };
+
+        var uri = $"athlete/activities?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
+
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.Token);
+
+        var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+
+        return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.ListSummaryActivityModelResponse, cancellationToken);
     }
 
     public async Task<ActivityModelResponse> GetActivity(
@@ -101,7 +129,7 @@ public class StravaRestHttpClient : IStravaRestHttpClient
         }
         catch (JsonException)
         {
-            var responseContent = response.Content.ReadAsStringAsync(cancellationToken);
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(T), responseContent);
             throw;

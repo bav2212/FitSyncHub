@@ -1,4 +1,4 @@
-﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.Requests;
+﻿namespace StravaWebhooksAzureFunctions.HttpClients.Models.BrowserSession;
 
 public record UpdatableActivityRequest
 {

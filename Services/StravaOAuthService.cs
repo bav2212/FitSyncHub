@@ -12,7 +12,8 @@ public class StravaOAuthService : IStravaOAuthService
     private readonly IStravaOAuthHttpClient _stravaOAuthHttpClient;
     private readonly Container _persistedGrantContainer;
 
-    public StravaOAuthService(IStravaOAuthHttpClient stravaOAuthHttpClient,
+    public StravaOAuthService(
+        IStravaOAuthHttpClient stravaOAuthHttpClient,
         CosmosClient cosmosClient)
     {
         _stravaOAuthHttpClient = stravaOAuthHttpClient;
