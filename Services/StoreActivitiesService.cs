@@ -17,7 +17,7 @@ public class StoreActivitiesService
         _activitiesContainer = cosmosClient.GetDatabase("strava").GetContainer("SummaryActivity");
     }
 
-    public async Task StoreActivities(
+    public async Task<int> StoreActivities(
         long athleteId,
         long before,
         long after,
@@ -33,6 +33,8 @@ public class StoreActivitiesService
             var response = await _activitiesContainer.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
             _ = response;
         }
+
+        return activities.Count;
     }
 
     private async Task<List<SummaryActivityModelResponse>> GetActivities(

@@ -25,13 +25,17 @@ public class CorrectRideElevationGainTriggerFunction
         var logger = executionContext.GetLogger<CorrectRideElevationGainTriggerFunction>();
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        await _correctElevationService.CorrectElevation(request.Before, request.After, executionContext.CancellationToken);
+        var result = await _correctElevationService.CorrectElevation(
+            request.Before,
+            request.After,
+            executionContext.CancellationToken);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(new
         {
             request.Before,
-            request.After
+            request.After,
+            Count = result
         }, executionContext.CancellationToken);
 
         return response;

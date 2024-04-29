@@ -26,14 +26,18 @@ public class StoreActivitiesTriggerFunction
         var logger = executionContext.GetLogger<StoreActivitiesTriggerFunction>();
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        await _storeActivitiesService
-            .StoreActivities(Constants.MyAthleteId, request.BeforeEpochTime, request.AfterEpochTime, executionContext.CancellationToken);
+        var result = await _storeActivitiesService.StoreActivities(
+            Constants.MyAthleteId,
+            request.BeforeEpochTime,
+            request.AfterEpochTime,
+            executionContext.CancellationToken);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(new
         {
             request.BeforeEpochTime,
-            request.AfterEpochTime
+            request.AfterEpochTime,
+            StoredCount = result
         }, executionContext.CancellationToken);
 
         return response;

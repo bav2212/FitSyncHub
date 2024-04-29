@@ -30,7 +30,7 @@ public class CorrectElevationService
         _logger = logger;
     }
 
-    public async Task CorrectElevation(
+    public async Task<int> CorrectElevation(
         DateOnly before,
         DateOnly after,
         CancellationToken cancellationToken)
@@ -42,6 +42,8 @@ public class CorrectElevationService
             var activityId = long.Parse(activity.id);
             await CorrectElevation(activityId, cancellationToken);
         }
+
+        return activities.Count;
     }
 
     public async Task CorrectElevation(

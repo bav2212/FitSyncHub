@@ -16,7 +16,9 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         "https://www.strava.com/activities/{0}/swap_elevation_stream?from_source={1}";
 
     private const string DeviceSource = "device";
+#pragma warning disable IDE0051 // Remove unused private members
     private const string LookupSource = "lookup";
+#pragma warning restore IDE0051 // Remove unused private members
     private readonly ILogger<StravaCookieHttpClient> _logger;
 
     public StravaCookieHttpClient(ILogger<StravaCookieHttpClient> logger)
