@@ -7,6 +7,7 @@ public class Constants
     public const long MyAthleteId = 50156776;
     // Marin Nicasio 2 id
     public const string MyCityBikeGearId = "b9320665";
+    public const string WahooSYSTMDeviceName = "Wahoo SYSTM";
 
     public static Boundaries MyMapBoundaries => new(
         26.098528,
