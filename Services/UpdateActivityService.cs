@@ -52,7 +52,8 @@ public class UpdateActivityService
 
         if (isOutdoorRide)
         {
-            await UpdateGearIfNeeded(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
+            // do not do it for now
+            //await CorrectGearIfNeeded(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
             await _correctElevationService.CorrectElevation(webhookEventData.ObjectId, cancellationToken);
             return;
         }
@@ -107,7 +108,7 @@ public class UpdateActivityService
         }
     }
 
-    private async Task UpdateGearIfNeeded(
+    private async Task CorrectGearIfNeeded(
         long athleteId,
         long activityId,
         ActivityModelResponse activity,
