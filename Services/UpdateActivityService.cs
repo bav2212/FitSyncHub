@@ -47,6 +47,12 @@ public class UpdateActivityService
             return;
         }
 
+        if (activity.Type == Constants.StravaActivityType.Run)
+        {
+            await _correctElevationService.CorrectElevation(webhookEventData.ObjectId, cancellationToken);
+            return;
+        }
+
         var isOutdoorRide = activity.Type == Constants.StravaActivityType.Ride
             && activity.DeviceName != Constants.WahooSYSTMDeviceName;
 
