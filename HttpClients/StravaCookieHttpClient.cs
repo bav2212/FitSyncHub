@@ -33,8 +33,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         Func<DateTime, string> privateNoteFormatter,
         CancellationToken cancellationToken)
     {
-        var handler = new HttpClientHandler() { CookieContainer = cookies };
-        var client = new HttpClient(handler);
+        using var httpClient = CreateHttpClient(cookies);
 
         var url = string.Format(StravaActivityUrlPattern, activity.Id);
 
@@ -71,7 +70,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         ];
         var content = new FormUrlEncodedContent(nameValueCollection);
 
-        var response = await client.PostAsync(url, content, cancellationToken);
+        var response = await httpClient.PostAsync(url, content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -91,8 +90,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         string authenticityToken,
         CancellationToken cancellationToken)
     {
-        var handler = new HttpClientHandler() { CookieContainer = cookies };
-        var client = new HttpClient(handler);
+        using var client = CreateHttpClient(cookies);
 
         var url = string.Format(StravaActivityUrlPattern, activityId);
         var getActivityResponse = await client.GetAsync(url, cancellationToken);
@@ -133,10 +131,16 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         return response;
     }
 
+    private static HttpClient CreateHttpClient(CookieContainer cookies)
+    {
+        var handler = new HttpClientHandler() { CookieContainer = cookies };
+        return new HttpClient(handler);
+    }
+
     private static async Task<HttpResponseMessage> SwapElevation(
         long activityId,
         string authenticityToken,
-        HttpClient client,
+        HttpClient httpClient,
         CancellationToken cancellationToken)
     {
         var url = string.Format(StravaActivitySwapElevationStreamUrlPattern, activityId, DeviceSource);
@@ -147,7 +151,7 @@ public class StravaCookieHttpClient : IStravaCookieHttpClient
         ];
         var content = new FormUrlEncodedContent(nameValueCollection);
 
-        return await client.PostAsync(url, content, cancellationToken);
+        return await httpClient.PostAsync(url, content, cancellationToken);
     }
 
     private static string ConvertBoolean(bool b) => b ? "1" : "0";
