@@ -9,9 +9,9 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.62" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.22.0" />
-	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.CosmosDB" Version="4.9.0" />
+	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.CosmosDB" Version="4.10.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.4" />
 	<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />

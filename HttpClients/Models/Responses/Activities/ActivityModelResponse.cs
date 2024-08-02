@@ -19,9 +19,9 @@ public class ActivityModelResponse
     [JsonPropertyName("timezone")]
     public string? TimeZone { get; init; }
     public float? UtcOffset { get; init; }
-    public object? LocationCity { get; init; }
-    public object? LocationState { get; init; }
-    public object? LocationCountry { get; init; }
+    public string? LocationCity { get; init; }
+    public string? LocationState { get; init; }
+    public string? LocationCountry { get; init; }
     public int? AchievementCount { get; init; }
     public int? KudosCount { get; init; }
     public int? CommentCount { get; init; }
@@ -36,11 +36,18 @@ public class ActivityModelResponse
     public bool? Flagged { get; init; }
     public string? GearId { get; init; }
     [JsonPropertyName("start_latlng")]
-    public object[]? StartLatitudeLongitude { get; init; }
+    public float[]? StartLatitudeLongitude { get; init; }
     [JsonPropertyName("end_latlng")]
-    public object[]? EndLatitudeLongitude { get; init; }
+    public float[]? EndLatitudeLongitude { get; init; }
     public float? AverageSpeed { get; init; }
     public float? MaxSpeed { get; init; }
+    public float? AverageCadence { get; init; }
+    public float? AverageTemp { get; init; }
+    public float? AverageWatts { get; init; }
+    public float? MaxWatts { get; init; }
+    public float? WeightedAverageWatts { get; init; }
+    public float? Kilojoules { get; init; }
+    public bool? DeviceWatts { get; init; }
     public bool? HasHeartrate { get; init; }
     public bool? HeartrateOptOut { get; init; }
     public bool? DisplayHideHeartrateOption { get; init; }
@@ -55,6 +62,7 @@ public class ActivityModelResponse
     public int? PrCount { get; init; }
     public int? TotalPhotoCount { get; init; }
     public bool? HasKudoed { get; init; }
+    public float? SufferScore { get; init; }
     public string? Description { get; init; }
     public float? Calories { get; init; }
     public string? PerceivedExertion { get; init; }
@@ -68,5 +76,5 @@ public class ActivityModelResponse
     public string? DeviceName { get; init; }
     public string? EmbedToken { get; init; }
     public string? PrivateNote { get; init; }
-    public object[]? AvailableZones { get; init; }
+    public string[]? AvailableZones { get; init; }
 }
