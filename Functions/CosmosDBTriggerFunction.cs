@@ -41,14 +41,16 @@ public class CosmosDBTriggerFunction
         _logger.LogInformation("Documents modified: {Count}", input.Count);
         foreach (var webhookEventData in input)
         {
+            var athleteId = webhookEventData.OwnerId;
+            var activityId = webhookEventData.ObjectId;
+
+            _logger.LogInformation("Document for activity Id: {ActivityId}", activityId);
+
             if (webhookEventData.AspectType != "create")
             {
                 _logger.LogInformation("Skip, because AspectType =! create. Aspect type: {AspectType}", webhookEventData.AspectType);
                 return;
             }
-
-            var athleteId = webhookEventData.OwnerId;
-            var activityId = webhookEventData.ObjectId;
 
             var activityResponse = await _stravaRestHttpClient
                 .GetActivity(activityId, athleteId, executionContext.CancellationToken);
