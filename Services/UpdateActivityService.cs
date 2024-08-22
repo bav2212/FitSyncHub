@@ -139,7 +139,7 @@ public class UpdateActivityService
         {
             Commute = activity.Commute,
             Trainer = activity.Trainer,
-            HideFromHome = true,
+            HideFromHome = false,
             Description = activity.Description,
             Name = activity.Name,
             Type = activity.Type!,
