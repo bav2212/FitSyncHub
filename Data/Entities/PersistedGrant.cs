@@ -1,10 +1,9 @@
-﻿namespace StravaWebhooksAzureFunctions.Data.Entities;
+﻿using StravaWebhooksAzureFunctions.Data.Entities.Abstractions;
 
-public class PersistedGrant
+namespace StravaWebhooksAzureFunctions.Data.Entities;
+
+public class PersistedGrant : DataModel
 {
-#pragma warning disable IDE1006 // Naming Styles
-    public required string id { get; set; }
-#pragma warning restore IDE1006 // Naming Styles
     public required string TokenType { get; set; }
     public required long ExpiresAt { get; set; }
     public required long ExpiresIn { get; set; }

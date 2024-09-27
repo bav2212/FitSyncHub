@@ -36,9 +36,10 @@ public class UpdateActivityService
 
     public async Task UpdateActivity(
         WebhookEventData webhookEventData,
-        ActivityModelResponse activity,
         CancellationToken cancellationToken)
     {
+        var activity = await _stravaRestHttpClient
+            .GetActivity(webhookEventData.ActivityId, webhookEventData.AthleteId, cancellationToken);
         if (activity.Type == Constants.StravaActivityType.Walk)
         {
             await UpdateActivityVisibilityToOnlyMe(webhookEventData, activity, cancellationToken);

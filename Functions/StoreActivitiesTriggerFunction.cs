@@ -10,9 +10,9 @@ namespace StravaWebhooksAzureFunctions.Functions;
 
 public class StoreActivitiesTriggerFunction
 {
-    private readonly StoreActivitiesService _storeActivitiesService;
+    private readonly StoreSummaryActivitiesService _storeActivitiesService;
 
-    public StoreActivitiesTriggerFunction(StoreActivitiesService storeActivitiesService)
+    public StoreActivitiesTriggerFunction(StoreSummaryActivitiesService storeActivitiesService)
     {
         _storeActivitiesService = storeActivitiesService;
     }
@@ -26,7 +26,7 @@ public class StoreActivitiesTriggerFunction
         var logger = executionContext.GetLogger<StoreActivitiesTriggerFunction>();
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var result = await _storeActivitiesService.StoreActivities(
+        var result = await _storeActivitiesService.StoreSummaryActivities(
             Constants.MyAthleteId,
             request.BeforeEpochTime,
             request.AfterEpochTime,

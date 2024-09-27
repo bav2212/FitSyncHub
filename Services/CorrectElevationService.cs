@@ -1,10 +1,8 @@
-﻿using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.Options;
+using StravaWebhooksAzureFunctions.Repositories;
 
 namespace StravaWebhooksAzureFunctions.Services;
 
@@ -12,20 +10,20 @@ public class CorrectElevationService
 {
     private readonly IStravaCookieAuthHttpClient _authService;
     private readonly IStravaCookieHttpClient _stravaCookieHttpClient;
-    private readonly Container _container;
+    private readonly SummaryActivityRepository _summaryActivityRepository;
     private readonly ILogger<CorrectElevationService> _logger;
     private readonly StravaOptions _stravaOptions;
 
     public CorrectElevationService(
         IStravaCookieAuthHttpClient authService,
         IStravaCookieHttpClient stravaCookieHttpClient,
-        CosmosClient cosmosClient,
+        SummaryActivityRepository summaryActivityRepository,
         IOptions<StravaOptions> options,
         ILogger<CorrectElevationService> logger)
     {
         _authService = authService;
         _stravaCookieHttpClient = stravaCookieHttpClient;
-        _container = cosmosClient.GetDatabase("strava").GetContainer("SummaryActivity");
+        _summaryActivityRepository = summaryActivityRepository;
         _stravaOptions = options.Value;
         _logger = logger;
     }
@@ -35,7 +33,10 @@ public class CorrectElevationService
         DateOnly after,
         CancellationToken cancellationToken)
     {
-        var activities = await GetRidesForCorrection(before, after, cancellationToken);
+        var activities = await _summaryActivityRepository.ReadItems(x =>
+            x.StartDate > after.ToDateTime(TimeOnly.MinValue)
+                && x.StartDate < before.ToDateTime(TimeOnly.MaxValue)
+                && x.Type == Constants.StravaActivityType.Ride, cancellationToken);
 
         foreach (var activity in activities)
         {
@@ -65,36 +66,5 @@ public class CorrectElevationService
             authResponse.Cookies,
             authResponse.AuthenticityToken,
             cancellationToken);
-    }
-
-    private async Task<List<SummaryActivityData>> GetRidesForCorrection(
-        DateOnly before,
-        DateOnly after,
-        CancellationToken cancellationToken)
-    {
-        var result = new List<SummaryActivityData>();
-
-        // Get LINQ IQueryable object
-        var queryable = _container.GetItemLinqQueryable<SummaryActivityData>();
-
-        // Construct LINQ query
-        var matches = queryable
-            .Where(x => x.StartDate > after.ToDateTime(TimeOnly.MinValue) && x.StartDate < before.ToDateTime(TimeOnly.MaxValue))
-            .Where(x => x.Type == Constants.StravaActivityType.Ride);
-        var linqFeed = matches.ToFeedIterator();
-
-        // Iterate query result pages
-        while (linqFeed.HasMoreResults)
-        {
-            var response = await linqFeed.ReadNextAsync(cancellationToken);
-
-            // Iterate query results
-            foreach (var item in response)
-            {
-                result.Add(item);
-            }
-        }
-
-        return result;
     }
 }

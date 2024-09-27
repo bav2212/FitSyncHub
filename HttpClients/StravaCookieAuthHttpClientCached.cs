@@ -1,24 +1,24 @@
 ﻿using System.Net;
 using System.Text.Json;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
+using StravaWebhooksAzureFunctions.Repositories;
 
 namespace StravaWebhooksAzureFunctions.HttpClients;
 
 public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
 {
     private readonly IStravaCookieAuthHttpClient _cookieAuthService;
-    private readonly Container _userSessionContainer;
+    private readonly UserSessionRepository _userSessionRepository;
 
     public StravaCookieAuthHttpClientCached(
         IStravaCookieAuthHttpClient cookieAuthService,
-        CosmosClient cosmosClient)
+        UserSessionRepository userSessionRepository)
     {
         _cookieAuthService = cookieAuthService;
-        _userSessionContainer = cosmosClient.GetContainer("strava", "UserSession");
+        _userSessionRepository = userSessionRepository;
     }
 
     public async Task<CookieLoginResponse> Login(
@@ -58,13 +58,9 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
         string username,
         CancellationToken cancellationToken)
     {
-        var iterator = _userSessionContainer
-            .GetItemLinqQueryable<UserSession>()
-            .Where(x => x.id == username)
-            .ToFeedIterator();
-
-        var results = await iterator.ReadNextAsync(cancellationToken);
+        var results = await _userSessionRepository.ReadItems(x => x.id == username, cancellationToken);
         var userSession = results.SingleOrDefault();
+
         if (userSession is not null)
         {
             var cookiesCollection = JsonSerializer
@@ -97,27 +93,18 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
             AuthenticityToken = authenticityToken
         };
 
-        return _userSessionContainer
-            .CreateItemAsync(userSession, cancellationToken: cancellationToken);
+        return _userSessionRepository.CreateItemAsync(userSession, cancellationToken: cancellationToken);
     }
 
     private async Task DeleteCookies(
         string username,
         CancellationToken cancellationToken)
     {
-        var iterator = _userSessionContainer
-           .GetItemLinqQueryable<UserSession>()
-           .Where(x => x.id == username)
-           .ToFeedIterator();
+        var results = await _userSessionRepository.ReadItems(x => x.id == username, cancellationToken);
 
-        while (iterator.HasMoreResults)
+        foreach (var item in results)
         {
-            var results = await iterator.ReadNextAsync(cancellationToken);
-
-            foreach (var item in results)
-            {
-                await _userSessionContainer.DeleteItemAsync<UserSession>(item.id, PartitionKey.None, cancellationToken: cancellationToken);
-            }
+            await _userSessionRepository.DeleteItemAsync(item, cancellationToken: cancellationToken);
         }
     }
 }

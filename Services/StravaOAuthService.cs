@@ -1,8 +1,7 @@
-﻿using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
-using StravaWebhooksAzureFunctions.Data.Entities;
+﻿using StravaWebhooksAzureFunctions.Data.Entities;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses;
+using StravaWebhooksAzureFunctions.Repositories;
 using StravaWebhooksAzureFunctions.Services.Interfaces;
 
 namespace StravaWebhooksAzureFunctions.Services;
@@ -10,14 +9,15 @@ namespace StravaWebhooksAzureFunctions.Services;
 public class StravaOAuthService : IStravaOAuthService
 {
     private readonly IStravaOAuthHttpClient _stravaOAuthHttpClient;
-    private readonly Container _persistedGrantContainer;
+    private readonly PersistedGrantRepository _persistedGrantRepository;
 
     public StravaOAuthService(
         IStravaOAuthHttpClient stravaOAuthHttpClient,
-        CosmosClient cosmosClient)
+        PersistedGrantRepository persistedGrantRepository
+        )
     {
         _stravaOAuthHttpClient = stravaOAuthHttpClient;
-        _persistedGrantContainer = cosmosClient.GetDatabase("strava").GetContainer("PersistedGrant");
+        _persistedGrantRepository = persistedGrantRepository;
     }
 
     public async Task<TokenResponseModel> RequestToken(long athleteId, CancellationToken cancellationToken)
@@ -44,31 +44,13 @@ public class StravaOAuthService : IStravaOAuthService
         persistedGrant.ExpiresAt = refreshTokenResponse.ExpiresAt;
         persistedGrant.TokenType = refreshTokenResponse.TokenType;
 
-        await _persistedGrantContainer.UpsertItemAsync(persistedGrant, cancellationToken: cancellationToken);
+        await _persistedGrantRepository.UpsertItemAsync(persistedGrant, cancellationToken: cancellationToken);
 
         return new(persistedGrant.AccessToken);
     }
 
     private async Task<PersistedGrant?> GetPersistedGrant(long athleteId, CancellationToken cancellationToken)
     {
-        var matches = _persistedGrantContainer.GetItemLinqQueryable<PersistedGrant>()
-                .Where(x => x.AthleteId == athleteId);
-
-        // Convert to feed iterator
-        using var linqFeed = matches.ToFeedIterator();
-
-        // Iterate query result pages
-        while (linqFeed.HasMoreResults)
-        {
-            var response = await linqFeed.ReadNextAsync(cancellationToken);
-
-            // Iterate query results
-            foreach (var item in response)
-            {
-                return item;
-            }
-        }
-
-        return default;
+        return await _persistedGrantRepository.Read(x => x.AthleteId == athleteId, cancellationToken);
     }
 }

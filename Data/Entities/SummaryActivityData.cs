@@ -1,12 +1,10 @@
-﻿using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
+﻿using StravaWebhooksAzureFunctions.Data.Entities.Abstractions;
+using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 
 namespace StravaWebhooksAzureFunctions.Data.Entities;
 
-public class SummaryActivityData
+public class SummaryActivityData : DataModel
 {
-#pragma warning disable IDE1006 // Naming Styles
-    public string id { get; set; } = null!;
-#pragma warning restore IDE1006 // Naming Styles
     public int? ResourceState { get; init; }
     public ActivityAthlete? Athlete { get; init; }
     public required string Name { get; init; }
@@ -22,11 +20,11 @@ public class SummaryActivityData
     public DateTime? StartDateLocal { get; init; }
     public string? TimeZone { get; init; }
     public float? UtcOffset { get; init; }
-    public object[]? StartLatitudeLongitude { get; init; }
-    public object[]? EndLatitudeLongitude { get; init; }
-    public object? LocationCity { get; init; }
-    public object? LocationState { get; init; }
-    public object? LocationCountry { get; init; }
+    public float[]? StartLatitudeLongitude { get; init; }
+    public float[]? EndLatitudeLongitude { get; init; }
+    public string? LocationCity { get; init; }
+    public string? LocationState { get; init; }
+    public string? LocationCountry { get; init; }
     public int? AchievementCount { get; init; }
     public int? KudosCount { get; init; }
     public int? CommentCount { get; init; }
@@ -46,8 +44,8 @@ public class SummaryActivityData
     public float? AverageWatts { get; init; }
     public float? WeightedAverageWatts { get; init; }
     public float? Kilojoules { get; init; }
-    public bool DeviceWatts { get; init; }
-    public bool HasHeartrate { get; init; }
+    public bool? DeviceWatts { get; init; }
+    public bool? HasHeartrate { get; init; }
     public float? AverageHeartrate { get; init; }
     public float? MaxHeartrate { get; init; }
     public float? MaxWatts { get; init; }

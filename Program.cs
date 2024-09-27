@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using StravaWebhooksAzureFunctions.HttpClients;
 using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.Options;
+using StravaWebhooksAzureFunctions.Repositories;
 using StravaWebhooksAzureFunctions.Services;
 using StravaWebhooksAzureFunctions.Services.Interfaces;
 
@@ -57,8 +58,12 @@ var host = new HostBuilder()
         });
         services.AddTransient<IStravaCookieHttpClient, StravaCookieHttpClient>();
 
+        services.AddTransient<PersistedGrantRepository>();
+        services.AddTransient<SummaryActivityRepository>();
+        services.AddTransient<UserSessionRepository>();
+
         services.AddTransient<CorrectElevationService>();
-        services.AddTransient<StoreActivitiesService>();
+        services.AddTransient<StoreSummaryActivitiesService>();
         services.AddTransient<UpdateActivityService>();
         services.AddTransient<IStravaOAuthService, StravaOAuthService>();
     })

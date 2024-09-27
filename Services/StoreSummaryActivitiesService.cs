@@ -1,43 +1,56 @@
-﻿using Microsoft.Azure.Cosmos;
-using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
+﻿using StravaWebhooksAzureFunctions.HttpClients.Interfaces;
 using StravaWebhooksAzureFunctions.HttpClients.Models.Responses.Activities;
 using StravaWebhooksAzureFunctions.Mappers;
+using StravaWebhooksAzureFunctions.Repositories;
 
 namespace StravaWebhooksAzureFunctions.Services;
-public class StoreActivitiesService
+public class StoreSummaryActivitiesService
 {
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
-    private readonly Container _activitiesContainer;
+    private readonly SummaryActivityRepository _summaryActivityRepository;
 
-    public StoreActivitiesService(
+    public StoreSummaryActivitiesService(
         IStravaRestHttpClient stravaRestHttpClient,
-        CosmosClient cosmosClient)
+        SummaryActivityRepository summaryActivityRepository)
     {
         _stravaRestHttpClient = stravaRestHttpClient;
-        _activitiesContainer = cosmosClient.GetDatabase("strava").GetContainer("SummaryActivity");
+        _summaryActivityRepository = summaryActivityRepository;
     }
 
-    public async Task<int> StoreActivities(
+    public async Task<int> StoreSummaryActivities(
         long athleteId,
         long before,
         long after,
         CancellationToken cancellationToken)
     {
-        var activities = await GetActivities(athleteId, before, after, cancellationToken);
+        var activities = await GetSummaryActivities(athleteId, before, after, cancellationToken);
 
         var mapper = new SummaryActivityMapper();
 
         foreach (var activity in activities)
         {
             var dataModel = mapper.SummaryActivityResponseToDataModel(activity);
-            var response = await _activitiesContainer.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
+            var response = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
             _ = response;
         }
 
         return activities.Count;
     }
 
-    private async Task<List<SummaryActivityModelResponse>> GetActivities(
+    public async Task StoreSummaryActivity(
+       long athleteId,
+       long activityId,
+       CancellationToken cancellationToken)
+    {
+        var activity = await _stravaRestHttpClient.GetActivity(activityId, athleteId, cancellationToken);
+        var mapper = new SummaryActivityMapper();
+
+        var dataModel = mapper.ActivityResponseToSummaryDataModel(activity);
+        var response = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
+        _ = response;
+    }
+
+    private async Task<List<SummaryActivityModelResponse>> GetSummaryActivities(
         long athleteId,
         long before,
         long after,

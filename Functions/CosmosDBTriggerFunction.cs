@@ -10,16 +10,19 @@ public class CosmosDBTriggerFunction
 {
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
     private readonly UpdateActivityService _updateActivityService;
+    private readonly StoreSummaryActivitiesService _storeActivitiesService;
     private readonly ILogger _logger;
 
     public CosmosDBTriggerFunction(
         IStravaRestHttpClient stravaRestHttpClient,
         UpdateActivityService updateActivityService,
+        StoreSummaryActivitiesService storeActivitiesService,
         ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<CosmosDBTriggerFunction>();
         _stravaRestHttpClient = stravaRestHttpClient;
         _updateActivityService = updateActivityService;
+        _storeActivitiesService = storeActivitiesService;
     }
 
     [Function(nameof(CosmosDBTriggerFunction))]
@@ -41,21 +44,24 @@ public class CosmosDBTriggerFunction
         _logger.LogInformation("Documents modified: {Count}", input.Count);
         foreach (var webhookEventData in input)
         {
-            var athleteId = webhookEventData.OwnerId;
-            var activityId = webhookEventData.ObjectId;
-
-            _logger.LogInformation("Document for activity Id: {ActivityId}", activityId);
-
-            if (webhookEventData.AspectType != "create")
-            {
-                _logger.LogInformation("Skip, because AspectType =! create. Aspect type: {AspectType}", webhookEventData.AspectType);
-                return;
-            }
-
-            var activityResponse = await _stravaRestHttpClient
-                .GetActivity(activityId, athleteId, executionContext.CancellationToken);
-
-            await _updateActivityService.UpdateActivity(webhookEventData, activityResponse, executionContext.CancellationToken);
+            await HandleWebhookEventData(webhookEventData, executionContext.CancellationToken);
         }
+    }
+
+    private async Task HandleWebhookEventData(WebhookEventData webhookEventData, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Document for activity Id: {ActivityId}", webhookEventData.ActivityId);
+
+        if (webhookEventData.AspectType == "create")
+        {
+            await _updateActivityService.UpdateActivity(webhookEventData, cancellationToken);
+        }
+        else
+        {
+            _logger.LogInformation("Skip updating, because AspectType =! create. Aspect type: {AspectType}", webhookEventData.AspectType);
+        }
+
+        await _storeActivitiesService
+            .StoreSummaryActivity(webhookEventData.AthleteId, webhookEventData.ActivityId, cancellationToken);
     }
 }

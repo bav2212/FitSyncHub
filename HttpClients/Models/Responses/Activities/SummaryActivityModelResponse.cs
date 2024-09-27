@@ -14,20 +14,14 @@ public class SummaryActivityModelResponse
     public string? Type { get; init; }
     public required string SportType { get; init; }
     public long? Id { get; init; }
-    public string? ExternalId { get; init; }
-    public long? UploadId { get; init; }
     public DateTime? StartDate { get; init; }
     public DateTime? StartDateLocal { get; init; }
     [JsonPropertyName("timezone")]
     public string? TimeZone { get; init; }
     public float? UtcOffset { get; init; }
-    [JsonPropertyName("start_latlng")]
-    public object[]? StartLatitudeLongitude { get; init; }
-    [JsonPropertyName("end_latlng")]
-    public object[]? EndLatitudeLongitude { get; init; }
-    public object? LocationCity { get; init; }
-    public object? LocationState { get; init; }
-    public object? LocationCountry { get; init; }
+    public string? LocationCity { get; init; }
+    public string? LocationState { get; init; }
+    public string? LocationCountry { get; init; }
     public int? AchievementCount { get; init; }
     public int? KudosCount { get; init; }
     public int? CommentCount { get; init; }
@@ -41,17 +35,23 @@ public class SummaryActivityModelResponse
     public string? Visibility { get; init; }
     public bool? Flagged { get; init; }
     public string? GearId { get; init; }
+    [JsonPropertyName("start_latlng")]
+    public float[]? StartLatitudeLongitude { get; init; }
+    [JsonPropertyName("end_latlng")]
+    public float[]? EndLatitudeLongitude { get; init; }
     public float? AverageSpeed { get; init; }
     public float? MaxSpeed { get; init; }
     public float? AverageCadence { get; init; }
     public float? AverageWatts { get; init; }
+    public float? MaxWatts { get; init; }
     public float? WeightedAverageWatts { get; init; }
     public float? Kilojoules { get; init; }
-    public bool DeviceWatts { get; init; }
-    public bool HasHeartrate { get; init; }
+    public bool? DeviceWatts { get; init; }
+    public bool? HasHeartrate { get; init; }
     public float? AverageHeartrate { get; init; }
     public float? MaxHeartrate { get; init; }
-    public float? MaxWatts { get; init; }
+    public long? UploadId { get; init; }
+    public string? ExternalId { get; init; }
     public int? PrCount { get; init; }
     public int? TotalPhotoCount { get; init; }
     public bool? HasKudoed { get; init; }
