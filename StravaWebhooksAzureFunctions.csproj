@@ -20,7 +20,7 @@
 	<PackageReference Include="Riok.Mapperly" Version="3.6.0" />
 	<PackageReference Include="Scrutor" Version="4.2.2" />
     <!--Temp to fix vulnerable transient dependency-->
-	<PackageReference Include="System.Text.Json" Version="8.0.4" />
+	<PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
