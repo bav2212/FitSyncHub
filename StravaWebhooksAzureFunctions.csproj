@@ -9,7 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.67" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.68" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.23.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.CosmosDB" Version="4.11.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
@@ -17,10 +17,8 @@
 	<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.4.0" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.1" />
-	<PackageReference Include="Riok.Mapperly" Version="3.6.0" />
+	<PackageReference Include="Riok.Mapperly" Version="4.0.0" />
 	<PackageReference Include="Scrutor" Version="5.0.1" />
-    <!--Temp to fix vulnerable transient dependency-->
-	<PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
