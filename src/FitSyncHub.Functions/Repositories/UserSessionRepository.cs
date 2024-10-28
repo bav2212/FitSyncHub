@@ -7,7 +7,7 @@ namespace FitSyncHub.Functions.Repositories;
 public class UserSessionRepository : CosmosDbRepository<UserSession>
 {
     public UserSessionRepository(CosmosClient cosmosClient)
-        : base(cosmosClient.GetDatabase("strava").GetContainer("UserSession"))
+        : base(cosmosClient.GetDatabase("fit-sync-hub").GetContainer("UserSession"))
     {
     }
 }

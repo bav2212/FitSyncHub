@@ -84,7 +84,7 @@ public class WebhookEventReceiverFunction
 public record WebhookEventReceiverMultiResponse
 {
     [CosmosDBOutput(
-        databaseName: "strava",
+        databaseName: "fit-sync-hub",
         containerName: "WebhookEvent",
         Connection = "AzureWebJobsStorageConnectionString",
         CreateIfNotExists = true,

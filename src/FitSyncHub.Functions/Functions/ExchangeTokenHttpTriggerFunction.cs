@@ -94,7 +94,7 @@ public class ExchangeTokenHttpTriggerFunction
 public record ExchangeTokenMultiResponse
 {
     [CosmosDBOutput(
-        databaseName: "strava",
+        databaseName: "fit-sync-hub",
         containerName: "PersistedGrant",
         Connection = "AzureWebJobsStorageConnectionString",
         CreateIfNotExists = true,

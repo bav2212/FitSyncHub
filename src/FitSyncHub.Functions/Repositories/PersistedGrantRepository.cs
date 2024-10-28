@@ -7,7 +7,7 @@ namespace FitSyncHub.Functions.Repositories;
 public class PersistedGrantRepository : CosmosDbRepository<PersistedGrant>
 {
     public PersistedGrantRepository(CosmosClient cosmosClient)
-        : base(cosmosClient.GetDatabase("strava").GetContainer("PersistedGrant"))
+        : base(cosmosClient.GetDatabase("fit-sync-hub").GetContainer("PersistedGrant"))
     {
     }
 }

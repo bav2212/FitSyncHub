@@ -26,7 +26,7 @@ public class CosmosDBTriggerFunction
 #endif
     public async Task Run(
         [CosmosDBTrigger(
-            databaseName: "strava",
+            databaseName: "fit-sync-hub",
             containerName: "WebhookEvent",
             Connection = "AzureWebJobsStorageConnectionString",
             LeaseContainerName = "leases",

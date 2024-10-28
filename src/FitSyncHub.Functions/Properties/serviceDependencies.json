@@ -10,13 +10,11 @@
     },
     "cosmosdb1": {
       "type": "cosmosdb",
-      "connectionId": "AzureWebJobsStorageConnectionString",
-      "dynamicId": null
+      "connectionId": "AzureWebJobsStorageConnectionString"
     },
     "secrets1": {
       "type": "secrets",
-      "connectionId": "VaultUri",
-      "dynamicId": null
+      "connectionId": "VaultUri"
     }
   }
 }
