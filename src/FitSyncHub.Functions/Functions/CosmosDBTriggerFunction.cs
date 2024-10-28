@@ -21,7 +21,9 @@ public class CosmosDBTriggerFunction
         _storeActivitiesService = storeActivitiesService;
     }
 
+#if !DEBUG
     [Function(nameof(CosmosDBTriggerFunction))]
+#endif
     public async Task Run(
         [CosmosDBTrigger(
             databaseName: "strava",

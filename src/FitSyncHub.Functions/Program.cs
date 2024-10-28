@@ -17,6 +17,10 @@ using Microsoft.Extensions.Logging;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
+    .ConfigureAppConfiguration(configuration =>
+    {
+        configuration.AddUserSecrets<Program>();
+    })
     .ConfigureServices((hostBuilderContext, services) =>
     {
         services.AddSingleton(x => new CosmosClient(hostBuilderContext.Configuration["AzureWebJobsStorageConnectionString"]));
@@ -77,7 +81,8 @@ var host = new HostBuilder()
 
         services.AddHttpClient<IntervalsIcuHttpClient>(client =>
         {
-            var intervalsIcuApiKey = hostBuilderContext.Configuration["IntervalsIcuApiKey"];
+            var intervalsIcuApiKey = hostBuilderContext.Configuration["IntervalsIcuApiKey"]
+                                     ?? throw new ArgumentNullException("IntervalsIcuApiKey is null");
 
             client.BaseAddress = new Uri("https://intervals.icu");
 
