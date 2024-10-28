@@ -20,10 +20,6 @@ public static class HttpResponseMessageExtensions
         {
             throw new NotFoundException("Entity not found", e);
         }
-        catch (HttpRequestException)
-        {
-            throw new HttpResponseMessageException("Error while http request executing", response);
-        }
     }
 }
 

@@ -135,5 +135,10 @@ public class StravaRestHttpClient : IStravaRestHttpClient
             _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(T), responseContent);
             throw;
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while handling json response");
+            throw;
+        }
     }
 }
