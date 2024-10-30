@@ -30,13 +30,19 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
         var logger = executionContext.GetLogger<WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction>();
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
+        if (!Uri.TryCreate(request.PlanUrl, UriKind.Absolute, out var planUri))
+        {
+            return req.CreateBadRequest("wrong url");
+        }
+
         try
         {
-            var links = await WhatsOnZwiftScraper.ScrapeWorkoutPlanLinks(request.PlanUrl);
+            var links = await WhatsOnZwiftScraper.ScrapeWorkoutPlanLinks(planUri);
             List<ZwiftToIntervalsIcuConvertResult> items = [];
             foreach (var link in links)
             {
-                var result = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(link);
+                var linkUri = new Uri(link);
+                var result = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(linkUri);
                 items.Add(result);
             }
 

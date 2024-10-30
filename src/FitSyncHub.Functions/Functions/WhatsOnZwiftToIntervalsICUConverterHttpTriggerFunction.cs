@@ -30,14 +30,19 @@ public class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
             return req.CreateBadRequest("wrong request");
         }
 
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            return req.CreateBadRequest("wrong url");
+        }
+
         try
         {
-            var workout = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(url);
+            var workout = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(uri);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            response.Headers.Add("Content-Type", "text/json; charset=utf-8");
+            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
-            await response.WriteStringAsync($"Filename: {workout.FileInfo.Name}\n");
+            await response.WriteStringAsync($"{workout.FileInfo.Name}\n");
 
             var responseContent = string.Join("\n", workout.IntervalsIcuStructure);
             await response.WriteStringAsync(responseContent);

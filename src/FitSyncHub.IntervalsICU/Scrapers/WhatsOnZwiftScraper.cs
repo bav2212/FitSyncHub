@@ -1,13 +1,13 @@
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 
 namespace FitSyncHub.IntervalsICU.Scrapers;
 
 public class WhatsOnZwiftScraper
 {
-    public static async Task<WhatsOnZwiftScrapedResponse> ScrapeWorkoutStructure(string url)
+    public static async Task<WhatsOnZwiftScrapedResponse> ScrapeWorkoutStructure(Uri uri)
     {
         var web = new HtmlWeb();
-        var htmlPageDoc = await web.LoadFromWebAsync(url);
+        var htmlPageDoc = await web.LoadFromWebAsync(uri, null, null);
 
         var workoutList = ParseWorkoutList(htmlPageDoc).ToList();
 
@@ -18,10 +18,10 @@ public class WhatsOnZwiftScraper
         };
     }
 
-    public static async Task<List<string>> ScrapeWorkoutPlanLinks(string url)
+    public static async Task<List<string>> ScrapeWorkoutPlanLinks(Uri uri)
     {
         var web = new HtmlWeb();
-        var htmlPageDoc = await web.LoadFromWebAsync(url);
+        var htmlPageDoc = await web.LoadFromWebAsync(uri, null, null);
 
         var viewWorkoutButtons = htmlPageDoc.DocumentNode
             .SelectNodes("//a[@class=\"button\"]")

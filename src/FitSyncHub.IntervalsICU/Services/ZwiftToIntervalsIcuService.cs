@@ -1,16 +1,15 @@
-using FitSyncHub.IntervalsICU;
+﻿using System.Text.RegularExpressions;
 using FitSyncHub.IntervalsICU.Parsers;
 using FitSyncHub.IntervalsICU.Scrapers;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
 
 namespace FitSyncHub.IntervalsICU.Services;
 
 public class ZwiftToIntervalsIcuService(ILogger<ZwiftToIntervalsIcuService> logger)
 {
-    public async Task<ZwiftToIntervalsIcuConvertResult> ScrapeAndConvertToIntervalsIcu(string workoutUrl)
+    public async Task<ZwiftToIntervalsIcuConvertResult> ScrapeAndConvertToIntervalsIcu(Uri workoutUri)
     {
-        var scrapeResult = await WhatsOnZwiftScraper.ScrapeWorkoutStructure(workoutUrl);
+        var scrapeResult = await WhatsOnZwiftScraper.ScrapeWorkoutStructure(workoutUri);
 
         var parsedRecords = WhatsOnZwiftParser.Parse(scrapeResult.WorkoutList).ToList();
         var resultLines = IntervalsIcuConverter.ConvertToIntervalsIcuFormat(parsedRecords);
