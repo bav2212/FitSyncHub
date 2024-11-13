@@ -14,16 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+    
     - name: Restore
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+    
     - name: Build
       run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+    
     - name: Publish
       run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}"
+    
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -34,15 +39,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+    
     - name: Download artifact from build job
       uses: actions/download-artifact@v4
       with:
         name: functionapp
         path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-    - name: Azure Login
+    
+    - name: Login to Azure
       uses: azure/login@v2
       with:
-        creds: ${{ secrets.FitSyncHubFunctions_SPN }}
+        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_49772ECB2202426D99B053E10DFC522F }}
+        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_EA335F7F8C374FC8BCD395F5CFE0F0CD }}
+        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6CFD50D71DE14AB581B30D6AEC34995B }}
+    
     - name: Deploy to Azure Function App
       uses: Azure/functions-action@v1
       with:
