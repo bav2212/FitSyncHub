@@ -9,16 +9,16 @@ public class CosmosDBTriggerFunction
 {
     private readonly UpdateActivityService _updateActivityService;
     private readonly StoreSummaryActivitiesService _storeActivitiesService;
-    private readonly ILogger _logger;
+    private readonly ILogger<CosmosDBTriggerFunction> _logger;
 
     public CosmosDBTriggerFunction(
         UpdateActivityService updateActivityService,
         StoreSummaryActivitiesService storeActivitiesService,
-        ILoggerFactory loggerFactory)
+        ILogger<CosmosDBTriggerFunction> logger)
     {
-        _logger = loggerFactory.CreateLogger<CosmosDBTriggerFunction>();
         _updateActivityService = updateActivityService;
         _storeActivitiesService = storeActivitiesService;
+        _logger = logger;
     }
 
 #if !DEBUG
@@ -31,7 +31,7 @@ public class CosmosDBTriggerFunction
             Connection = "AzureWebJobsStorageConnectionString",
             LeaseContainerName = "leases",
             CreateLeaseContainerIfNotExists = true)] IReadOnlyList<WebhookEventData> input,
-        FunctionContext executionContext)
+        CancellationToken cancellationToken)
     {
         if (input == null || input.Count <= 0)
         {
@@ -42,7 +42,7 @@ public class CosmosDBTriggerFunction
         _logger.LogInformation("Documents modified: {Count}", input.Count);
         foreach (var webhookEventData in input)
         {
-            await HandleWebhookEventData(webhookEventData, executionContext.CancellationToken);
+            await HandleWebhookEventData(webhookEventData, cancellationToken);
         }
     }
 

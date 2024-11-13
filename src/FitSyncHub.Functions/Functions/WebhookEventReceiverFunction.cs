@@ -1,10 +1,10 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Functions.Options;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Options;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
@@ -21,18 +21,16 @@ public class WebhookEventReceiverFunction
 
     [Function(nameof(WebhookEventReceiverFunction))]
     public static WebhookEventReceiverMultiResponse Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequest req,
         [FromBody] WebhookEventDataWebhookRequest request,
-        FunctionContext executionContext)
+        CancellationToken cancellationToken)
     {
-        _ = executionContext;
-
         if (request.OwnerId != Constants.MyAthleteId)
         {
             return new WebhookEventReceiverMultiResponse
             {
                 Document = default,
-                HttpResponse = req.CreateResponse(HttpStatusCode.BadRequest)
+                Result = new BadRequestResult()
             };
         }
 
@@ -52,7 +50,7 @@ public class WebhookEventReceiverFunction
         return new WebhookEventReceiverMultiResponse
         {
             Document = webhookEventData,
-            HttpResponse = req.CreateResponse(HttpStatusCode.OK)
+            Result = new OkResult()
         };
     }
 
@@ -90,5 +88,6 @@ public record WebhookEventReceiverMultiResponse
         CreateIfNotExists = true,
         PartitionKey = "/id")]
     public required WebhookEventData? Document { get; init; }
-    public required HttpResponseData HttpResponse { get; init; }
+    [HttpResult]
+    public required IActionResult Result { get; init; }
 }

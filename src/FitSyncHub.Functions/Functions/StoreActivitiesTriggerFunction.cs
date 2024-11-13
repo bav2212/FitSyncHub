@@ -1,8 +1,8 @@
-﻿using System.Net;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using FitSyncHub.Functions.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
@@ -11,36 +11,36 @@ namespace FitSyncHub.Functions.Functions;
 public class StoreActivitiesTriggerFunction
 {
     private readonly StoreSummaryActivitiesService _storeActivitiesService;
+    private readonly ILogger<StoreActivitiesTriggerFunction> _logger;
 
-    public StoreActivitiesTriggerFunction(StoreSummaryActivitiesService storeActivitiesService)
+    public StoreActivitiesTriggerFunction(
+        StoreSummaryActivitiesService storeActivitiesService,
+        ILogger<StoreActivitiesTriggerFunction> logger)
     {
         _storeActivitiesService = storeActivitiesService;
+        _logger = logger;
     }
 
     [Function(nameof(StoreActivitiesTriggerFunction))]
-    public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "store")] HttpRequestData req,
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "store")] HttpRequest req,
         [FromBody] StoreStravaActivitiesRequest request,
-        FunctionContext executionContext)
+        CancellationToken cancellationToken)
     {
-        var logger = executionContext.GetLogger<StoreActivitiesTriggerFunction>();
-        logger.LogInformation("C# HTTP trigger function processed a request.");
+        _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var result = await _storeActivitiesService.StoreSummaryActivities(
             Constants.MyAthleteId,
             request.BeforeEpochTime,
             request.AfterEpochTime,
-            executionContext.CancellationToken);
+            cancellationToken);
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(new
+        return new OkObjectResult(new
         {
             request.BeforeEpochTime,
             request.AfterEpochTime,
             StoredCount = result
-        }, executionContext.CancellationToken);
-
-        return response;
+        });
     }
 }
 

@@ -1,13 +1,11 @@
-﻿using System.Net;
-using FitSyncHub.Functions.Data.Entities;
-using FitSyncHub.Functions.Extensions;
+﻿using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Functions.HttpClients.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions;
-
 public class ExchangeTokenHttpTriggerFunction
 {
     private readonly HashSet<string> _expectedScope = [
@@ -20,29 +18,32 @@ public class ExchangeTokenHttpTriggerFunction
         "read_all"
     ];
     private readonly IStravaOAuthHttpClient _stravaHttpClient;
+    private readonly ILogger<ExchangeTokenHttpTriggerFunction> _logger;
 
-    public ExchangeTokenHttpTriggerFunction(IStravaOAuthHttpClient stravaHttpClient)
+    public ExchangeTokenHttpTriggerFunction(
+        IStravaOAuthHttpClient stravaHttpClient,
+        ILogger<ExchangeTokenHttpTriggerFunction> logger)
     {
         _stravaHttpClient = stravaHttpClient;
+        _logger = logger;
     }
 
     [Function(nameof(ExchangeTokenHttpTriggerFunction))]
     public async Task<ExchangeTokenMultiResponse> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "exchange_token")] HttpRequestData req,
-        FunctionContext executionContext)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "exchange_token")] HttpRequest req,
+        CancellationToken cancellationToken)
     {
-        var logger = executionContext.GetLogger<ExchangeTokenHttpTriggerFunction>();
-        logger.LogInformation("Started executing function {Function}", nameof(ExchangeTokenHttpTriggerFunction));
+        _logger.LogInformation("Started executing function {Function}", nameof(ExchangeTokenHttpTriggerFunction));
 
-        var code = req.Query["code"];
-        var scope = req.Query["scope"];
+        string? code = req.Query["code"];
+        string? scope = req.Query["scope"];
 
-        if (scope is null || !_expectedScope.SetEquals(scope.Split(',')))
+        if (scope == null || !_expectedScope.SetEquals(scope.Split(',')))
         {
             return new ExchangeTokenMultiResponse()
             {
                 Document = default,
-                HttpResponse = req.CreateBadRequest("Invalid scope")
+                Result = new BadRequestObjectResult("Invalid scope")
             };
         }
 
@@ -51,22 +52,21 @@ public class ExchangeTokenHttpTriggerFunction
             return new ExchangeTokenMultiResponse()
             {
                 Document = default,
-                HttpResponse = req.CreateBadRequest("Code is required")
+                Result = new BadRequestObjectResult("Code is required")
             };
         }
 
-        var exchangeTokenResponse = await _stravaHttpClient
-            .ExchangeTokenAsync(code, executionContext.CancellationToken);
-        logger.LogInformation("Exchanged token");
+        var exchangeTokenResponse = await _stravaHttpClient.ExchangeTokenAsync(code, cancellationToken);
+        _logger.LogInformation("Exchanged token");
 
         var athleteId = exchangeTokenResponse.Athlete.Id;
         if (athleteId != Constants.MyAthleteId)
         {
-            logger.LogWarning("Skipping, because this athlete is not supported");
+            _logger.LogWarning("Skipping, because this athlete is not supported");
             return new ExchangeTokenMultiResponse()
             {
                 Document = default,
-                HttpResponse = req.CreateBadRequest("Athlete is not supported")
+                Result = new BadRequestObjectResult("Athlete is not supported")
             };
         }
 
@@ -86,7 +86,7 @@ public class ExchangeTokenHttpTriggerFunction
         return new ExchangeTokenMultiResponse()
         {
             Document = persistedGrant,
-            HttpResponse = req.CreateResponse(HttpStatusCode.OK)
+            Result = new OkResult()
         };
     }
 }
@@ -100,5 +100,6 @@ public record ExchangeTokenMultiResponse
         CreateIfNotExists = true,
         PartitionKey = "/id")]
     public required PersistedGrant? Document { get; init; }
-    public required HttpResponseData HttpResponse { get; init; }
+    [HttpResult]
+    public required IActionResult Result { get; set; }
 }

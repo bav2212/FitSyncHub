@@ -1,7 +1,7 @@
-﻿using System.Net;
-using FitSyncHub.Functions.Services;
+﻿using FitSyncHub.Functions.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
@@ -10,35 +10,35 @@ namespace FitSyncHub.Functions.Functions;
 public class CorrectRideElevationGainTriggerFunction
 {
     private readonly CorrectElevationService _correctElevationService;
+    private readonly ILogger<CorrectRideElevationGainTriggerFunction> _logger;
 
-    public CorrectRideElevationGainTriggerFunction(CorrectElevationService correctElevationService)
+    public CorrectRideElevationGainTriggerFunction(
+        CorrectElevationService correctElevationService,
+        ILogger<CorrectRideElevationGainTriggerFunction> logger)
     {
         _correctElevationService = correctElevationService;
+        _logger = logger;
     }
 
     [Function(nameof(CorrectRideElevationGainTriggerFunction))]
-    public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "correct-elevation")] HttpRequestData req,
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "correct-elevation")] HttpRequest req,
         [FromBody] CorrectRideElevationRequest request,
-        FunctionContext executionContext)
+        CancellationToken cancellationToken)
     {
-        var logger = executionContext.GetLogger<CorrectRideElevationGainTriggerFunction>();
-        logger.LogInformation("C# HTTP trigger function processed a request.");
+        _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var result = await _correctElevationService.CorrectElevation(
             request.Before,
             request.After,
-            executionContext.CancellationToken);
+            cancellationToken);
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(new
+        return new OkObjectResult(new
         {
             request.Before,
             request.After,
             Count = result
-        }, executionContext.CancellationToken);
-
-        return response;
+        });
     }
 }
 

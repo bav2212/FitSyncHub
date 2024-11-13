@@ -10,88 +10,86 @@ using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.Services;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
-    .ConfigureAppConfiguration(configuration =>
+var builder = FunctionsApplication.CreateBuilder(args);
+
+builder.ConfigureFunctionsWebApplication();
+
+builder.Configuration.AddUserSecrets<Program>();
+
+builder.Services
+    .AddApplicationInsightsTelemetryWorkerService()
+    .ConfigureFunctionsApplicationInsights()
+    .AddSingleton(x => new CosmosClient(builder.Configuration["AzureWebJobsStorageConnectionString"]));
+
+builder.Services.AddOptions<StravaOptions>()
+    .Configure<IConfiguration>((settings, configuration) =>
     {
-        configuration.AddUserSecrets<Program>();
-    })
-    .ConfigureServices((hostBuilderContext, services) =>
+        configuration.GetSection(StravaOptions.Position).Bind(settings);
+    });
+
+builder.Services.AddOptions<BodyMeasurementsOptions>()
+    .Configure<IConfiguration>((settings, configuration) =>
     {
-        services.AddSingleton(x => new CosmosClient(hostBuilderContext.Configuration["AzureWebJobsStorageConnectionString"]));
+        configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings);
+    });
 
-        services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();
-        services.Configure<LoggerFilterOptions>(options =>
-        {
-            // The Application Insights SDK adds a default logging filter that instructs ILogger to capture only Warning and more severe logs. Application Insights requires an explicit override.
-            // Log levels can also be configured using host.json. For more information, see https://learn.microsoft.com/en-us/azure/azure-monitor/app/worker-service#ilogger-logs
-            var toRemove = options.Rules.FirstOrDefault(rule => rule.ProviderName
-                == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
+builder.Services.AddScoped<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClient>();
+builder.Services.Decorate<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClientCached>();
 
-            if (toRemove is not null)
-            {
-                options.Rules.Remove(toRemove);
-            }
-        });
+builder.Services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client =>
+{
+    client.BaseAddress = new Uri("http://www.strava.com");
+});
 
-        services.AddOptions<StravaOptions>()
-            .Configure<IConfiguration>((settings, configuration) =>
-            {
-                configuration.GetSection(StravaOptions.Position).Bind(settings);
-            });
+builder.Services.AddHttpClient<IStravaRestHttpClient, StravaRestHttpClient>(client =>
+{
+    client.BaseAddress = new Uri("https://www.strava.com/api/v3/");
+});
+builder.Services.AddTransient<IStravaCookieHttpClient, StravaCookieHttpClient>();
 
-        services.AddOptions<BodyMeasurementsOptions>()
-            .Configure<IConfiguration>((settings, configuration) =>
-            {
-                configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings);
-            });
+builder.Services.AddTransient<PersistedGrantRepository>();
+builder.Services.AddTransient<SummaryActivityRepository>();
+builder.Services.AddTransient<UserSessionRepository>();
 
-        services.AddScoped<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClient>();
-        services.Decorate<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClientCached>();
+builder.Services.AddTransient<CorrectElevationService>();
+builder.Services.AddTransient<StoreSummaryActivitiesService>();
+builder.Services.AddTransient<UpdateActivityService>();
+builder.Services.AddTransient<IStravaOAuthService, StravaOAuthService>();
 
-        services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client =>
-        {
-            client.BaseAddress = new Uri("http://www.strava.com");
-        });
+///
+builder.Services.AddScoped<ZwiftToIntervalsIcuService>();
+builder.Services.AddScoped<IntervalsIcuStorageService>();
 
-        services.AddHttpClient<IStravaRestHttpClient, StravaRestHttpClient>(client =>
-        {
-            client.BaseAddress = new Uri("https://www.strava.com/api/v3/");
-        });
-        services.AddTransient<IStravaCookieHttpClient, StravaCookieHttpClient>();
+builder.Services.AddHttpClient<IntervalsIcuHttpClient>(client =>
+{
+    var intervalsIcuApiKey = builder.Configuration["IntervalsIcuApiKey"]
+                             ?? throw new ArgumentNullException("IntervalsIcuApiKey is null");
 
-        services.AddTransient<PersistedGrantRepository>();
-        services.AddTransient<SummaryActivityRepository>();
-        services.AddTransient<UserSessionRepository>();
+    client.BaseAddress = new Uri("https://intervals.icu");
 
-        services.AddTransient<CorrectElevationService>();
-        services.AddTransient<StoreSummaryActivitiesService>();
-        services.AddTransient<UpdateActivityService>();
-        services.AddTransient<IStravaOAuthService, StravaOAuthService>();
+    var authenticationString = $"API_KEY:{intervalsIcuApiKey}";
+    var base64EncodedAuthenticationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(authenticationString));
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
+});
 
-        ///
-        services.AddScoped<ZwiftToIntervalsIcuService>();
-        services.AddScoped<IntervalsIcuStorageService>();
+builder.Logging.Services.Configure<LoggerFilterOptions>(options =>
+{
+    // The Application Insights SDK adds a default logging filter that instructs ILogger to capture only Warning and more severe logs. Application Insights requires an explicit override.
+    // Log levels can also be configured using host.json. For more information, see https://learn.microsoft.com/en-us/azure/azure-monitor/app/worker-service#ilogger-logs
+    var toRemove = options.Rules.FirstOrDefault(rule => rule.ProviderName
+        == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
 
-        services.AddHttpClient<IntervalsIcuHttpClient>(client =>
-        {
-            var intervalsIcuApiKey = hostBuilderContext.Configuration["IntervalsIcuApiKey"]
-                                     ?? throw new ArgumentNullException("IntervalsIcuApiKey is null");
+    if (toRemove is not null)
+    {
+        options.Rules.Remove(toRemove);
+    }
+});
 
-            client.BaseAddress = new Uri("https://intervals.icu");
-
-            var authenticationString = $"API_KEY:{intervalsIcuApiKey}";
-            var base64EncodedAuthenticationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(authenticationString));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
-        });
-
-    })
-    .Build();
-
-host.Run();
+var host = builder.Build();
+await host.RunAsync();
