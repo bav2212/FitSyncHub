@@ -22,8 +22,7 @@ public class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
 
     [Function(nameof(WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction))]
     public async Task<ActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "whats-on-zwift-to-intervals")] HttpRequest req,
-        CancellationToken cancellationToken)
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "whats-on-zwift-to-intervals")] HttpRequest req)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 

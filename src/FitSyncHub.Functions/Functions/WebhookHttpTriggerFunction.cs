@@ -22,7 +22,7 @@ public class WebhookHttpTriggerFunction
     }
 
     [Function(nameof(WebhookHttpTriggerFunction))]
-    public async Task<IActionResult> Run(
+    public IActionResult Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "webhook")] HttpRequest req)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
