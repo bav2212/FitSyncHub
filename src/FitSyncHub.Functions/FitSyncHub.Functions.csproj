@@ -7,23 +7,26 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>2fdb2003-312a-494c-948d-92de42255595</UserSecretsId>
   </PropertyGroup>
+
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.71" />
+	<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.0.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.CosmosDB" Version="4.11.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.0" />
-	<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0" />
 	<PackageReference Include="Riok.Mapperly" Version="4.1.0" />
 	<PackageReference Include="Scrutor" Version="5.0.2" />
 	<PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\FitSyncHub.IntervalsICU\FitSyncHub.IntervalsICU.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -32,8 +35,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
   </ItemGroup>
 </Project>

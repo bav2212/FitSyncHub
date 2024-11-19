@@ -28,7 +28,7 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = "whats-on-zwift-to-intervals-plan-exporter")] HttpRequest req,
         [FromBody] IntervalICUPlanExporterRequest request,
-        FunctionContext executionContext)
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -48,7 +48,7 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
                 items.Add(result);
             }
 
-            await _intervalsIcuStorageService.Store(items, request.FolderId, executionContext.CancellationToken);
+            await _intervalsIcuStorageService.Store(items, request.FolderId, cancellationToken);
             _logger.LogInformation("Stored plan");
 
             return new OkObjectResult("Stored plan");

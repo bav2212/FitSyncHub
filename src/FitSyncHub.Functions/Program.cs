@@ -68,8 +68,7 @@ builder.Services.AddScoped<IntervalsIcuStorageService>();
 
 builder.Services.AddHttpClient<IntervalsIcuHttpClient>(client =>
 {
-    var intervalsIcuApiKey = builder.Configuration["IntervalsIcuApiKey"]
-                             ?? throw new ArgumentNullException("IntervalsIcuApiKey is null");
+    var intervalsIcuApiKey = builder.Configuration["IntervalsIcuApiKey"] ?? throw new InvalidOperationException("IntervalsIcuApiKey is null");
 
     client.BaseAddress = new Uri("https://intervals.icu");
 
