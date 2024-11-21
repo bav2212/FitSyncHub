@@ -3,12 +3,15 @@ on:
   push:
     branches:
     - master
+    - feature/dotnet-9
+
 env:
   AZURE_FUNCTIONAPP_NAME: FitSyncHubFunctions
   AZURE_FUNCTIONAPP_PACKAGE_PATH: src/FitSyncHub.Functions/published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 9.0.x
   WORKING_DIRECTORY: src/FitSyncHub.Functions
+
 jobs:
   build:
     runs-on: ubuntu-latest
