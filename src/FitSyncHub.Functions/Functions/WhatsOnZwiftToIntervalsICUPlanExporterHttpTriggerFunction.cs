@@ -1,10 +1,10 @@
-﻿using System.Net;
-using FitSyncHub.Functions.Extensions;
-using FitSyncHub.IntervalsICU.Scrapers;
+﻿using FitSyncHub.IntervalsICU.Scrapers;
 using FitSyncHub.IntervalsICU.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 namespace FitSyncHub.Functions.Functions;
 
@@ -12,27 +12,29 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
 {
     private readonly ZwiftToIntervalsIcuService _zwiftToIntervalsIcuService;
     private readonly IntervalsIcuStorageService _intervalsIcuStorageService;
+    private readonly ILogger<WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction> _logger;
 
     public WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction(
         ZwiftToIntervalsIcuService zwiftToIntervalsIcuService,
-        IntervalsIcuStorageService intervalsIcuStorageService)
+        IntervalsIcuStorageService intervalsIcuStorageService,
+        ILogger<WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction> logger)
     {
         _zwiftToIntervalsIcuService = zwiftToIntervalsIcuService;
         _intervalsIcuStorageService = intervalsIcuStorageService;
+        _logger = logger;
     }
 
     [Function(nameof(WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction))]
-    public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "whats-on-zwift-to-intervals-plan-exporter")] HttpRequestData req,
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "whats-on-zwift-to-intervals-plan-exporter")] HttpRequest req,
         [FromBody] IntervalICUPlanExporterRequest request,
-        FunctionContext executionContext)
+        CancellationToken cancellationToken)
     {
-        var logger = executionContext.GetLogger<WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction>();
-        logger.LogInformation("C# HTTP trigger function processed a request.");
+        _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         if (!Uri.TryCreate(request.PlanUrl, UriKind.Absolute, out var planUri))
         {
-            return req.CreateBadRequest("wrong url");
+            return new BadRequestObjectResult("wrong url");
         }
 
         try
@@ -46,18 +48,15 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
                 items.Add(result);
             }
 
-            await _intervalsIcuStorageService.Store(items, request.FolderId, executionContext.CancellationToken);
+            await _intervalsIcuStorageService.Store(items, request.FolderId, cancellationToken);
+            _logger.LogInformation("Stored plan");
 
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            logger.LogInformation("Stored plan");
-            await response.WriteStringAsync("Stored plan");
-
-            return response;
+            return new OkObjectResult("Stored plan");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
-            return req.CreateBadRequest("Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
+            _logger.LogError(ex, "Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
+            return new BadRequestObjectResult("Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
         }
     }
 }

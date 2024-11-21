@@ -1,8 +1,8 @@
-﻿using System.Net;
-using FitSyncHub.Functions.Extensions;
+﻿using System.Text;
 using FitSyncHub.IntervalsICU.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions;
@@ -10,49 +10,50 @@ namespace FitSyncHub.Functions.Functions;
 public class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
 {
     private readonly ZwiftToIntervalsIcuService _zwiftToIntervalsIcuService;
+    private readonly ILogger<WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction> _logger;
 
-    public WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction(ZwiftToIntervalsIcuService zwiftToIntervalsIcuService)
+    public WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction(
+        ZwiftToIntervalsIcuService zwiftToIntervalsIcuService,
+        ILogger<WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction> logger)
     {
         _zwiftToIntervalsIcuService = zwiftToIntervalsIcuService;
+        _logger = logger;
     }
 
     [Function(nameof(WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction))]
-    public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "whats-on-zwift-to-intervals")] HttpRequestData req,
-        FunctionContext executionContext)
+    public async Task<ActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "whats-on-zwift-to-intervals")] HttpRequest req)
     {
-        var logger = executionContext.GetLogger<WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction>();
-        logger.LogInformation("C# HTTP trigger function processed a request.");
+        _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var url = req.Query["url"];
-        if (url == null)
+        string? url = req.Query["url"];
+        if (url is null)
         {
-            return req.CreateBadRequest("wrong request");
+            return new BadRequestObjectResult("wrong request");
         }
 
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
-            return req.CreateBadRequest("wrong url");
+            return new BadRequestObjectResult("wrong url");
         }
 
         try
         {
             var workout = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(uri);
 
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            var result = new StringBuilder();
+            result.AppendLine($"{workout.FileInfo.Name}\n");
+            foreach (var item in workout.IntervalsIcuStructure)
+            {
+                result.AppendLine(item);
+            }
 
-            await response.WriteStringAsync($"{workout.FileInfo.Name}\n");
-
-            var responseContent = string.Join("\n", workout.IntervalsIcuStructure);
-            await response.WriteStringAsync(responseContent);
-
-            return response;
+            return new OkObjectResult(result.ToString());
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Cannot convert WhatsOnZwift workout to Intervals.ICU workout");
-            return req.CreateBadRequest("Cannot convert WhatsOnZwift workout to Intervals.ICU workout");
+            _logger.LogError(ex, "Cannot convert WhatsOnZwift workout to Intervals.ICU workout");
+            return new BadRequestObjectResult("Cannot convert WhatsOnZwift workout to Intervals.ICU workout");
         }
     }
 }

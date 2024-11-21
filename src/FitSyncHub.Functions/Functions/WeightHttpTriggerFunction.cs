@@ -1,9 +1,8 @@
-﻿using System.Net;
-using FitSyncHub.Functions.Extensions;
-using FitSyncHub.Functions.HttpClients.Interfaces;
+﻿using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.Options;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -13,62 +12,61 @@ public class WeightHttpTriggerFunction
 {
     private readonly BodyMeasurementsOptions _options;
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
+    private readonly ILogger<WeightHttpTriggerFunction> _logger;
 
     public WeightHttpTriggerFunction(
         IStravaRestHttpClient stravaRestHttpClient,
-        IOptions<BodyMeasurementsOptions> options)
+        IOptions<BodyMeasurementsOptions> options,
+        ILogger<WeightHttpTriggerFunction> logger)
     {
         _options = options.Value;
         _stravaRestHttpClient = stravaRestHttpClient;
+        _logger = logger;
     }
 
     [Function(nameof(WeightHttpTriggerFunction))]
-    public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "weight")] HttpRequestData req,
-        FunctionContext executionContext)
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "weight")] HttpRequest req,
+        CancellationToken cancellationToken)
     {
-        var logger = executionContext.GetLogger<WeightHttpTriggerFunction>();
-        logger.LogInformation("C# HTTP trigger function processed a request.");
+        _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var weight = req.Query["weight"];
-        var athleteId = req.Query["athlete_id"];
-        var verifyToken = req.Query["verify_token"];
+        string? weight = req.Query["weight"];
+        string? athleteId = req.Query["athlete_id"];
+        string? verifyToken = req.Query["verify_token"];
 
         if (weight is null || athleteId is null || verifyToken is null)
         {
-            return req.CreateBadRequest("wrong request");
+            return new BadRequestObjectResult("wrong request");
         }
 
         if (verifyToken != _options.VerifyToken)
         {
-            return req.CreateBadRequest("VerifyToken is wrong");
+            return new BadRequestObjectResult("VerifyToken is wrong");
         }
 
         if (!float.TryParse(weight, out var parsedWeight))
         {
-            return req.CreateBadRequest("Weight has wrong format");
+            return new BadRequestObjectResult("Weight has wrong format");
         }
 
         if (string.IsNullOrWhiteSpace(athleteId) || !long.TryParse(athleteId, out var parsedAthleteId))
         {
-            return req.CreateBadRequest("Athlete id is not valid");
+            return new BadRequestObjectResult("Athlete id is not valid");
         }
 
-        logger.LogInformation("Weight is {weight} kg", weight);
+        _logger.LogInformation("Weight is {weight} kg", weight);
 
         try
         {
-            await _stravaRestHttpClient.UpdateAthlete(parsedAthleteId, parsedWeight, executionContext.CancellationToken);
+            await _stravaRestHttpClient.UpdateAthlete(parsedAthleteId, parsedWeight, cancellationToken);
 
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(weight);
-
-            return response;
+            return new OkObjectResult(weight);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Cannot update athlete weight");
-            return req.CreateBadRequest("Cannot update athlete weight");
+            _logger.LogError(ex, "Cannot update athlete weight");
+            return new BadRequestObjectResult("Cannot update athlete weight");
         }
     }
 }
