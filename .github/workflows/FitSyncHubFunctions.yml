@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - master
+  workflow_dispatch:
 
 env:
   AZURE_FUNCTIONAPP_NAME: FitSyncHubFunctions
@@ -33,6 +34,8 @@ jobs:
         include-hidden-files: true
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write #This is required for requesting the JWT
     needs: build
     steps:
     - name: Download artifact from build job
@@ -40,10 +43,12 @@ jobs:
       with:
         name: functionapp
         path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-    - name: Azure Login
+    - name: Login to Azure
       uses: azure/login@v2
       with:
-        creds: ${{ secrets.FitSyncHubFunctions_SPN }}
+        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_796D20CE0A304404BA9A53F3996664A6 }}
+        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_20BB901E9F534C99AACE0B6047B63C11 }}
+        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_1E4EED762FA74DA6B84E3CF369EB2AF6 }}
     - name: Deploy to Azure Function App
       uses: Azure/functions-action@v1
       with:
