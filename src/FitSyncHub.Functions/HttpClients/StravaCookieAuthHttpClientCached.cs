@@ -3,6 +3,7 @@ using System.Text.Json;
 using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.HttpClients.Models.Responses;
+using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Functions.Repositories;
 using Microsoft.Azure.Cosmos;
 
@@ -30,7 +31,12 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
         if (cookies is { } && authenticityToken is { }
             && await CheckCookiesCorrect(cookies, authenticityToken, cancellationToken))
         {
-            return new CookieLoginResponse { Success = true, Cookies = cookies, AuthenticityToken = authenticityToken };
+            return new CookieLoginResponse
+            {
+                Success = true,
+                Cookies = cookies,
+                AuthenticityToken = authenticityToken
+            };
         }
 
         var response = await _cookieAuthService.Login(username, password, cancellationToken);
@@ -61,19 +67,19 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
         var results = await _userSessionRepository.ReadItems(x => x.id == username, cancellationToken);
         var userSession = results.SingleOrDefault();
 
-        if (userSession is not null)
+        if (userSession is null)
         {
-            var cookiesCollection = JsonSerializer
-                .Deserialize<CookieCollection>(userSession.CookiesCollectionRawData)!;
-            var cookies = new CookieContainer();
-            cookies.Add(cookiesCollection);
-
-            var authenticityToken = userSession.AuthenticityToken;
-
-            return (cookies, authenticityToken);
+            return (default, default);
         }
 
-        return (default, default);
+        var cookiesCollection = JsonSerializer.Deserialize(userSession.CookiesCollectionRawData,
+            CookieCollectionJsonSerializerContext.Default.CookieCollection)!;
+        var cookies = new CookieContainer();
+        cookies.Add(cookiesCollection);
+
+        var authenticityToken = userSession.AuthenticityToken;
+
+        return (cookies, authenticityToken);
     }
 
     private Task<ItemResponse<UserSession>> StoreCookies(
@@ -83,7 +89,7 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
         CancellationToken cancellationToken)
     {
         var cookiesCollection = cookies.GetAllCookies();
-        var cookiesCollectionJson = JsonSerializer.Serialize(cookiesCollection);
+        var cookiesCollectionJson = JsonSerializer.Serialize(cookiesCollection, CookieCollectionJsonSerializerContext.Default.CookieCollection);
 
         var userSession = new UserSession
         {
