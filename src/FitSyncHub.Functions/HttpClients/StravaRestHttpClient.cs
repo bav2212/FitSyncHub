@@ -41,7 +41,8 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
-        return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
+        return await HandleJsonResponse(response,
+            StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
     }
 
     public async Task<List<SummaryActivityModelResponse>> GetActivities(
@@ -69,7 +70,8 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
-        return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.ListSummaryActivityModelResponse, cancellationToken);
+        return await HandleJsonResponse(response,
+            StravaRestApiSerializerContext.Default.ListSummaryActivityModelResponse, cancellationToken);
     }
 
     public async Task<ActivityModelResponse> GetActivity(
@@ -84,7 +86,8 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
-        return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
+        return await HandleJsonResponse(response,
+            StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
     }
 
     public async Task<List<SummaryGearResponse>> GetBikes(
@@ -98,8 +101,8 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
-        var detailedAthlete =
-            await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
+        var detailedAthlete = await HandleJsonResponse(response,
+            StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
 
         return detailedAthlete.Bikes;
     }
@@ -114,11 +117,13 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         using var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"activities/{activityId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.Token);
-        requestMessage.Content = JsonContent.Create(model, StravaBrowserSessionSerializerContext.Default.UpdatableActivityRequest);
+        requestMessage.Content = JsonContent.Create(model,
+            StravaBrowserSessionSerializerContext.Default.UpdatableActivityRequest);
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
 
-        return await HandleJsonResponse(response, StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
+        return await HandleJsonResponse(response,
+            StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
     }
 
 

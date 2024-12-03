@@ -28,8 +28,7 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
         CancellationToken cancellationToken)
     {
         var (cookies, authenticityToken) = await GetStoredCookies(username, cancellationToken);
-        if (cookies is { } && authenticityToken is { }
-            && await CheckCookiesCorrect(cookies, authenticityToken, cancellationToken))
+        if (cookies is { } && authenticityToken is { } && await CheckCookiesCorrect(cookies, cancellationToken))
         {
             return new CookieLoginResponse
             {
@@ -54,10 +53,9 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
 
     public Task<bool> CheckCookiesCorrect(
         CookieContainer cookies,
-        string authenticityToken,
         CancellationToken cancellationToken)
     {
-        return _cookieAuthService.CheckCookiesCorrect(cookies, authenticityToken, cancellationToken);
+        return _cookieAuthService.CheckCookiesCorrect(cookies, cancellationToken);
     }
 
     private async Task<(CookieContainer? cookies, string? authenticityToken)> GetStoredCookies(
@@ -89,7 +87,8 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
         CancellationToken cancellationToken)
     {
         var cookiesCollection = cookies.GetAllCookies();
-        var cookiesCollectionJson = JsonSerializer.Serialize(cookiesCollection, CookieCollectionJsonSerializerContext.Default.CookieCollection);
+        var cookiesCollectionJson = JsonSerializer
+            .Serialize(cookiesCollection, CookieCollectionJsonSerializerContext.Default.CookieCollection);
 
         var userSession = new UserSession
         {
@@ -99,7 +98,7 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
             AuthenticityToken = authenticityToken
         };
 
-        return _userSessionRepository.CreateItemAsync(userSession, cancellationToken: cancellationToken);
+        return _userSessionRepository.UpsertItemAsync(userSession, cancellationToken: cancellationToken);
     }
 
     private async Task DeleteCookies(

@@ -20,9 +20,9 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
         var handler = new HttpClientHandler() { CookieContainer = cookies };
         var client = new HttpClient(handler);
 
-        var response = await client.GetAsync(StravaUrlLogin, cancellationToken);
+        var getResponse = await client.GetAsync(StravaUrlLogin, cancellationToken);
         var doc = new HtmlDocument();
-        doc.LoadHtml(await response.Content.ReadAsStringAsync(cancellationToken));
+        doc.LoadHtml(await getResponse.Content.ReadAsStringAsync(cancellationToken));
 
         var tokenNode = doc.DocumentNode.SelectSingleNode("//input[@name='authenticity_token']");
         var authenticityToken = tokenNode.GetAttributeValue("value", "");
@@ -35,12 +35,12 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
             new("authenticity_token", authenticityToken)
         ]);
 
-        response = await client.PostAsync(StravaUrlSession, content, cancellationToken);
-        _ = response;
+        var postResponse = await client.PostAsync(StravaUrlSession, content, cancellationToken);
+        postResponse.EnsureSuccessStatusCode();
 
         return new CookieLoginResponse
         {
-            Success = await CheckCookiesCorrect(cookies, authenticityToken, cancellationToken),
+            Success = await CheckCookiesCorrect(cookies, cancellationToken),
             AuthenticityToken = authenticityToken,
             Cookies = cookies,
         };
@@ -48,7 +48,6 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
 
     public async Task<bool> CheckCookiesCorrect(
         CookieContainer cookies,
-        string authenticityToken,
         CancellationToken cancellationToken)
     {
         var handler = new HttpClientHandler() { CookieContainer = cookies };
