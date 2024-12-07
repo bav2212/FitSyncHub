@@ -32,6 +32,7 @@ jobs:
         name: functionapp
         path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         include-hidden-files: true
+        retention-days: 30
   deploy:
     runs-on: ubuntu-latest
     permissions:
