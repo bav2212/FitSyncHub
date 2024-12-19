@@ -1,9 +1,10 @@
 ﻿using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.HttpClients.Models.Responses.Activities;
+using FitSyncHub.Functions.Mappers;
 using FitSyncHub.Functions.Repositories;
-using StravaWebhooksAzureFunctions.Mappers;
 
 namespace FitSyncHub.Functions.Services;
+
 public class StoreSummaryActivitiesService
 {
     private readonly IStravaRestHttpClient _stravaRestHttpClient;

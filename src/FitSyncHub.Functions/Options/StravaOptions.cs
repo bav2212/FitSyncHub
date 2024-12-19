@@ -1,4 +1,5 @@
 ﻿namespace FitSyncHub.Functions.Options;
+
 public record StravaOptions
 {
     public const string Position = "Strava";

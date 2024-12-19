@@ -1,5 +1,5 @@
 ﻿using FitSyncHub.IntervalsICU.HttpClients;
-using FitSyncHub.IntervalsICU.HttpClients.Models;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.IntervalsICU.Services;
@@ -72,5 +72,3 @@ public class IntervalsIcuStorageService(
         }
     }
 }
-
-

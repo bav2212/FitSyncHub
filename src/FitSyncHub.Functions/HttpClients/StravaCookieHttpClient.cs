@@ -4,9 +4,9 @@ using System.Text.Json;
 using System.Web;
 using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.HttpClients.Models.Responses.Activities;
+using FitSyncHub.Functions.JsonSerializerContexts;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
-using StravaWebhooksAzureFunctions;
 
 namespace FitSyncHub.Functions.HttpClients;
 

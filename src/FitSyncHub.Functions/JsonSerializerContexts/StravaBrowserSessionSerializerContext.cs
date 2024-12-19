@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using FitSyncHub.Functions.HttpClients.Models.BrowserSession;
 
-namespace StravaWebhooksAzureFunctions;
+namespace FitSyncHub.Functions.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(UpdatableActivityRequest))]

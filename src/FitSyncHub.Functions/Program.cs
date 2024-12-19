@@ -65,6 +65,7 @@ builder.Services.AddTransient<IStravaOAuthService, StravaOAuthService>();
 ///
 builder.Services.AddScoped<ZwiftToIntervalsIcuService>();
 builder.Services.AddScoped<IntervalsIcuStorageService>();
+builder.Services.AddScoped<IntervalsIcuDeletePlanService>();
 
 builder.Services.AddHttpClient<IntervalsIcuHttpClient>(client =>
 {

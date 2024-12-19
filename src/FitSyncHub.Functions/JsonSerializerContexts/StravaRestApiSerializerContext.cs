@@ -4,7 +4,7 @@ using FitSyncHub.Functions.HttpClients.Models.Responses;
 using FitSyncHub.Functions.HttpClients.Models.Responses.Activities;
 using FitSyncHub.Functions.HttpClients.Models.Responses.Athletes;
 
-namespace StravaWebhooksAzureFunctions;
+namespace FitSyncHub.Functions.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(ActivityModelResponse))]

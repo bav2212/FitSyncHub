@@ -7,9 +7,9 @@ using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.HttpClients.Models.BrowserSession;
 using FitSyncHub.Functions.HttpClients.Models.Responses.Activities;
 using FitSyncHub.Functions.HttpClients.Models.Responses.Athletes;
+using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Functions.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using StravaWebhooksAzureFunctions;
 
 namespace FitSyncHub.Functions.HttpClients;
 

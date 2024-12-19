@@ -2,7 +2,7 @@
 using FitSyncHub.Functions.HttpClients.Models.Responses.Activities;
 using Riok.Mapperly.Abstractions;
 
-namespace StravaWebhooksAzureFunctions.Mappers;
+namespace FitSyncHub.Functions.Mappers;
 
 [Mapper]
 internal partial class SummaryActivityMapper

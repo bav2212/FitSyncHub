@@ -1,4 +1,4 @@
-namespace FitSyncHub.IntervalsICU.HttpClients.Models;
+﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
 public class CreateWorkoutRequestModel
 {

@@ -1,5 +1,4 @@
-﻿using FitSyncHub.Functions;
-using FitSyncHub.Functions.HttpClients.Interfaces;
+﻿using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.Options;
 using FitSyncHub.Functions.Repositories;
 using Microsoft.Extensions.Logging;

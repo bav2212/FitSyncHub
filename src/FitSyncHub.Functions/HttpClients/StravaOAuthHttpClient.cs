@@ -3,9 +3,9 @@ using FitSyncHub.Functions.Extensions;
 using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.HttpClients.Models.Requests;
 using FitSyncHub.Functions.HttpClients.Models.Responses;
+using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Functions.Options;
 using Microsoft.Extensions.Options;
-using StravaWebhooksAzureFunctions;
 
 namespace FitSyncHub.Functions.HttpClients;
 
