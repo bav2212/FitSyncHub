@@ -62,10 +62,14 @@ builder.Services.AddTransient<StoreSummaryActivitiesService>();
 builder.Services.AddTransient<UpdateActivityService>();
 builder.Services.AddTransient<IStravaOAuthService, StravaOAuthService>();
 
-///
+/// Intervals.ICU services
 builder.Services.AddScoped<ZwiftToIntervalsIcuService>();
 builder.Services.AddScoped<IntervalsIcuStorageService>();
 builder.Services.AddScoped<IntervalsIcuDeletePlanService>();
+
+///// Zwift services
+//builder.Services.AddScoped<ExcelReader>();
+//builder.Services.AddScoped<ZwiftRoutesService>();
 
 builder.Services.AddHttpClient<IntervalsIcuHttpClient>(client =>
 {
