@@ -54,11 +54,15 @@ public class UpdateActivityService
 
         var isOutdoorRide = activity.Type == Constants.StravaActivityType.Ride
             && activity.DeviceName != Constants.WahooSYSTMDeviceName;
-
         if (isOutdoorRide)
         {
             await CorrectGearIfNeeded(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
             await _correctElevationService.CorrectElevation(webhookEventData.ObjectId, cancellationToken);
+            return;
+        }
+        else if (RequiresZwiftActivityNameFix(activity))
+        {
+            await RenameZwiftActivityAsync(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
             return;
         }
 
@@ -66,6 +70,42 @@ public class UpdateActivityService
             activity.Name,
             activity.Id,
             activity.Type);
+    }
+
+    // zwift workout from interval.icu starts like "Zwift - :"
+    private static bool RequiresZwiftActivityNameFix(ActivityModelResponse activity)
+    {
+        return activity.Name.StartsWith("Zwift - :", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // zwift workout from interval.icu starts like "Zwift - :"
+    // delete ":" from name
+    private async Task RenameZwiftActivityAsync(long athleteId,
+        long activityId,
+        ActivityModelResponse activity,
+        CancellationToken cancellationToken)
+    {
+        if (!RequiresZwiftActivityNameFix(activity))
+        {
+            return;
+        }
+
+        var name = activity.Name;
+        var newName = name.Replace("Zwift - :", "Zwift - ");
+
+        var updateModel = new UpdatableActivityRequest
+        {
+            Commute = activity.Commute,
+            Trainer = activity.Trainer,
+            HideFromHome = activity.HideFromHome,
+            Description = activity.Description,
+            Name = newName,
+            Type = activity.Type!,
+            SportType = activity.SportType,
+            GearId = activity.GearId
+        };
+
+        await _stravaRestHttpClient.UpdateActivity(activityId, athleteId, updateModel, cancellationToken);
     }
 
     private async Task UpdateActivityVisibilityToOnlyMe(
@@ -136,7 +176,7 @@ public class UpdateActivityService
             return;
         }
 
-        var updateModel = new UpdatableActivityRequest()
+        var updateModel = new UpdatableActivityRequest
         {
             Commute = activity.Commute,
             Trainer = activity.Trainer,

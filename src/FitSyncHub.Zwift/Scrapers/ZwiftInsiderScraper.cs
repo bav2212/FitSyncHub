@@ -19,7 +19,8 @@ public class ZwiftInsiderScraper
         };
     }
 
-    private static ZwiftInsiderScraperWattPerKgElapsedTimeItemsResponse? ParseWattPerKg(HtmlDocument htmlPageDoc)
+    private static ZwiftInsiderScraperWattPerKgElapsedTimeItemsResponse? ParseWattPerKg(
+        HtmlDocument htmlPageDoc)
     {
         // Find the node containing "Time Estimates"
         var timeEstimatesNode = htmlPageDoc.DocumentNode.SelectSingleNode("//*[contains(text(), 'Time Estimates')]");
@@ -47,7 +48,8 @@ public class ZwiftInsiderScraper
         return default;
     }
 
-    private static IEnumerable<ZwiftInsiderScraperWattPerKgElapsedTimeResponse> GetWattPerKgValues(string html)
+    private static IEnumerable<ZwiftInsiderScraperWattPerKgElapsedTimeResponse> GetWattPerKgValues(
+        string html)
     {
         // Load the HTML document
         var document = new HtmlDocument();
@@ -81,7 +83,8 @@ public class ZwiftInsiderScraper
         }
     }
 
-    private static ZwiftInsiderScraperLeadInAndElevationResponse? ParseLeadInAndElevation(HtmlDocument htmlPageDoc)
+    private static ZwiftInsiderScraperLeadInAndElevationResponse? ParseLeadInAndElevation(
+        HtmlDocument htmlPageDoc)
     {
         // XPath to find <p> elements with all specified classes
         var xpath = $"//p[contains(@class, 'has-text-align-center') and " +
@@ -126,6 +129,7 @@ public class ZwiftInsiderScraper
         var elevation = match.Groups[2].Success
             ? double.Parse(match.Groups[2].Value)
             : 0;
+
         return new ZwiftInsiderScraperLeadInAndElevationResponse
         {
             Length = length,
