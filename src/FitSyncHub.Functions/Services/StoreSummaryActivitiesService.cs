@@ -5,12 +5,12 @@ using FitSyncHub.Functions.Repositories;
 
 namespace FitSyncHub.Functions.Services;
 
-public class StoreSummaryActivitiesService
+public class SummaryActivityService
 {
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
     private readonly SummaryActivityRepository _summaryActivityRepository;
 
-    public StoreSummaryActivitiesService(
+    public SummaryActivityService(
         IStravaRestHttpClient stravaRestHttpClient,
         SummaryActivityRepository summaryActivityRepository)
     {
@@ -48,6 +48,22 @@ public class StoreSummaryActivitiesService
 
         var dataModel = mapper.ActivityResponseToSummaryDataModel(activity);
         var response = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
+        _ = response;
+    }
+
+    public async Task DeleteSummaryActivity(
+       long athleteId,
+       long activityId,
+       CancellationToken cancellationToken)
+    {
+        var existingActivitySummary = await _summaryActivityRepository
+            .Read(x => x.id == activityId.ToString(), cancellationToken);
+        if (existingActivitySummary is null)
+        {
+            return;
+        }
+
+        var response = await _summaryActivityRepository.DeleteItemAsync(existingActivitySummary, cancellationToken: cancellationToken);
         _ = response;
     }
 

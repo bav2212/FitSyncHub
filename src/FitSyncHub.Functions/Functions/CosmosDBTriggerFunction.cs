@@ -8,16 +8,16 @@ namespace FitSyncHub.Functions.Functions;
 public class CosmosDBTriggerFunction
 {
     private readonly UpdateActivityService _updateActivityService;
-    private readonly StoreSummaryActivitiesService _storeActivitiesService;
+    private readonly SummaryActivityService _summaryActivityService;
     private readonly ILogger<CosmosDBTriggerFunction> _logger;
 
     public CosmosDBTriggerFunction(
         UpdateActivityService updateActivityService,
-        StoreSummaryActivitiesService storeActivitiesService,
+        SummaryActivityService summaryActivityService,
         ILogger<CosmosDBTriggerFunction> logger)
     {
         _updateActivityService = updateActivityService;
-        _storeActivitiesService = storeActivitiesService;
+        _summaryActivityService = summaryActivityService;
         _logger = logger;
     }
 
@@ -50,6 +50,13 @@ public class CosmosDBTriggerFunction
     {
         _logger.LogInformation("Document for activity Id: {ActivityId}", webhookEventData.ActivityId);
 
+        if (webhookEventData.AspectType == "delete")
+        {
+            await _summaryActivityService
+                .DeleteSummaryActivity(webhookEventData.AthleteId, webhookEventData.ActivityId, cancellationToken);
+            return;
+        }
+
         if (webhookEventData.AspectType == "create")
         {
             await _updateActivityService.UpdateActivity(webhookEventData, cancellationToken);
@@ -59,7 +66,7 @@ public class CosmosDBTriggerFunction
             _logger.LogInformation("Skip updating, because AspectType =! create. Aspect type: {AspectType}", webhookEventData.AspectType);
         }
 
-        await _storeActivitiesService
+        await _summaryActivityService
             .StoreSummaryActivity(webhookEventData.AthleteId, webhookEventData.ActivityId, cancellationToken);
     }
 }

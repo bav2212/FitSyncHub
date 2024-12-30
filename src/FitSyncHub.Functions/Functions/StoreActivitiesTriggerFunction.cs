@@ -10,14 +10,14 @@ namespace FitSyncHub.Functions.Functions;
 
 public class StoreActivitiesTriggerFunction
 {
-    private readonly StoreSummaryActivitiesService _storeActivitiesService;
+    private readonly SummaryActivityService _summaryActivityService;
     private readonly ILogger<StoreActivitiesTriggerFunction> _logger;
 
     public StoreActivitiesTriggerFunction(
-        StoreSummaryActivitiesService storeActivitiesService,
+        SummaryActivityService summaryActivityService,
         ILogger<StoreActivitiesTriggerFunction> logger)
     {
-        _storeActivitiesService = storeActivitiesService;
+        _summaryActivityService = summaryActivityService;
         _logger = logger;
     }
 
@@ -29,7 +29,7 @@ public class StoreActivitiesTriggerFunction
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var result = await _storeActivitiesService.StoreSummaryActivities(
+        var result = await _summaryActivityService.StoreSummaryActivities(
             Constants.MyAthleteId,
             request.BeforeEpochTime,
             request.AfterEpochTime,

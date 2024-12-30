@@ -58,7 +58,7 @@ builder.Services.AddTransient<SummaryActivityRepository>();
 builder.Services.AddTransient<UserSessionRepository>();
 
 builder.Services.AddTransient<CorrectElevationService>();
-builder.Services.AddTransient<StoreSummaryActivitiesService>();
+builder.Services.AddTransient<SummaryActivityService>();
 builder.Services.AddTransient<UpdateActivityService>();
 builder.Services.AddTransient<IStravaOAuthService, StravaOAuthService>();
 
