@@ -40,13 +40,16 @@ public class CosmosDBTriggerFunction
         }
 
         _logger.LogInformation("Documents modified: {Count}", input.Count);
-        foreach (var webhookEventData in input)
+        var orderedInput = input.OrderBy(x => x.CreatedOn);
+
+        foreach (var webhookEventData in orderedInput)
         {
             await HandleWebhookEventData(webhookEventData, cancellationToken);
         }
     }
 
-    private async Task HandleWebhookEventData(WebhookEventData webhookEventData, CancellationToken cancellationToken)
+    private async Task HandleWebhookEventData(WebhookEventData webhookEventData,
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation("Document for activity Id: {ActivityId}", webhookEventData.ActivityId);
 
