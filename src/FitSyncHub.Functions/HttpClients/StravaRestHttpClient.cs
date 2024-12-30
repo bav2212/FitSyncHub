@@ -81,7 +81,8 @@ public class StravaRestHttpClient : IStravaRestHttpClient
     {
         var tokenResponse = await _stravaOAuthService.RequestToken(athleteId, cancellationToken);
 
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"activities/{activityId}?include_all_efforts=false");
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get,
+            $"activities/{activityId}?include_all_efforts=false");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.Token);
 
         var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
@@ -127,7 +128,8 @@ public class StravaRestHttpClient : IStravaRestHttpClient
     }
 
 
-    private async Task<T> HandleJsonResponse<T>(HttpResponseMessage response, JsonTypeInfo<T> jsonTypeInfo, CancellationToken cancellationToken)
+    private async Task<T> HandleJsonResponse<T>(
+        HttpResponseMessage response, JsonTypeInfo<T> jsonTypeInfo, CancellationToken cancellationToken)
     {
         try
         {

@@ -32,7 +32,10 @@ public class CosmosDbRepository<T> where T : DataModel
         T dataModel,
         CancellationToken cancellationToken)
     {
-        return Container.DeleteItemAsync<T>(dataModel.id, PartitionKey.None, cancellationToken: cancellationToken);
+        var partitionKey = new PartitionKey(dataModel.id);
+
+        return Container.DeleteItemAsync<T>(
+            dataModel.id, partitionKey, cancellationToken: cancellationToken);
     }
 
     public async Task<T?> Read(
