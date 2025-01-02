@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.HttpClients.Models.BrowserSession;
@@ -40,7 +41,10 @@ public class UpdateActivityService
     {
         var activity = await _stravaRestHttpClient
             .GetActivity(webhookEventData.ActivityId, webhookEventData.AthleteId, cancellationToken);
-        _logger.LogInformation("Activity: {Activity}", activity);
+
+        // temp
+        var activityJson = JsonSerializer.Serialize(activity);
+        _logger.LogInformation("Activity: {Activity}", activityJson);
 
         if (activity.Type == Constants.StravaActivityType.Walk)
         {
