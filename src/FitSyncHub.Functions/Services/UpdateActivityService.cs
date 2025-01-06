@@ -68,6 +68,8 @@ public class UpdateActivityService
         }
         else if (RequiresZwiftActivityNameFix(activity))
         {
+            _logger.LogInformation("Rename activity with name: {Name}, id: {Id}", activity.Name, activity.Id);
+
             await RenameZwiftActivityAsync(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
             return;
         }
@@ -93,11 +95,17 @@ public class UpdateActivityService
     {
         if (!RequiresZwiftActivityNameFix(activity))
         {
+            _logger.LogWarning("Activity {ActivityId} does not require name fix", activityId);
             return;
         }
 
         var name = activity.Name;
         var newName = name.Replace("Zwift - :", "Zwift - ");
+
+        _logger.LogInformation("Update activity name for activity {ActivityId} from {OldName} to {NewName}",
+            activityId,
+            name,
+            newName);
 
         var updateModel = new UpdatableActivityRequest
         {
@@ -131,6 +139,7 @@ public class UpdateActivityService
 
         var activityId = activity.Id;
 
+        _logger.LogInformation("Update activity visibility to only me for activity {ActivityId}", activityId);
         var response = await _stravaCookieHttpClient.UpdateActivityVisibilityToOnlyMe(
             activity,
             authResponse.Cookies,
@@ -182,6 +191,7 @@ public class UpdateActivityService
             return;
         }
 
+        _logger.LogInformation("Update gear for ride {RideId}", activity.Id);
         var updateModel = new UpdatableActivityRequest
         {
             Commute = activity.Commute,

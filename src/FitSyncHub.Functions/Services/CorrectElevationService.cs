@@ -61,6 +61,8 @@ public class CorrectElevationService
             return;
         }
 
+        _logger.LogInformation("Correcting elevation for activity {ActivityId}", activityId);
+
         await _stravaCookieHttpClient.CorrectElevationIfNeeded(
             activityId,
             authResponse.Cookies,
