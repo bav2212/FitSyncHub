@@ -12,15 +12,18 @@ public class WeightHttpTriggerFunction
 {
     private readonly BodyMeasurementsOptions _options;
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
+    private readonly AthleteContext _athleteContext;
     private readonly ILogger<WeightHttpTriggerFunction> _logger;
 
     public WeightHttpTriggerFunction(
         IStravaRestHttpClient stravaRestHttpClient,
+        AthleteContext athleteContext,
         IOptions<BodyMeasurementsOptions> options,
         ILogger<WeightHttpTriggerFunction> logger)
     {
         _options = options.Value;
         _stravaRestHttpClient = stravaRestHttpClient;
+        _athleteContext = athleteContext;
         _logger = logger;
     }
 
@@ -59,7 +62,9 @@ public class WeightHttpTriggerFunction
 
         try
         {
-            await _stravaRestHttpClient.UpdateAthlete(parsedAthleteId, parsedWeight, cancellationToken);
+            _athleteContext.AthleteId = parsedAthleteId;
+
+            await _stravaRestHttpClient.UpdateAthlete(parsedWeight, cancellationToken);
 
             return new OkObjectResult(weight);
         }

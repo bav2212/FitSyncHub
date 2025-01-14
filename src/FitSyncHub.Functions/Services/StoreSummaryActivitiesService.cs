@@ -19,12 +19,11 @@ public class SummaryActivityService
     }
 
     public async Task<int> StoreSummaryActivities(
-        long athleteId,
         long before,
         long after,
         CancellationToken cancellationToken)
     {
-        var activities = await GetSummaryActivities(athleteId, before, after, cancellationToken);
+        var activities = await GetSummaryActivities(before, after, cancellationToken);
 
         var mapper = new SummaryActivityMapper();
 
@@ -39,11 +38,10 @@ public class SummaryActivityService
     }
 
     public async Task StoreSummaryActivity(
-       long athleteId,
        long activityId,
        CancellationToken cancellationToken)
     {
-        var activity = await _stravaRestHttpClient.GetActivity(activityId, athleteId, cancellationToken);
+        var activity = await _stravaRestHttpClient.GetActivity(activityId, cancellationToken);
         var mapper = new SummaryActivityMapper();
 
         var dataModel = mapper.ActivityResponseToSummaryDataModel(activity);
@@ -52,7 +50,6 @@ public class SummaryActivityService
     }
 
     public async Task DeleteSummaryActivity(
-       long athleteId,
        long activityId,
        CancellationToken cancellationToken)
     {
@@ -63,12 +60,12 @@ public class SummaryActivityService
             return;
         }
 
-        var response = await _summaryActivityRepository.DeleteItemAsync(existingActivitySummary, cancellationToken: cancellationToken);
+        var response = await _summaryActivityRepository
+            .DeleteItemAsync(existingActivitySummary, cancellationToken: cancellationToken);
         _ = response;
     }
 
     private async Task<List<SummaryActivityModelResponse>> GetSummaryActivities(
-        long athleteId,
         long before,
         long after,
         CancellationToken cancellationToken)
@@ -80,7 +77,7 @@ public class SummaryActivityService
 
         for (var page = Constants.StravaRestApi.AthleteActivitiesFirstPage; hasValuesToIterate; page++)
         {
-            var portion = await _stravaRestHttpClient.GetActivities(athleteId, before, after, page, perPage, cancellationToken);
+            var portion = await _stravaRestHttpClient.GetActivities(before, after, page, perPage, cancellationToken);
             result.AddRange(portion);
 
             hasValuesToIterate = portion.Count == perPage;

@@ -9,15 +9,18 @@ public class CosmosDBTriggerFunction
 {
     private readonly UpdateActivityService _updateActivityService;
     private readonly SummaryActivityService _summaryActivityService;
+    private readonly AthleteContext _athleteContext;
     private readonly ILogger<CosmosDBTriggerFunction> _logger;
 
     public CosmosDBTriggerFunction(
         UpdateActivityService updateActivityService,
         SummaryActivityService summaryActivityService,
+        AthleteContext athleteContext,
         ILogger<CosmosDBTriggerFunction> logger)
     {
         _updateActivityService = updateActivityService;
         _summaryActivityService = summaryActivityService;
+        _athleteContext = athleteContext;
         _logger = logger;
     }
 
@@ -51,12 +54,14 @@ public class CosmosDBTriggerFunction
     private async Task HandleWebhookEventData(WebhookEventData webhookEventData,
         CancellationToken cancellationToken)
     {
+        _athleteContext.AthleteId = webhookEventData.AthleteId;
+
         _logger.LogInformation("Document for activity Id: {ActivityId}", webhookEventData.ActivityId);
 
         if (webhookEventData.AspectType == "delete")
         {
             await _summaryActivityService
-                .DeleteSummaryActivity(webhookEventData.AthleteId, webhookEventData.ActivityId, cancellationToken);
+                .DeleteSummaryActivity(webhookEventData.ActivityId, cancellationToken);
             return;
         }
 
@@ -69,7 +74,6 @@ public class CosmosDBTriggerFunction
             _logger.LogInformation("Skip updating, because AspectType =! create. Aspect type: {AspectType}", webhookEventData.AspectType);
         }
 
-        await _summaryActivityService
-            .StoreSummaryActivity(webhookEventData.AthleteId, webhookEventData.ActivityId, cancellationToken);
+        await _summaryActivityService.StoreSummaryActivity(webhookEventData.ActivityId, cancellationToken);
     }
 }

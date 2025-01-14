@@ -1,6 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using FitSyncHub.Functions;
 using FitSyncHub.Functions.HttpClients;
+using FitSyncHub.Functions.HttpClients.DelegatingHandlers;
 using FitSyncHub.Functions.HttpClients.Interfaces;
 using FitSyncHub.Functions.Options;
 using FitSyncHub.Functions.Repositories;
@@ -39,18 +41,7 @@ builder.Services.AddOptions<BodyMeasurementsOptions>()
         configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings);
     });
 
-builder.Services.AddScoped<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClient>();
-builder.Services.Decorate<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClientCached>();
-
-builder.Services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client =>
-{
-    client.BaseAddress = new Uri("http://www.strava.com");
-});
-
-builder.Services.AddHttpClient<IStravaRestHttpClient, StravaRestHttpClient>(client =>
-{
-    client.BaseAddress = new Uri("https://www.strava.com/api/v3/");
-});
+builder.Services.AddScoped<AthleteContext>();
 builder.Services.AddTransient<IStravaCookieHttpClient, StravaCookieHttpClient>();
 
 builder.Services.AddTransient<PersistedGrantRepository>();
@@ -70,6 +61,21 @@ builder.Services.AddScoped<IntervalsIcuDeletePlanService>();
 ///// Zwift services
 //builder.Services.AddScoped<ExcelReader>();
 //builder.Services.AddScoped<ZwiftRoutesService>();
+
+builder.Services.AddScoped<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClient>();
+builder.Services.Decorate<IStravaCookieAuthHttpClient, StravaCookieAuthHttpClientCached>();
+
+builder.Services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client =>
+{
+    client.BaseAddress = new Uri("http://www.strava.com");
+});
+
+builder.Services.AddTransient<StravaRestApiAuthenticationDelegatingHandler>();
+builder.Services.AddHttpClient<IStravaRestHttpClient, StravaRestHttpClient>(client =>
+{
+    client.BaseAddress = new Uri("https://www.strava.com/api/v3/");
+})
+.AddHttpMessageHandler<StravaRestApiAuthenticationDelegatingHandler>();
 
 builder.Services.AddHttpClient<IntervalsIcuHttpClient>(client =>
 {

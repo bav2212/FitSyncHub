@@ -39,8 +39,7 @@ public class UpdateActivityService
         WebhookEventData webhookEventData,
         CancellationToken cancellationToken)
     {
-        var activity = await _stravaRestHttpClient
-            .GetActivity(webhookEventData.ActivityId, webhookEventData.AthleteId, cancellationToken);
+        var activity = await _stravaRestHttpClient.GetActivity(webhookEventData.ActivityId, cancellationToken);
 
         // temp
         var activityJson = JsonSerializer.Serialize(activity);
@@ -62,7 +61,7 @@ public class UpdateActivityService
             && activity.DeviceName != Constants.WahooSYSTMDeviceName;
         if (isOutdoorRide)
         {
-            await CorrectGearIfNeeded(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
+            await CorrectGearIfNeeded(webhookEventData.ObjectId, activity, cancellationToken);
             await _correctElevationService.CorrectElevation(webhookEventData.ObjectId, cancellationToken);
             return;
         }
@@ -70,7 +69,7 @@ public class UpdateActivityService
         {
             _logger.LogInformation("Rename activity with name: {Name}, id: {Id}", activity.Name, activity.Id);
 
-            await RenameZwiftActivityAsync(webhookEventData.OwnerId, webhookEventData.ObjectId, activity, cancellationToken);
+            await RenameZwiftActivityAsync(webhookEventData.ObjectId, activity, cancellationToken);
             return;
         }
 
@@ -88,7 +87,7 @@ public class UpdateActivityService
 
     // zwift workout from interval.icu starts like "Zwift - :"
     // delete ":" from name
-    private async Task RenameZwiftActivityAsync(long athleteId,
+    private async Task RenameZwiftActivityAsync(
         long activityId,
         ActivityModelResponse activity,
         CancellationToken cancellationToken)
@@ -119,7 +118,7 @@ public class UpdateActivityService
             GearId = activity.GearId
         };
 
-        await _stravaRestHttpClient.UpdateActivity(activityId, athleteId, updateModel, cancellationToken);
+        await _stravaRestHttpClient.UpdateActivity(activityId, updateModel, cancellationToken);
     }
 
     private async Task UpdateActivityVisibilityToOnlyMe(
@@ -168,7 +167,6 @@ public class UpdateActivityService
     }
 
     private async Task CorrectGearIfNeeded(
-        long athleteId,
         long activityId,
         ActivityModelResponse activity,
         CancellationToken cancellationToken)
@@ -204,6 +202,6 @@ public class UpdateActivityService
             GearId = Constants.MyCityBikeGearId
         };
 
-        await _stravaRestHttpClient.UpdateActivity(activityId, athleteId, updateModel, cancellationToken);
+        await _stravaRestHttpClient.UpdateActivity(activityId, updateModel, cancellationToken);
     }
 }

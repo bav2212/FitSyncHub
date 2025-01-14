@@ -30,7 +30,6 @@ public class StoreActivitiesTriggerFunction
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var result = await _summaryActivityService.StoreSummaryActivities(
-            Constants.MyAthleteId,
             request.BeforeEpochTime,
             request.AfterEpochTime,
             cancellationToken);
