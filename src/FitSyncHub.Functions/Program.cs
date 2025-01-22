@@ -37,7 +37,6 @@ builder.Services.AddOptions<BodyMeasurementsOptions>()
         configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings);
     });
 
-
 builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
 builder.Services.ConfigureStravaModule<StravaAuthCookieStorageManager, StravaOAuthService>();
 builder.Services.ConfigureIntervalsIcuModule(builder.Configuration["IntervalsIcuApiKey"]);
