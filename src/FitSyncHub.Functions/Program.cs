@@ -1,11 +1,10 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
+﻿using FitSyncHub.Common;
+using FitSyncHub.Functions;
 using FitSyncHub.Functions.Managers;
 using FitSyncHub.Functions.Options;
 using FitSyncHub.Functions.Repositories;
 using FitSyncHub.Functions.Services;
-using FitSyncHub.IntervalsICU.HttpClients;
-using FitSyncHub.IntervalsICU.Services;
+using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
@@ -39,7 +38,10 @@ builder.Services.AddOptions<BodyMeasurementsOptions>()
     });
 
 
+builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
 builder.Services.ConfigureStravaModule<StravaAuthCookieStorageManager, StravaOAuthService>();
+builder.Services.ConfigureIntervalsIcuModule(builder.Configuration["IntervalsIcuApiKey"]);
+//builder.Services.ConfigureZwiftModule();
 
 builder.Services.AddTransient<PersistedGrantRepository>();
 builder.Services.AddTransient<SummaryActivityRepository>();
@@ -48,26 +50,6 @@ builder.Services.AddTransient<UserSessionRepository>();
 builder.Services.AddTransient<CorrectElevationService>();
 builder.Services.AddTransient<SummaryActivityService>();
 builder.Services.AddTransient<UpdateActivityService>();
-
-/// Intervals.ICU services
-builder.Services.AddScoped<ZwiftToIntervalsIcuService>();
-builder.Services.AddScoped<IntervalsIcuStorageService>();
-builder.Services.AddScoped<IntervalsIcuDeletePlanService>();
-
-///// Zwift services
-//builder.Services.AddScoped<ExcelReader>();
-//builder.Services.AddScoped<ZwiftRoutesService>();
-
-builder.Services.AddHttpClient<IntervalsIcuHttpClient>(client =>
-{
-    var intervalsIcuApiKey = builder.Configuration["IntervalsIcuApiKey"] ?? throw new InvalidOperationException("IntervalsIcuApiKey is null");
-
-    client.BaseAddress = new Uri("https://intervals.icu");
-
-    var authenticationString = $"API_KEY:{intervalsIcuApiKey}";
-    var base64EncodedAuthenticationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(authenticationString));
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
-});
 
 builder.Logging.Services.Configure<LoggerFilterOptions>(options =>
 {

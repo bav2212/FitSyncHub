@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Json;
-using FitSyncHub.Common;
+using FitSyncHub.Common.Abstractions;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Strava.Extensions;

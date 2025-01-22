@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.Common;
+﻿namespace FitSyncHub.Common.Abstractions;
 
 public interface IStravaApplicationOptionsProvider
 {
