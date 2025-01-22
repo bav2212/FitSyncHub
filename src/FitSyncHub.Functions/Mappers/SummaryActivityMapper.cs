@@ -1,5 +1,5 @@
 ﻿using FitSyncHub.Functions.Data.Entities;
-using FitSyncHub.Functions.HttpClients.Models.Responses.Activities;
+using FitSyncHub.Strava.Models.Responses.Activities;
 using Riok.Mapperly.Abstractions;
 
 namespace FitSyncHub.Functions.Mappers;

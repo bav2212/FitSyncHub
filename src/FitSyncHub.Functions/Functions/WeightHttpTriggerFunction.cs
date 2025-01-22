@@ -1,5 +1,6 @@
-﻿using FitSyncHub.Functions.HttpClients.Interfaces;
-using FitSyncHub.Functions.Options;
+﻿using FitSyncHub.Functions.Options;
+using FitSyncHub.Strava;
+using FitSyncHub.Strava.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -12,12 +13,12 @@ public class WeightHttpTriggerFunction
 {
     private readonly BodyMeasurementsOptions _options;
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
-    private readonly AthleteContext _athleteContext;
+    private readonly StravaAthleteContext _athleteContext;
     private readonly ILogger<WeightHttpTriggerFunction> _logger;
 
     public WeightHttpTriggerFunction(
         IStravaRestHttpClient stravaRestHttpClient,
-        AthleteContext athleteContext,
+        StravaAthleteContext athleteContext,
         IOptions<BodyMeasurementsOptions> options,
         ILogger<WeightHttpTriggerFunction> logger)
     {

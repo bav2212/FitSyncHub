@@ -1,5 +1,6 @@
 ﻿using FitSyncHub.Functions.Data.Entities;
-using FitSyncHub.Functions.HttpClients.Interfaces;
+using FitSyncHub.Strava;
+using FitSyncHub.Strava.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;

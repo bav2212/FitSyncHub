@@ -1,4 +1,4 @@
-﻿using FitSyncHub.Functions.Models;
+﻿using FitSyncHub.Common.Models;
 
 namespace FitSyncHub.Functions.Helpers;
 

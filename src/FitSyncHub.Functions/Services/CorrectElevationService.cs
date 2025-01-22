@@ -1,6 +1,7 @@
-﻿using FitSyncHub.Functions.HttpClients.Interfaces;
-using FitSyncHub.Functions.Options;
+﻿using FitSyncHub.Functions.Options;
 using FitSyncHub.Functions.Repositories;
+using FitSyncHub.Strava;
+using FitSyncHub.Strava.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
