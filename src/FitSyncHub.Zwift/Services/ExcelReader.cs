@@ -82,7 +82,7 @@ public class ExcelReader
         return table;
     }
 
-    private string? GetCellHyperlink(Cell cell, Hyperlink[] hyperlinks, HyperlinkRelationship[] hyperlinkRelationships)
+    private static string? GetCellHyperlink(Cell cell, Hyperlink[] hyperlinks, HyperlinkRelationship[] hyperlinkRelationships)
     {
         if (cell.CellReference is null)
         {
@@ -90,7 +90,7 @@ public class ExcelReader
         }
 
         // get the Hyperlink object "behind" the cell
-        var hyperlink = hyperlinks.SingleOrDefault(i => i.Reference.Value == cell.CellReference.Value);
+        var hyperlink = hyperlinks.SingleOrDefault(i => i.Reference!.Value == cell.CellReference.Value);
 
         if (hyperlink is null)
         {
@@ -98,11 +98,11 @@ public class ExcelReader
         }
 
         // if the hyperlink has an anchor, the anchor will be stored without the # in hyperlink.Location
-        string location = hyperlink.Location;
+        string location = hyperlink.Location!;
 
         // the URI is stored in the HyperlinkRelationship
         var hyperlinkRelationship = hyperlinkRelationships.SingleOrDefault(i => i.Id == hyperlink.Id);
-        var url = hyperlinkRelationship.Uri.ToString();
+        var url = hyperlinkRelationship!.Uri.ToString();
 
         return string.IsNullOrWhiteSpace(location) ? url.ToString() : $"{url}#{location}";
     }

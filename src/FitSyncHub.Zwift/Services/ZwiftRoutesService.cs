@@ -21,13 +21,13 @@ public class ZwiftRoutesService
         foreach (DataRow row in dt.Rows)
         {
             var route = row["Route"].ToString()!;
-            if (row["2w/kg time"].ToString().Length > 0)
+            if (row["2w/kg time"].ToString()!.Length > 0)
             {
                 var res = new Result(route,
-                    double.Parse(row["lead in length"].ToString()),
-                    double.Parse(row["lead in elevation"].ToString()),
-                    double.Parse(row["2w/kg time"].ToString()),
-                    double.Parse(row["3w/kg time"].ToString())
+                    double.Parse(row["lead in length"].ToString()!),
+                    double.Parse(row["lead in elevation"].ToString()!),
+                    double.Parse(row["2w/kg time"].ToString()!),
+                    double.Parse(row["3w/kg time"].ToString()!)
                     );
                 result.Add(res);
                 continue;
