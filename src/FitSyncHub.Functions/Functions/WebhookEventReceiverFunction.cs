@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Functions.Options;
+using FitSyncHub.Strava;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;

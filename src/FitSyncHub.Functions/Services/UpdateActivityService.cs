@@ -1,10 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
 using FitSyncHub.Functions.Data.Entities;
-using FitSyncHub.Functions.HttpClients.Interfaces;
-using FitSyncHub.Functions.HttpClients.Models.BrowserSession;
-using FitSyncHub.Functions.HttpClients.Models.Responses.Activities;
 using FitSyncHub.Functions.Options;
+using FitSyncHub.Strava;
+using FitSyncHub.Strava.Abstractions;
+using FitSyncHub.Strava.Models.BrowserSession;
+using FitSyncHub.Strava.Models.Responses.Activities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

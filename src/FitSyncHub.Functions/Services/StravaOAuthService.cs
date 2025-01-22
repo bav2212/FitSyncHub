@@ -1,8 +1,7 @@
 ﻿using FitSyncHub.Functions.Data.Entities;
-using FitSyncHub.Functions.HttpClients.Interfaces;
-using FitSyncHub.Functions.HttpClients.Models.Responses;
 using FitSyncHub.Functions.Repositories;
-using FitSyncHub.Functions.Services.Interfaces;
+using FitSyncHub.Strava.Abstractions;
+using FitSyncHub.Strava.Models.Responses;
 
 namespace FitSyncHub.Functions.Services;
 

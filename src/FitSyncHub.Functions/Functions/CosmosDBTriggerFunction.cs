@@ -1,5 +1,6 @@
 ﻿using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Functions.Services;
+using FitSyncHub.Strava;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -9,13 +10,13 @@ public class CosmosDBTriggerFunction
 {
     private readonly UpdateActivityService _updateActivityService;
     private readonly SummaryActivityService _summaryActivityService;
-    private readonly AthleteContext _athleteContext;
+    private readonly StravaAthleteContext _athleteContext;
     private readonly ILogger<CosmosDBTriggerFunction> _logger;
 
     public CosmosDBTriggerFunction(
         UpdateActivityService updateActivityService,
         SummaryActivityService summaryActivityService,
-        AthleteContext athleteContext,
+        StravaAthleteContext athleteContext,
         ILogger<CosmosDBTriggerFunction> logger)
     {
         _updateActivityService = updateActivityService;
