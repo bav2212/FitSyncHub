@@ -4,6 +4,7 @@ using FitSyncHub.Functions.Managers;
 using FitSyncHub.Functions.Options;
 using FitSyncHub.Functions.Repositories;
 using FitSyncHub.Functions.Services;
+using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
 using Microsoft.Azure.Cosmos;
@@ -40,6 +41,13 @@ builder.Services.AddOptions<BodyMeasurementsOptions>()
 builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
 builder.Services.ConfigureStravaModule<StravaAuthCookieStorageManager, StravaOAuthService>();
 builder.Services.ConfigureIntervalsIcuModule(builder.Configuration["IntervalsIcuApiKey"]);
+builder.Services.ConfigureGarminConnectModule(
+    new Garmin.Connect.Auth.BasicAuthParameters(
+        builder.Configuration["GarminConnect:Credentials:Username"],
+        builder.Configuration["GarminConnect:Credentials:Password"]
+        )
+    );
+
 //builder.Services.ConfigureZwiftModule();
 
 builder.Services.AddTransient<PersistedGrantRepository>();

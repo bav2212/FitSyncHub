@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FitSyncHub.GarminConnect\FitSyncHub.GarminConnect.csproj" />
     <ProjectReference Include="..\FitSyncHub.IntervalsICU\FitSyncHub.IntervalsICU.csproj" />
     <ProjectReference Include="..\FitSyncHub.Strava\FitSyncHub.Strava.csproj" />
     <ProjectReference Include="..\FitSyncHub.Zwift\FitSyncHub.Zwift.csproj" />

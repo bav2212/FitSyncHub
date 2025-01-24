@@ -1,6 +1,6 @@
 ﻿using FitSyncHub.Functions.Options;
-using FitSyncHub.Strava;
 using FitSyncHub.Strava.Abstractions;
+using Garmin.Connect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -13,18 +13,18 @@ public class WeightHttpTriggerFunction
 {
     private readonly BodyMeasurementsOptions _options;
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
-    private readonly StravaAthleteContext _athleteContext;
+    private readonly GarminConnectClient _garminClient;
     private readonly ILogger<WeightHttpTriggerFunction> _logger;
 
     public WeightHttpTriggerFunction(
         IStravaRestHttpClient stravaRestHttpClient,
-        StravaAthleteContext athleteContext,
+        GarminConnectClient garminClient,
         IOptions<BodyMeasurementsOptions> options,
         ILogger<WeightHttpTriggerFunction> logger)
     {
         _options = options.Value;
         _stravaRestHttpClient = stravaRestHttpClient;
-        _athleteContext = athleteContext;
+        _garminClient = garminClient;
         _logger = logger;
     }
 
@@ -36,10 +36,9 @@ public class WeightHttpTriggerFunction
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         string? weight = req.Query["weight"];
-        string? athleteId = req.Query["athlete_id"];
         string? verifyToken = req.Query["verify_token"];
 
-        if (weight is null || athleteId is null || verifyToken is null)
+        if (weight is null || verifyToken is null)
         {
             return new BadRequestObjectResult("wrong request");
         }
@@ -54,18 +53,22 @@ public class WeightHttpTriggerFunction
             return new BadRequestObjectResult("Weight has wrong format");
         }
 
-        if (string.IsNullOrWhiteSpace(athleteId) || !long.TryParse(athleteId, out var parsedAthleteId))
+        if (parsedWeight > 200)
         {
-            return new BadRequestObjectResult("Athlete id is not valid");
+            return new BadRequestObjectResult("Weight should be in kg's");
         }
 
         _logger.LogInformation("Weight is {weight} kg", weight);
 
         try
         {
-            _athleteContext.AthleteId = parsedAthleteId;
-
+            _logger.LogInformation("Updating athlete weight on strava");
             await _stravaRestHttpClient.UpdateAthlete(parsedWeight, cancellationToken);
+            _logger.LogInformation("Updated athlete weight on strava");
+
+            _logger.LogInformation("Updating athlete weight on garmin connect");
+            await _garminClient.SetUserWeight(parsedWeight * 1000, cancellationToken);
+            _logger.LogInformation("Updated athlete weight on garmin connect");
 
             return new OkObjectResult(weight);
         }
