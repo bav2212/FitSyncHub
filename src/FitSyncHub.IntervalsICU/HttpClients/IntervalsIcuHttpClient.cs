@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Globalization;
+using System.Net.Http.Json;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using ZwiftToIntervalsICUConverter.HttpClients.Models;
 
@@ -7,6 +8,30 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 public class IntervalsIcuHttpClient(HttpClient httpClient)
 {
     private readonly HttpClient _httpClient = httpClient;
+
+    public async Task<HttpResponseMessage> ListActivities(
+        string athleteId,
+        DateTime oldest,
+        DateTime newest,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        var baseUrl = $"api/v1/athlete/{athleteId}/activities";
+
+        var queryParams = new Dictionary<string, string>()
+        {
+            { "oldest", oldest.ToString("s", CultureInfo.InvariantCulture) },
+            { "newest", newest.ToString("s", CultureInfo.InvariantCulture) },
+            { "limit",  limit.ToString() },
+        };
+
+        var requestUri = $"{baseUrl}?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
+
+        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return response;
+    }
 
     public async Task<HttpResponseMessage> ListAllTheAthleteFoldersPlansAndWorkouts(
         string athleteId,
