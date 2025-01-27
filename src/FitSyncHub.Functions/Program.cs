@@ -42,11 +42,9 @@ builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
 builder.Services.ConfigureStravaModule<StravaAuthCookieStorageManager, StravaOAuthService>();
 builder.Services.ConfigureIntervalsIcuModule(builder.Configuration["IntervalsIcuApiKey"]);
 builder.Services.ConfigureGarminConnectModule(
-    new Garmin.Connect.Auth.BasicAuthParameters(
-        builder.Configuration["GarminConnect:Credentials:Username"],
-        builder.Configuration["GarminConnect:Credentials:Password"]
-        )
-    );
+    builder.Configuration["GarminConnect:Credentials:Username"],
+    builder.Configuration["GarminConnect:Credentials:Password"]
+);
 
 //builder.Services.ConfigureZwiftModule();
 

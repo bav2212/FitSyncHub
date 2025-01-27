@@ -8,15 +8,23 @@ public static class GarminConnectModule
 {
     public static IServiceCollection ConfigureGarminConnectModule(
         this IServiceCollection services,
-        BasicAuthParameters basicAuthParameters)
+        string? email,
+        string? password)
     {
-        services.AddSingleton(sp =>
-            new GarminConnectClient(sp.GetRequiredService<GarminConnectContext>()));
-
-        services.AddSingleton(sp =>
+        if (string.IsNullOrWhiteSpace(email))
         {
-            return new GarminConnectContext(new HttpClient(), basicAuthParameters);
-        });
+            throw new ArgumentException("Value cannot be null or whitespace.", nameof(email));
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            throw new ArgumentException("Value cannot be null or whitespace.", nameof(password));
+        }
+
+        services.AddSingleton<IAuthParameters>((sp) => new BasicAuthParameters(email, password));
+        services.AddHttpClient<GarminConnectContext>();
+
+        services.AddScoped(sp => new GarminConnectClient(sp.GetRequiredService<GarminConnectContext>()));
 
         return services;
     }
