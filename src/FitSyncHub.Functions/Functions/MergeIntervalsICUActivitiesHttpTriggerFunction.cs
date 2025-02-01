@@ -1,6 +1,7 @@
 ﻿using FitSyncHub.Common.Fit;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -94,8 +95,11 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             mergedFileBytes = ms.ToArray();
         }
 
+        var mergedActivityName = await GetMergedEventName(activities, linkedPairedEvent, cancellationToken);
+
         _logger.LogInformation("Creating merged activity");
         var createActivityResponse = await _intervalsIcuHttpClient.CreateActivity(Constants.AthleteId, mergedFileBytes,
+            name: mergedActivityName,
             pairedEventId: linkedPairedEvent,
             cancellationToken: cancellationToken);
         _logger.LogInformation("Created merged activity, ActivityId: {ActivityId}", createActivityResponse.Id);
@@ -108,5 +112,25 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         return new OkResult();
+    }
+
+    private async Task<string?> GetMergedEventName(IEnumerable<ActivityResponse> activities,
+        int? linkedPairedEvent,
+        CancellationToken cancellationToken)
+    {
+        if (!linkedPairedEvent.HasValue)
+        {
+            return default;
+        }
+
+        var @event = await _intervalsIcuHttpClient.GetEvent(Constants.AthleteId, linkedPairedEvent.Value, cancellationToken);
+        var eventName = @event.Name.Trim();
+
+        if (@event.Tags.Contains("race"))
+        {
+            return $"Warmup + {eventName} + cooldown";
+        }
+
+        return eventName;
     }
 }
