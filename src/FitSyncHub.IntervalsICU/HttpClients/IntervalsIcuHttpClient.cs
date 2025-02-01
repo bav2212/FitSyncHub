@@ -1,15 +1,17 @@
 ﻿using System.Globalization;
-using System.Net.Http.Json;
-using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
+using System.Net.Http.Headers;
+using System.Net.Mime;
+using System.Text.Json;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using ZwiftToIntervalsICUConverter.HttpClients.Models;
 
 namespace FitSyncHub.IntervalsICU.HttpClients;
 
-public class IntervalsIcuHttpClient(HttpClient httpClient)
+public partial class IntervalsIcuHttpClient(HttpClient httpClient)
 {
     private readonly HttpClient _httpClient = httpClient;
 
-    public async Task<HttpResponseMessage> ListActivities(
+    public async Task<IReadOnlyCollection<ActivityResponse>> ListActivities(
         string athleteId,
         DateTime oldest,
         DateTime newest,
@@ -30,61 +32,78 @@ public class IntervalsIcuHttpClient(HttpClient httpClient)
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        return response;
+        var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
+        return JsonSerializer.Deserialize(content, IntervalsIcuSourceGenerationContext.Default.IReadOnlyCollectionActivityResponse)!;
     }
 
-    public async Task<HttpResponseMessage> ListAllTheAthleteFoldersPlansAndWorkouts(
-        string athleteId,
-        CancellationToken cancellationToken)
+    public async Task<Stream> DownloadOriginalActivityFitFile(
+       string activityId,
+       CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{athleteId}/folders";
+        var requestUri = $"api/v1/activity/{activityId}/file";
 
-        var response = await _httpClient.GetAsync(url, cancellationToken);
+        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        return response;
+        return await response.Content.ReadAsStreamAsync(cancellationToken);
     }
 
-    public async Task<HttpResponseMessage> CreateWorkouts(
-        string athleteId,
-        IReadOnlyCollection<CreateWorkoutRequestModel> model,
-        CancellationToken cancellationToken)
+    public async Task UnlinkPairedWorkout(
+       string activityId,
+       CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{athleteId}/workouts/bulk";
+        var requestUri = $"api/v1/activity/{activityId}";
+        var content = new StringContent("""{ "paired_event_id":0}""", MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json));
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.IReadOnlyCollectionCreateWorkoutRequestModel);
-        var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
-
+        var response = await _httpClient.PutAsync(requestUri, content, cancellationToken);
         response.EnsureSuccessStatusCode();
-
-        return response;
     }
 
-    public async Task<HttpResponseMessage> CreateWorkout(
-        string athleteId,
-        CreateWorkoutRequestModel model,
-        CancellationToken cancellationToken)
+    public async Task<CreateActivityResponse> CreateActivity(
+       string athleteId,
+       byte[] activityBytes,
+       string? name = default,
+       string? description = default,
+       int? pairedEventId = default,
+       CancellationToken cancellationToken = default)
     {
-        var url = $"api/v1/athlete/{athleteId}/workouts";
+        var requestUri = $"api/v1/athlete/{athleteId}/activities";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.CreateWorkoutRequestModel);
-        var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
+        using var formData = new MultipartFormDataContent();
+        using var fileContent = new ByteArrayContent(activityBytes);
 
+        // Add the file to the form-data with the key 'file'
+        formData.Add(fileContent, "file", "merged.fit");
+        if (name != null)
+        {
+            formData.Add(new StringContent(name), "name");
+        }
+
+        if (description != null)
+        {
+            formData.Add(new StringContent(description), "description");
+        }
+
+        if (pairedEventId.HasValue)
+        {
+            formData.Add(new StringContent(pairedEventId.Value.ToString()), "paired_event_id");
+        }
+
+        // Send POST request
+        var response = await _httpClient.PostAsync(requestUri, formData, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        return response;
+        var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
+        return JsonSerializer.Deserialize(content, IntervalsIcuSourceGenerationContext.Default.CreateActivityResponse)!;
     }
 
-    public async Task<HttpResponseMessage> DeleteWorkout(
-        string athleteId,
-        int workoutId,
-        CancellationToken cancellationToken)
+    public async Task DeleteActivity(
+         string activityId,
+         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{athleteId}/workouts/{workoutId}";
+        var requestUri = $"api/v1/activity/{activityId}";
 
-        var response = await _httpClient.DeleteAsync(url, cancellationToken);
+        var response = await _httpClient.DeleteAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
-
-        return response;
     }
 }
