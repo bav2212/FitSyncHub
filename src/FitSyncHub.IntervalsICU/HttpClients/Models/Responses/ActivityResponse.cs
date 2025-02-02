@@ -1,4 +1,6 @@
-﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
+﻿using System.Text.Json.Serialization;
+
+namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
 public class ActivityResponse
 {
@@ -222,6 +224,7 @@ public class Hrr
     public required int? StartBpm { get; set; }
     public required int? EndBpm { get; set; }
     public required int? AverageWatts { get; set; }
+    [JsonPropertyName("hrr")]
     public required int? HrrValue { get; set; }
 }
 
