@@ -38,25 +38,31 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
         if (count is null)
         {
+            _logger.LogInformation("wrong request");
             return new BadRequestObjectResult("wrong request");
         }
 
         if (!int.TryParse(count, out var parsedCount))
         {
+            _logger.LogInformation("Count has wrong format");
             return new BadRequestObjectResult("Count has wrong format");
         }
 
         if (parsedCount > 10)
         {
+            _logger.LogInformation("Can't parse more that 10 activities");
             return new BadRequestObjectResult("Can't parse more that 10 activities");
         }
 
-        var activities = await _intervalsIcuHttpClient
-            .ListActivities(Constants.AthleteId, DateTime.Now.AddDays(-1), DateTime.Now, 10, cancellationToken) ?? [];
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var activities = await _intervalsIcuHttpClient.ListActivities(Constants.AthleteId,
+            new DateTime(today, TimeOnly.MinValue), new DateTime(today, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
         _logger.LogInformation("Received {ActivitiesCount} today's activities", activities.Count);
 
         if (activities.Count != parsedCount)
         {
+            _logger.LogInformation("Found {ActivitiesCount} todays activities, but specified {ParsedCount} in request", activities.Count, parsedCount);
             return new BadRequestObjectResult($"Found {activities.Count} todays activities, but specified {parsedCount} in request");
         }
 
@@ -111,7 +117,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             _logger.LogInformation("Finished deleting activity {ActivityId} from Intervals.icu", activity.Id);
         }
 
-        return new OkResult();
+        return new OkObjectResult("Merged");
     }
 
     private async Task<string?> GetMergedEventName(IEnumerable<ActivityResponse> activities,
