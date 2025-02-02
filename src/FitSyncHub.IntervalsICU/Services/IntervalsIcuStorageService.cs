@@ -33,7 +33,7 @@ public class IntervalsIcuStorageService(
         logger.LogInformation("Stored {ItemsCount} at intervals.icu folder {FolderId}", items.Count, intervalsIcuFolderId);
     }
 
-    private static IEnumerable<CreateWorkoutRequestModel> CreateCreateWorkoutRequestModels(
+    private static IEnumerable<WorkoutCreateRequest> CreateCreateWorkoutRequestModels(
         int folderId,
         IReadOnlyCollection<ZwiftToIntervalsIcuConvertResult> items)
     {
@@ -60,7 +60,7 @@ public class IntervalsIcuStorageService(
 
                 var absoluteDayNumber = (weekNumber - weeksStartsFrom) * 7 + dayNumber - 1;
 
-                var createWorkoutRequestModel = new CreateWorkoutRequestModel
+                var createWorkoutRequestModel = new WorkoutCreateRequest
                 {
                     Name = item.FileInfo.Name,
                     Description = string.Join(Environment.NewLine, item.IntervalsIcuStructure),

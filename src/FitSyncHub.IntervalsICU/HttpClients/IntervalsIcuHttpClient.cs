@@ -1,7 +1,9 @@
 ﻿using System.Globalization;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text.Json;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using ZwiftToIntervalsICUConverter.HttpClients.Models;
 
@@ -59,7 +61,32 @@ public partial class IntervalsIcuHttpClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<CreateActivityResponse> CreateActivity(
+    public async Task<ActivityResponse> GetActivity(
+      string activityId,
+      CancellationToken cancellationToken)
+    {
+        var requestUri = $"api/v1/activity/{activityId}";
+
+        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
+        return JsonSerializer.Deserialize(content, IntervalsIcuSourceGenerationContext.Default.ActivityResponse)!;
+    }
+
+    public async Task UpdateActivity(
+       string activityId,
+       ActivityUpdateRequest model,
+       CancellationToken cancellationToken)
+    {
+        var requestUri = $"api/v1/activity/{activityId}";
+
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.ActivityUpdateRequest);
+        var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<ActivityCreateResponse> CreateActivity(
        string athleteId,
        byte[] activityBytes,
        string? name = default,
@@ -94,7 +121,7 @@ public partial class IntervalsIcuHttpClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
-        return JsonSerializer.Deserialize(content, IntervalsIcuSourceGenerationContext.Default.CreateActivityResponse)!;
+        return JsonSerializer.Deserialize(content, IntervalsIcuSourceGenerationContext.Default.ActivityCreateResponse)!;
     }
 
     public async Task DeleteActivity(

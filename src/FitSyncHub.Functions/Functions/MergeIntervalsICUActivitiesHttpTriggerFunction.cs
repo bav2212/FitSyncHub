@@ -1,6 +1,7 @@
 ﻿using FitSyncHub.Common.Fit;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -66,12 +67,14 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             return new BadRequestObjectResult($"Found {activities.Count} todays activities, but specified {parsedCount} in request");
         }
 
-        int? linkedPairedEvent = default;
+        EventResponse? linkedPairedEvent = default;
         var activityWithLinkedPairedEvent = activities.Where(x => x.PairedEventId.HasValue).SingleOrDefault();
-        if (activityWithLinkedPairedEvent != null)
+        if (activityWithLinkedPairedEvent != null && activityWithLinkedPairedEvent.PairedEventId is { } pairedEventId)
         {
+            _logger.LogInformation("Get linked paired event");
+            linkedPairedEvent = await _intervalsIcuHttpClient.GetEvent(Constants.AthleteId, pairedEventId, cancellationToken);
+
             _logger.LogInformation("Unlinking paired event {EventId} from activity {ActivityId}", linkedPairedEvent, activityWithLinkedPairedEvent.Id);
-            linkedPairedEvent = activityWithLinkedPairedEvent.PairedEventId;
             await _intervalsIcuHttpClient.UnlinkPairedWorkout(activityWithLinkedPairedEvent.Id, cancellationToken);
         }
 
@@ -101,14 +104,36 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             mergedFileBytes = ms.ToArray();
         }
 
-        var mergedActivityName = await GetMergedEventName(activities, linkedPairedEvent, cancellationToken);
+        var mergedActivityName = GetMergedEventName(activities, linkedPairedEvent);
 
         _logger.LogInformation("Creating merged activity");
         var createActivityResponse = await _intervalsIcuHttpClient.CreateActivity(Constants.AthleteId, mergedFileBytes,
             name: mergedActivityName,
-            pairedEventId: linkedPairedEvent,
+            pairedEventId: linkedPairedEvent?.Id,
             cancellationToken: cancellationToken);
         _logger.LogInformation("Created merged activity, ActivityId: {ActivityId}", createActivityResponse.Id);
+
+
+        if (linkedPairedEvent != null && IsRaceEvent(linkedPairedEvent))
+        {
+            _logger.LogInformation("Update activity {ActivityId} to set Race = true", createActivityResponse.Id);
+
+            var activity = await _intervalsIcuHttpClient.GetActivity(createActivityResponse.Id, cancellationToken);
+
+            var updateRequest = new ActivityUpdateRequest
+            {
+                Type = activity.Type,
+                Commute = activity.Commute,
+                Description = activity.Description,
+                Name = activity.Name,
+                Gear = new GearUpdateRequest { Id = activity.Gear.Id },
+                Trainer = activity.Trainer,
+                Race = true
+            };
+
+            await _intervalsIcuHttpClient.UpdateActivity(activity.Id, updateRequest, cancellationToken);
+            _logger.LogInformation("Updated activity {ActivityId} to set Race = true", createActivityResponse.Id);
+        }
 
         foreach (var activity in activities)
         {
@@ -120,23 +145,25 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         return new OkObjectResult("Merged");
     }
 
-    private async Task<string?> GetMergedEventName(IEnumerable<ActivityResponse> activities,
-        int? linkedPairedEvent,
-        CancellationToken cancellationToken)
+    private static string? GetMergedEventName(IEnumerable<ActivityResponse> activities,
+        EventResponse? linkedPairedEvent)
     {
-        if (!linkedPairedEvent.HasValue)
+        if (linkedPairedEvent is null)
         {
             return default;
         }
 
-        var @event = await _intervalsIcuHttpClient.GetEvent(Constants.AthleteId, linkedPairedEvent.Value, cancellationToken);
-        var eventName = @event.Name.Trim();
-
-        if (@event.Tags.Contains("race"))
+        var eventName = linkedPairedEvent.Name.Trim();
+        if (IsRaceEvent(linkedPairedEvent))
         {
             return $"Warmup + {eventName} + cooldown";
         }
 
         return eventName;
+    }
+
+    private static bool IsRaceEvent(EventResponse linkedPairedEvent)
+    {
+        return linkedPairedEvent.Tags.Contains("race");
     }
 }

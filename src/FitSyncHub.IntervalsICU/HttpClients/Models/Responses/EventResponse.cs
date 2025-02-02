@@ -2,7 +2,7 @@
 
 public class EventResponse
 {
-    public required string Id { get; set; }
+    public required int Id { get; set; }
     public required string StartDateLocal { get; set; }
     public required string Type { get; set; }
     public required string Name { get; set; }

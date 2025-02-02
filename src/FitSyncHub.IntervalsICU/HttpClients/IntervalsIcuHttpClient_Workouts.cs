@@ -20,12 +20,12 @@ public partial class IntervalsIcuHttpClient
 
     public async Task<HttpResponseMessage> CreateWorkouts(
         string athleteId,
-        IReadOnlyCollection<CreateWorkoutRequestModel> model,
+        IReadOnlyCollection<WorkoutCreateRequest> model,
         CancellationToken cancellationToken)
     {
         var url = $"api/v1/athlete/{athleteId}/workouts/bulk";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.IReadOnlyCollectionCreateWorkoutRequestModel);
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.IReadOnlyCollectionWorkoutCreateRequest);
         var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
 
         response.EnsureSuccessStatusCode();
@@ -35,12 +35,12 @@ public partial class IntervalsIcuHttpClient
 
     public async Task<HttpResponseMessage> CreateWorkout(
         string athleteId,
-        CreateWorkoutRequestModel model,
+        WorkoutCreateRequest model,
         CancellationToken cancellationToken)
     {
         var url = $"api/v1/athlete/{athleteId}/workouts";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.CreateWorkoutRequestModel);
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.WorkoutCreateRequest);
         var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
 
         response.EnsureSuccessStatusCode();

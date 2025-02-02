@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public class CreateWorkoutRequestModel
+public class WorkoutCreateRequest
 {
     public required long FolderId { get; init; }
     public required string Name { get; init; }
