@@ -24,7 +24,8 @@ public static class GarminConnectModule
         services.AddSingleton<IAuthParameters>((sp) => new BasicAuthParameters(email, password));
         services.AddHttpClient<GarminConnectContext>();
 
-        services.AddScoped(sp => new GarminConnectClient(sp.GetRequiredService<GarminConnectContext>()));
+        services.AddScoped<ExtendedGarminConnectClient>();
+        services.AddScoped<GarminConnectContext>();
 
         return services;
     }

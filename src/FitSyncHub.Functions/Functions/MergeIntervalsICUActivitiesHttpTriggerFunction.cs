@@ -1,4 +1,5 @@
 ﻿using FitSyncHub.Common.Fit;
+using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
@@ -15,17 +16,20 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
     private readonly FitFileDecoder _decoder;
     private readonly FitFileEncoder _encoder;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
+    private readonly ExtendedGarminConnectClient _extendedGarminConnectClient;
     private readonly ILogger<MergeIntervalsICUActivitiesHttpTriggerFunction> _logger;
 
     public MergeIntervalsICUActivitiesHttpTriggerFunction(
         FitFileDecoder decoder,
         FitFileEncoder encoder,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
+        ExtendedGarminConnectClient extendedGarminConnectClient,
         ILogger<MergeIntervalsICUActivitiesHttpTriggerFunction> logger)
     {
         _decoder = decoder;
         _encoder = encoder;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
+        _extendedGarminConnectClient = extendedGarminConnectClient;
         _logger = logger;
     }
 
@@ -35,21 +39,22 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
-        string? count = req.Query["count"];
+        string? countQueryParameter = req.Query["count"];
+        string? syncWithGarminQueryParameter = req.Query["syncWithGarmin"];
 
-        if (count is null)
+        if (countQueryParameter is null)
         {
             _logger.LogInformation("wrong request");
             return new BadRequestObjectResult("wrong request");
         }
 
-        if (!int.TryParse(count, out var parsedCount))
+        if (!int.TryParse(countQueryParameter, out var count))
         {
             _logger.LogInformation("Count has wrong format");
             return new BadRequestObjectResult("Count has wrong format");
         }
 
-        if (parsedCount > 10)
+        if (count > 10)
         {
             _logger.LogInformation("Can't parse more that 10 activities");
             return new BadRequestObjectResult("Can't parse more that 10 activities");
@@ -61,10 +66,10 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             new DateTime(today, TimeOnly.MinValue), new DateTime(today, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
         _logger.LogInformation("Received {ActivitiesCount} today's activities", activities.Count);
 
-        if (activities.Count != parsedCount)
+        if (activities.Count != count)
         {
-            _logger.LogInformation("Found {ActivitiesCount} todays activities, but specified {ParsedCount} in request", activities.Count, parsedCount);
-            return new BadRequestObjectResult($"Found {activities.Count} todays activities, but specified {parsedCount} in request");
+            _logger.LogInformation("Found {ActivitiesCount} todays activities, but specified {ParsedCount} in request", activities.Count, count);
+            return new BadRequestObjectResult($"Found {activities.Count} todays activities, but specified {count} in request");
         }
 
         EventResponse? linkedPairedEvent = default;
@@ -142,11 +147,16 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             _logger.LogInformation("Finished deleting activity {ActivityId} from Intervals.icu", activity.Id);
         }
 
+        if (bool.TryParse(syncWithGarminQueryParameter, out var syncWithGarmin) && syncWithGarmin)
+        {
+            await SyncWithGarmin(createActivityResponse.Id, cancellationToken);
+        }
+
         return new OkObjectResult("Merged");
     }
 
     private static string? GetMergedEventName(IEnumerable<ActivityResponse> activities,
-        EventResponse? linkedPairedEvent)
+    EventResponse? linkedPairedEvent)
     {
         if (linkedPairedEvent is null)
         {
@@ -165,5 +175,51 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
     private static bool IsRaceEvent(EventResponse linkedPairedEvent)
     {
         return linkedPairedEvent.Tags.Contains("race");
+    }
+
+    private async Task SyncWithGarmin(string intervalsIcuActivityId, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Start sync with Garmin");
+
+        var todayDate = DateTime.UtcNow.Date;
+
+        var garminActivities = await _extendedGarminConnectClient
+            .GetActivitiesByDate(todayDate.Date, todayDate.AddDays(1), null, cancellationToken);
+        _logger.LogInformation("Got {Count} activities from Garmin", garminActivities.Length);
+        if (garminActivities.Length != 1)
+        {
+            _logger.LogWarning("Skip syncing with Garmin, cause activities count = {Count}", garminActivities.Length);
+            return;
+        }
+
+        var todaysGarminActivity = garminActivities.Single();
+
+        var intervalsIcuActivity = await _intervalsIcuHttpClient.GetActivity(intervalsIcuActivityId, cancellationToken);
+        _logger.LogInformation("Got activity from Intervals.ICU");
+
+        if (intervalsIcuActivity.Distance is null || intervalsIcuActivity.TotalElevationGain is null)
+        {
+            _logger.LogWarning("Skip syncing with Garmin, intervals.icu activity has no Distance or Elevation. Distance: {Distance}, Elevation: {Elevation}",
+                intervalsIcuActivity.Distance,
+                intervalsIcuActivity.TotalElevationGain);
+            return;
+        }
+
+        var updateModel = new GarminActivityUpdateRequest
+        {
+            ActivityId = todaysGarminActivity.ActivityId,
+            ActivityName = intervalsIcuActivity.Name,
+            Description = intervalsIcuActivity.Description,
+            SummaryDTO = new GarminActivityUpdateSummary
+            {
+                Distance = (int)intervalsIcuActivity.Distance,
+                ElevationGain = (int)intervalsIcuActivity.TotalElevationGain
+            }
+        };
+
+        _logger.LogInformation("Updating garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
+        await _extendedGarminConnectClient.UpdateActivity(updateModel, cancellationToken);
+        _logger.LogInformation("Updated garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
+
     }
 }
