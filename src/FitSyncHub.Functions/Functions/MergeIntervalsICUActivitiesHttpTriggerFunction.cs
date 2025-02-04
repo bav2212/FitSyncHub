@@ -54,6 +54,12 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             return new BadRequestObjectResult("Count has wrong format");
         }
 
+        if (count == 0)
+        {
+            _logger.LogInformation("Count should be more than 0");
+            return new BadRequestObjectResult("Count should be more than 0");
+        }
+
         if (count > 10)
         {
             _logger.LogInformation("Can't parse more that 10 activities");
@@ -61,7 +67,6 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
         var activities = await _intervalsIcuHttpClient.ListActivities(Constants.AthleteId,
             new DateTime(today, TimeOnly.MinValue), new DateTime(today, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
         _logger.LogInformation("Received {ActivitiesCount} today's activities", activities.Count);
@@ -72,6 +77,26 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             return new BadRequestObjectResult($"Found {activities.Count} todays activities, but specified {count} in request");
         }
 
+        string activityIdToSyncWithGarmin;
+        if (activities.Count == 1)
+        {
+            activityIdToSyncWithGarmin = activities.Single().Id;
+        }
+        else
+        {
+            activityIdToSyncWithGarmin = await MergeActivities(activities, cancellationToken);
+        }
+
+        if (bool.TryParse(syncWithGarminQueryParameter, out var syncWithGarmin) && syncWithGarmin)
+        {
+            await SyncWithGarmin(activityIdToSyncWithGarmin, cancellationToken);
+        }
+
+        return new OkObjectResult("Success");
+    }
+
+    private async Task<string> MergeActivities(IReadOnlyCollection<ActivityResponse> activities, CancellationToken cancellationToken)
+    {
         EventResponse? linkedPairedEvent = default;
         var activityWithLinkedPairedEvent = activities.Where(x => x.PairedEventId.HasValue).SingleOrDefault();
         if (activityWithLinkedPairedEvent != null && activityWithLinkedPairedEvent.PairedEventId is { } pairedEventId)
@@ -147,12 +172,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             _logger.LogInformation("Finished deleting activity {ActivityId} from Intervals.icu", activity.Id);
         }
 
-        if (bool.TryParse(syncWithGarminQueryParameter, out var syncWithGarmin) && syncWithGarmin)
-        {
-            await SyncWithGarmin(createActivityResponse.Id, cancellationToken);
-        }
-
-        return new OkObjectResult("Merged");
+        return createActivityResponse.Id;
     }
 
     private static string? GetMergedEventName(IEnumerable<ActivityResponse> activities,
