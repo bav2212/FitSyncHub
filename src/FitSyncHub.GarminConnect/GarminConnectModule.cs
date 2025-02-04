@@ -25,7 +25,7 @@ public static class GarminConnectModule
         services.AddHttpClient<GarminConnectContext>();
 
         services.AddScoped<ExtendedGarminConnectClient>();
-        services.AddScoped<GarminConnectContext>();
+        services.AddScoped<GarminConnectClient>();
 
         return services;
     }
