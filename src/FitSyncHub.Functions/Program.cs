@@ -19,6 +19,8 @@ var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
+builder.UseMiddleware<ExceptionHandlingMiddleware>();
+
 builder.Configuration.AddUserSecrets<Program>();
 
 builder.Services
