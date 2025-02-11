@@ -153,12 +153,11 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             var updateRequest = new ActivityUpdateRequest
             {
                 Type = activity.Type,
-                Commute = activity.Commute,
                 Description = activity.Description,
                 Name = activity.Name,
                 Gear = new GearUpdateRequest { Id = activity.Gear.Id },
                 Trainer = activity.Trainer,
-                Race = true
+                SubType = ActivitySubType.Race,
             };
 
             await _intervalsIcuHttpClient.UpdateActivity(activity.Id, updateRequest, cancellationToken);
