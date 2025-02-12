@@ -5,6 +5,7 @@ namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 public class ActivityUpdateRequest
 {
     public required ActivitySubType SubType { get; set; }
+    public required int? IcuTrainingLoad { get; set; }
     public required bool? Trainer { get; set; }
     public required string Name { get; set; }
     public required string Description { get; set; }

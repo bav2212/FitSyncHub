@@ -77,25 +77,47 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             return new BadRequestObjectResult($"Found {activities.Count} todays activities, but specified {count} in request");
         }
 
-        string activityIdToSyncWithGarmin;
+        SyncGarminModel syncWithGarminModel;
         if (activities.Count == 1)
         {
-            activityIdToSyncWithGarmin = activities.Single().Id;
+            var activity = activities.Single();
+
+            syncWithGarminModel = new SyncGarminModel
+            {
+                Name = activity.Name,
+                Description = activity.Description,
+                Distance = activity.Distance,
+                TotalElevationGain = activity.TotalElevationGain
+            };
         }
         else
         {
-            activityIdToSyncWithGarmin = await MergeActivities(activities, cancellationToken);
+            var mergedActivity = await UpdateActivitiesWithNewTssAndReturnMergedActivity(activities, cancellationToken);
+
+            syncWithGarminModel = new SyncGarminModel
+            {
+                Name = mergedActivity.Name,
+                Description = mergedActivity.Description,
+                Distance = mergedActivity.Distance,
+                TotalElevationGain = mergedActivity.TotalElevationGain
+            };
+
+            _logger.LogInformation("Start deleting merged activity {ActivityId} from Intervals.icu", mergedActivity.Id);
+            await _intervalsIcuHttpClient.DeleteActivity(mergedActivity.Id, cancellationToken);
+            _logger.LogInformation("Finished deleting merged activity {ActivityId} from Intervals.icu", mergedActivity.Id);
         }
 
         if (bool.TryParse(syncWithGarminQueryParameter, out var syncWithGarmin) && syncWithGarmin)
         {
-            await SyncWithGarmin(activityIdToSyncWithGarmin, cancellationToken);
+            await SyncWithGarmin(syncWithGarminModel, cancellationToken);
         }
 
         return new OkObjectResult("Success");
     }
 
-    private async Task<string> MergeActivities(IReadOnlyCollection<ActivityResponse> activities, CancellationToken cancellationToken)
+    private async Task<ActivityResponse> UpdateActivitiesWithNewTssAndReturnMergedActivity(
+        IReadOnlyCollection<ActivityResponse> activities,
+        CancellationToken cancellationToken)
     {
         EventResponse? linkedPairedEvent = default;
         var activityWithLinkedPairedEvent = activities.Where(x => x.PairedEventId.HasValue).SingleOrDefault();
@@ -143,13 +165,38 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             cancellationToken: cancellationToken);
         _logger.LogInformation("Created merged activity, ActivityId: {ActivityId}", createActivityResponse.Id);
 
-
+        var mergedActivity = await _intervalsIcuHttpClient.GetActivity(createActivityResponse.Id, cancellationToken);
+        // still need this to sync this merged activity with Garmin
         if (linkedPairedEvent != null && IsRaceEvent(linkedPairedEvent))
         {
             _logger.LogInformation("Update activity {ActivityId} to set Race = true", createActivityResponse.Id);
 
-            var activity = await _intervalsIcuHttpClient.GetActivity(createActivityResponse.Id, cancellationToken);
+            var updateRequest = new ActivityUpdateRequest
+            {
+                Type = mergedActivity.Type,
+                Description = mergedActivity.Description,
+                Name = mergedActivity.Name,
+                Gear = new GearUpdateRequest { Id = mergedActivity.Gear.Id },
+                Trainer = mergedActivity.Trainer,
+                SubType = ActivitySubType.Race,
+                IcuTrainingLoad = mergedActivity.IcuTrainingLoad,
+            };
 
+            await _intervalsIcuHttpClient.UpdateActivity(mergedActivity.Id, updateRequest, cancellationToken);
+            _logger.LogInformation("Updated activity {ActivityId} to set Race = true", createActivityResponse.Id);
+            mergedActivity = await _intervalsIcuHttpClient.GetActivity(createActivityResponse.Id, cancellationToken);
+        }
+
+        ActivityResponse? raceActivity = default;
+        if (linkedPairedEvent != null && IsRaceEvent(linkedPairedEvent))
+        {
+            // activity with most tss is race
+            raceActivity = activities.MaxBy(x => x.IcuTrainingLoad);
+        }
+
+        var newTssForActivities = CalculateNewTssForActivities(activities, mergedActivity);
+        foreach (var (activity, newTss) in newTssForActivities)
+        {
             var updateRequest = new ActivityUpdateRequest
             {
                 Type = activity.Type,
@@ -157,25 +204,41 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
                 Name = activity.Name,
                 Gear = new GearUpdateRequest { Id = activity.Gear.Id },
                 Trainer = activity.Trainer,
-                SubType = ActivitySubType.Race,
+                SubType = GetSubType(raceActivity, activity),
+                IcuTrainingLoad = (int)Math.Round(newTss),
             };
-
             await _intervalsIcuHttpClient.UpdateActivity(activity.Id, updateRequest, cancellationToken);
-            _logger.LogInformation("Updated activity {ActivityId} to set Race = true", createActivityResponse.Id);
         }
 
-        foreach (var activity in activities)
-        {
-            _logger.LogInformation("Start deleting activity {ActivityId} from Intervals.icu", activity.Id);
-            await _intervalsIcuHttpClient.DeleteActivity(activity.Id, cancellationToken);
-            _logger.LogInformation("Finished deleting activity {ActivityId} from Intervals.icu", activity.Id);
-        }
-
-        return createActivityResponse.Id;
+        return mergedActivity;
     }
 
-    private static string? GetMergedEventName(IEnumerable<ActivityResponse> activities,
-    EventResponse? linkedPairedEvent)
+    private static ActivitySubType GetSubType(ActivityResponse? raceActivity, ActivityResponse activity)
+    {
+        if (raceActivity is null)
+        {
+            return ActivitySubType.None;
+        }
+
+        var raceActivityStartDate = DateTime.Parse(raceActivity.StartDate);
+        var activityStartDate = DateTime.Parse(activity.StartDate);
+
+        if (raceActivityStartDate == activityStartDate)
+        {
+            return ActivitySubType.Race;
+        }
+
+        if (raceActivityStartDate > activityStartDate)
+        {
+            return ActivitySubType.Warmup;
+        }
+
+        return ActivitySubType.Cooldown;
+    }
+
+    private static string? GetMergedEventName(
+        IEnumerable<ActivityResponse> activities,
+        EventResponse? linkedPairedEvent)
     {
         if (linkedPairedEvent is null)
         {
@@ -196,7 +259,40 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         return linkedPairedEvent.Tags.Contains("race");
     }
 
-    private async Task SyncWithGarmin(string intervalsIcuActivityId, CancellationToken cancellationToken)
+
+    private static List<IntervalsIcuActivityWithNewTss> CalculateNewTssForActivities(
+        IReadOnlyCollection<ActivityResponse> activities, ActivityResponse mergedActivity)
+    {
+        if (mergedActivity.Source != "UPLOAD")
+        {
+            throw new Exception("Unexpected behavior");
+        }
+
+        var mergedTss = mergedActivity.IcuTrainingLoad!.Value;
+        var activitiesTss = activities.Select(x => x.IcuTrainingLoad!.Value).Sum();
+
+        var deltaTssToAdd = mergedTss - activitiesTss;
+
+        List<IntervalsIcuActivityWithNewTss> activitiesWithNewTss = [];
+        foreach (var activity in activities)
+        {
+            var newTss = activity.IcuTrainingLoad!.Value
+                + (activity.IcuTrainingLoad!.Value / (decimal)activitiesTss * deltaTssToAdd);
+
+            activitiesWithNewTss.Add(new IntervalsIcuActivityWithNewTss(activity, newTss));
+        }
+
+        if ((int)Math.Round(activitiesWithNewTss.Select(x => x.Tss).Sum()) != mergedTss)
+        {
+            throw new Exception("Unexpected error while calculation new tss");
+        }
+
+        return activitiesWithNewTss;
+    }
+
+    private async Task SyncWithGarmin(
+        SyncGarminModel syncModel,
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start sync with Garmin");
 
@@ -212,27 +308,23 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         var todaysGarminActivity = garminActivities.Single();
-
-        var intervalsIcuActivity = await _intervalsIcuHttpClient.GetActivity(intervalsIcuActivityId, cancellationToken);
-        _logger.LogInformation("Got activity from Intervals.ICU");
-
-        if (intervalsIcuActivity.Distance is null || intervalsIcuActivity.TotalElevationGain is null)
+        if (syncModel.Distance is null || syncModel.TotalElevationGain is null)
         {
-            _logger.LogWarning("Skip syncing with Garmin, intervals.icu activity has no Distance or Elevation. Distance: {Distance}, Elevation: {Elevation}",
-                intervalsIcuActivity.Distance,
-                intervalsIcuActivity.TotalElevationGain);
+            _logger.LogWarning("Skip syncing with Garmin, no Distance or Elevation. Distance: {Distance}, Elevation: {Elevation}",
+                syncModel.Distance,
+                syncModel.TotalElevationGain);
             return;
         }
 
         var updateModel = new GarminActivityUpdateRequest
         {
             ActivityId = todaysGarminActivity.ActivityId,
-            ActivityName = intervalsIcuActivity.Name,
-            Description = intervalsIcuActivity.Description,
+            ActivityName = syncModel.Name,
+            Description = syncModel.Description,
             SummaryDTO = new GarminActivityUpdateSummary
             {
-                Distance = (int)intervalsIcuActivity.Distance,
-                ElevationGain = (int)intervalsIcuActivity.TotalElevationGain
+                Distance = (int)syncModel.Distance,
+                ElevationGain = (int)syncModel.TotalElevationGain
             }
         };
 
@@ -241,4 +333,16 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         _logger.LogInformation("Updated garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
 
     }
+
+
+    private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, decimal Tss);
+
+    private class SyncGarminModel
+    {
+        public required string Name { get; init; }
+        public required string Description { get; init; }
+        public required double? Distance { get; init; }
+        public required double? TotalElevationGain { get; init; }
+    }
+
 }
