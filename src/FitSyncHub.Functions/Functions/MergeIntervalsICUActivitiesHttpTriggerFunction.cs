@@ -40,6 +40,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
         string? countQueryParameter = req.Query["count"];
+        string? dateQueryParameter = req.Query["date"];
         string? syncWithGarminQueryParameter = req.Query["syncWithGarmin"];
 
         if (countQueryParameter is null)
@@ -66,10 +67,14 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             return new BadRequestObjectResult("Can't parse more that 10 activities");
         }
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (!DateOnly.TryParse(dateQueryParameter, out var date))
+        {
+            date = DateOnly.FromDateTime(DateTime.Today);
+        }
+
         var activities = await _intervalsIcuHttpClient.ListActivities(Constants.AthleteId,
-            new DateTime(today, TimeOnly.MinValue), new DateTime(today, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
-        _logger.LogInformation("Received {ActivitiesCount} today's activities", activities.Count);
+            new DateTime(date, TimeOnly.MinValue), new DateTime(date, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
+        _logger.LogInformation("Received {ActivitiesCount} activities", activities.Count);
 
         if (activities.Count != count)
         {
@@ -145,9 +150,10 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             mergedFileBytes = ms.ToArray();
         }
 
-        var mergedActivityName = GetMergedEventName(activities, linkedPairedEvent);
+        var mergedActivityName = linkedPairedEvent?.Name;
 
         _logger.LogInformation("Creating merged activity");
+        // need this to avoid manual calculation of total Load
         var mergedActivityResponse = await _intervalsIcuHttpClient.CreateActivity(Constants.AthleteId, mergedFileBytes,
             name: mergedActivityName,
             pairedEventId: linkedPairedEvent?.Id,
@@ -215,24 +221,6 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         return ActivitySubType.Cooldown;
-    }
-
-    private static string? GetMergedEventName(
-        IEnumerable<ActivityResponse> activities,
-        EventResponse? linkedPairedEvent)
-    {
-        if (linkedPairedEvent is null)
-        {
-            return default;
-        }
-
-        var eventName = linkedPairedEvent.Name.Trim();
-        if (IsRaceEvent(linkedPairedEvent))
-        {
-            return $"Warmup + {eventName} + cooldown";
-        }
-
-        return eventName;
     }
 
     private static bool IsRaceEvent(EventResponse linkedPairedEvent)
