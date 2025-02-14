@@ -30,12 +30,12 @@ public class FitFileDecoder
         }
         catch (FitException ex)
         {
-            Console.WriteLine("A FitException occurred when trying to decode the FIT file. Message: " + ex.Message);
+            _logger.LogError("A FitException occurred when trying to decode the FIT file. Message: {Message}", ex.Message);
             throw;
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Exception occurred when trying to decode the FIT file. Message: " + ex.Message);
+            _logger.LogError("Exception occurred when trying to decode the FIT file. Message: {Message}", ex.Message);
             throw;
         }
     }
