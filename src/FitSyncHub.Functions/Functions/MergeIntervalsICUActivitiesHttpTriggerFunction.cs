@@ -167,12 +167,12 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             await _intervalsIcuHttpClient.UpdateActivity(activity.Id, updateRequest, cancellationToken);
         }
 
-
+        var mergedActivityName = linkedPairedEvent?.Name
+            ?? string.Join(" + ", activities.Select(x => x.Name.Trim()));
         var mergedFitSessionMessage = mergedFitFile.SessionMesgs.Single();
-
         var syncWithGarminModel = new SyncGarminModel
         {
-            Name = linkedPairedEvent?.Name,
+            Name = mergedActivityName,
             Description = null,
             Distance = mergedFitSessionMessage.GetTotalDistance(),
             TotalElevationGain = mergedFitSessionMessage.GetTotalAscent()
@@ -288,7 +288,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
     private class SyncGarminModel
     {
-        public required string? Name { get; init; }
+        public required string Name { get; init; }
         public required string? Description { get; init; }
         public required double? Distance { get; init; }
         public required double? TotalElevationGain { get; init; }
