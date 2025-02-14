@@ -1,4 +1,6 @@
-﻿using FitSyncHub.Common.Fit;
+﻿using Dynastream.Fit;
+using FitSyncHub.Common;
+using FitSyncHub.Common.Fit;
 using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
@@ -8,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
 
@@ -124,7 +127,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             await _intervalsIcuHttpClient.UnlinkPairedWorkout(activityWithLinkedPairedEvent.Id, cancellationToken);
         }
 
-        Dictionary<string, Dynastream.Fit.FitMessages> activityFitMessages = [];
+        Dictionary<string, FitMessages> activityFitMessages = [];
         foreach (var activity in activities)
         {
             _logger.LogInformation("Downloading fit file for activity {ActivityId}", activity.Id);
@@ -138,29 +141,8 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         _logger.LogInformation("Start merging fit messages");
-        var result = new FitFileMerger([.. activityFitMessages.Values]);
+        var mergedFitFile = new FitFileMerger([.. activityFitMessages.Values]);
         _logger.LogInformation("Finished merging fit messages");
-
-        byte[] mergedFileBytes;
-        using (var ms = new MemoryStream())
-        {
-            _logger.LogInformation("Start encoding merged fit messages");
-            _encoder.Encode(ms, result);
-            _logger.LogInformation("Finished encoding merged fit messages");
-            mergedFileBytes = ms.ToArray();
-        }
-
-        var mergedActivityName = linkedPairedEvent?.Name;
-
-        _logger.LogInformation("Creating merged activity");
-        // need this to avoid manual calculation of total Load
-        var mergedActivityResponse = await _intervalsIcuHttpClient.CreateActivity(Constants.AthleteId, mergedFileBytes,
-            name: mergedActivityName,
-            pairedEventId: linkedPairedEvent?.Id,
-            cancellationToken: cancellationToken);
-        _logger.LogInformation("Created merged activity, ActivityId: {ActivityId}", mergedActivityResponse.Id);
-        var mergedActivity =
-            await _intervalsIcuHttpClient.GetActivity(mergedActivityResponse.Id, cancellationToken);
 
         ActivityResponse? raceActivity = default;
         if (linkedPairedEvent != null && IsRaceEvent(linkedPairedEvent))
@@ -169,7 +151,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             raceActivity = activities.MaxBy(x => x.IcuTrainingLoad);
         }
 
-        var newTssForActivities = CalculateNewTssForActivities(activities, mergedActivity);
+        var newTssForActivities = CalculateNewTssForActivities(activities, mergedFitFile);
         foreach (var (activity, newTss) in newTssForActivities)
         {
             var updateRequest = new ActivityUpdateRequest
@@ -185,20 +167,20 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             await _intervalsIcuHttpClient.UpdateActivity(activity.Id, updateRequest, cancellationToken);
         }
 
+
+        var mergedFitSessionMessage = mergedFitFile.SessionMesgs.Single();
+
         var syncWithGarminModel = new SyncGarminModel
         {
-            Name = mergedActivity.Name,
-            Description = mergedActivity.Description,
-            Distance = mergedActivity.Distance,
-            TotalElevationGain = mergedActivity.TotalElevationGain
+            Name = linkedPairedEvent?.Name,
+            Description = null,
+            Distance = mergedFitSessionMessage.GetTotalDistance(),
+            TotalElevationGain = mergedFitSessionMessage.GetTotalAscent()
         };
-
-        _logger.LogInformation("Start deleting merged activity {ActivityId} from Intervals.icu", mergedActivity.Id);
-        await _intervalsIcuHttpClient.DeleteActivity(mergedActivity.Id, cancellationToken);
-        _logger.LogInformation("Finished deleting merged activity {ActivityId} from Intervals.icu", mergedActivity.Id);
 
         return syncWithGarminModel;
     }
+
 
     private static ActivitySubType GetSubType(ActivityResponse? raceActivity, ActivityResponse activity)
     {
@@ -230,28 +212,26 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
 
     private static List<IntervalsIcuActivityWithNewTss> CalculateNewTssForActivities(
-        IReadOnlyCollection<ActivityResponse> activities, ActivityResponse mergedActivity)
+        IReadOnlyCollection<ActivityResponse> activities,
+        FitMessages mergedFitMessages)
     {
-        if (mergedActivity.Source != "UPLOAD")
-        {
-            throw new Exception("Unexpected behavior");
-        }
+        var ftp = activities.Select(x => x.IcuFtp!.Value).Distinct().Single();
 
-        var mergedTss = mergedActivity.IcuTrainingLoad!.Value;
-        var activitiesTss = activities.Select(x => x.IcuTrainingLoad!.Value).Sum();
+        var mergedTss = TssCalculator.Calculate(mergedFitMessages, ftp)!.Tss;
+        var activitiesTss = activities.Select(x => x.PowerLoad!.Value).Sum();
 
         var deltaTssToAdd = mergedTss - activitiesTss;
 
         List<IntervalsIcuActivityWithNewTss> activitiesWithNewTss = [];
         foreach (var activity in activities)
         {
-            var newTss = activity.IcuTrainingLoad!.Value
-                + (activity.IcuTrainingLoad!.Value / (decimal)activitiesTss * deltaTssToAdd);
+            var newTss = activity.PowerLoad!.Value
+                + (activity.PowerLoad!.Value / (double)activitiesTss * deltaTssToAdd);
 
             activitiesWithNewTss.Add(new IntervalsIcuActivityWithNewTss(activity, newTss));
         }
 
-        if ((int)Math.Round(activitiesWithNewTss.Select(x => x.Tss).Sum()) != mergedTss)
+        if (Math.Round(activitiesWithNewTss.Select(x => x.Tss).Sum()) != Math.Round(mergedTss))
         {
             throw new Exception("Unexpected error while calculation new tss");
         }
@@ -304,14 +284,13 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
     }
 
 
-    private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, decimal Tss);
+    private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, double Tss);
 
     private class SyncGarminModel
     {
-        public required string Name { get; init; }
-        public required string Description { get; init; }
+        public required string? Name { get; init; }
+        public required string? Description { get; init; }
         public required double? Distance { get; init; }
         public required double? TotalElevationGain { get; init; }
     }
-
 }

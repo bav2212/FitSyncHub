@@ -7,7 +7,7 @@ public class GarminActivityUpdateRequest
     [JsonPropertyName("activityId")]
     public required long ActivityId { get; set; }
     [JsonPropertyName("activityName")]
-    public required string ActivityName { get; set; }
+    public required string? ActivityName { get; set; }
     [JsonPropertyName("summaryDTO")]
     public required GarminActivityUpdateSummary SummaryDTO { get; set; }
     [JsonPropertyName("description")]
