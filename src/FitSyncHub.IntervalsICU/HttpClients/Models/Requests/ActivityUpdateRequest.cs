@@ -16,11 +16,11 @@ public class ActivityUpdateRequest
 [JsonConverter(typeof(JsonStringEnumConverter<ActivitySubType>))]
 public enum ActivitySubType
 {
-    None,
-    Commute,
-    Warmup,
-    Cooldown,
-    Race
+    NONE,
+    COMMUTE,
+    WARMUP,
+    COOLDOWN,
+    RACE
 }
 
 public class GearUpdateRequest

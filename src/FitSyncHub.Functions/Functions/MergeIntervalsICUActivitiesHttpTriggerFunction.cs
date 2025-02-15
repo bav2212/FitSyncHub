@@ -106,7 +106,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
         if (bool.TryParse(syncWithGarminQueryParameter, out var syncWithGarmin) && syncWithGarmin)
         {
-            await SyncWithGarmin(syncWithGarminModel, cancellationToken);
+            await SyncWithGarmin(date, syncWithGarminModel, cancellationToken);
         }
 
         return new OkObjectResult("Success");
@@ -181,12 +181,11 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         return syncWithGarminModel;
     }
 
-
     private static ActivitySubType GetSubType(ActivityResponse? raceActivity, ActivityResponse activity)
     {
         if (raceActivity is null)
         {
-            return ActivitySubType.None;
+            return ActivitySubType.NONE;
         }
 
         var raceActivityStartDate = DateTime.Parse(raceActivity.StartDate);
@@ -194,22 +193,21 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
         if (raceActivityStartDate == activityStartDate)
         {
-            return ActivitySubType.Race;
+            return ActivitySubType.RACE;
         }
 
         if (raceActivityStartDate > activityStartDate)
         {
-            return ActivitySubType.Warmup;
+            return ActivitySubType.WARMUP;
         }
 
-        return ActivitySubType.Cooldown;
+        return ActivitySubType.COOLDOWN;
     }
 
     private static bool IsRaceEvent(EventResponse linkedPairedEvent)
     {
         return linkedPairedEvent.Tags.Contains("race");
     }
-
 
     private static List<IntervalsIcuActivityWithNewTss> CalculateNewTssForActivities(
         IReadOnlyCollection<ActivityResponse> activities,
@@ -240,15 +238,17 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
     }
 
     private async Task SyncWithGarmin(
+        DateOnly date,
         SyncGarminModel syncModel,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start sync with Garmin");
 
-        var todayDate = DateTime.UtcNow.Date;
-
-        var garminActivities = await _extendedGarminConnectClient
-            .GetActivitiesByDate(todayDate.Date, todayDate.AddDays(1), null, cancellationToken);
+        var garminActivities = await _extendedGarminConnectClient.GetActivitiesByDate(
+            new DateTime(date, TimeOnly.MinValue),
+            new DateTime(date, TimeOnly.MaxValue),
+            null,
+            cancellationToken);
         _logger.LogInformation("Got {Count} activities from Garmin", garminActivities.Length);
         if (garminActivities.Length != 1)
         {
@@ -282,7 +282,6 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         _logger.LogInformation("Updated garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
 
     }
-
 
     private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, double Tss);
 
