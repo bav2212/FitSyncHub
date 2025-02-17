@@ -239,7 +239,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
     private async Task SyncWithGarmin(
         DateOnly date,
-        ActivitySummary activitySymmary,
+        ActivitySummary activitySummary,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start sync with Garmin");
@@ -257,23 +257,23 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         var todaysGarminActivity = garminActivities.Single();
-        if (activitySymmary.Distance is null || activitySymmary.ElevationAscent is null)
+        if (activitySummary.Distance is null || activitySummary.ElevationAscent is null)
         {
             _logger.LogWarning("Skip syncing with Garmin, no Distance or Elevation. Distance: {Distance}, Elevation ascent: {ElevationAscent}",
-                activitySymmary.Distance,
-                activitySymmary.ElevationAscent);
+                activitySummary.Distance,
+                activitySummary.ElevationAscent);
             return;
         }
 
         var updateModel = new GarminActivityUpdateRequest
         {
             ActivityId = todaysGarminActivity.ActivityId,
-            ActivityName = activitySymmary.Name,
-            Description = activitySymmary.Description,
+            ActivityName = activitySummary.Name,
+            Description = activitySummary.Description,
             SummaryDTO = new GarminActivityUpdateSummary
             {
-                Distance = (int)activitySymmary.Distance,
-                ElevationGain = (int)activitySymmary.ElevationAscent,
+                Distance = (int)activitySummary.Distance,
+                ElevationGain = (int)activitySummary.ElevationAscent,
             }
         };
 

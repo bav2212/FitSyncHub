@@ -36,6 +36,17 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
             };
         }
 
+        if (cookies is null || authenticityToken is null)
+        {
+            return new CookieLoginResponse
+            {
+                Success = false,
+                Cookies = null,
+                AuthenticityToken = null
+            };
+        }
+
+
         var response = await _cookieAuthService.Login(username, password, cancellationToken);
         if (response.Success)
         {

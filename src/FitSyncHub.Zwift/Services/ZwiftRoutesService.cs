@@ -33,7 +33,7 @@ public class ZwiftRoutesService
                 continue;
             }
 
-            var link = row[ExcelReader.HyperlinkColumnName].ToString();
+            var link = row[ExcelReader.HyperlinkColumnName]?.ToString() ?? throw new Exception("No hyperlink");
             var scrapeResult = await ZwiftInsiderScraper.ScrapeZwiftInsiderWorkoutPage(new Uri(link));
 
             var length = scrapeResult.LeadInAndElevation?.Length ?? 0;
