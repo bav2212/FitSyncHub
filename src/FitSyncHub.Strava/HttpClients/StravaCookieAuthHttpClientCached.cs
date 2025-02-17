@@ -28,24 +28,13 @@ public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
         var (cookies, authenticityToken) = await GetStoredCookies(username, cancellationToken);
         if (cookies is { } && authenticityToken is { } && await CheckCookiesCorrect(cookies, cancellationToken))
         {
-            return new CookieLoginResponse
-            {
-                Success = true,
-                Cookies = cookies,
-                AuthenticityToken = authenticityToken
-            };
+            return new CookieLoginResponse(cookies, authenticityToken);
         }
 
         if (cookies is null || authenticityToken is null)
         {
-            return new CookieLoginResponse
-            {
-                Success = false,
-                Cookies = null,
-                AuthenticityToken = null
-            };
+            return CookieLoginResponse.Unsuccess;
         }
-
 
         var response = await _cookieAuthService.Login(username, password, cancellationToken);
         if (response.Success)

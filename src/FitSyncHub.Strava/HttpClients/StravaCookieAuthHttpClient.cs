@@ -38,12 +38,9 @@ public class StravaCookieAuthHttpClient : IStravaCookieAuthHttpClient
         var postResponse = await client.PostAsync(StravaUrlSession, content, cancellationToken);
         postResponse.EnsureSuccessStatusCode();
 
-        return new CookieLoginResponse
-        {
-            Success = await CheckCookiesCorrect(cookies, cancellationToken),
-            AuthenticityToken = authenticityToken,
-            Cookies = cookies,
-        };
+        return await CheckCookiesCorrect(cookies, cancellationToken)
+            ? new CookieLoginResponse(cookies, authenticityToken)
+            : CookieLoginResponse.Unsuccess;
     }
 
     public async Task<bool> CheckCookiesCorrect(

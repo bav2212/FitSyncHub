@@ -5,10 +5,23 @@ namespace FitSyncHub.Strava.Models.Responses;
 
 public record CookieLoginResponse
 {
+    public static readonly CookieLoginResponse Unsuccess = new(success: false);
+
+    private CookieLoginResponse(bool success)
+    {
+        Success = success;
+    }
+
+    public CookieLoginResponse(CookieContainer cookies, string authenticityToken) : this(true)
+    {
+        Cookies = cookies;
+        AuthenticityToken = authenticityToken;
+    }
+
+
     [MemberNotNullWhen(true, nameof(Cookies))]
     [MemberNotNullWhen(true, nameof(AuthenticityToken))]
-    public required bool Success { get; init; }
-
-    public required CookieContainer? Cookies { get; init; }
-    public required string? AuthenticityToken { get; init; }
+    public bool Success { get; private init; }
+    public CookieContainer? Cookies { get; private init; }
+    public string? AuthenticityToken { get; private init; }
 }
