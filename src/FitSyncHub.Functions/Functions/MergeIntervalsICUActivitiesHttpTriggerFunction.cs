@@ -85,34 +85,34 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             return new BadRequestObjectResult($"Found {activities.Count} todays activities, but specified {count} in request");
         }
 
-        SyncGarminModel syncWithGarminModel;
+        ActivitySummary activitySummary;
         if (activities.Count == 1)
         {
             var activity = activities.Single();
 
-            syncWithGarminModel = new SyncGarminModel
+            activitySummary = new ActivitySummary
             {
                 Name = activity.Name,
                 Description = activity.Description,
                 Distance = activity.Distance,
-                TotalElevationGain = activity.TotalElevationGain
+                ElevationAscent = activity.TotalElevationGain!.Value,
             };
         }
         else
         {
-            syncWithGarminModel
-                = await UpdateActivitiesWithNewTssAndPrepareGarminSyncModel(activities, cancellationToken);
+            activitySummary
+                = await UpdateActivitiesWithNewTssAndReturnSummary(activities, cancellationToken);
         }
 
         if (bool.TryParse(syncWithGarminQueryParameter, out var syncWithGarmin) && syncWithGarmin)
         {
-            await SyncWithGarmin(date, syncWithGarminModel, cancellationToken);
+            await SyncWithGarmin(date, activitySummary, cancellationToken);
         }
 
         return new OkObjectResult("Success");
     }
 
-    private async Task<SyncGarminModel> UpdateActivitiesWithNewTssAndPrepareGarminSyncModel(
+    private async Task<ActivitySummary> UpdateActivitiesWithNewTssAndReturnSummary(
         IReadOnlyCollection<ActivityResponse> activities,
         CancellationToken cancellationToken)
     {
@@ -170,12 +170,12 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         var mergedActivityName = linkedPairedEvent?.Name
             ?? string.Join(" + ", activities.Select(x => x.Name.Trim()));
         var mergedFitSessionMessage = mergedFitFile.SessionMesgs.Single();
-        var syncWithGarminModel = new SyncGarminModel
+        var syncWithGarminModel = new ActivitySummary
         {
             Name = mergedActivityName,
             Description = null,
             Distance = mergedFitSessionMessage.GetTotalDistance(),
-            TotalElevationGain = mergedFitSessionMessage.GetTotalAscent()
+            ElevationAscent = mergedFitSessionMessage.GetTotalAscent()
         };
 
         return syncWithGarminModel;
@@ -239,7 +239,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
     private async Task SyncWithGarmin(
         DateOnly date,
-        SyncGarminModel syncModel,
+        ActivitySummary activitySymmary,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start sync with Garmin");
@@ -257,23 +257,23 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         var todaysGarminActivity = garminActivities.Single();
-        if (syncModel.Distance is null || syncModel.TotalElevationGain is null)
+        if (activitySymmary.Distance is null || activitySymmary.ElevationAscent is null)
         {
-            _logger.LogWarning("Skip syncing with Garmin, no Distance or Elevation. Distance: {Distance}, Elevation: {Elevation}",
-                syncModel.Distance,
-                syncModel.TotalElevationGain);
+            _logger.LogWarning("Skip syncing with Garmin, no Distance or Elevation. Distance: {Distance}, Elevation ascent: {ElevationAscent}",
+                activitySymmary.Distance,
+                activitySymmary.ElevationAscent);
             return;
         }
 
         var updateModel = new GarminActivityUpdateRequest
         {
             ActivityId = todaysGarminActivity.ActivityId,
-            ActivityName = syncModel.Name,
-            Description = syncModel.Description,
+            ActivityName = activitySymmary.Name,
+            Description = activitySymmary.Description,
             SummaryDTO = new GarminActivityUpdateSummary
             {
-                Distance = (int)syncModel.Distance,
-                ElevationGain = (int)syncModel.TotalElevationGain
+                Distance = (int)activitySymmary.Distance,
+                ElevationGain = (int)activitySymmary.ElevationAscent,
             }
         };
 
@@ -285,11 +285,11 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
     private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, double Tss);
 
-    private class SyncGarminModel
+    private class ActivitySummary
     {
         public required string Name { get; init; }
         public required string? Description { get; init; }
         public required double? Distance { get; init; }
-        public required double? TotalElevationGain { get; init; }
+        public required double? ElevationAscent { get; init; }
     }
 }

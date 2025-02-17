@@ -16,8 +16,8 @@ public class GarminActivityUpdateRequest
 
 public class GarminActivityUpdateSummary
 {
-    [JsonPropertyName("elevationGain")]
-    public required int ElevationGain { get; set; }
     [JsonPropertyName("distance")]
     public required int Distance { get; set; }
+    [JsonPropertyName("elevationGain")]
+    public required int ElevationGain { get; set; }
 }
