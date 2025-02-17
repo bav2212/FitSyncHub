@@ -1,4 +1,4 @@
-namespace FitSyncHub.IntervalsICU.Scrapers;
+﻿namespace FitSyncHub.IntervalsICU.Scrapers;
 
 public class WhatsOnZwiftScrapedResponse
 {

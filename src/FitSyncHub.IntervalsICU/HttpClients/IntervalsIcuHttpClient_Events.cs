@@ -19,5 +19,4 @@ public partial class IntervalsIcuHttpClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
         return JsonSerializer.Deserialize(content, IntervalsIcuSourceGenerationContext.Default.EventResponse)!;
     }
-
 }
