@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 
-namespace FitSyncHub.Zwift.Scrapers;
+namespace FitSyncHub.ZwiftInsider.Scrapers;
 public class ZwiftInsiderScraper
 {
     public static async Task<ZwiftInsiderScraperResponse> ScrapeZwiftInsiderWorkoutPage(Uri uri)

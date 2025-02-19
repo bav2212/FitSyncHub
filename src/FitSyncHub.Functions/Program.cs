@@ -48,7 +48,7 @@ builder.Services.ConfigureGarminConnectModule(
     builder.Configuration["GarminConnect:Credentials:Password"]
 );
 
-//builder.Services.ConfigureZwiftModule();
+//builder.Services.ConfigureZwiftInsiderModule();
 
 builder.Services.AddTransient<PersistedGrantRepository>();
 builder.Services.AddTransient<SummaryActivityRepository>();

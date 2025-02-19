@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Functions", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.IntervalsICU", "src\FitSyncHub.IntervalsICU\FitSyncHub.IntervalsICU.csproj", "{71732C2B-F039-467A-80A0-0F3CC4BF84B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Zwift", "src\FitSyncHub.Zwift\FitSyncHub.Zwift.csproj", "{2FA9102A-57C3-4566-8ED1-28C33886B8FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.ZwiftInsider", "src\FitSyncHub.Zwift\FitSyncHub.ZwiftInsider.csproj", "{2FA9102A-57C3-4566-8ED1-28C33886B8FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Strava", "src\FitSyncHub.Strava\FitSyncHub.Strava.csproj", "{6583EF1B-7D25-4856-AADB-450E16BF437C}"
 EndProject

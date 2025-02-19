@@ -1,13 +1,13 @@
 ﻿using System.Data;
 using System.Text.Json;
-using FitSyncHub.Zwift.Scrapers;
+using FitSyncHub.ZwiftInsider.Scrapers;
 
-namespace FitSyncHub.Zwift.Services;
-public class ZwiftRoutesService
+namespace FitSyncHub.ZwiftInsider.Services;
+public class ZwiftInsiderRoutesService
 {
     private readonly ExcelReader _excelReader;
 
-    public ZwiftRoutesService(ExcelReader excelReader)
+    public ZwiftInsiderRoutesService(ExcelReader excelReader)
     {
         _excelReader = excelReader;
     }
@@ -38,13 +38,13 @@ public class ZwiftRoutesService
 
             var length = scrapeResult.LeadInAndElevation?.Length ?? 0;
             var elevation = scrapeResult.LeadInAndElevation?.Elevation ?? 0;
-            var twoWattsPerKg = (scrapeResult.WattPerKg is { }
-                && scrapeResult.WattPerKg.WattsPerKdTimeEstimate.TryGetValue(2, out var twoWattPerKgMinutes))
+            var twoWattsPerKg = scrapeResult.WattPerKg is { }
+                && scrapeResult.WattPerKg.WattsPerKdTimeEstimate.TryGetValue(2, out var twoWattPerKgMinutes)
                 ? twoWattPerKgMinutes
                 : 0;
 
-            var threeWattsPerKg = (scrapeResult.WattPerKg is { }
-                && scrapeResult.WattPerKg.WattsPerKdTimeEstimate.TryGetValue(3, out var threeWattPerKgMinutes))
+            var threeWattsPerKg = scrapeResult.WattPerKg is { }
+                && scrapeResult.WattPerKg.WattsPerKdTimeEstimate.TryGetValue(3, out var threeWattPerKgMinutes)
                 ? threeWattPerKgMinutes
                 : 0;
 

@@ -1,6 +1,6 @@
 ﻿using FitSyncHub.Common.Models;
 
-namespace FitSyncHub.Functions.Helpers;
+namespace FitSyncHub.Common.Helpers;
 
 /// <summary>
 /// 

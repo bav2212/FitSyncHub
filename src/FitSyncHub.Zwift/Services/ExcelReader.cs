@@ -5,7 +5,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using FitSyncHub.Zwift.Helpers;
 using Microsoft.Extensions.Logging;
 
-namespace FitSyncHub.Zwift.Services;
+namespace FitSyncHub.ZwiftInsider.Services;
 
 public class ExcelReader
 {

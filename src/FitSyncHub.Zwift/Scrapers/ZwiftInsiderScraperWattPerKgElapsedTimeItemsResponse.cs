@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.Zwift.Scrapers;
+﻿namespace FitSyncHub.ZwiftInsider.Scrapers;
 
 public record ZwiftInsiderScraperWattPerKgElapsedTimeItemsResponse
 {
