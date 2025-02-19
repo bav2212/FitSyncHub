@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml.Spreadsheet;
 
-namespace FitSyncHub.Zwift.Helpers;
+namespace FitSyncHub.ZwiftInsider.Helpers;
 
 internal partial class SpreadSheetHelper
 {
@@ -77,4 +77,3 @@ internal partial class SpreadSheetHelper
     [GeneratedRegex("^[A-Z]+$")]
     private static partial Regex ColumnNameUpperRegex();
 }
-

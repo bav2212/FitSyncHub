@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using FitSyncHub.Zwift.Helpers;
+using FitSyncHub.ZwiftInsider.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.ZwiftInsider.Services;
