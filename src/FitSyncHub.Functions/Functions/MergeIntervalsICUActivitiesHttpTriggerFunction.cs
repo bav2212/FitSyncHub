@@ -252,7 +252,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         _logger.LogInformation("Got {Count} activities from Garmin", garminActivities.Length);
         if (garminActivities.Length != 1)
         {
-            throw new InvalidDataException($"Skip syncing with Garmin, cause activities count = {garminActivities.Length}"));
+            throw new InvalidDataException($"Skip syncing with Garmin, cause activities count = {garminActivities.Length}");
         }
 
         var todaysGarminActivity = garminActivities.Single();
