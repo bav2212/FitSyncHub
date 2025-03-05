@@ -1,4 +1,8 @@
-﻿using Garmin.Connect.Auth;
+﻿using FitSyncHub.GarminConnect.Auth;
+using FitSyncHub.GarminConnect.Auth.Abstractions;
+using FitSyncHub.GarminConnect.HttpClients;
+using FitSyncHub.GarminConnect.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FitSyncHub.GarminConnect;
@@ -7,28 +11,22 @@ public static class GarminConnectModule
 {
     public static IServiceCollection ConfigureGarminConnectModule(
         this IServiceCollection services,
-        string? email,
-        string? password)
+        string garminAuthOptionsPath)
     {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new ArgumentException("Value cannot be null or whitespace.", nameof(email));
-        }
-
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            throw new ArgumentException("Value cannot be null or whitespace.", nameof(password));
-        }
-
         services.AddMemoryCache();
-        services.AddSingleton<IAuthParameters>((sp) => new BasicAuthParameters(email, password));
+
+        services.AddOptions<GarminConnectAuthOptions>()
+            .Configure<IConfiguration>((settings, configuration) =>
+            {
+                configuration.GetSection(garminAuthOptionsPath).Bind(settings);
+            })
+            .ValidateOnStart();
 
         services.AddHttpClient<IGarminAuthenticationService, GarminAuthenticationService>();
         services.AddTransient<GarminConnectAuthenticationDelegatingHandler>();
         services.AddHttpClient<GarminConnectHttpClient>((sp, client) =>
         {
-            var baseAddress = sp.GetRequiredService<IAuthParameters>().BaseUrl;
-            client.BaseAddress = new Uri(baseAddress);
+            client.BaseAddress = new Uri("https://connect.garmin.com");
         })
         .AddHttpMessageHandler<GarminConnectAuthenticationDelegatingHandler>();
 

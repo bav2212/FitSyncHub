@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.GarminConnect.Models.Auth;
+﻿namespace FitSyncHub.GarminConnect.Auth;
 
 public record ConsumerCredentials
 {

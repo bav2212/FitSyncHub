@@ -1,5 +1,5 @@
 ﻿using FitSyncHub.Functions.Options;
-using FitSyncHub.GarminConnect;
+using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.Strava.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

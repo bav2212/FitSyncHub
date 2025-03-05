@@ -1,7 +1,7 @@
 ﻿using Dynastream.Fit;
 using FitSyncHub.Common;
 using FitSyncHub.Common.Fit;
-using FitSyncHub.GarminConnect;
+using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.Models.Requests;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;

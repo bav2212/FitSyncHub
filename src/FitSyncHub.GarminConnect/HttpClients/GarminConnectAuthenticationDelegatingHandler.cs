@@ -1,15 +1,14 @@
-﻿using FitSyncHub.GarminConnect.Models.Auth;
-using Garmin.Connect.Auth;
-using Garmin.Connect.Auth.External;
+﻿using FitSyncHub.GarminConnect.Auth;
+using FitSyncHub.GarminConnect.Auth.Abstractions;
+using FitSyncHub.GarminConnect.Exceptions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Polly;
 
-namespace FitSyncHub.GarminConnect;
+namespace FitSyncHub.GarminConnect.HttpClients;
 
 public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 {
-    private readonly IAuthParameters _authParameters;
     private readonly IGarminAuthenticationService _garminAuthenticationService;
     private readonly IMemoryCache _memoryCache;
     private readonly ILogger<GarminConnectAuthenticationDelegatingHandler> _logger;
@@ -19,12 +18,10 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
     private readonly int _initialWaitDurationMilliseconds = 200;
 
     public GarminConnectAuthenticationDelegatingHandler(
-        IAuthParameters authParameters,
         IGarminAuthenticationService garminAuthenticationService,
         IMemoryCache memoryCache,
         ILogger<GarminConnectAuthenticationDelegatingHandler> logger)
     {
-        _authParameters = authParameters;
         _garminAuthenticationService = garminAuthenticationService;
         _memoryCache = memoryCache;
         _logger = logger;
@@ -45,17 +42,17 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
                     _logger.LogWarning("Error while authentication: {Error}, retry {RetryCount} after {Timespan}", response.Message, retryCount, timespan);
                 });
 
-        var oAuth2Token =
-            await authorizationEnsuringPolicy.ExecuteAsync(() => Refresh(cancellationToken));
+        var authenticationResult =
+            await authorizationEnsuringPolicy.ExecuteAsync(() => Authenticate(cancellationToken));
 
-        request.Headers.Add("cookie", _authParameters.Cookies);
-        request.Headers.Add("authorization", $"Bearer {oAuth2Token.AccessToken}");
+        request.Headers.Add("cookie", authenticationResult.Cookie);
+        request.Headers.Add("authorization", $"Bearer {authenticationResult.OAuthToken2.AccessToken}");
         request.Headers.Add("di-backend", "connectapi.garmin.com");
 
         return await base.SendAsync(request, cancellationToken);
     }
 
-    private Task<OAuth2Token> Refresh(CancellationToken cancellationToken)
+    private Task<AuthenticationResult> Authenticate(CancellationToken cancellationToken)
     {
         return _memoryCache.GetOrCreateAsync(_cacheKey, async entry =>
         {

@@ -4,35 +4,36 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
 using FitSyncHub.Functions.JsonSerializerContexts;
-using FitSyncHub.GarminConnect.Models.Auth;
-using Garmin.Connect.Auth;
-using Garmin.Connect.Auth.External;
+using FitSyncHub.GarminConnect.Auth.Abstractions;
+using FitSyncHub.GarminConnect.Exceptions;
+using FitSyncHub.GarminConnect.Options;
+using Microsoft.Extensions.Options;
 using OAuth;
-using ConsumerCredentials = FitSyncHub.GarminConnect.Models.Auth.ConsumerCredentials;
 
-namespace FitSyncHub.GarminConnect;
+namespace FitSyncHub.GarminConnect.Auth;
 
-internal class GarminAuthenticationService : IGarminAuthenticationService
+internal partial class GarminAuthenticationService : IGarminAuthenticationService
 {
-    private readonly IAuthParameters _authParameters;
     private readonly HttpClient _httpClient;
 
+    private readonly BasicAuthParameters _authParameters;
     private readonly string _ssoUrl;
     private readonly string _embedUrl;
     private readonly string _signInUrl;
     private readonly string _oAuthConsumerUrl = "https://thegarth.s3.amazonaws.com/oauth_consumer.json";
 
-    public GarminAuthenticationService(HttpClient httpClient, IAuthParameters authParameters)
+    public GarminAuthenticationService(HttpClient httpClient,
+        IOptions<GarminConnectAuthOptions> authOptions)
     {
-        _authParameters = authParameters;
         _httpClient = httpClient;
 
+        _authParameters = new BasicAuthParameters(authOptions.Value.Username, authOptions.Value.Password);
         _ssoUrl = $"https://sso.{_authParameters.Domain}/sso";
         _embedUrl = $"{_ssoUrl}/embed";
         _signInUrl = $"{_ssoUrl}/signin";
     }
 
-    public async Task<OAuth2Token> RefreshGarminAuthenticationAsync(CancellationToken cancellationToken)
+    public async Task<AuthenticationResult> RefreshGarminAuthenticationAsync(CancellationToken cancellationToken)
     {
         _authParameters.Cookies = await RequestCookies(cancellationToken);
         _authParameters.Csrf = await RequestCsrfToken(cancellationToken);
@@ -43,7 +44,13 @@ internal class GarminAuthenticationService : IGarminAuthenticationService
 
         try
         {
-            return await GetOAuth2TokenAsync(auth1Token, consumerCredentials, cancellationToken);
+            var token = await GetOAuth2TokenAsync(auth1Token, consumerCredentials, cancellationToken);
+
+            return new AuthenticationResult
+            {
+                OAuthToken2 = token,
+                Cookie = _authParameters.Cookies,
+            };
         }
         catch (Exception e)
         {
@@ -145,10 +152,8 @@ internal class GarminAuthenticationService : IGarminAuthenticationService
         }
 
         var content = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
-        var regexCSRF = new Regex("name=\"_csrf\"\\s+value=\"(.+?)\"", RegexOptions.Compiled | RegexOptions.Multiline);
 
-        var match = regexCSRF.Match(content);
-
+        var match = RegexCSRF().Match(content);
         if (!match.Success)
         {
             throw new GarminConnectAuthenticationException("Failed to find regex match for csrf token.")
@@ -211,9 +216,7 @@ internal class GarminAuthenticationService : IGarminAuthenticationService
             { Code = Code.OAuth1TicketNotFound };
         }
 
-        var regexTicket = new Regex(@"embed\?ticket=([^""]+)""", RegexOptions.Compiled | RegexOptions.Multiline);
-        var match = regexTicket.Match(content);
-
+        var match = RegetTicket().Match(content);
         if (!match.Success)
         {
             throw new GarminConnectAuthenticationException("Failed to find regex match for ticket.")
@@ -314,4 +317,10 @@ internal class GarminAuthenticationService : IGarminAuthenticationService
         return JsonSerializer.Deserialize(content, GarminConnectSnakeCaseSerializerContext.Default.OAuth2Token)
             ?? throw new InvalidOperationException("Failed to deserialize OAuth2Token from Garmin response.");
     }
+
+    [GeneratedRegex("name=\"_csrf\"\\s+value=\"(.+?)\"", RegexOptions.Multiline | RegexOptions.Compiled)]
+    private static partial Regex RegexCSRF();
+
+    [GeneratedRegex(@"embed\?ticket=([^""]+)""", RegexOptions.Multiline | RegexOptions.Compiled)]
+    private static partial Regex RegetTicket();
 }

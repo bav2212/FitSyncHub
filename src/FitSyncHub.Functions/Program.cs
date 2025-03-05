@@ -43,10 +43,7 @@ builder.Services.AddOptions<BodyMeasurementsOptions>()
 builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
 builder.Services.ConfigureStravaModule<StravaAuthCookieStorageManager, StravaOAuthService>();
 builder.Services.ConfigureIntervalsIcuModule(builder.Configuration["IntervalsIcuApiKey"]);
-builder.Services.ConfigureGarminConnectModule(
-    builder.Configuration["GarminConnect:Credentials:Username"],
-    builder.Configuration["GarminConnect:Credentials:Password"]
-);
+builder.Services.ConfigureGarminConnectModule("GarminConnect:Credentials");
 
 //builder.Services.ConfigureZwiftInsiderModule();
 

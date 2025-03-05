@@ -4,7 +4,7 @@ using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.GarminConnect.Models.Requests;
 using FitSyncHub.GarminConnect.Models.Responses;
 
-namespace FitSyncHub.GarminConnect;
+namespace FitSyncHub.GarminConnect.HttpClients;
 
 public class GarminConnectHttpClient
 {
@@ -22,7 +22,7 @@ public class GarminConnectHttpClient
     {
         var start = 0;
         var limit = 20;
-        var activitySlug = string.IsNullOrEmpty(activityType) ? "" : ("&activityType=" + activityType);
+        var activitySlug = string.IsNullOrEmpty(activityType) ? "" : "&activityType=" + activityType;
         List<GarminActivityResponse> result = [];
 
         do
