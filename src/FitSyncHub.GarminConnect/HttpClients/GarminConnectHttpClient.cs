@@ -63,7 +63,6 @@ public class GarminConnectHttpClient
         return response;
     }
 
-
     public async Task SetUserWeight(
         double weight,
         CancellationToken cancellationToken = default)
