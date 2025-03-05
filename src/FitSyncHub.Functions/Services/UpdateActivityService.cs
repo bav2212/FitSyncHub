@@ -66,60 +66,11 @@ public class UpdateActivityService
             await _correctElevationService.CorrectElevation(webhookEventData.ObjectId, cancellationToken);
             return;
         }
-        else if (RequiresZwiftActivityNameFix(activity))
-        {
-            _logger.LogInformation("Rename activity with name: {Name}, id: {Id}", activity.Name, activity.Id);
-
-            await RenameZwiftActivityAsync(webhookEventData.ObjectId, activity, cancellationToken);
-            return;
-        }
 
         _logger.LogInformation("Skip activity with name: {Name}, id: {Id}, cause it's not walk or ride activity. Type: {Type}",
             activity.Name,
             activity.Id,
             activity.Type);
-    }
-
-    // zwift workout from interval.icu starts like "Zwift - :"
-    private static bool RequiresZwiftActivityNameFix(ActivityModelResponse activity)
-    {
-        return activity.Name.StartsWith("Zwift - :", StringComparison.OrdinalIgnoreCase);
-    }
-
-    // zwift workout from interval.icu starts like "Zwift - :"
-    // delete ":" from name
-    private async Task RenameZwiftActivityAsync(
-        long activityId,
-        ActivityModelResponse activity,
-        CancellationToken cancellationToken)
-    {
-        if (!RequiresZwiftActivityNameFix(activity))
-        {
-            _logger.LogWarning("Activity {ActivityId} does not require name fix", activityId);
-            return;
-        }
-
-        var name = activity.Name;
-        var newName = name.Replace("Zwift - :", "Zwift - ");
-
-        _logger.LogInformation("Update activity name for activity {ActivityId} from {OldName} to {NewName}",
-            activityId,
-            name,
-            newName);
-
-        var updateModel = new UpdatableActivityRequest
-        {
-            Commute = activity.Commute,
-            Trainer = activity.Trainer,
-            HideFromHome = activity.HideFromHome,
-            Description = activity.Description,
-            Name = newName,
-            Type = activity.Type!,
-            SportType = activity.SportType,
-            GearId = activity.GearId
-        };
-
-        await _stravaRestHttpClient.UpdateActivity(activityId, updateModel, cancellationToken);
     }
 
     private async Task UpdateActivityVisibilityToOnlyMe(
