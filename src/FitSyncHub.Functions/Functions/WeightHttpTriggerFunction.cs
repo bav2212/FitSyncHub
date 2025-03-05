@@ -1,6 +1,6 @@
 ﻿using FitSyncHub.Functions.Options;
+using FitSyncHub.GarminConnect;
 using FitSyncHub.Strava.Abstractions;
-using Garmin.Connect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -13,18 +13,18 @@ public class WeightHttpTriggerFunction
 {
     private readonly BodyMeasurementsOptions _options;
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
-    private readonly GarminConnectClient _garminClient;
+    private readonly GarminConnectHttpClient _garminConnectHttpClient;
     private readonly ILogger<WeightHttpTriggerFunction> _logger;
 
     public WeightHttpTriggerFunction(
         IStravaRestHttpClient stravaRestHttpClient,
-        GarminConnectClient garminClient,
+        GarminConnectHttpClient garminConnectHttpClient,
         IOptions<BodyMeasurementsOptions> options,
         ILogger<WeightHttpTriggerFunction> logger)
     {
         _options = options.Value;
         _stravaRestHttpClient = stravaRestHttpClient;
-        _garminClient = garminClient;
+        _garminConnectHttpClient = garminConnectHttpClient;
         _logger = logger;
     }
 
@@ -67,7 +67,7 @@ public class WeightHttpTriggerFunction
             _logger.LogInformation("Updated athlete weight on strava");
 
             _logger.LogInformation("Updating athlete weight on garmin connect");
-            await _garminClient.SetUserWeight(parsedWeight * 1000, cancellationToken);
+            await _garminConnectHttpClient.SetUserWeight(parsedWeight * 1000, cancellationToken);
             _logger.LogInformation("Updated athlete weight on garmin connect");
 
             return new OkObjectResult(weight);

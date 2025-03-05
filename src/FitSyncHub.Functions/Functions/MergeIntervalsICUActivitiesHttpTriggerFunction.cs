@@ -2,6 +2,7 @@
 using FitSyncHub.Common;
 using FitSyncHub.Common.Fit;
 using FitSyncHub.GarminConnect;
+using FitSyncHub.GarminConnect.Models.Requests;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
@@ -17,22 +18,19 @@ namespace FitSyncHub.Functions.Functions;
 public class MergeIntervalsICUActivitiesHttpTriggerFunction
 {
     private readonly FitFileDecoder _decoder;
-    private readonly FitFileEncoder _encoder;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
-    private readonly ExtendedGarminConnectClient _extendedGarminConnectClient;
+    private readonly GarminConnectHttpClient _garminConnectHttpClient;
     private readonly ILogger<MergeIntervalsICUActivitiesHttpTriggerFunction> _logger;
 
     public MergeIntervalsICUActivitiesHttpTriggerFunction(
         FitFileDecoder decoder,
-        FitFileEncoder encoder,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
-        ExtendedGarminConnectClient extendedGarminConnectClient,
+        GarminConnectHttpClient garminConnectHttpClient,
         ILogger<MergeIntervalsICUActivitiesHttpTriggerFunction> logger)
     {
         _decoder = decoder;
-        _encoder = encoder;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
-        _extendedGarminConnectClient = extendedGarminConnectClient;
+        _garminConnectHttpClient = garminConnectHttpClient;
         _logger = logger;
     }
 
@@ -244,15 +242,15 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
     {
         _logger.LogInformation("Start sync with Garmin");
 
-        var garminActivities = await _extendedGarminConnectClient.GetActivitiesByDate(
+        var garminActivities = await _garminConnectHttpClient.GetActivitiesByDate(
             new DateTime(date, TimeOnly.MinValue),
             new DateTime(date, TimeOnly.MaxValue),
             null,
             cancellationToken);
-        _logger.LogInformation("Got {Count} activities from Garmin", garminActivities.Length);
-        if (garminActivities.Length != 1)
+        _logger.LogInformation("Got {Count} activities from Garmin", garminActivities.Count);
+        if (garminActivities.Count != 1)
         {
-            throw new InvalidDataException($"Skip syncing with Garmin, cause activities count = {garminActivities.Length}");
+            throw new InvalidDataException($"Skip syncing with Garmin, cause activities count = {garminActivities.Count}");
         }
 
         var todaysGarminActivity = garminActivities.Single();
@@ -277,7 +275,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         };
 
         _logger.LogInformation("Updating garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
-        await _extendedGarminConnectClient.UpdateActivity(updateModel, cancellationToken);
+        await _garminConnectHttpClient.UpdateActivity(updateModel, cancellationToken);
         _logger.LogInformation("Updated garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
 
     }
