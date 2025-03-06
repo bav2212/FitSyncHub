@@ -11,7 +11,7 @@ public record GarminActivityResponse
     public required double Duration { get; init; }
     public required double ElapsedDuration { get; init; }
     public required double MovingDuration { get; init; }
-    public required double ElevationGain { get; init; }
+    public double? ElevationGain { get; init; }
     public double? ElevationLoss { get; init; }
     public required double AverageSpeed { get; init; }
 }
