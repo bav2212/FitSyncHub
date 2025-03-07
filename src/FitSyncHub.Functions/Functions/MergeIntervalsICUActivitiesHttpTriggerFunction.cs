@@ -204,7 +204,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
     private static bool IsRaceEvent(EventResponse linkedPairedEvent)
     {
-        return linkedPairedEvent.Tags.Contains("race");
+        return linkedPairedEvent.Tags is { } && linkedPairedEvent.Tags.Contains("race");
     }
 
     private static List<IntervalsIcuActivityWithNewTss> CalculateNewTssForActivities(

@@ -1,7 +1,7 @@
 ﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
-public class ActivityCreateResponse
+public record ActivityCreateResponse
 {
-    public required string IcuAthleteId { get; set; }
-    public required string Id { get; set; }
+    public required string IcuAthleteId { get; init; }
+    public required string Id { get; init; }
 }

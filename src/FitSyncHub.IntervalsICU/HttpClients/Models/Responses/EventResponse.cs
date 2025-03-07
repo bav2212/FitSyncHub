@@ -1,12 +1,12 @@
 ﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
-public class EventResponse
+public record EventResponse
 {
-    public required int Id { get; set; }
-    public required string StartDateLocal { get; set; }
-    public required string Type { get; set; }
-    public required string Name { get; set; }
-    public required string Description { get; set; }
-    public required bool Indoor { get; set; }
-    public required List<string> Tags { get; set; } = [];
+    public required int Id { get; init; }
+    public required string StartDateLocal { get; init; }
+    public required string Type { get; init; }
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required bool Indoor { get; init; }
+    public required List<string>? Tags { get; init; }
 }
