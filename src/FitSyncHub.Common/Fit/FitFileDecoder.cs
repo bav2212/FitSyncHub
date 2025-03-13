@@ -49,10 +49,6 @@ public class FitFileDecoder
         return Decode(fitSource);
     }
 
-
-
-
-
     //public FitMessages Decode(string fileName)
     //{
     //    try

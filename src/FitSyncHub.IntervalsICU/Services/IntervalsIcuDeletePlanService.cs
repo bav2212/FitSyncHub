@@ -13,12 +13,12 @@ public class IntervalsIcuDeletePlanService(
         int intervalsIcuFolderId,
         CancellationToken cancellationToken)
     {
-        var athleteId = Constants.AthleteId;
-        var ids = await GetFolderWorkoutIds(athleteId, intervalsIcuFolderId, cancellationToken);
+        const string AthleteId = Constants.AthleteId;
+        var ids = await GetFolderWorkoutIds(AthleteId, intervalsIcuFolderId, cancellationToken);
 
         foreach (var workoutId in ids)
         {
-            await httpClient.DeleteWorkout(athleteId, workoutId, cancellationToken);
+            await httpClient.DeleteWorkout(AthleteId, workoutId, cancellationToken);
             logger.LogInformation("Deleted workout with id {WorkoutId} from intervals.icu folder {FolderId}", workoutId, intervalsIcuFolderId);
         }
     }

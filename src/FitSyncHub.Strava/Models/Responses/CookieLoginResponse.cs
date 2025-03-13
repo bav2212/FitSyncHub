@@ -18,7 +18,6 @@ public record CookieLoginResponse
         AuthenticityToken = authenticityToken;
     }
 
-
     [MemberNotNullWhen(true, nameof(Cookies))]
     [MemberNotNullWhen(true, nameof(AuthenticityToken))]
     public bool Success { get; private init; }

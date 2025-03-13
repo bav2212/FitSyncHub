@@ -66,8 +66,8 @@ public class ZwiftInsiderScraper
         var timeEstimatesText = timeEstimatesNode.InnerText;
 
         // Regular expression to match the time estimates
-        var pattern = @"(\d+)\sW/kg:\s(\d+)\sminutes";
-        var matches = Regex.Matches(timeEstimatesText, pattern);
+        const string Pattern = @"(\d+)\sW/kg:\s(\d+)\sminutes";
+        var matches = Regex.Matches(timeEstimatesText, Pattern);
 
         // Parse and print the results
         foreach (Match match in matches)
@@ -87,12 +87,12 @@ public class ZwiftInsiderScraper
         HtmlDocument htmlPageDoc)
     {
         // XPath to find <p> elements with all specified classes
-        var xpath = $"//p[contains(@class, 'has-text-align-center') and " +
-                           $"contains(@class, 'has-white-color') and " +
-                           $"contains(@class, 'has-text-color') and " +
-                           $"contains(@class, 'has-link-color')]";
+        const string Xpath = "//p[contains(@class, 'has-text-align-center') and " +
+                           "contains(@class, 'has-white-color') and " +
+                           "contains(@class, 'has-text-color') and " +
+                           "contains(@class, 'has-link-color')]";
 
-        var paragraphNode = htmlPageDoc.DocumentNode.SelectSingleNode(xpath);
+        var paragraphNode = htmlPageDoc.DocumentNode.SelectSingleNode(Xpath);
         return GetLeadInAndElevation(paragraphNode.OuterHtml);
     }
 
@@ -103,10 +103,10 @@ public class ZwiftInsiderScraper
         htmlDoc.LoadHtml(html);
 
         // XPath to find the span element containing the text
-        var xpath = "//span[contains(text(), 'lead-in')]";
+        const string Xpath = "//span[contains(text(), 'lead-in')]";
 
         // Select the node
-        var node = htmlDoc.DocumentNode.SelectSingleNode(xpath);
+        var node = htmlDoc.DocumentNode.SelectSingleNode(Xpath);
 
         if (node == null)
         {
@@ -117,8 +117,8 @@ public class ZwiftInsiderScraper
         var segment = node.InnerText.Trim();
 
         // Parse the length and elevation using regular expressions
-        var pattern = @"\+([\d\.]+)km.*?lead-in(?:.*?([\d\.]+)m.*elevation)?$";
-        var match = Regex.Match(segment, pattern);
+        const string Pattern = @"\+([\d\.]+)km.*?lead-in(?:.*?([\d\.]+)m.*elevation)?$";
+        var match = Regex.Match(segment, Pattern);
 
         if (!match.Success)
         {

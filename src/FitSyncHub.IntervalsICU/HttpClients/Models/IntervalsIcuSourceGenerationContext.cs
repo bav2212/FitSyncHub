@@ -12,7 +12,7 @@ namespace ZwiftToIntervalsICUConverter.HttpClients.Models;
 [JsonSerializable(typeof(IReadOnlyCollection<ActivityResponse>))]
 [JsonSerializable(typeof(ActivityCreateResponse))]
 [JsonSerializable(typeof(ActivityUpdateRequest))]
-[JsonSerializable(typeof(EventResponse))]
+[JsonSerializable(typeof(IReadOnlyCollection<EventResponse>))]
 internal partial class IntervalsIcuSourceGenerationContext : JsonSerializerContext
 {
 }

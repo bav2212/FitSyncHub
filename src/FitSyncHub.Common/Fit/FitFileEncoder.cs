@@ -33,7 +33,6 @@ public class FitFileEncoder
         encodeDemo.Write(fitMessages.SessionMesgs);
         encodeDemo.Write(fitMessages.ActivityMesgs);
 
-
         // Update header datasize and file CRC
         encodeDemo.Close();
 

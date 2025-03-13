@@ -56,9 +56,9 @@ public class ZwiftToIntervalsIcuService(ILogger<ZwiftToIntervalsIcuService> logg
 
     private static bool TryGetDay(string workoutName, out int? dayNumber)
     {
-        var regexPattern = @"^(Day\s(?<day_number>\d+))";
+        const string RegexPattern = @"^(Day\s(?<day_number>\d+))";
         // Match the line with the regular expression
-        var dayMatch = Regex.Match(workoutName, regexPattern);
+        var dayMatch = Regex.Match(workoutName, RegexPattern);
 
         if (!dayMatch.Success)
         {
@@ -72,9 +72,9 @@ public class ZwiftToIntervalsIcuService(ILogger<ZwiftToIntervalsIcuService> logg
 
     private ZwiftToIntervalsIcuWeek GetWeek(string weekName)
     {
-        var regexPattern = @"^(Week\s(?<week_number>\d+))$|^(?<week_zero>Week 0 Prep)$";
+        const string RegexPattern = @"^(Week\s(?<week_number>\d+))$|^(?<week_zero>Week 0 Prep)$";
         // Match the line with the regular expression
-        var weekMatch = Regex.Match(weekName, regexPattern);
+        var weekMatch = Regex.Match(weekName, RegexPattern);
 
         if (!weekMatch.Success)
         {
@@ -98,7 +98,6 @@ public class ZwiftToIntervalsIcuService(ILogger<ZwiftToIntervalsIcuService> logg
     }
 }
 
-
 public record ZwiftToIntervalsIcuConvertResult
 {
     public required List<string> IntervalsIcuStructure { get; init; }
@@ -111,7 +110,6 @@ public record ZwiftToIntervalsIcuConvertFileInfo
     public required ZwiftToIntervalsIcuWeek Week { get; init; }
     public required int? Day { get; init; }
 }
-
 
 public record ZwiftToIntervalsIcuWeek
 {

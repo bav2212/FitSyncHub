@@ -98,8 +98,10 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
         else
         {
+            var pairedEvent = await GetPairedEvent(activities, date, cancellationToken);
+
             activitySummary
-                = await UpdateActivitiesWithNewTssAndReturnSummary(activities, cancellationToken);
+                = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
         }
 
         if (bool.TryParse(syncWithGarminQueryParameter, out var syncWithGarmin) && syncWithGarmin)
@@ -112,19 +114,9 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
     private async Task<ActivitySummary> UpdateActivitiesWithNewTssAndReturnSummary(
         IReadOnlyCollection<ActivityResponse> activities,
+        EventResponse? pairedEvent,
         CancellationToken cancellationToken)
     {
-        EventResponse? linkedPairedEvent = default;
-        var activityWithLinkedPairedEvent = activities.Where(x => x.PairedEventId.HasValue).SingleOrDefault();
-        if (activityWithLinkedPairedEvent != null && activityWithLinkedPairedEvent.PairedEventId is { } pairedEventId)
-        {
-            _logger.LogInformation("Get linked paired event");
-            linkedPairedEvent = await _intervalsIcuHttpClient.GetEvent(Constants.AthleteId, pairedEventId, cancellationToken);
-
-            _logger.LogInformation("Unlinking paired event {EventId} from activity {ActivityId}", linkedPairedEvent, activityWithLinkedPairedEvent.Id);
-            await _intervalsIcuHttpClient.UnlinkPairedWorkout(activityWithLinkedPairedEvent.Id, cancellationToken);
-        }
-
         Dictionary<string, FitMessages> activityFitMessages = [];
         foreach (var activity in activities)
         {
@@ -143,7 +135,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         _logger.LogInformation("Finished merging fit messages");
 
         ActivityResponse? raceActivity = default;
-        if (linkedPairedEvent != null && IsRaceEvent(linkedPairedEvent))
+        if (pairedEvent != null && IsRaceEvent(pairedEvent))
         {
             // activity with most tss is race
             raceActivity = activities.MaxBy(x => x.IcuTrainingLoad);
@@ -165,7 +157,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             await _intervalsIcuHttpClient.UpdateActivity(activity.Id, updateRequest, cancellationToken);
         }
 
-        var mergedActivityName = linkedPairedEvent?.Name
+        var mergedActivityName = pairedEvent?.Name
             ?? string.Join(" + ", activities.Select(x => x.Name.Trim()));
         var mergedFitSessionMessage = mergedFitFile.SessionMesgs.Single();
         var syncWithGarminModel = new ActivitySummary
@@ -177,6 +169,34 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         };
 
         return syncWithGarminModel;
+    }
+
+    private async Task<EventResponse?> GetPairedEvent(
+        IReadOnlyCollection<ActivityResponse> activities,
+        DateOnly date,
+        CancellationToken cancellationToken)
+    {
+        var activityWithLinkedPairedEvent = activities.SingleOrDefault(x => x.PairedEventId.HasValue);
+
+        // TODO Event can be not linked to activity. Handle this case
+        if (activityWithLinkedPairedEvent?.PairedEventId is { } pairedEventId)
+        {
+            _logger.LogInformation("Get linked paired event");
+            var pairedEvent = await _intervalsIcuHttpClient.GetEvent(Constants.AthleteId, pairedEventId, cancellationToken);
+
+            _logger.LogInformation("Unlinking paired event {EventId} from activity {ActivityId}", pairedEvent, activityWithLinkedPairedEvent.Id);
+            await _intervalsIcuHttpClient.UnlinkPairedWorkout(activityWithLinkedPairedEvent.Id, cancellationToken);
+
+            return pairedEvent;
+        }
+
+        var events = await _intervalsIcuHttpClient.ListEvents(
+            Constants.AthleteId,
+            new DateTime(date, TimeOnly.MinValue),
+            new DateTime(date, TimeOnly.MaxValue),
+            cancellationToken);
+
+        return events.SingleOrDefault();
     }
 
     private static ActivitySubType GetSubType(ActivityResponse? raceActivity, ActivityResponse activity)
@@ -277,7 +297,6 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         _logger.LogInformation("Updating garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
         await _garminConnectHttpClient.UpdateActivity(updateModel, cancellationToken);
         _logger.LogInformation("Updated garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
-
     }
 
     private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, double Tss);

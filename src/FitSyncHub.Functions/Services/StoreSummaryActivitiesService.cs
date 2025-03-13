@@ -73,15 +73,15 @@ public class SummaryActivityService
     {
         var result = new List<SummaryActivityModelResponse>();
 
-        var perPage = Constants.StravaRestApi.AthleteActivitiesPerPage;
+        const int PerPage = Constants.StravaRestApi.AthleteActivitiesPerPage;
         var hasValuesToIterate = true;
 
         for (var page = Constants.StravaRestApi.AthleteActivitiesFirstPage; hasValuesToIterate; page++)
         {
-            var portion = await _stravaRestHttpClient.GetActivities(before, after, page, perPage, cancellationToken);
+            var portion = await _stravaRestHttpClient.GetActivities(before, after, page, PerPage, cancellationToken);
             result.AddRange(portion);
 
-            hasValuesToIterate = portion.Count == perPage;
+            hasValuesToIterate = portion.Count == PerPage;
         }
 
         return result;

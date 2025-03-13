@@ -166,7 +166,6 @@ public class WhatsOnZwiftParser
         }
         catch (Exception)
         {
-
             throw;
         }
     }

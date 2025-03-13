@@ -32,7 +32,6 @@ public class StravaAuthCookieStorageManager : IStravaAuthCookieStorageManager
 
     public Task StoreCookies(string username, string serializedCookies, string authenticityToken, CancellationToken cancellationToken)
     {
-
         var userSession = new UserSession
         {
             id = username,

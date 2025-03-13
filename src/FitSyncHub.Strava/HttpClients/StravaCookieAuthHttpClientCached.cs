@@ -6,7 +6,6 @@ using FitSyncHub.Strava.Models.Responses;
 
 namespace FitSyncHub.Strava.HttpClients;
 
-
 public class StravaCookieAuthHttpClientCached : IStravaCookieAuthHttpClient
 {
     private readonly IStravaCookieAuthHttpClient _cookieAuthService;

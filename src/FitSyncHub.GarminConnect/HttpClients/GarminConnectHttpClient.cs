@@ -21,13 +21,13 @@ public class GarminConnectHttpClient
         CancellationToken cancellationToken = default)
     {
         var start = 0;
-        var limit = 20;
+        const int Limit = 20;
         var activitySlug = string.IsNullOrEmpty(activityType) ? "" : "&activityType=" + activityType;
         List<GarminActivityResponse> result = [];
 
         do
         {
-            var url = $"{"/activitylist-service/activities/search/activities"}?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}&start={start}&limit={limit}{activitySlug}";
+            var url = $"/activitylist-service/activities/search/activities?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}&start={start}&limit={Limit}{activitySlug}";
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
@@ -41,9 +41,9 @@ public class GarminConnectHttpClient
             }
 
             result.AddRange(array);
-            start += limit;
+            start += Limit;
         }
-        while (result.Count % limit == 0);
+        while (result.Count % Limit == 0);
 
         return result.AsReadOnly();
     }
@@ -75,9 +75,9 @@ public class GarminConnectHttpClient
             }
         };
 
-        var url = "/userprofile-service/userprofile/user-settings";
+        const string Url = "/userprofile-service/userprofile/user-settings";
 
-        var response = await _httpClient.PutAsJsonAsync(url, body,
+        var response = await _httpClient.PutAsJsonAsync(Url, body,
             GarminConnectCamelCaseSerializerContext.Default.GarminSetUserWeightRequest, cancellationToken);
         response.EnsureSuccessStatusCode();
     }

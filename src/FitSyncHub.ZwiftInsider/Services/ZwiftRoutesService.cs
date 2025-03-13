@@ -48,7 +48,6 @@ public class ZwiftInsiderRoutesService
                 ? threeWattPerKgMinutes
                 : 0;
 
-
             result.Add(new Result(route, length, elevation, twoWattsPerKg, threeWattsPerKg));
         }
 

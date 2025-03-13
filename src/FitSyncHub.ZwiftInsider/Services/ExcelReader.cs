@@ -12,7 +12,6 @@ public class ExcelReader
     public static readonly string HyperlinkColumnName = "__Hyperlink";
     private readonly ILogger<ExcelReader> _logger;
 
-
     public ExcelReader(ILogger<ExcelReader> logger)
     {
         _logger = logger;
