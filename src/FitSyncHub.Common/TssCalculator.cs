@@ -58,7 +58,7 @@ public class TssCalculator
             rollingAverages.Add(powerValues.Skip(i).Take(30).Average());
         }
 
-        var np = Math.Pow(rollingAverages.Select(p => Math.Pow(p, 4)).Average(), 0.25);
+        var np = Math.Pow(rollingAverages.Average(p => Math.Pow(p, 4)), 0.25);
         return np;
     }
 

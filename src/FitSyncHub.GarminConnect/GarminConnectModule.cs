@@ -24,7 +24,7 @@ public static class GarminConnectModule
 
         services.AddHttpClient<IGarminAuthenticationService, GarminAuthenticationService>();
         services.AddTransient<GarminConnectAuthenticationDelegatingHandler>();
-        services.AddHttpClient<GarminConnectHttpClient>((sp, client) =>
+        services.AddHttpClient<GarminConnectHttpClient>(client =>
         {
             client.BaseAddress = new Uri("https://connect.garmin.com");
         })

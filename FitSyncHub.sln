@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Common.UnitTests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.GarminConnect.UnitTests", "tests\FitSyncHub.GarminConnect.UnitTests\FitSyncHub.GarminConnect.UnitTests.csproj", "{0305D233-CFB8-9FDC-A126-AF28AD30EADF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Zwift", "src\FitSyncHub.Zwift\FitSyncHub.Zwift.csproj", "{8A32E800-16AE-3807-1AD4-3A5BE867DB58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,10 @@ Global
 		{0305D233-CFB8-9FDC-A126-AF28AD30EADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0305D233-CFB8-9FDC-A126-AF28AD30EADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0305D233-CFB8-9FDC-A126-AF28AD30EADF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,6 +85,7 @@ Global
 		{D57117FD-E51E-4548-B198-E30548207E57} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
 		{499E7CBD-D667-E64B-E115-FACA24FC6D53} = {4F2169E7-30C9-4D10-A756-E8C787FED0DB}
 		{0305D233-CFB8-9FDC-A126-AF28AD30EADF} = {4F2169E7-30C9-4D10-A756-E8C787FED0DB}
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7625267B-BDC8-42BC-A028-0D457C18D56A}

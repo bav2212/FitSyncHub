@@ -32,8 +32,8 @@ public class TssCalculatorUnitTest
             {
                 var files = Directory.EnumerateFiles(activityRootDirectoryPath);
 
-                var fitFile = files.Where(x => x.EndsWith(".fit")).Single();
-                var jsonFile = files.Where(x => x.EndsWith(".json")).Single();
+                var fitFile = files.Single(x => x.EndsWith(".fit"));
+                var jsonFile = files.Single(x => x.EndsWith(".json"));
 
                 Add(fitFile, jsonFile);
             }

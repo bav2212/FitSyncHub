@@ -160,15 +160,13 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         var mergedActivityName = pairedEvent?.Name
             ?? string.Join(" + ", activities.Select(x => x.Name.Trim()));
         var mergedFitSessionMessage = mergedFitFile.SessionMesgs.Single();
-        var syncWithGarminModel = new ActivitySummary
+        return new ActivitySummary
         {
             Name = mergedActivityName,
             Description = null,
             Distance = mergedFitSessionMessage.GetTotalDistance(),
             ElevationAscent = mergedFitSessionMessage.GetTotalAscent()
         };
-
-        return syncWithGarminModel;
     }
 
     private async Task<EventResponse?> GetPairedEvent(
@@ -234,7 +232,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         var ftp = activities.Select(x => x.IcuFtp!.Value).Distinct().Single();
 
         var mergedTss = TssCalculator.Calculate(mergedFitMessages, ftp)!.Tss;
-        var activitiesTss = activities.Select(x => x.PowerLoad!.Value).Sum();
+        var activitiesTss = activities.Sum(x => x.PowerLoad!.Value);
 
         var deltaTssToAdd = mergedTss - activitiesTss;
 
@@ -247,7 +245,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             activitiesWithNewTss.Add(new IntervalsIcuActivityWithNewTss(activity, newTss));
         }
 
-        if (Math.Round(activitiesWithNewTss.Select(x => x.Tss).Sum()) != Math.Round(mergedTss))
+        if (Math.Round(activitiesWithNewTss.Sum(x => x.Tss)) != Math.Round(mergedTss))
         {
             throw new Exception("Unexpected error while calculation new tss");
         }
@@ -301,7 +299,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
     private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, double Tss);
 
-    private class ActivitySummary
+    private record ActivitySummary
     {
         public required string Name { get; init; }
         public required string? Description { get; init; }
