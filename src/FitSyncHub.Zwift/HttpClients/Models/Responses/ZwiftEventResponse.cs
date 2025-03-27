@@ -6,14 +6,13 @@ namespace FitSyncHub.Zwift.HttpClients.Models.Responses
     {
         [JsonConverter(typeof(DateTimeWithoutColonOffsetJsonConverter))]
         public DateTime EventStart { get; set; }
-        public ZwiftEventSubgroupResponse[] EventSubgroups { get; set; }
+        public required ZwiftEventSubgroupResponse[] EventSubgroups { get; set; }
     }
 
     public class ZwiftEventSubgroupResponse
     {
         public int Id { get; set; }
-        public string SubgroupLabel { get; set; }
-        public string[] RulesSet { get; set; }
+        public string? SubgroupLabel { get; set; }
+        public string[]? RulesSet { get; set; }
     }
-
 }

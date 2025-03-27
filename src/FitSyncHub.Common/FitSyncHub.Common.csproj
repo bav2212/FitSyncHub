@@ -8,7 +8,7 @@
 
   <ItemGroup>
       <PackageReference Include="Garmin.FIT.Sdk" Version="21.158.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
   </ItemGroup>
 
 </Project>

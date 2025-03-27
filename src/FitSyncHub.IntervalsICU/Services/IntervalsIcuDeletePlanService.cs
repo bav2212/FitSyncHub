@@ -37,6 +37,6 @@ public class IntervalsIcuDeletePlanService(
 
         var planOverview = allFoldersOverviewList.Single(x => x.Id == intervalsIcuFolderId);
 
-        return planOverview.Children.Select(x => x.Id).ToList();
+        return [.. planOverview.Children.Select(x => x.Id)];
     }
 }

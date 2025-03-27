@@ -23,7 +23,6 @@ public partial class ZwiftDownloaderHttpClient
         string subgroupLabel,
         string downloadToFolder)
     {
-
         foreach (var zwiftEventUrl in zwiftEventUrls)
         {
             var zwiftEventId = GetEventId(zwiftEventUrl);

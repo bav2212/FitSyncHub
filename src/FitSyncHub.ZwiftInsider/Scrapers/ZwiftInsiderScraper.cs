@@ -2,12 +2,14 @@
 using HtmlAgilityPack;
 
 namespace FitSyncHub.ZwiftInsider.Scrapers;
-public class ZwiftInsiderScraper
+public static class ZwiftInsiderScraper
 {
     public static async Task<ZwiftInsiderScraperResponse> ScrapeZwiftInsiderWorkoutPage(Uri uri)
     {
         var web = new HtmlWeb();
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var htmlPageDoc = await web.LoadFromWebAsync(uri, null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         var wattPerKgResult = ParseWattPerKg(htmlPageDoc);
         var leadInAndElevationResult = ParseLeadInAndElevation(htmlPageDoc);

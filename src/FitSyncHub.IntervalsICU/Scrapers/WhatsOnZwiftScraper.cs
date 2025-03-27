@@ -2,18 +2,20 @@
 
 namespace FitSyncHub.IntervalsICU.Scrapers;
 
-public class WhatsOnZwiftScraper
+public static class WhatsOnZwiftScraper
 {
     public static async Task<WhatsOnZwiftScrapedResponse> ScrapeWorkoutStructure(Uri uri)
     {
         var web = new HtmlWeb();
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var htmlPageDoc = await web.LoadFromWebAsync(uri, null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         var workoutList = ParseWorkoutList(htmlPageDoc).ToList();
 
         return new WhatsOnZwiftScrapedResponse()
         {
-            NameSegments = ParseNameSegments(htmlPageDoc).ToList(),
+            NameSegments = [.. ParseNameSegments(htmlPageDoc)],
             WorkoutList = workoutList,
         };
     }
@@ -21,7 +23,9 @@ public class WhatsOnZwiftScraper
     public static async Task<List<string>> ScrapeWorkoutPlanLinks(Uri uri)
     {
         var web = new HtmlWeb();
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var htmlPageDoc = await web.LoadFromWebAsync(uri, null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         var viewWorkoutButtons = htmlPageDoc.DocumentNode
             .SelectNodes("//a[@class=\"button\"]")
@@ -29,8 +33,7 @@ public class WhatsOnZwiftScraper
             .ToList();
 
         return viewWorkoutButtons
-            .Select(x => x.Attributes["href"].Value)
-            .ToList();
+            .ConvertAll(x => x.Attributes["href"].Value);
     }
 
     private static IEnumerable<string> ParseNameSegments(HtmlDocument htmlPageDoc)
