@@ -44,17 +44,23 @@ public static class ZwiftResultsAnalyzer
         Console.WriteLine("Average duration: " + Math.Round(orderedByDuration.Average(x => x.ActivityData.DurationInMilliseconds / 1000.0 / 60), 2));
         Console.WriteLine();
 
+#pragma warning disable IDE1006 // Naming Styles
         var TUKRIds = await ZwiftPowerHelper.GetTeamUkraineRidersIds();
+#pragma warning restore IDE1006 // Naming Styles
 
+#pragma warning disable IDE1006 // Naming Styles
         var TUKRResults = orderedByDuration
             .Where(x => TUKRIds.Contains(x.ProfileId))
             .ToList();
+#pragma warning restore IDE1006 // Naming Styles
 
+#pragma warning disable IDE1006 // Naming Styles
         foreach (var TUKRResult in TUKRResults)
         {
             FormatText(orderedByDuration, TUKRResult);
             Console.WriteLine();
         }
+#pragma warning restore IDE1006 // Naming Styles
     }
 
     private static void FormatText(
