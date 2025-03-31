@@ -17,7 +17,6 @@ public class GarminSyncWeightTimerTriggerFunction
         _logger = logger;
     }
 
-
     [Function(nameof(GarminSyncWeightTimerTriggerFunction))]
     public async Task RunMorning(
         // run every day at 4, 5, 6, 7, 13, 19 utc
