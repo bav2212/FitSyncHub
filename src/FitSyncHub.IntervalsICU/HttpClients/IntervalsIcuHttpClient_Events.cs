@@ -27,7 +27,7 @@ public partial class IntervalsIcuHttpClient
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
-        return JsonSerializer.Deserialize(content, IntervalsIcuSourceGenerationContext.Default.IReadOnlyCollectionEventResponse)!;
+        return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.IReadOnlyCollectionEventResponse)!;
     }
 
     public async Task<EventResponse> GetEvent(
@@ -41,6 +41,6 @@ public partial class IntervalsIcuHttpClient
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
-        return JsonSerializer.Deserialize(content, IntervalsIcuSourceGenerationContext.Default.EventResponse)!;
+        return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.EventResponse)!;
     }
 }

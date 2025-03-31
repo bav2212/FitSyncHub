@@ -33,7 +33,7 @@ public class IntervalsIcuDeletePlanService(
 
         var allFoldersResponseJson = await allFoldersResponse.Content.ReadAsStringAsync(cancellationToken);
         var allFoldersOverviewList = JsonSerializer.Deserialize(allFoldersResponseJson,
-            IntervalsIcuSourceGenerationContext.Default.IReadOnlyCollectionAthleteFolderPlanWorkoutsResponse)!;
+            IntervalsIcuSnakeCaseSourceGenerationContext.Default.IReadOnlyCollectionAthleteFolderPlanWorkoutsResponse)!;
 
         var planOverview = allFoldersOverviewList.Single(x => x.Id == intervalsIcuFolderId);
 

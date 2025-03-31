@@ -7,11 +7,12 @@ namespace FitSyncHub.Functions.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
-    Converters = [typeof(GarminConnectDateTimeConverter)]
-    )]
+    Converters = [typeof(GarminConnectDateTimeConverter), typeof(GarminConnectDateOnlyConverter)]
+)]
 [JsonSerializable(typeof(GarminActivityUpdateRequest))]
-[JsonSerializable(typeof(GarminSetUserWeightRequest))]
 [JsonSerializable(typeof(GarminActivityResponse[]))]
+[JsonSerializable(typeof(GarminSetUserWeightRequest))]
+[JsonSerializable(typeof(GarminWeightResponse))]
 internal partial class GarminConnectCamelCaseSerializerContext : JsonSerializerContext
 {
 }

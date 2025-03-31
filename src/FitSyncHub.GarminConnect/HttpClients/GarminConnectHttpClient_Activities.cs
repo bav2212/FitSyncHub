@@ -6,7 +6,7 @@ using FitSyncHub.GarminConnect.Models.Responses;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
-public class GarminConnectHttpClient
+public partial class GarminConnectHttpClient
 {
     private readonly HttpClient _httpClient;
 
@@ -61,24 +61,5 @@ public class GarminConnectHttpClient
 
         var response = await _httpClient.SendAsync(request, cancellationToken);
         return response;
-    }
-
-    public async Task SetUserWeight(
-        double weight,
-        CancellationToken cancellationToken = default)
-    {
-        var body = new GarminSetUserWeightRequest
-        {
-            UserData = new WeightUserData
-            {
-                Weight = weight
-            }
-        };
-
-        const string Url = "/userprofile-service/userprofile/user-settings";
-
-        var response = await _httpClient.PutAsJsonAsync(Url, body,
-            GarminConnectCamelCaseSerializerContext.Default.GarminSetUserWeightRequest, cancellationToken);
-        response.EnsureSuccessStatusCode();
     }
 }

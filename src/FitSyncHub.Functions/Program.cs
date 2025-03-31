@@ -51,6 +51,7 @@ builder.Services.AddTransient<PersistedGrantRepository>();
 builder.Services.AddTransient<SummaryActivityRepository>();
 builder.Services.AddTransient<UserSessionRepository>();
 
+builder.Services.AddTransient<GarminHealthDataService>();
 builder.Services.AddTransient<CorrectElevationService>();
 builder.Services.AddTransient<SummaryActivityService>();
 builder.Services.AddTransient<UpdateActivityService>();

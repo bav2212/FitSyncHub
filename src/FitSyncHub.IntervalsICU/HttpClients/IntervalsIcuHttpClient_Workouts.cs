@@ -25,7 +25,7 @@ public partial class IntervalsIcuHttpClient
     {
         var url = $"api/v1/athlete/{athleteId}/workouts/bulk";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.IReadOnlyCollectionWorkoutCreateRequest);
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.IReadOnlyCollectionWorkoutCreateRequest);
         var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
 
         response.EnsureSuccessStatusCode();
@@ -40,7 +40,7 @@ public partial class IntervalsIcuHttpClient
     {
         var url = $"api/v1/athlete/{athleteId}/workouts";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSourceGenerationContext.Default.WorkoutCreateRequest);
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.WorkoutCreateRequest);
         var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
 
         response.EnsureSuccessStatusCode();

@@ -28,7 +28,8 @@ public class WeightHttpTriggerFunction
         _logger = logger;
     }
 
-    [Function(nameof(WeightHttpTriggerFunction))]
+    //[Function(nameof(WeightHttpTriggerFunction))]
+    // Disabled. Now use Garmin Index S2 instead
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "weight")] HttpRequest req,
         CancellationToken cancellationToken)
