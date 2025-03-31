@@ -70,9 +70,9 @@ public class GarminHealthDataService
     {
         // should be ok for now, cause I didn't stop functions often
         // maybe will store data in database in future
-        if (_memoryCache.TryGetValue(GarminLastWeightResponseKey, out GarminWeightResponse? garminLastWeightResponsne)
+        if (_memoryCache.TryGetValue(GarminLastWeightResponseKey, out GarminWeightResponse? garminLastWeightResonse)
             // check that it works
-            && new GarminWeightResponseComparer().Equals(garminLastWeightResponsne, garminWeightResponse))
+            && new GarminWeightResponseComparer().Equals(garminLastWeightResonse, garminWeightResponse))
         {
             _logger.LogInformation("Skip intervals.icu wellness data update, cause nothing has changed in Garmin");
             return;
