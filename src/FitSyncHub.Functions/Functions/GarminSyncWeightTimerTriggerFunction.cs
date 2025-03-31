@@ -29,6 +29,6 @@ public class GarminSyncWeightTimerTriggerFunction
             timer.IsPastDue);
 
         await _garminHealthDataService.Sync(cancellationToken);
-        _logger.LogInformation("Expected next schedule occurrence, {NextOccurance}", timer.ScheduleStatus?.Next);
+        _logger.LogInformation("Expected next schedule occurrence, {NextOccurrence}", timer.ScheduleStatus?.Next);
     }
 }
