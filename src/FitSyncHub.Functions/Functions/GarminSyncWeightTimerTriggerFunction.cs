@@ -20,7 +20,8 @@ public class GarminSyncWeightTimerTriggerFunction
 
     [Function("GarminSyncWeightMorningTrigger")]
     public async Task RunMorning(
-        [TimerTrigger("0 * 6-11 * * *")] TimerInfo myTimer,
+        // Run every hour from 4 to 7 utc
+        [TimerTrigger("0 * 4-7 * * *")] TimerInfo myTimer,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Morning trigger executed at: {DateTime}", DateTime.Now);
@@ -30,7 +31,8 @@ public class GarminSyncWeightTimerTriggerFunction
 
     [Function("GarminSyncWeightRestOfDayTrigger")]
     public async Task RunRestOfDay(
-        [TimerTrigger("0 */6 0-5,12-23 * * *")] TimerInfo myTimer,
+        // Run every 6 hours from 0 to 3 and 8 to 23 utc
+        [TimerTrigger("0 */6 0-3,8-23 * * *")] TimerInfo myTimer,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Rest of day trigger executed at: {DateTime}", DateTime.Now);
