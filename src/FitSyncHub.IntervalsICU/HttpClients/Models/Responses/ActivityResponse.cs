@@ -54,10 +54,10 @@ public record ActivityResponse
     public required int? MaxTemp { get; init; }
     public required double? AvgLrBalance { get; init; }
     public required double? Gap { get; init; }
-    public required string GapModel { get; init; } //ENUM: NONE, STRAVA_RUN
+    public required ActivityGapModel? GapModel { get; init; }
     public required bool? UseElevationCorrection { get; init; }
     public required bool? Race { get; init; }
-    public required Gear Gear { get; init; }
+    public required ActivityGear Gear { get; init; }
     public required double? PerceivedExertion { get; init; }
     public required string DeviceName { get; init; }
     public required string PowerMeter { get; init; }
@@ -89,7 +89,7 @@ public record ActivityResponse
     public required bool? IcuIgnoreHr { get; init; }
     public required bool? IgnoreVelocity { get; init; }
     public required bool? IgnorePace { get; init; }
-    public required List<IgnorePart> IgnoreParts { get; init; }
+    public required List<ActivityIgnorePart> IgnoreParts { get; init; }
     public required int? IcuTrainingLoadData { get; init; }
     public required List<string> IntervalSummary { get; init; }
     public required string SkylineChartBytes { get; init; }
@@ -98,20 +98,20 @@ public record ActivityResponse
     public required bool? HasSegments { get; init; }
     public required List<string> PowerFieldNames { get; init; }
     public required string PowerField { get; init; }
-    public required List<ZoneTime> IcuZoneTimes { get; init; }
+    public required List<ActivityZoneTime> IcuZoneTimes { get; init; }
     public required List<int> IcuHrZoneTimes { get; init; }
     public required List<int> PaceZoneTimes { get; init; }
     public required List<int> GapZoneTimes { get; init; }
     public required bool? UseGapZoneTimes { get; init; }
-    public required string TizOrder { get; init; } //ENUM: POWER_HR_PACE, POWER_PACE_HR, HR_POWER_PACE, HR_PACE_POWER, PACE_POWER_HR, PACE_HR_POWER
+    public required ActivityTizOrder? TizOrder { get; init; }
     public required double? PolarizationIndex { get; init; }
-    public required List<Achievement> IcuAchievements { get; init; }
+    public required List<ActivityAchievement> IcuAchievements { get; init; }
     public required bool? IcuIntervalsEdited { get; init; }
     public required bool? LockIntervals { get; init; }
     public required int? IcuLapCount { get; init; }
     public required int? IcuJoulesAboveFtp { get; init; }
     public required int? IcuMaxWbalDepletion { get; init; }
-    public required Hrr IcuHrr { get; init; }
+    public required ActivityHrr IcuHrr { get; init; }
     public required string IcuSyncError { get; init; }
     public required string IcuColor { get; init; }
     public required double? IcuPowerHrZ2 { get; init; }
@@ -129,7 +129,7 @@ public record ActivityResponse
     public required double? PoolLength { get; init; }
     public required double? Compliance { get; init; }
     public required int? CoachTick { get; init; }
-    public required string Source { get; init; } //ENUM: STRAVA, UPLOAD, MANUAL, GARMIN_CONNECT, OAUTH_CLIENT, DROPBOX, POLAR, SUUNTO, COROS, WAHOO, ZWIFT
+    public required ActivitySource Source { get; init; }
     public required int? OauthClientId { get; init; }
     public required string OauthClientName { get; init; }
     public required double? AverageAltitude { get; init; }
@@ -138,10 +138,10 @@ public record ActivityResponse
     public required int? PowerLoad { get; init; }
     public required int? HrLoad { get; init; }
     public required int? PaceLoad { get; init; }
-    public required string HrLoadType { get; init; } //ENUM: AVG_HR, HR_ZONES, HRSS
-    public required string PaceLoadType { get; init; } //ENUM: SWIM, RUN
+    public required ActivityHrLoadType? HrLoadType { get; init; }
+    public required ActivityPaceLoadType? PaceLoadType { get; init; }
     public required List<string> Tags { get; init; }
-    public required List<Attachment> Attachments { get; init; }
+    public required List<ActivityAttachment> Attachments { get; init; }
     public required List<int> RecordingStops { get; init; }
     public required double? AverageWeatherTemp { get; init; }
     public required double? MinWeatherTemp { get; init; }
@@ -171,7 +171,41 @@ public record ActivityResponse
     public required double? IcuVariabilityIndex { get; init; }
 }
 
-public record Gear
+[JsonConverter(typeof(JsonStringEnumConverter<ActivityGapModel>))]
+public enum ActivityGapModel
+{
+    NONE,
+    STRAVA_RUN
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<ActivityTizOrder>))]
+public enum ActivityTizOrder
+{
+    POWER_HR_PACE, POWER_PACE_HR, HR_POWER_PACE, HR_PACE_POWER, PACE_POWER_HR, PACE_HR_POWER
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<ActivitySource>))]
+public enum ActivitySource
+{
+    STRAVA, UPLOAD, MANUAL, GARMIN_CONNECT, OAUTH_CLIENT, DROPBOX, POLAR, SUUNTO, COROS, WAHOO, ZWIFT
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<ActivityPaceLoadType>))]
+public enum ActivityPaceLoadType
+{
+    SWIM,
+    RUN
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<ActivityHrLoadType>))]
+public enum ActivityHrLoadType
+{
+    AVG_HR,
+
+    HR_ZONES, HRSS
+}
+
+public record ActivityGear
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
@@ -179,7 +213,7 @@ public record Gear
     public required bool? Primary { get; init; }
 }
 
-public record IgnorePart
+public record ActivityIgnorePart
 {
     public required int? StartIndex { get; init; }
     public required int? EndIndex { get; init; }
@@ -188,26 +222,35 @@ public record IgnorePart
     public required bool? Hr { get; init; }
 }
 
-public record ZoneTime
+public record ActivityZoneTime
 {
     public required string Id { get; init; }
     public required int? Secs { get; init; }
 }
 
-public record Achievement
+public record ActivityAchievement
 {
     public required string Id { get; init; }
-    public required string Type { get; init; } // Enum: BEST_POWER, FTP_UP, LTHR_UP, BEST_PACE
+    public required ActivityAchievementType Type { get; init; }
     public required string Message { get; init; }
     public required int? Watts { get; init; }
     public required int? Secs { get; init; }
     public required int? Value { get; init; }
     public required double? Distance { get; init; }
     public required double? Pace { get; init; }
-    public required Point Point { get; init; }
+    public required ActivityPoint Point { get; init; }
 }
 
-public record Point
+[JsonConverter(typeof(JsonStringEnumConverter<ActivityAchievementType>))]
+public enum ActivityAchievementType
+{
+    BEST_POWER,
+    FTP_UP,
+    LTHR_UP,
+    BEST_PACE
+}
+
+public record ActivityPoint
 {
     public required int? StartIndex { get; init; }
     public required int? EndIndex { get; init; }
@@ -215,7 +258,7 @@ public record Point
     public required int? Value { get; init; }
 }
 
-public record Hrr
+public record ActivityHrr
 {
     public required int? StartIndex { get; init; }
     public required int? EndIndex { get; init; }
@@ -228,10 +271,11 @@ public record Hrr
     public required int? HrrValue { get; init; }
 }
 
-public record Attachment
+public record ActivityAttachment
 {
     public required string Id { get; init; }
     public required string Filename { get; init; }
-    public required string Mimetype { get; init; }
+    [JsonPropertyName("mimetype")]
+    public required string MimeType { get; init; }
     public required string Url { get; init; }
 }

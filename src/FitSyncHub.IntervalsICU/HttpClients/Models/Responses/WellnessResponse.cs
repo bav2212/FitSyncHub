@@ -1,4 +1,6 @@
-﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
+﻿using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
+
+namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
 public record WellnessResponse
 {
@@ -14,8 +16,8 @@ public record WellnessResponse
     public required int? RestingHR { get; init; }
     public required float? Hrv { get; init; }
     public required float? HrvSDNN { get; init; }
-    public required string? MenstrualPhase { get; init; } // PERIOD, FOLLICULAR, OVULATING, LUTEAL, NONE
-    public required string? MenstrualPhasePredicted { get; init; } // PERIOD, FOLLICULAR, OVULATING, LUTEAL, NONE
+    public required WellnessMenstrualPhase? MenstrualPhase { get; init; }
+    public required WellnessMenstrualPhase? MenstrualPhasePredicted { get; init; }
     public required int? KcalConsumed { get; init; }
     public required int? SleepSecs { get; init; }
     public required float? SleepScore { get; init; }
@@ -47,6 +49,6 @@ public record WellnessResponse
 
 public record WellnessSportInfoResponse
 {
-    public required string? Type { get; init; } // Ride, Run, Swim, WeightTraining, Hike, Walk, AlpineSki, BackcountrySki, Badminton, Canoeing, Crossfit, EBikeRide, EMountainBikeRide, Elliptical, Golf, GravelRide, TrackRide, Handcycle, HighIntensityIntervalTraining, Hockey, IceSkate, InlineSkate, Kayaking, Kitesurf, MountainBikeRide, NordicSki, OpenWaterSwim, Padel, Pilates, Pickleball, Racquetball, Rugby, RockClimbing, RollerSki, Rowing, Sail, Skateboard, Snowboard, Snowshoe, Soccer, Squash, StairStepper, StandUpPaddling, Surfing, TableTennis, Tennis, TrailRun, Transition, Velomobile, VirtualRide, VirtualRow, VirtualRun, WaterSport, Wheelchair, Windsurf, Workout, Yoga, Other 
+    public required WellnessSportInfoType? Type { get; init; }
     public required float? Eftp { get; init; }
 }
