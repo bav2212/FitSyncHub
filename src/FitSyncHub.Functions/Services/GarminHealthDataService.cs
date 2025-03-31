@@ -5,6 +5,7 @@ using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.Strava.Abstractions;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Services;
 public class GarminHealthDataService
@@ -16,17 +17,20 @@ public class GarminHealthDataService
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
     private readonly IMemoryCache _memoryCache;
+    private readonly ILogger<GarminHealthDataService> _logger;
 
     public GarminHealthDataService(
         GarminConnectHttpClient garminConnectHttpClient,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
         IStravaRestHttpClient stravaRestHttpClient,
-        IMemoryCache memoryCache)
+        IMemoryCache memoryCache,
+        ILogger<GarminHealthDataService> logger)
     {
         _garminConnectHttpClient = garminConnectHttpClient;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
         _stravaRestHttpClient = stravaRestHttpClient;
         _memoryCache = memoryCache;
+        _logger = logger;
     }
     public async Task Sync(CancellationToken cancellationToken)
     {
@@ -51,9 +55,11 @@ public class GarminHealthDataService
         if (_memoryCache.TryGetValue(StravaLastSetWeightKey, out float lastSetWeight)
             && lastSetWeight == weightInKgs)
         {
+            _logger.LogInformation("Skip strava weight update cause weight didn't change");
             return;
         }
 
+        _logger.LogInformation("Updating weight: {Value}", weightInKgs);
         await _stravaRestHttpClient.UpdateAthlete(weightInKgs, cancellationToken);
         _memoryCache.Set(StravaLastSetWeightKey, weightInKgs);
     }
@@ -68,6 +74,7 @@ public class GarminHealthDataService
             // check that it works
             && new GarminWeightResponseComparer().Equals(garminLastWeightResponsne, garminWeightResponse))
         {
+            _logger.LogInformation("Skip intervals.icu wellness data update, cause nothing has changed in Garmin");
             return;
         }
 
@@ -82,7 +89,9 @@ public class GarminHealthDataService
                 BodyFat = garminWeightResponse.TotalAverage.BodyFat
             };
 
-            await _intervalsIcuHttpClient.UpdateWellness(Constants.AthleteId, wellnessRequest, cancellationToken);
+            _logger.LogInformation("Updating Intervals.icu wellness: {Value}", wellnessRequest);
+            var response = await _intervalsIcuHttpClient.UpdateWellness(Constants.AthleteId, wellnessRequest, cancellationToken);
+            _logger.LogInformation("Updated Intervals.icu wellness. Response: {Value}", response);
         }
 
         _memoryCache.Set(GarminLastWeightResponseKey, garminWeightResponse);
