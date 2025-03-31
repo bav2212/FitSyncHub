@@ -18,25 +18,17 @@ public class GarminSyncWeightTimerTriggerFunction
     }
 
 
-    [Function("GarminSyncWeightMorningTrigger")]
+    [Function(nameof(GarminSyncWeightTimerTriggerFunction))]
     public async Task RunMorning(
-        // Run every hour from 4 to 7 utc
-        [TimerTrigger("0 * 4-7 * * *")] TimerInfo myTimer,
+        // run every day at 4, 5, 6, 7, 13, 19 utc
+        [TimerTrigger("0 0 4-7,13,19 * * *")] TimerInfo timer,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Morning trigger executed at: {DateTime}", DateTime.Now);
+        _logger.LogInformation("Trigger executed at: {DateTime}, invocation is due to a missed schedule occurrence: {isPastDue}",
+            DateTime.Now,
+            timer.IsPastDue);
 
         await _garminHealthDataService.Sync(cancellationToken);
-    }
-
-    [Function("GarminSyncWeightRestOfDayTrigger")]
-    public async Task RunRestOfDay(
-        // Run every 6 hours from 0 to 3 and 8 to 23 utc
-        [TimerTrigger("0 */6 0-3,8-23 * * *")] TimerInfo myTimer,
-        CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Rest of day trigger executed at: {DateTime}", DateTime.Now);
-
-        await _garminHealthDataService.Sync(cancellationToken);
+        _logger.LogInformation("Expected next schedule occurrence, {NextOccurance}", timer.ScheduleStatus?.Next);
     }
 }
