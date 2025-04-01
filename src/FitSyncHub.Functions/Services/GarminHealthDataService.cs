@@ -55,18 +55,21 @@ public class GarminHealthDataService
         GarminWeightResponse? previousGarminWeightResponse,
         CancellationToken cancellationToken)
     {
-        if (!garminWeightResponse.TotalAverage.Weight.HasValue)
-        {
-            return;
-        }
-
-        var weightInKgs = garminWeightResponse.TotalAverage.Weight.Value / 1000;
         if (previousGarminWeightResponse is { }
             && previousGarminWeightResponse.TotalAverage.Weight == garminWeightResponse.TotalAverage.Weight)
         {
             _logger.LogInformation("Skip strava weight update cause weight didn't change");
             return;
         }
+
+        var lastWeightMeasurement = garminWeightResponse.DateWeightList[^1];
+        if (lastWeightMeasurement.SourceType != "INDEX_SCALE")
+        {
+            _logger.LogInformation("Skip strava weight update cause data not from Garmin index scale");
+            return;
+        }
+
+        var weightInKgs = lastWeightMeasurement.Weight / 1000;
 
         _logger.LogInformation("Updating weight: {Value}", weightInKgs);
         await _stravaRestHttpClient.UpdateAthlete(weightInKgs, cancellationToken);
