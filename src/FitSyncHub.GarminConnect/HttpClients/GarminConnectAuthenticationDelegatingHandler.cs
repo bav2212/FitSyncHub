@@ -1,7 +1,8 @@
-﻿using FitSyncHub.GarminConnect.Auth;
+﻿using FitSyncHub.Common.Extensions;
+using FitSyncHub.GarminConnect.Auth;
 using FitSyncHub.GarminConnect.Auth.Abstractions;
 using FitSyncHub.GarminConnect.Exceptions;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Polly;
 
@@ -10,7 +11,7 @@ namespace FitSyncHub.GarminConnect.HttpClients;
 public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 {
     private readonly IGarminAuthenticationService _garminAuthenticationService;
-    private readonly IMemoryCache _memoryCache;
+    private readonly IDistributedCache _distributedCache;
     private readonly ILogger<GarminConnectAuthenticationDelegatingHandler> _logger;
 
     private readonly string _cacheKey = "GarminOAuth2Token";
@@ -19,11 +20,11 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 
     public GarminConnectAuthenticationDelegatingHandler(
         IGarminAuthenticationService garminAuthenticationService,
-        IMemoryCache memoryCache,
+        IDistributedCache distributedCache,
         ILogger<GarminConnectAuthenticationDelegatingHandler> logger)
     {
         _garminAuthenticationService = garminAuthenticationService;
-        _memoryCache = memoryCache;
+        _distributedCache = distributedCache;
         _logger = logger;
     }
 
@@ -36,9 +37,9 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
             .WaitAndRetryAsync(
                 retryCount: _retryCount,
                 retryAttempt => TimeSpan.FromMilliseconds(_initialWaitDurationMilliseconds * Math.Pow(2, retryAttempt - 1)),
-                (response, timespan, retryCount, context) =>
+                async (response, timespan, retryCount, context) =>
                 {
-                    RemoveCache();
+                    await RemoveCache();
                     _logger.LogWarning("Error while authentication: {Error}, retry {RetryCount} after {Timespan}", response.Message, retryCount, timespan);
                 });
 
@@ -52,16 +53,21 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
         return await base.SendAsync(request, cancellationToken);
     }
 
-    private Task<AuthenticationResult> Authenticate(CancellationToken cancellationToken)
+    private async Task<AuthenticationResult> Authenticate(CancellationToken cancellationToken)
     {
-        return _memoryCache.GetOrCreateAsync(_cacheKey, async entry =>
+        var cachedResult = await _distributedCache.GetFromJsonAsync<AuthenticationResult>(_cacheKey, cancellationToken);
+        if (cachedResult != null)
         {
-            return await _garminAuthenticationService.RefreshGarminAuthenticationAsync(cancellationToken);
-        })!;
+            return cachedResult;
+        }
+
+        var authenticationResult = await _garminAuthenticationService.RefreshGarminAuthenticationAsync(cancellationToken);
+        await _distributedCache.SetAsJsonAsync(_cacheKey, authenticationResult, cancellationToken: cancellationToken);
+        return authenticationResult;
     }
 
-    private void RemoveCache()
+    private async Task RemoveCache()
     {
-        _memoryCache.Remove(_cacheKey);
+        await _distributedCache.RemoveAsync(_cacheKey);
     }
 }

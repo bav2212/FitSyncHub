@@ -12,9 +12,9 @@ public class ZwiftInsiderRoutesService
         _excelReader = excelReader;
     }
 
-    public async Task DoManipulation()
+    public async Task DoManipulation(string zwiftRoutesFilePath, string sheetName = "Sheet1")
     {
-        var dt = _excelReader.Read(@"C:\Users\bav22\OneDrive\Рабочий стол\zwift_routes.xlsx", "Sheet1");
+        var dt = _excelReader.Read(zwiftRoutesFilePath, sheetName);
 
         var result = new List<Result>();
 

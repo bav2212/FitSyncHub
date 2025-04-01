@@ -8,8 +8,10 @@ using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
+using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,8 +46,15 @@ builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
 builder.Services.ConfigureStravaModule<StravaAuthCookieStorageManager, StravaOAuthService>();
 builder.Services.ConfigureIntervalsIcuModule(builder.Configuration["IntervalsIcuApiKey"]);
 builder.Services.ConfigureGarminConnectModule("GarminConnect:Credentials");
-
 //builder.Services.ConfigureZwiftInsiderModule();
+
+builder.Services.AddCosmosCache((CosmosCacheOptions cacheOptions) =>
+{
+    cacheOptions.DatabaseName = "fit-sync-hub";
+    cacheOptions.ContainerName = "DistributedCache";
+    cacheOptions.ClientBuilder = new CosmosClientBuilder(builder.Configuration["AzureWebJobsStorageConnectionString"]);
+    cacheOptions.CreateIfNotExists = true;
+});
 
 builder.Services.AddTransient<PersistedGrantRepository>();
 builder.Services.AddTransient<SummaryActivityRepository>();

@@ -13,8 +13,6 @@ public static class GarminConnectModule
         this IServiceCollection services,
         string garminAuthOptionsPath)
     {
-        services.AddMemoryCache();
-
         services.AddOptions<GarminConnectAuthOptions>()
             .Configure<IConfiguration>((settings, configuration) =>
             {
