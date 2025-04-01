@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using FitSyncHub.Zwift.HttpClients.Models.Responses;
 using ZwiftToIntervalsICUConverter.HttpClients.Models;
 
@@ -6,7 +7,7 @@ namespace FitSyncHub.Zwift.Helpers;
 
 public static class ZwiftResultsAnalyzer
 {
-    public static async Task AnalyzeAsync(string directoryPath)
+    public static async Task<string> AnalyzeAsync(string directoryPath)
     {
         List<ZwiftRaceResultEntryResponse> results = [];
         foreach (var filePath in Directory.EnumerateFiles(directoryPath))
@@ -25,24 +26,22 @@ public static class ZwiftResultsAnalyzer
             .OrderByDescending(GetAvgWattsPerKg)
             .ToList();
 
-        Console.WriteLine("Fastest:");
-        FormatText(orderedByDuration, orderedByDuration.First());
-        Console.WriteLine();
+        var textBuilder = new ZwiftResultsTextBuilder();
 
-        Console.WriteLine("Strongest(watts per kg):");
-        FormatText(orderedByDuration, orderedByWattsPerKg.First());
-        Console.WriteLine();
+        textBuilder.AppendLine("Fastest:");
+        textBuilder.AppendFormattedText(orderedByDuration, 0);
 
-        Console.WriteLine("Median by duration:");
-        FormatText(orderedByDuration, orderedByDuration[orderedByDuration.Count / 2]);
-        Console.WriteLine();
+        textBuilder.AppendLine("Strongest(watts per kg):");
+        textBuilder.AppendFormattedText(orderedByWattsPerKg, 0);
 
-        Console.WriteLine("Median by watts per kg:");
-        FormatText(orderedByDuration, orderedByWattsPerKg[orderedByWattsPerKg.Count / 2]);
-        Console.WriteLine();
+        textBuilder.AppendLine("Median by duration:");
+        textBuilder.AppendFormattedText(orderedByDuration, orderedByDuration.Count / 2);
 
-        Console.WriteLine("Average duration: " + Math.Round(orderedByDuration.Average(x => x.ActivityData.DurationInMilliseconds / 1000.0 / 60), 2));
-        Console.WriteLine();
+        textBuilder.AppendLine("Median by watts per kg:");
+        textBuilder.AppendFormattedText(orderedByWattsPerKg, orderedByWattsPerKg.Count / 2);
+
+        textBuilder.AppendLine("Average duration: " + Math.Round(orderedByDuration.Average(x => x.ActivityData.DurationInMilliseconds / 1000.0 / 60), 2));
+        textBuilder.AppendLine("");
 
 #pragma warning disable IDE1006 // Naming Styles
         var TUKRIds = await ZwiftPowerHelper.GetTeamUkraineRidersIds();
@@ -57,30 +56,51 @@ public static class ZwiftResultsAnalyzer
 #pragma warning disable IDE1006 // Naming Styles
         foreach (var TUKRResult in TUKRResults)
         {
-            FormatText(orderedByDuration, TUKRResult);
-            Console.WriteLine();
+            textBuilder.AppendFormattedText(orderedByDuration, TUKRResult);
         }
 #pragma warning restore IDE1006 // Naming Styles
-    }
 
-    private static void FormatText(
-        List<ZwiftRaceResultEntryResponse> orderedByDurationItems,
-        ZwiftRaceResultEntryResponse dto)
-    {
-        var name = $"{dto.ProfileData.FirstName} {dto.ProfileData.LastName}".Trim();
-        Console.WriteLine(name + ":");
-
-        var duration = dto.ActivityData.DurationInMilliseconds / 1000.0 / 60;
-        var place = orderedByDurationItems.IndexOf(dto) + 1;
-
-        Console.WriteLine("Duration: " + Math.Round(duration, 2)
-            + ", Watts per kg: " + Math.Round(GetAvgWattsPerKg(dto), 2)
-            + ", Place: " + place + "/" + orderedByDurationItems.Count);
+        return textBuilder.Build();
     }
 
     private static double GetAvgWattsPerKg(ZwiftRaceResultEntryResponse dto)
     {
         var weight = dto.ProfileData.WeightInGrams / 1000.0;
         return dto.SensorData.AvgWatts / weight;
+    }
+
+    private class ZwiftResultsTextBuilder()
+    {
+        private readonly StringBuilder _sb = new();
+
+        public void AppendLine(string line) => _sb.AppendLine(line);
+        public string Build() => _sb.ToString();
+
+        public void AppendFormattedText(
+          IList<ZwiftRaceResultEntryResponse> orderedByDurationItems,
+          int dtoIndex)
+        {
+            var dto = orderedByDurationItems[dtoIndex];
+
+            var name = $"{dto.ProfileData.FirstName} {dto.ProfileData.LastName}".Trim();
+            _sb.AppendLine(name + ":");
+
+            var duration = dto.ActivityData.DurationInMilliseconds / 1000.0 / 60;
+            var place = dtoIndex + 1;
+
+            _sb.AppendLine("Duration: " + Math.Round(duration, 2)
+                + ", Watts per kg: " + Math.Round(GetAvgWattsPerKg(dto), 2)
+                + ", Place: " + place + "/" + orderedByDurationItems.Count);
+
+            _sb.AppendLine();
+        }
+
+        public void AppendFormattedText(
+          IList<ZwiftRaceResultEntryResponse> orderedByDurationItems,
+          ZwiftRaceResultEntryResponse dto)
+        {
+            var index = orderedByDurationItems.IndexOf(dto);
+            AppendFormattedText(orderedByDurationItems, index);
+        }
     }
 }

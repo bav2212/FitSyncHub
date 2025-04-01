@@ -1,15 +1,19 @@
 ﻿using System.Data;
 using System.Text.Json;
 using FitSyncHub.ZwiftInsider.Scrapers;
+using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.ZwiftInsider.Services;
 public class ZwiftInsiderRoutesService
 {
     private readonly ExcelReader _excelReader;
+    private readonly ILogger<ZwiftInsiderRoutesService> _logger;
 
-    public ZwiftInsiderRoutesService(ExcelReader excelReader)
+    public ZwiftInsiderRoutesService(ExcelReader excelReader,
+        ILogger<ZwiftInsiderRoutesService> logger)
     {
         _excelReader = excelReader;
+        _logger = logger;
     }
 
     public async Task DoManipulation(string zwiftRoutesFilePath, string sheetName = "Sheet1")
@@ -52,7 +56,7 @@ public class ZwiftInsiderRoutesService
         }
 
         var resultString = JsonSerializer.Serialize(result);
-        Console.WriteLine(resultString);
+        _logger.LogInformation("Result: {Result}", resultString);
     }
 
     private record Result(string Route,
