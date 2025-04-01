@@ -24,10 +24,16 @@ public static class DistributedCacheExtensions
         }
     }
 
-    public static async Task SetAsJsonAsync<T>(
+    public static Task SetAsJsonAsync<T>(
         this IDistributedCache cache, string key, T value, CancellationToken cancellationToken = default)
     {
+        return SetAsJsonAsync(cache, key, value, new DistributedCacheEntryOptions(), cancellationToken);
+    }
+
+    public static async Task SetAsJsonAsync<T>(
+        this IDistributedCache cache, string key, T value, DistributedCacheEntryOptions options, CancellationToken cancellationToken = default)
+    {
         var serializedValue = JsonSerializer.Serialize(value);
-        await cache.SetStringAsync(key, serializedValue, token: cancellationToken);
+        await cache.SetStringAsync(key, serializedValue, options, cancellationToken);
     }
 }
