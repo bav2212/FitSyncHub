@@ -80,7 +80,11 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
         }
 
         var authenticationResult = await _garminAuthenticationService.RefreshGarminAuthenticationAsync(cancellationToken);
-        await _distributedCache.SetAsJsonAsync(_authenticationCacheKey, authenticationResult, cancellationToken: cancellationToken);
+        var cacheOptions = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(authenticationResult.OAuthToken2.ExpiresIn)
+        };
+        await _distributedCache.SetAsJsonAsync(_authenticationCacheKey, authenticationResult, cacheOptions, cancellationToken);
         return authenticationResult;
     }
 
