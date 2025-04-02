@@ -62,7 +62,9 @@ public class GarminHealthDataService
             return;
         }
 
-        var lastWeightMeasurement = garminWeightResponse.DateWeightList[^1];
+        var lastWeightMeasurement = garminWeightResponse.DateWeightList
+            .OrderBy(x => x.Date)
+            .Last();
         if (lastWeightMeasurement.SourceType != "INDEX_SCALE")
         {
             _logger.LogInformation("Skip strava weight update cause data not from Garmin index scale");
@@ -90,12 +92,27 @@ public class GarminHealthDataService
             return;
         }
 
-        if (garminWeightResponse.TotalAverage.BodyFat != intervalsIcuWellness.BodyFat)
+        var lastWeightMeasurement = garminWeightResponse.DateWeightList
+            .OrderBy(x => x.Date)
+            .Last();
+        if (lastWeightMeasurement.SourceType != "INDEX_SCALE")
+        {
+            _logger.LogInformation("Skip strava weight update cause data not from Garmin index scale");
+            return;
+        }
+
+        if (!lastWeightMeasurement.BodyFat.HasValue)
+        {
+            _logger.LogDebug("Skip wellness data update, cause body fat is not available in Garmin");
+            return;
+        }
+
+        if (lastWeightMeasurement.BodyFat.Value != intervalsIcuWellness.BodyFat)
         {
             var wellnessRequest = new WellnessRequest
             {
                 Id = intervalsIcuWellness.Id!,
-                BodyFat = garminWeightResponse.TotalAverage.BodyFat
+                BodyFat = lastWeightMeasurement.BodyFat.Value,
             };
 
             _logger.LogInformation("Updating Intervals.icu wellness: {Value}", wellnessRequest);

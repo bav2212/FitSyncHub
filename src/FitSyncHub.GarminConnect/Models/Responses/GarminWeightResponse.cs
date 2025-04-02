@@ -29,11 +29,11 @@ public record DateWeightList
     public required long Date { get; init; }
     public required string CalendarDate { get; init; }
     public required float Weight { get; init; }
-    public required float Bmi { get; init; }
-    public required float BodyFat { get; init; }
-    public required float BodyWater { get; init; }
-    public int BoneMass { get; init; }
-    public int MuscleMass { get; init; }
+    public required float? Bmi { get; init; }
+    public required float? BodyFat { get; init; }
+    public required float? BodyWater { get; init; }
+    public int? BoneMass { get; init; }
+    public int? MuscleMass { get; init; }
     public float? PhysiqueRating { get; init; }
     public float? VisceralFat { get; init; }
     public float? MetabolicAge { get; init; }
