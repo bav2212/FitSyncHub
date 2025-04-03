@@ -1,5 +1,6 @@
 ﻿using FitSyncHub.Common;
 using FitSyncHub.Functions;
+using FitSyncHub.Functions.Functions;
 using FitSyncHub.Functions.Managers;
 using FitSyncHub.Functions.Options;
 using FitSyncHub.Functions.Repositories;
@@ -17,11 +18,19 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+HashSet<string> functionsCalledByUser = [
+    nameof(WeightHttpTriggerFunction),
+    nameof(MergeIntervalsICUActivitiesHttpTriggerFunction),
+    nameof(WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction),
+    nameof(WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction),
+];
+
 var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
-builder.UseMiddleware<ExceptionHandlingMiddleware>();
+// apply ExceptionHandlingMiddleware for functions called by user only, otherwise will see error in azure portal
+builder.UseWhen<ExceptionHandlingMiddleware>((context) => functionsCalledByUser.Contains(context.FunctionDefinition.Name));
 
 builder.Configuration.AddUserSecrets<Program>();
 
@@ -31,16 +40,10 @@ builder.Services
     .AddSingleton(x => new CosmosClient(builder.Configuration["AzureWebJobsStorageConnectionString"]));
 
 builder.Services.AddOptions<StravaOptions>()
-    .Configure<IConfiguration>((settings, configuration) =>
-    {
-        configuration.GetSection(StravaOptions.Position).Bind(settings);
-    });
+    .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(StravaOptions.Position).Bind(settings));
 
 builder.Services.AddOptions<BodyMeasurementsOptions>()
-    .Configure<IConfiguration>((settings, configuration) =>
-    {
-        configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings);
-    });
+    .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings));
 
 builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
 builder.Services.ConfigureStravaModule<StravaAuthCookieStorageManager, StravaOAuthService>();
