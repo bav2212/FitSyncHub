@@ -73,7 +73,8 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 
     private async Task<AuthenticationResult> Authenticate(CancellationToken cancellationToken)
     {
-        var cachedResult = await _distributedCache.GetFromJsonAsync<AuthenticationResult>(_authenticationCacheKey, cancellationToken);
+        var cachedResult = await _distributedCache.GetFromJsonAsync<AuthenticationResult>(_authenticationCacheKey,
+            cancellationToken);
         if (cachedResult != null)
         {
             return cachedResult;

@@ -44,8 +44,11 @@ public class GarminHealthDataService
             return;
         }
 
-        await UpdateIntervalsIcuWellness(garminWeightResponse, previousGarminWeightResponse, today, cancellationToken);
-        await UpdateStravaWeight(garminWeightResponse, previousGarminWeightResponse, cancellationToken);
+        if (garminWeightResponse.DateWeightList.Length != 0)
+        {
+            await UpdateIntervalsIcuWellness(garminWeightResponse, previousGarminWeightResponse, today, cancellationToken);
+            await UpdateStravaWeight(garminWeightResponse, previousGarminWeightResponse, cancellationToken);
+        }
 
         await _distributedCache.SetAsJsonAsync(GarminLastWeightResponseKey, garminWeightResponse, cancellationToken: cancellationToken);
     }
