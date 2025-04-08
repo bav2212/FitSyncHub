@@ -18,4 +18,8 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="HttpClients\Models\Requests\" />
+  </ItemGroup>
+
 </Project>

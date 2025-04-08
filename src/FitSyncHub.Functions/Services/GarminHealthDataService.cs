@@ -1,11 +1,10 @@
-﻿using FitSyncHub.Common.Extensions;
+﻿using FitSyncHub.Common.Services;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.Models.Responses;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.Strava.Abstractions;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Services;
@@ -16,20 +15,20 @@ public class GarminHealthDataService
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly IStravaRestHttpClient _stravaRestHttpClient;
-    private readonly IDistributedCache _distributedCache;
+    private readonly IDistributedCacheService _distributedCacheService;
     private readonly ILogger<GarminHealthDataService> _logger;
 
     public GarminHealthDataService(
         GarminConnectHttpClient garminConnectHttpClient,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
         IStravaRestHttpClient stravaRestHttpClient,
-        IDistributedCache distributedCache,
+        IDistributedCacheService distributedCacheService,
         ILogger<GarminHealthDataService> logger)
     {
         _garminConnectHttpClient = garminConnectHttpClient;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
         _stravaRestHttpClient = stravaRestHttpClient;
-        _distributedCache = distributedCache;
+        _distributedCacheService = distributedCacheService;
         _logger = logger;
     }
     public async Task Sync(CancellationToken cancellationToken)
@@ -37,7 +36,7 @@ public class GarminHealthDataService
         var today = DateOnly.FromDateTime(DateTime.Now);
 
         var garminWeightResponse = await _garminConnectHttpClient.GetWeightDayView(today, cancellationToken);
-        var previousGarminWeightResponse = await _distributedCache.GetFromJsonAsync<GarminWeightResponse>(GarminLastWeightResponseKey, cancellationToken);
+        var previousGarminWeightResponse = await _distributedCacheService.GetValueAsync<GarminWeightResponse>(GarminLastWeightResponseKey, cancellationToken);
         if (previousGarminWeightResponse != null && new GarminWeightResponseComparer().Equals(previousGarminWeightResponse, garminWeightResponse))
         {
             _logger.LogInformation("Skip wellness data update, cause nothing has changed in Garmin");
@@ -50,7 +49,7 @@ public class GarminHealthDataService
             await UpdateStravaWeight(garminWeightResponse, previousGarminWeightResponse, cancellationToken);
         }
 
-        await _distributedCache.SetAsJsonAsync(GarminLastWeightResponseKey, garminWeightResponse, cancellationToken: cancellationToken);
+        await _distributedCacheService.SetValueAsync(GarminLastWeightResponseKey, garminWeightResponse, cancellationToken: cancellationToken);
     }
 
     private async Task UpdateStravaWeight(

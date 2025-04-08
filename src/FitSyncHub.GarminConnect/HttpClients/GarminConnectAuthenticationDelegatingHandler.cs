@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using FitSyncHub.Common.Extensions;
+using FitSyncHub.Common.Services;
 using FitSyncHub.GarminConnect.Auth;
 using FitSyncHub.GarminConnect.Auth.Abstractions;
 using FitSyncHub.GarminConnect.Exceptions;
@@ -12,7 +12,7 @@ namespace FitSyncHub.GarminConnect.HttpClients;
 public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 {
     private readonly IGarminAuthenticationService _garminAuthenticationService;
-    private readonly IDistributedCache _distributedCache;
+    private readonly IDistributedCacheService _distributedCacheService;
     private readonly ILogger<GarminConnectAuthenticationDelegatingHandler> _logger;
 
     private readonly string _authenticationCacheKey = "garmin-oauth2-token";
@@ -21,11 +21,11 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 
     public GarminConnectAuthenticationDelegatingHandler(
         IGarminAuthenticationService garminAuthenticationService,
-        IDistributedCache distributedCache,
+        IDistributedCacheService distributedCacheService,
         ILogger<GarminConnectAuthenticationDelegatingHandler> logger)
     {
         _garminAuthenticationService = garminAuthenticationService;
-        _distributedCache = distributedCache;
+        _distributedCacheService = distributedCacheService;
         _logger = logger;
     }
 
@@ -73,10 +73,11 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 
     private async Task<AuthenticationResult> Authenticate(CancellationToken cancellationToken)
     {
-        var cachedResult = await _distributedCache.GetFromJsonAsync<AuthenticationResult>(_authenticationCacheKey,
+        var cachedResult = await _distributedCacheService.GetValueAsync<AuthenticationResult>(_authenticationCacheKey,
             cancellationToken);
         if (cachedResult != null)
         {
+            _logger.LogInformation("Using cached authentication result");
             return cachedResult;
         }
 
@@ -85,12 +86,14 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(authenticationResult.OAuthToken2.ExpiresIn)
         };
-        await _distributedCache.SetAsJsonAsync(_authenticationCacheKey, authenticationResult, cacheOptions, cancellationToken);
+        await _distributedCacheService.SetValueAsync(_authenticationCacheKey, authenticationResult, cacheOptions, cancellationToken);
+        _logger.LogInformation("Cached authentication result for {ExpiresIn} seconds", authenticationResult.OAuthToken2.ExpiresIn);
         return authenticationResult;
     }
 
     private async Task RemoveCache()
     {
-        await _distributedCache.RemoveAsync(_authenticationCacheKey);
+        _logger.LogInformation("Removing cached authentication result");
+        await _distributedCacheService.RemoveAsync(_authenticationCacheKey);
     }
 }
