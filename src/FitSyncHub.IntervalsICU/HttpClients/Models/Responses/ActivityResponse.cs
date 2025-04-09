@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
@@ -182,12 +183,6 @@ public enum ActivityGapModel
 public enum ActivityTizOrder
 {
     POWER_HR_PACE, POWER_PACE_HR, HR_POWER_PACE, HR_PACE_POWER, PACE_POWER_HR, PACE_HR_POWER
-}
-
-[JsonConverter(typeof(JsonStringEnumConverter<ActivitySource>))]
-public enum ActivitySource
-{
-    STRAVA, UPLOAD, MANUAL, GARMIN_CONNECT, OAUTH_CLIENT, DROPBOX, POLAR, SUUNTO, COROS, WAHOO, ZWIFT
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter<ActivityPaceLoadType>))]

@@ -73,8 +73,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             date = DateOnly.FromDateTime(DateTime.Today);
         }
 
-        var activities = await _intervalsIcuHttpClient.ListActivities(Constants.AthleteId,
-            new DateTime(date, TimeOnly.MinValue), new DateTime(date, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
+        var activities = await GetRideActivities(date, cancellationToken);
         _logger.LogInformation("Received {ActivitiesCount} activities", activities.Count);
 
         if (activities.Count != count)
@@ -110,6 +109,13 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         return new OkObjectResult("Success");
+    }
+
+    private async Task<IReadOnlyCollection<ActivityResponse>> GetRideActivities(DateOnly date, CancellationToken cancellationToken)
+    {
+        var activities = await _intervalsIcuHttpClient.ListActivities(Constants.AthleteId,
+                    new DateTime(date, TimeOnly.MinValue), new DateTime(date, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
+        return [.. activities.Where(x => x.Type.Contains("Ride"))];
     }
 
     private async Task<ActivitySummary> UpdateActivitiesWithNewTssAndReturnSummary(

@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text.Json;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using ZwiftToIntervalsICUConverter.HttpClients.Models;
@@ -33,7 +34,23 @@ public partial class IntervalsIcuHttpClient
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
-        return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.IReadOnlyCollectionActivityResponse)!;
+
+        return [.. FilterStravaActivitiesAndDeserialize(content)];
+    }
+
+    private static IEnumerable<ActivityResponse> FilterStravaActivitiesAndDeserialize(string content)
+    {
+        var jsonDocument = JsonDocument.Parse(content);
+
+        foreach (var jsonObject in jsonDocument.RootElement.EnumerateArray())
+        {
+            if (jsonObject.GetProperty("source").GetString() == nameof(ActivitySource.STRAVA))
+            {
+                continue;
+            }
+
+            yield return jsonObject.Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse)!;
+        }
     }
 
     public async Task<Stream> DownloadOriginalActivityFitFile(
@@ -86,32 +103,35 @@ public partial class IntervalsIcuHttpClient
 
     public async Task<ActivityCreateResponse> CreateActivity(
        string athleteId,
-       byte[] activityBytes,
-       string? name = default,
-       string? description = default,
-       int? pairedEventId = default,
+       CreateActivityRequest createActivityRequest,
        CancellationToken cancellationToken = default)
     {
         var requestUri = $"api/v1/athlete/{athleteId}/activities";
 
-        using var formData = new MultipartFormDataContent();
-        using var fileContent = new ByteArrayContent(activityBytes);
-
-        // Add the file to the form-data with the key 'file'
-        formData.Add(fileContent, "file", "merged.fit");
-        if (name != null)
+        using var formData = new MultipartFormDataContent
         {
-            formData.Add(new StringContent(name), "name");
+            // Add the file to the form-data with the key 'file'
+            { new ByteArrayContent(createActivityRequest.ActivityBytes), "file", createActivityRequest.ActivityFileName }
+        };
+
+        if (createActivityRequest.Name != null)
+        {
+            formData.Add(new StringContent(createActivityRequest.Name), "name");
         }
 
-        if (description != null)
+        if (createActivityRequest.Description != null)
         {
-            formData.Add(new StringContent(description), "description");
+            formData.Add(new StringContent(createActivityRequest.Description), "description");
         }
 
-        if (pairedEventId.HasValue)
+        if (createActivityRequest.PairedEventId.HasValue)
         {
-            formData.Add(new StringContent(pairedEventId.Value.ToString()), "paired_event_id");
+            formData.Add(new StringContent(createActivityRequest.PairedEventId.Value.ToString()), "paired_event_id");
+        }
+
+        if (createActivityRequest.ExternalId != null)
+        {
+            formData.Add(new StringContent(createActivityRequest.ExternalId), "external_id");
         }
 
         // Send POST request
