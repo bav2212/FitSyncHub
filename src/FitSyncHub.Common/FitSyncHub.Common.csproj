@@ -8,8 +8,9 @@
 
   <ItemGroup>
       <PackageReference Include="Garmin.FIT.Sdk" Version="21.158.0" />
-      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.3" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.4" />
+      <PackageReference Include="morelinq" Version="4.4.0" />
   </ItemGroup>
 
 </Project>
