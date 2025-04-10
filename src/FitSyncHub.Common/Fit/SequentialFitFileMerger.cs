@@ -2,12 +2,12 @@
 
 namespace FitSyncHub.Common.Fit;
 
-public class FitFileMerger : FitMessages
+public class SequentialFitFileMerger : FitMessages
 {
     private readonly List<FitMessages> _fitMessagesList;
     private readonly FitMessages _fitMessagesFirst;
 
-    public FitFileMerger(params List<FitMessages> fitMessagesParams)
+    public SequentialFitFileMerger(params List<FitMessages> fitMessagesParams)
     {
         if (fitMessagesParams.Count < 1)
         {
@@ -15,16 +15,16 @@ public class FitFileMerger : FitMessages
         }
 
         _fitMessagesList = [.. fitMessagesParams
-            .OrderBy(x => x.FileIdMesgs.First().GetTimeCreated().GetDateTime())];
-        _fitMessagesFirst = _fitMessagesList.First();
+            .OrderBy(x => x.FileIdMesgs[0].GetTimeCreated().GetDateTime())];
+        _fitMessagesFirst = _fitMessagesList[0];
 
-        SetFileIdMesgs();
-        SetSessionMesgs();
-        SetActivityMesgs();
-        SetOtherMesgs();
+        SetFileIdMessages();
+        SetSessionMessages();
+        SetActivityMessages();
+        SetOtherMessages();
     }
 
-    private void SetOtherMesgs()
+    private void SetOtherMessages()
     {
         foreach (var fitMessages in _fitMessagesList)
         {
@@ -39,7 +39,7 @@ public class FitFileMerger : FitMessages
         }
     }
 
-    private void SetActivityMesgs()
+    private void SetActivityMessages()
     {
         var result = new ActivityMesg(_fitMessagesFirst.ActivityMesgs.Single());
         // copy all and reset total timer time
@@ -58,7 +58,7 @@ public class FitFileMerger : FitMessages
         activityMesgs.Add(result);
     }
 
-    private void SetSessionMesgs()
+    private void SetSessionMessages()
     {
         var session = new SessionMesg();
 
@@ -96,7 +96,7 @@ public class FitFileMerger : FitMessages
         sessionMesgs.Add(session);
     }
 
-    private void SetFileIdMesgs()
+    private void SetFileIdMessages()
     {
         fileIdMesgs.AddRange(_fitMessagesFirst.FileIdMesgs);
     }

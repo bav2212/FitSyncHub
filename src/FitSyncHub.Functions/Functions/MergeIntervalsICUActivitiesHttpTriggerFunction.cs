@@ -137,7 +137,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         }
 
         _logger.LogInformation("Start merging fit messages");
-        var mergedFitFile = new FitFileMerger([.. activityFitMessages.Values]);
+        var mergedFitFile = new SequentialFitFileMerger([.. activityFitMessages.Values]);
         _logger.LogInformation("Finished merging fit messages");
 
         ActivityResponse? raceActivity = default;
