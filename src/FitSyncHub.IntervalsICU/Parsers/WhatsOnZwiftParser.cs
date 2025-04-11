@@ -1,24 +1,25 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
+using FitSyncHub.Common.IntervalsIcu.Models;
 
 namespace FitSyncHub.IntervalsICU.Parsers;
 
 public class WhatsOnZwiftParser
 {
-    private static readonly string s_timeHoursRegexKey = "hours";
-    private static readonly string s_timeMinutesRegexKey = "minutes";
-    private static readonly string s_timeSecondsRegexKey = "seconds";
-    private static readonly string s_timeRegexPattern = $@"(?<time>((?<{s_timeHoursRegexKey}>\d+)hr\s*)?((?<{s_timeMinutesRegexKey}>\d+)min\s*)?((?<{s_timeSecondsRegexKey}>\d+)sec\s*)?)";
+    private const string TimeHoursRegexKey = "hours";
+    private const string TimeMinutesRegexKey = "minutes";
+    private const string TimeSecondsRegexKey = "seconds";
+    private static readonly string s_timeRegexPattern = $@"(?<time>((?<{TimeHoursRegexKey}>\d+)hr\s*)?((?<{TimeMinutesRegexKey}>\d+)min\s*)?((?<{TimeSecondsRegexKey}>\d+)sec\s*)?)";
 
-    private static readonly string s_repsNumberRegexKey = "reps_number";
-    private static readonly string s_repsRegexPattern = $@"(?<reps>(?<{s_repsNumberRegexKey}>\d+)x\s*)?";
+    private const string RepsNumberRegexKey = "reps_number";
+    private static readonly string s_repsRegexPattern = $@"(?<reps>(?<{RepsNumberRegexKey}>\d+)x\s*)?";
 
-    private static readonly string s_rpmNumberRegexKey = "rpm_number";
-    private static readonly string s_freeRideRegexKey = "free_ride";
-    private static readonly string s_maxEffortRegexKey = "max_effort";
-    private static readonly string s_ftpFromRegexKey = "ftp_from";
-    private static readonly string s_ftpToRegexKey = "ftp_to";
-    private static readonly string s_ftpSingleRegexKey = "ftp_single";
+    private const string RpmNumberRegexKey = "rpm_number";
+    private const string FreeRideRegexKey = "free_ride";
+    private const string MaxEffortRegexKey = "max_effort";
+    private const string FtpFromRegexKey = "ftp_from";
+    private const string FtpToRegexKey = "ftp_to";
+    private const string FtpSingleRegexKey = "ftp_single";
 
     private static readonly string s_pattern;
 
@@ -31,37 +32,37 @@ public class WhatsOnZwiftParser
         stringBuilder.Append(s_timeRegexPattern);
         stringBuilder.Append(@"(\s*@\s*)?");
         // Optional RPM segment
-        stringBuilder.Append($@"(?<rpm>(?<{s_rpmNumberRegexKey}>\d+)rpm)?");
+        stringBuilder.Append($@"(?<rpm>(?<{RpmNumberRegexKey}>\d+)rpm)?");
         // Non-greedy match for any characters in between
         stringBuilder.Append(@"(\s+?)?");
         // FTP segment
-        stringBuilder.Append($@"(?<ftp>(from\s+(?<{s_ftpFromRegexKey}>\d+)\s+to\s+(?<{s_ftpToRegexKey}>\d+)%\s*FTP)|((?<{s_ftpSingleRegexKey}>\d+)% FTP))?");
+        stringBuilder.Append($@"(?<ftp>(from\s+(?<{FtpFromRegexKey}>\d+)\s+to\s+(?<{FtpToRegexKey}>\d+)%\s*FTP)|((?<{FtpSingleRegexKey}>\d+)% FTP))?");
         // free ride segment
-        stringBuilder.Append($@"(?<{s_freeRideRegexKey}>(free ride)?)");
+        stringBuilder.Append($"(?<{FreeRideRegexKey}>(free ride)?)");
         // max effort segment
-        stringBuilder.Append($@"(?<{s_maxEffortRegexKey}>(MAX)?)");
+        stringBuilder.Append($"(?<{MaxEffortRegexKey}>(MAX)?)");
 
         // Regular expression to match the pattern
         s_pattern = stringBuilder.ToString();
     }
 
-    public static IEnumerable<ParsedZwiftWorkoutGroup> Parse(IReadOnlyCollection<string> workoutSteps)
+    public static IEnumerable<IntervalsIcuWorkoutGroup> Parse(IReadOnlyCollection<string> workoutSteps)
     {
         foreach (var (index, workoutStep) in workoutSteps.Select((x, i) => (i, x)))
         {
-            var blockDescription = GetBlockDescription(workoutSteps, index);
+            var blockInfo = GetBlockInfo(workoutSteps, index);
             var lineSegments = workoutStep.Split(',', StringSplitOptions.TrimEntries);
             var workoutLines = ParseWorkoutLines(lineSegments).ToList();
 
-            yield return new ParsedZwiftWorkoutGroup
+            yield return new IntervalsIcuWorkoutGroup
             {
-                BlockDescription = blockDescription,
+                BlockInfo = blockInfo,
                 Items = workoutLines
             };
         }
     }
 
-    private static IEnumerable<ParsedZwiftWorkoutLine> ParseWorkoutLines(string[] lineSegments)
+    private static IEnumerable<IntervalsIcuWorkoutLine> ParseWorkoutLines(string[] lineSegments)
     {
         foreach (var line in lineSegments)
         {
@@ -76,10 +77,10 @@ public class WhatsOnZwiftParser
             var time = ConvertTime(match);
             var rpm = ConvertRpm(match);
             var ftp = ConvertFtp(match);
-            var isFreeRide = !string.IsNullOrEmpty(match.Groups[s_freeRideRegexKey].Value);
-            var isMaxEffort = !string.IsNullOrEmpty(match.Groups[s_maxEffortRegexKey].Value);
+            var isFreeRide = !string.IsNullOrEmpty(match.Groups[FreeRideRegexKey].Value);
+            var isMaxEffort = !string.IsNullOrEmpty(match.Groups[MaxEffortRegexKey].Value);
 
-            yield return new ParsedZwiftWorkoutLine
+            yield return new IntervalsIcuWorkoutLine
             {
                 Time = time,
                 Rpm = rpm,
@@ -90,7 +91,7 @@ public class WhatsOnZwiftParser
         }
     }
 
-    private static string GetBlockDescription(IReadOnlyCollection<string> lines, int index)
+    private static IntervalsIcuWorkoutGroupBlockInfo GetBlockInfo(IReadOnlyCollection<string> lines, int index)
     {
         var repetitionRegexPattern = s_repsRegexPattern;
 
@@ -99,43 +100,44 @@ public class WhatsOnZwiftParser
 
         if (index == 0)
         {
-            return "Warmup";
+            return IntervalsIcuWorkoutGroupBlockInfo.CreateWarmup();
         }
 
         if (index == lines.Count - 1)
         {
-            return "Cooldown";
+            return IntervalsIcuWorkoutGroupBlockInfo.CreateCooldown();
         }
 
         // Get the repetition count if present (e.g., 3x)
-        var repsNumberMatch = repetitionMatch.Groups[s_repsNumberRegexKey].Value.Trim();
-        if (!string.IsNullOrEmpty(repsNumberMatch))
-        {
-            var repeatCount = int.Parse(repsNumberMatch);
-            return $"{repeatCount}x";
-        }
+        var repsNumberMatch = repetitionMatch.Groups[RepsNumberRegexKey].Value.Trim();
 
-        return "1x";
+        var repeatCount = !string.IsNullOrEmpty(repsNumberMatch)
+            && int.TryParse(repsNumberMatch, out var parsedRepeatCount)
+            ? parsedRepeatCount
+            : 1;
+
+        return IntervalsIcuWorkoutGroupBlockInfo.CreateInterval(repeatCount);
     }
 
-    private static IParsedZwiftWorkoutFtp? ConvertFtp(Match match)
+    private static IIntervalsIcuWorkoutFtp? ConvertFtp(Match match)
     {
-        var ftpFromMatch = match.Groups[s_ftpFromRegexKey].Value;
-        var ftpToMatch = match.Groups[s_ftpToRegexKey].Value;
+        var ftpFromMatch = match.Groups[FtpFromRegexKey].Value;
+        var ftpToMatch = match.Groups[FtpToRegexKey].Value;
         // Check if it's an FTP range or a single value
         if (!string.IsNullOrEmpty(ftpFromMatch) && !string.IsNullOrEmpty(ftpToMatch))
         {
-            return new ParsedZwiftWorkoutFtpRange
+            return new IntervalsIcuWorkoutFtpRange
             {
                 From = int.Parse(ftpFromMatch),
-                To = int.Parse(ftpToMatch)
+                To = int.Parse(ftpToMatch),
+                IsRampRange = true,
             };
         }
 
-        var ftpSingleMatch = match.Groups[s_ftpSingleRegexKey].Value;
+        var ftpSingleMatch = match.Groups[FtpSingleRegexKey].Value;
         if (!string.IsNullOrEmpty(ftpSingleMatch))
         {
-            return new ParsedZwiftWorkoutFtpSingle
+            return new IntervalsIcuWorkoutFtpSingle
             {
                 Value = int.Parse(ftpSingleMatch),
             };
@@ -146,15 +148,15 @@ public class WhatsOnZwiftParser
 
     private static int? ConvertRpm(Match match)
     {
-        var rpm = match.Groups[s_rpmNumberRegexKey].Value;
+        var rpm = match.Groups[RpmNumberRegexKey].Value;
         return string.IsNullOrEmpty(rpm) ? default(int?) : int.Parse(rpm);
     }
 
     private static TimeSpan ConvertTime(Match match)
     {
-        var hoursMatch = match.Groups[s_timeHoursRegexKey].Value.Trim();
-        var minutesMatch = match.Groups[s_timeMinutesRegexKey].Value.Trim();
-        var secondsMatch = match.Groups[s_timeSecondsRegexKey].Value.Trim();
+        var hoursMatch = match.Groups[TimeHoursRegexKey].Value.Trim();
+        var minutesMatch = match.Groups[TimeMinutesRegexKey].Value.Trim();
+        var secondsMatch = match.Groups[TimeSecondsRegexKey].Value.Trim();
 
         var hours = string.IsNullOrEmpty(hoursMatch) ? default : int.Parse(hoursMatch);
         var minutes = string.IsNullOrEmpty(minutesMatch) ? default : int.Parse(minutesMatch);

@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using FitSyncHub.Common.IntervalsIcu;
 using FitSyncHub.IntervalsICU.Parsers;
 using FitSyncHub.IntervalsICU.Scrapers;
 using Microsoft.Extensions.Logging;

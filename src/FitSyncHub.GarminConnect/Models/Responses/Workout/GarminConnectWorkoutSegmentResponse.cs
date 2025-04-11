@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Models.Responses.Workout;
 
-public record GarminWorkoutSegmentResponse
+public record GarminConnectWorkoutSegmentResponse
 {
     public int SegmentOrder { get; init; }
     public GarminConnectSportTypeResponse SportType { get; init; } = default!;

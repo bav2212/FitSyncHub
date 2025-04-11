@@ -1,11 +1,11 @@
 ﻿using System.Text;
-using FitSyncHub.IntervalsICU.Parsers;
+using FitSyncHub.Common.IntervalsIcu.Models;
 
-namespace FitSyncHub.IntervalsICU;
+namespace FitSyncHub.Common.IntervalsIcu;
 
-public class IntervalsIcuConverter
+public static class IntervalsIcuConverter
 {
-    public static List<string> ConvertToIntervalsIcuFormat(IReadOnlyCollection<ParsedZwiftWorkoutGroup> workoutGroups)
+    public static List<string> ConvertToIntervalsIcuFormat(IReadOnlyCollection<IntervalsIcuWorkoutGroup> workoutGroups)
     {
         var mergedGroups = MergeGroups(workoutGroups).ToList();
 
@@ -14,7 +14,7 @@ public class IntervalsIcuConverter
         foreach (var workoutGroup in mergedGroups)
         {
             resultLines.Add(string.Empty);
-            resultLines.Add($"{workoutGroup.BlockDescription}");
+            resultLines.Add($"{workoutGroup.BlockInfo}");
 
             resultLines.AddRange(workoutGroup.Items.Select(ConvertToIntervalsIcuFormat));
         }
@@ -22,14 +22,14 @@ public class IntervalsIcuConverter
         return resultLines;
     }
 
-    private static IEnumerable<ParsedZwiftWorkoutGroup> MergeGroups(IReadOnlyCollection<ParsedZwiftWorkoutGroup> workoutGroups)
+    private static IEnumerable<IntervalsIcuWorkoutGroup> MergeGroups(IReadOnlyCollection<IntervalsIcuWorkoutGroup> workoutGroups)
     {
         if (workoutGroups.Count == 0)
         {
             yield break;
         }
 
-        ParsedZwiftWorkoutGroup? previousGroup = null;
+        IntervalsIcuWorkoutGroup? previousGroup = null;
 
         foreach (var workoutGroup in workoutGroups)
         {
@@ -39,26 +39,23 @@ public class IntervalsIcuConverter
                 continue;
             }
 
-            if (previousGroup.BlockDescription == workoutGroup.BlockDescription
-                && workoutGroup.BlockDescription == "1x")
+            if (previousGroup.BlockInfo == workoutGroup.BlockInfo && workoutGroup.BlockInfo.IsDefaultInterval)
             {
                 previousGroup = previousGroup with
                 {
                     Items = [.. previousGroup.Items, .. workoutGroup.Items]
                 };
-            }
-            else
-            {
-                yield return previousGroup;
-                previousGroup = workoutGroup;
                 continue;
             }
+
+            yield return previousGroup;
+            previousGroup = workoutGroup;
         }
 
         yield return previousGroup!;
     }
 
-    private static string ConvertToIntervalsIcuFormat(ParsedZwiftWorkoutLine item)
+    private static string ConvertToIntervalsIcuFormat(IntervalsIcuWorkoutLine item)
     {
         var sb = new StringBuilder("-");
         AppendTimeSegment(item, sb);
@@ -85,7 +82,7 @@ public class IntervalsIcuConverter
         return sb.ToString();
     }
 
-    private static void AppendTimeSegment(ParsedZwiftWorkoutLine item, StringBuilder sb)
+    private static void AppendTimeSegment(IntervalsIcuWorkoutLine item, StringBuilder sb)
     {
         sb.Append(' ');
         if (item.Time.Hours != 0)
@@ -104,7 +101,7 @@ public class IntervalsIcuConverter
         }
     }
 
-    private static void AppendFtpSegment(ParsedZwiftWorkoutLine item, StringBuilder sb)
+    private static void AppendFtpSegment(IntervalsIcuWorkoutLine item, StringBuilder sb)
     {
         if (item.Ftp is null)
         {
@@ -112,13 +109,18 @@ public class IntervalsIcuConverter
         }
 
         sb.Append(' ');
-        if (item.Ftp is ParsedZwiftWorkoutFtpRange ftpRange)
+        if (item.Ftp is IntervalsIcuWorkoutFtpRange ftpRange)
         {
-            sb.Append($"ramp {ftpRange.From}-{ftpRange.To}%");
+            if (ftpRange.IsRampRange)
+            {
+                sb.Append("ramp ");
+            }
+
+            sb.Append($"{ftpRange.From}-{ftpRange.To}%");
             return;
         }
 
-        if (item.Ftp is ParsedZwiftWorkoutFtpSingle ftpSingle)
+        if (item.Ftp is IntervalsIcuWorkoutFtpSingle ftpSingle)
         {
             sb.Append($"{ftpSingle.Value}%");
             return;

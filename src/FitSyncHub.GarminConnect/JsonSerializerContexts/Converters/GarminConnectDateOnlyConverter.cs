@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace FitSyncHub.GarminConnect.Converters;
+namespace FitSyncHub.GarminConnect.JsonSerializerContexts.Converters;
 
 public class GarminConnectDateOnlyConverter : JsonConverter<DateOnly>
 {

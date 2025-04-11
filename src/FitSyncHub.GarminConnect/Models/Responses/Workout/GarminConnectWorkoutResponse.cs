@@ -10,5 +10,5 @@ public record GarminConnectWorkoutResponse
     public GarminConnectSportTypeResponse SportType { get; init; } = default!;
     public string SubSportType { get; init; } = default!;
     public int? EstimatedDurationInSecs { get; init; }
-    public List<GarminWorkoutSegmentResponse> WorkoutSegments { get; init; } = [];
+    public List<GarminConnectWorkoutSegmentResponse> WorkoutSegments { get; init; } = [];
 }
