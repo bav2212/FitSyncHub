@@ -3,7 +3,7 @@ using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.Models.Requests;
 using FitSyncHub.GarminConnect.Models.Responses;
 
-namespace FitSyncHub.Functions.JsonSerializerContexts;
+namespace FitSyncHub.GarminConnect.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,

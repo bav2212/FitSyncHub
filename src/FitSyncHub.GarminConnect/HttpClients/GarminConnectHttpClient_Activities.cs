@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
-using FitSyncHub.Functions.JsonSerializerContexts;
+using FitSyncHub.GarminConnect.JsonSerializerContexts;
 using FitSyncHub.GarminConnect.Models.Requests;
 using FitSyncHub.GarminConnect.Models.Responses;
 

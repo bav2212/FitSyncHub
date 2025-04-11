@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using FitSyncHub.Functions.JsonSerializerContexts;
+using FitSyncHub.GarminConnect.JsonSerializerContexts;
 
 namespace FitSyncHub.GarminConnect.UnitTests;
 

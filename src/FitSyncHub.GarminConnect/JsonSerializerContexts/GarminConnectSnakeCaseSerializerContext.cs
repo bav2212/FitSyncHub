@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using FitSyncHub.GarminConnect.Auth;
 
-namespace FitSyncHub.Functions.JsonSerializerContexts;
+namespace FitSyncHub.GarminConnect.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(OAuth2Token))]
