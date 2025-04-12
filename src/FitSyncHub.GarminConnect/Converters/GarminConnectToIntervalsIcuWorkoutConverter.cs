@@ -1,4 +1,4 @@
-﻿using FitSyncHub.Common.IntervalsIcu.Models;
+﻿using FitSyncHub.Common.Applications.IntervalsIcu.Models;
 using FitSyncHub.GarminConnect.Models.Responses.Workout;
 
 namespace FitSyncHub.GarminConnect.Converters;

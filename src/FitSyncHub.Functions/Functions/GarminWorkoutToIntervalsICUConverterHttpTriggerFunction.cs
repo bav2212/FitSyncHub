@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using FitSyncHub.Common.IntervalsIcu;
+using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.HttpClients;
 using Microsoft.AspNetCore.Http;

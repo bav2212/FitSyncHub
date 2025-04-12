@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using FitSyncHub.Common.IntervalsIcu.Models;
+using FitSyncHub.Common.Applications.IntervalsIcu.Models;
 
-namespace FitSyncHub.Common.IntervalsIcu;
+namespace FitSyncHub.Common.Applications.IntervalsIcu;
 
 public static class IntervalsIcuConverter
 {

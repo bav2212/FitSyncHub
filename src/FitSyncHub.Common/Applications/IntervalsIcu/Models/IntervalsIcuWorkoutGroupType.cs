@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.Common.IntervalsIcu.Models;
+﻿namespace FitSyncHub.Common.Applications.IntervalsIcu.Models;
 
 public enum IntervalsIcuWorkoutGroupType
 {

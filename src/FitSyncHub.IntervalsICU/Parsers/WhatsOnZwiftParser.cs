@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using FitSyncHub.Common.IntervalsIcu.Models;
+using FitSyncHub.Common.Applications.IntervalsIcu.Models;
 
 namespace FitSyncHub.IntervalsICU.Parsers;
 
