@@ -39,12 +39,22 @@ public partial class GarminConnectHttpClient
 
         var dateString = date.ToString("yyyy-MM-dd");
 
+        // add strict model and return model in method response. 
+        // this will give possibility to better handle when do data at all and when no cycling activities
         var workoutUuid = jsonDocument.RootElement.GetProperty("taskList")
             .EnumerateArray()
             .Where(x =>
-                x.GetProperty("calendarDate").GetString() == dateString &&
-                x.GetProperty("taskWorkout").GetProperty("sportType").GetProperty("sportTypeKey")
-                    .GetString() == "cycling")
+            {
+                var sportTypeJsonNode = x.GetProperty("taskWorkout").GetProperty("sportType");
+                if (sportTypeJsonNode.ValueKind == JsonValueKind.Null)
+                {
+                    return false;
+                }
+
+                return x.GetProperty("calendarDate").GetString() == dateString &&
+                    sportTypeJsonNode.GetProperty("sportTypeKey").GetString() == "cycling";
+
+            })
             .Select(x => x.GetProperty("taskWorkout").GetProperty("workoutUuid").GetString())
             .ToList();
 

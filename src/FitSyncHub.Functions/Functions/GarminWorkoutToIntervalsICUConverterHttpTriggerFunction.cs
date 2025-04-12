@@ -42,6 +42,11 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
         var workoutIds = await _garminConnectHttpClient.GetTrainingPlanCyclingWorkoutGuids(
             trainingPlanId, date, cancellationToken);
 
+        if (workoutIds.Count == 0)
+        {
+            return new BadRequestObjectResult("No activities for specified date");
+        }
+
         var result = new StringBuilder();
 
         foreach (var workoutId in workoutIds)
