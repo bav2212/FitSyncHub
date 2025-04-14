@@ -6,7 +6,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
 public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
 {

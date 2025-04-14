@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.Strava;
 
-public class ExchangeTokenHttpTriggerFunction
+public class StravaExchangeTokenHttpTriggerFunction
 {
     private readonly HashSet<string> _expectedScope = [
         "read",
@@ -20,22 +20,22 @@ public class ExchangeTokenHttpTriggerFunction
         "read_all"
     ];
     private readonly IStravaOAuthHttpClient _stravaHttpClient;
-    private readonly ILogger<ExchangeTokenHttpTriggerFunction> _logger;
+    private readonly ILogger<StravaExchangeTokenHttpTriggerFunction> _logger;
 
-    public ExchangeTokenHttpTriggerFunction(
+    public StravaExchangeTokenHttpTriggerFunction(
         IStravaOAuthHttpClient stravaHttpClient,
-        ILogger<ExchangeTokenHttpTriggerFunction> logger)
+        ILogger<StravaExchangeTokenHttpTriggerFunction> logger)
     {
         _stravaHttpClient = stravaHttpClient;
         _logger = logger;
     }
 
-    [Function(nameof(ExchangeTokenHttpTriggerFunction))]
+    [Function(nameof(StravaExchangeTokenHttpTriggerFunction))]
     public async Task<ExchangeTokenMultiResponse> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "exchange_token")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Started executing function {Function}", nameof(ExchangeTokenHttpTriggerFunction));
+        _logger.LogInformation("Started executing function {Function}", nameof(StravaExchangeTokenHttpTriggerFunction));
 
         string? code = req.Query["code"];
         string? scope = req.Query["scope"];

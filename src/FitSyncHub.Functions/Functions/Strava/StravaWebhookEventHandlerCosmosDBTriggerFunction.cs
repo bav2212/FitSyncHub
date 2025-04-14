@@ -6,18 +6,18 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class CosmosDBTriggerFunction
+public class StravaWebhookEventHandlerCosmosDBTriggerFunction
 {
     private readonly UpdateActivityService _updateActivityService;
     private readonly SummaryActivityService _summaryActivityService;
     private readonly StravaAthleteContext _athleteContext;
-    private readonly ILogger<CosmosDBTriggerFunction> _logger;
+    private readonly ILogger<StravaWebhookEventHandlerCosmosDBTriggerFunction> _logger;
 
-    public CosmosDBTriggerFunction(
+    public StravaWebhookEventHandlerCosmosDBTriggerFunction(
         UpdateActivityService updateActivityService,
         SummaryActivityService summaryActivityService,
         StravaAthleteContext athleteContext,
-        ILogger<CosmosDBTriggerFunction> logger)
+        ILogger<StravaWebhookEventHandlerCosmosDBTriggerFunction> logger)
     {
         _updateActivityService = updateActivityService;
         _summaryActivityService = summaryActivityService;
@@ -37,16 +37,15 @@ public class CosmosDBTriggerFunction
             CreateLeaseContainerIfNotExists = true)] IReadOnlyList<WebhookEventData> input,
         CancellationToken cancellationToken)
     {
-        if (input == null || input.Count <= 0)
+        if (input == null || input.Count == 0)
         {
             _logger.LogInformation("Skipping cause no input from cosmos db trigger");
             return;
         }
 
         _logger.LogInformation("Documents modified: {Count}", input.Count);
-        var orderedInput = input.OrderBy(x => x.CreatedOn);
 
-        foreach (var webhookEventData in orderedInput)
+        foreach (var webhookEventData in input.OrderBy(x => x.CreatedOn))
         {
             await HandleWebhookEventData(webhookEventData, cancellationToken);
         }

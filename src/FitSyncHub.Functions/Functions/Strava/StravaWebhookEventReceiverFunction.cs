@@ -1,31 +1,23 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using FitSyncHub.Functions.Data.Entities;
-using FitSyncHub.Functions.Options;
 using FitSyncHub.Strava;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Options;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.Strava;
 
-public class WebhookEventReceiverFunction
+public class StravaWebhookEventReceiverFunction
 {
-    private readonly StravaOptions _stravaOptions;
-
-    public WebhookEventReceiverFunction(IOptions<StravaOptions> stravaOptions)
-    {
-        _stravaOptions = stravaOptions.Value;
-    }
-
-    [Function(nameof(WebhookEventReceiverFunction))]
-    public static WebhookEventReceiverMultiResponse Run(
+    [Function(nameof(StravaWebhookEventReceiverFunction))]
+    public WebhookEventReceiverMultiResponse Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequest req,
-        [FromBody] WebhookEventDataWebhookRequest request,
-        CancellationToken cancellationToken)
+        [FromBody] WebhookEventDataWebhookRequest request)
     {
+        _ = req;
+
         if (request.OwnerId != Constants.MyAthleteId)
         {
             return new WebhookEventReceiverMultiResponse

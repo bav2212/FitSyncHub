@@ -5,22 +5,22 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.Strava;
 
-public class CorrectRideElevationGainTriggerFunction
+public class StravaCorrectRideElevationGainTriggerFunction
 {
     private readonly CorrectElevationService _correctElevationService;
-    private readonly ILogger<CorrectRideElevationGainTriggerFunction> _logger;
+    private readonly ILogger<StravaCorrectRideElevationGainTriggerFunction> _logger;
 
-    public CorrectRideElevationGainTriggerFunction(
+    public StravaCorrectRideElevationGainTriggerFunction(
         CorrectElevationService correctElevationService,
-        ILogger<CorrectRideElevationGainTriggerFunction> logger)
+        ILogger<StravaCorrectRideElevationGainTriggerFunction> logger)
     {
         _correctElevationService = correctElevationService;
         _logger = logger;
     }
 
-    [Function(nameof(CorrectRideElevationGainTriggerFunction))]
+    [Function(nameof(StravaCorrectRideElevationGainTriggerFunction))]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = "correct-elevation")] HttpRequest req,
         [FromBody] CorrectRideElevationRequest request,

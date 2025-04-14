@@ -6,22 +6,22 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.Strava;
 
-public class StoreActivitiesTriggerFunction
+public class StravaStoreActivitiesTriggerFunction
 {
     private readonly SummaryActivityService _summaryActivityService;
-    private readonly ILogger<StoreActivitiesTriggerFunction> _logger;
+    private readonly ILogger<StravaStoreActivitiesTriggerFunction> _logger;
 
-    public StoreActivitiesTriggerFunction(
+    public StravaStoreActivitiesTriggerFunction(
         SummaryActivityService summaryActivityService,
-        ILogger<StoreActivitiesTriggerFunction> logger)
+        ILogger<StravaStoreActivitiesTriggerFunction> logger)
     {
         _summaryActivityService = summaryActivityService;
         _logger = logger;
     }
 
-    [Function(nameof(StoreActivitiesTriggerFunction))]
+    [Function(nameof(StravaStoreActivitiesTriggerFunction))]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = "store")] HttpRequest req,
         [FromBody] StoreStravaActivitiesRequest request,

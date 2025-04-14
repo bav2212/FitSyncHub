@@ -17,10 +17,13 @@ public class GarminSyncWeightTimerTriggerFunction
         _logger = logger;
     }
 
+#if !DEBUG
     [Function(nameof(GarminSyncWeightTimerTriggerFunction))]
+#endif
     public async Task RunMorning(
         // run every day at 4, 5, 6, 7, 13, 19 utc
         [TimerTrigger("0 0 4-7,13,19 * * *")] TimerInfo timer,
+
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Trigger executed at: {DateTime}, invocation is due to a missed schedule occurrence: {isPastDue}",

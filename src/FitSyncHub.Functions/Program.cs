@@ -1,6 +1,7 @@
 ﻿using FitSyncHub.Common;
 using FitSyncHub.Functions;
 using FitSyncHub.Functions.Functions;
+using FitSyncHub.Functions.Functions.IntervalsIcu;
 using FitSyncHub.Functions.Managers;
 using FitSyncHub.Functions.Options;
 using FitSyncHub.Functions.Repositories;

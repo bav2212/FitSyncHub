@@ -6,22 +6,22 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.Strava;
 
-public class WebhookHttpTriggerFunction
+public class StravaWebhookHttpTriggerFunction
 {
     private readonly StravaOptions _options;
-    private readonly ILogger<WebhookHttpTriggerFunction> _logger;
+    private readonly ILogger<StravaWebhookHttpTriggerFunction> _logger;
 
-    public WebhookHttpTriggerFunction(
+    public StravaWebhookHttpTriggerFunction(
         IOptions<StravaOptions> options,
-        ILogger<WebhookHttpTriggerFunction> logger)
+        ILogger<StravaWebhookHttpTriggerFunction> logger)
     {
         _options = options.Value;
         _logger = logger;
     }
 
-    [Function(nameof(WebhookHttpTriggerFunction))]
+    [Function(nameof(StravaWebhookHttpTriggerFunction))]
     public IActionResult Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "webhook")] HttpRequest req)
     {
