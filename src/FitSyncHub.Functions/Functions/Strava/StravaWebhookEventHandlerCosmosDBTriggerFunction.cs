@@ -4,7 +4,7 @@ using FitSyncHub.Strava;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.Strava;
 
 public class StravaWebhookEventHandlerCosmosDBTriggerFunction
 {

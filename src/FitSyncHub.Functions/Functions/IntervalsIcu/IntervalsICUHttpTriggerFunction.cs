@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace FitSyncHub.Functions.Functions.Intervals;
+namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
 public class IntervalsICUHttpTriggerFunction
 {
