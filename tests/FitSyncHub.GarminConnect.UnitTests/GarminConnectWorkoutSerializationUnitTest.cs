@@ -12,7 +12,7 @@ public class GarminConnectWorkoutSerializationUnitTest
         var content = await File.ReadAllTextAsync(filePath);
 
         var value = JsonSerializer.Deserialize(content,
-            GarminConnectWorkoutSerializerContext.Default.GarminConnectWorkoutResponse);
+            GarminConnectWorkoutSerializerContext.Default.WorkoutResponse);
 
         Assert.NotNull(value);
     }

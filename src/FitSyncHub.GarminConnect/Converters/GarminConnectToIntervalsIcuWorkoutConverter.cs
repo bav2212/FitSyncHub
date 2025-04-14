@@ -6,13 +6,13 @@ namespace FitSyncHub.GarminConnect.Converters;
 public static class GarminConnectToIntervalsIcuWorkoutConverter
 {
     public static List<IntervalsIcuWorkoutGroup> ConvertGarminWorkoutToIntervalsIcuWorkoutGroups(
-        GarminConnectWorkoutResponse workout, int garminConnectFtp)
+        WorkoutResponse workout, int garminConnectFtp)
     {
         List<IntervalsIcuWorkoutGroup> result = [];
 
         foreach (var step in workout.WorkoutSegments[0].WorkoutSteps)
         {
-            if (step is GarminConnectExecutableStepResponse workoutStep)
+            if (step is WorkoutExecutableStepResponse workoutStep)
             {
                 var item = GetIntervalsIcuWorkoutLine(workoutStep, garminConnectFtp);
 
@@ -24,13 +24,13 @@ public static class GarminConnectToIntervalsIcuWorkoutConverter
                 result.Add(group);
             }
 
-            if (step is GarminConnectRepeatGroupResponse repeatStep)
+            if (step is WorkoutRepeatGroupResponse repeatStep)
             {
                 var group = new IntervalsIcuWorkoutGroup
                 {
                     BlockInfo = IntervalsIcuWorkoutGroupBlockInfo.CreateInterval(repeatStep.NumberOfIterations),
                     Items = [.. repeatStep.WorkoutSteps
-                        .OfType<GarminConnectExecutableStepResponse>()
+                        .OfType<WorkoutExecutableStepResponse>()
                         .Select(x => GetIntervalsIcuWorkoutLine(x, garminConnectFtp))]
                 };
 
@@ -42,7 +42,7 @@ public static class GarminConnectToIntervalsIcuWorkoutConverter
     }
 
     private static IntervalsIcuWorkoutGroupBlockInfo CreateBlockInfo(
-        GarminConnectExecutableStepResponse workoutStep)
+        WorkoutExecutableStepResponse workoutStep)
     {
         return GetWorkoutGroupType(workoutStep) switch
         {
@@ -54,9 +54,11 @@ public static class GarminConnectToIntervalsIcuWorkoutConverter
     }
 
     private static IntervalsIcuWorkoutLine GetIntervalsIcuWorkoutLine(
-        GarminConnectExecutableStepResponse workoutStep,
+        WorkoutExecutableStepResponse workoutStep,
         int garminConnectFtp)
     {
+        var workoutGroupType = GetWorkoutGroupType(workoutStep);
+
         var (from, to) = (workoutStep.TargetValueOne, workoutStep.TargetValueTwo) switch
         {
             ({ } fromValue, { } toValue) => (
@@ -65,6 +67,12 @@ public static class GarminConnectToIntervalsIcuWorkoutConverter
             ),
             _ => throw new ArgumentException($"{nameof(workoutStep.TargetValueOne)} and {nameof(workoutStep.TargetValueTwo)} must be set"),
         };
+
+        if (workoutGroupType is IntervalsIcuWorkoutGroupType.Cooldown)
+        {
+            // swap from and to for cooldown
+            (from, to) = (to, from);
+        }
 
         var secondsValue = workoutStep.EndConditionValue
             ?? throw new ArgumentException($"{nameof(workoutStep.EndConditionValue)} must be set");
@@ -81,13 +89,13 @@ public static class GarminConnectToIntervalsIcuWorkoutConverter
                 From = from,
                 To = to,
                 // ramp for warmup and cooldown
-                IsRampRange = GetWorkoutGroupType(workoutStep) is IntervalsIcuWorkoutGroupType.Warmup or IntervalsIcuWorkoutGroupType.Cooldown,
+                IsRampRange = workoutGroupType is IntervalsIcuWorkoutGroupType.Warmup or IntervalsIcuWorkoutGroupType.Cooldown,
             }
         };
     }
 
     private static IntervalsIcuWorkoutGroupType GetWorkoutGroupType(
-       GarminConnectExecutableStepResponse workoutStep)
+       WorkoutExecutableStepResponse workoutStep)
     {
         return workoutStep.StepType.StepTypeKey switch
         {

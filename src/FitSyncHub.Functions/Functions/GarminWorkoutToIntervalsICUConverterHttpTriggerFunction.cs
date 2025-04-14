@@ -18,7 +18,6 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
         GarminConnectHttpClient garminConnectHttpClient,
         ILogger<GarminWorkoutToIntervalsICUConverterHttpTriggerFunction> logger)
     {
-
         _garminConnectHttpClient = garminConnectHttpClient;
         _logger = logger;
     }
@@ -39,18 +38,32 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
         var ftp = await _garminConnectHttpClient.GetCyclingFtp(cancellationToken: cancellationToken);
 
         var trainingPlanId = await _garminConnectHttpClient.GetActiveTrainingPlanId(cancellationToken);
-        var workoutIds = await _garminConnectHttpClient.GetTrainingPlanCyclingWorkoutGuids(
-            trainingPlanId, date, cancellationToken);
+        var trainingPlan = await _garminConnectHttpClient.GetTrainingPlan(trainingPlanId, cancellationToken);
 
-        if (workoutIds.Count == 0)
+        var taskListForDate = trainingPlan.TaskList
+            .Where(x => x.CalendarDate == date && x.TaskWorkout.SportType != null)
+            .ToList();
+
+        if (taskListForDate.Count == 0)
         {
             return new BadRequestObjectResult("No activities for specified date");
         }
 
+        var cyclingTaskListForDate = taskListForDate
+            .Where(x => x.TaskWorkout.SportType.SportTypeKey == "cycling")
+            .ToList();
+
+        if (cyclingTaskListForDate.Count == 0)
+        {
+            return new BadRequestObjectResult("No cycling activities for specified date");
+        }
+
         var result = new StringBuilder();
 
-        foreach (var workoutId in workoutIds)
+        foreach (var cyclingTask in cyclingTaskListForDate)
         {
+            var workoutId = cyclingTask.TaskWorkout.WorkoutUuid;
+
             var workoutResponse = await _garminConnectHttpClient.GetWorkout(workoutId, cancellationToken);
 
             var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter

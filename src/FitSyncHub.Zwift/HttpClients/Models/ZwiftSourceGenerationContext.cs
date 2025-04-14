@@ -6,6 +6,4 @@ namespace ZwiftToIntervalsICUConverter.HttpClients.Models;
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(IReadOnlyCollection<ZwiftEventResponse>))]
 [JsonSerializable(typeof(IReadOnlyCollection<ZwiftRaceResultResponse>))]
-internal partial class ZwiftSourceGenerationContext : JsonSerializerContext
-{
-}
+internal partial class ZwiftSourceGenerationContext : JsonSerializerContext;

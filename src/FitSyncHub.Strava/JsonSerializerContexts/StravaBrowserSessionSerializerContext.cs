@@ -5,6 +5,4 @@ namespace FitSyncHub.Functions.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(UpdatableActivityRequest))]
-internal partial class StravaBrowserSessionSerializerContext : JsonSerializerContext
-{
-}
+internal partial class StravaBrowserSessionSerializerContext : JsonSerializerContext;

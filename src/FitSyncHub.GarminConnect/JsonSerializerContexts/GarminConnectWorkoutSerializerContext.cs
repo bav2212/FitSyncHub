@@ -6,7 +6,5 @@ namespace FitSyncHub.GarminConnect.JsonSerializerContexts;
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase
 )]
-[JsonSerializable(typeof(GarminConnectWorkoutResponse))]
-internal partial class GarminConnectWorkoutSerializerContext : JsonSerializerContext
-{
-}
+[JsonSerializable(typeof(WorkoutResponse))]
+internal partial class GarminConnectWorkoutSerializerContext : JsonSerializerContext;

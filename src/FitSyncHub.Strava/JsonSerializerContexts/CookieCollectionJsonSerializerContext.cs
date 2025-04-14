@@ -5,6 +5,4 @@ namespace FitSyncHub.Functions.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions]
 [JsonSerializable(typeof(CookieCollection))]
-internal partial class CookieCollectionJsonSerializerContext : JsonSerializerContext
-{
-}
+internal partial class CookieCollectionJsonSerializerContext : JsonSerializerContext;

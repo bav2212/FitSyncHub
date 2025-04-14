@@ -6,7 +6,7 @@ namespace FitSyncHub.GarminConnect.HttpClients;
 
 public partial class GarminConnectHttpClient
 {
-    public async Task<GarminConnectWorkoutResponse> GetWorkout(
+    public async Task<WorkoutResponse> GetWorkout(
         Guid id,
         CancellationToken cancellationToken = default)
     {
@@ -16,7 +16,6 @@ public partial class GarminConnectHttpClient
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
-        return JsonSerializer.Deserialize(content,
-            GarminConnectWorkoutSerializerContext.Default.GarminConnectWorkoutResponse)!;
+        return JsonSerializer.Deserialize(content, GarminConnectWorkoutSerializerContext.Default.WorkoutResponse)!;
     }
 }

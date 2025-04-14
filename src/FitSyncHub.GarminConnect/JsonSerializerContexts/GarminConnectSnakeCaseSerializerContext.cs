@@ -6,6 +6,4 @@ namespace FitSyncHub.GarminConnect.JsonSerializerContexts;
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(OAuth2Token))]
 [JsonSerializable(typeof(ConsumerCredentials))]
-internal partial class GarminConnectSnakeCaseSerializerContext : JsonSerializerContext
-{
-}
+internal partial class GarminConnectSnakeCaseSerializerContext : JsonSerializerContext;

@@ -13,6 +13,4 @@ namespace FitSyncHub.GarminConnect.JsonSerializerContexts;
 [JsonSerializable(typeof(GarminActivityResponse[]))]
 [JsonSerializable(typeof(GarminSetUserWeightRequest))]
 [JsonSerializable(typeof(GarminWeightResponse))]
-internal partial class GarminConnectCamelCaseSerializerContext : JsonSerializerContext
-{
-}
+internal partial class GarminConnectCamelCaseSerializerContext : JsonSerializerContext;

@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using FitSyncHub.GarminConnect.JsonSerializerContexts;
+using FitSyncHub.GarminConnect.Models.Responses.TrainingPlan;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
@@ -24,9 +26,8 @@ public partial class GarminConnectHttpClient
             .First();
     }
 
-    public async Task<List<Guid>> GetTrainingPlanCyclingWorkoutGuids(
+    public async Task<TrainingPlanResponse> GetTrainingPlan(
         long planId,
-        DateOnly date,
         CancellationToken cancellationToken = default)
     {
         var url = $"/trainingplan-service/trainingplan/fbt-adaptive/{planId}";
@@ -35,29 +36,6 @@ public partial class GarminConnectHttpClient
         response.EnsureSuccessStatusCode();
 
         var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-        var jsonDocument = JsonDocument.Parse(responseContent);
-
-        var dateString = date.ToString("yyyy-MM-dd");
-
-        // add strict model and return model in method response. 
-        // this will give possibility to better handle when do data at all and when no cycling activities
-        var workoutUuid = jsonDocument.RootElement.GetProperty("taskList")
-            .EnumerateArray()
-            .Where(x =>
-            {
-                var sportTypeJsonNode = x.GetProperty("taskWorkout").GetProperty("sportType");
-                if (sportTypeJsonNode.ValueKind == JsonValueKind.Null)
-                {
-                    return false;
-                }
-
-                return x.GetProperty("calendarDate").GetString() == dateString &&
-                    sportTypeJsonNode.GetProperty("sportTypeKey").GetString() == "cycling";
-
-            })
-            .Select(x => x.GetProperty("taskWorkout").GetProperty("workoutUuid").GetString())
-            .ToList();
-
-        return workoutUuid.ConvertAll(Guid.Parse!);
+        return JsonSerializer.Deserialize(responseContent, GarminConnectTrainingPlanSerializerContext.Default.TrainingPlanResponse)!;
     }
 }

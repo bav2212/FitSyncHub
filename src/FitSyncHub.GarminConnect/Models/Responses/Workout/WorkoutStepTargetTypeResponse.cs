@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Models.Responses.Workout;
 
-public record GarminConnectTargetTypeResponse
+public record WorkoutStepTargetTypeResponse
 {
     public int WorkoutTargetTypeId { get; init; }
     public string WorkoutTargetTypeKey { get; init; } = default!;

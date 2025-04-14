@@ -34,13 +34,13 @@ public static class AppleHealthExportFileParser
         return heartRateData;
     }
 
-    public static int? FindClosestHeartRate(List<AppleHeartRateRecord> heartRates, DateTime trackTime)
+    public static int FindClosestHeartRate(List<AppleHeartRateRecord> heartRates, DateTime trackTime)
     {
         var closest = heartRates
             .OrderBy(hr => Math.Abs((hr.Time - trackTime).TotalSeconds)) // Find nearest timestamp
-            .FirstOrDefault();
+            .First();
 
-        return closest?.HeartRate > 0 ? closest.HeartRate : null;
+        return closest.HeartRate;
     }
 }
 

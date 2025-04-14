@@ -14,6 +14,4 @@ namespace FitSyncHub.Functions.JsonSerializerContexts;
 [JsonSerializable(typeof(ExchangeTokenResponse))]
 [JsonSerializable(typeof(RefreshTokenRequest))]
 [JsonSerializable(typeof(RefreshTokenResponse))]
-internal partial class StravaRestApiSerializerContext : JsonSerializerContext
-{
-}
+internal partial class StravaRestApiSerializerContext : JsonSerializerContext;

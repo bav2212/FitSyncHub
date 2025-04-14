@@ -15,7 +15,6 @@ public class ZwiftFitFileMerger : FitMessages
 
         _zwiftDataDictionary = GetZwiftData(_zwiftFitMessages);
 
-
         foreach (var record in _fitMessages.RecordMesgs)
         {
             var timestamp = record.GetTimestamp();
