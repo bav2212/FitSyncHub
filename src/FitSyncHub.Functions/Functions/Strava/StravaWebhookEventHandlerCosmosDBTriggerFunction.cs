@@ -26,7 +26,7 @@ public class StravaWebhookEventHandlerCosmosDBTriggerFunction
     }
 
 #if !DEBUG
-    [Function(nameof(CosmosDBTriggerFunction))]
+    [Function(nameof(StravaWebhookEventHandlerCosmosDBTriggerFunction))]
 #endif
     public async Task Run(
         [CosmosDBTrigger(
