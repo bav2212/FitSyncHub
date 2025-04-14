@@ -4,9 +4,11 @@ namespace FitSyncHub.Common.Applications.Apple;
 
 public static class AppleHealthExportFileParser
 {
-    public static List<AppleHeartRateRecord> LoadHeartRateData(string xmlFilePath)
+    public static SortedList<DateTime, AppleHeartRateRecord> LoadHeartRateData(string xmlFilePath,
+        DateTime from,
+        DateTime? to = default)
     {
-        List<AppleHeartRateRecord> heartRateData = [];
+        SortedList<DateTime, AppleHeartRateRecord> heartRateData = [];
         var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, IgnoreWhitespace = true };
 
         using (var reader = XmlReader.Create(xmlFilePath, settings))
@@ -21,9 +23,20 @@ public static class AppleHealthExportFileParser
 
                     if (DateTime.TryParse(timeString, out var time) && int.TryParse(valueString, out var heartRate))
                     {
-                        heartRateData.Add(new AppleHeartRateRecord
+                        var timeUtc = time.ToUniversalTime();
+                        if (timeUtc < from)
                         {
-                            Time = time.ToUniversalTime(),
+                            continue;
+                        }
+
+                        if (to.HasValue && timeUtc > to)
+                        {
+                            break;
+                        }
+
+                        heartRateData.Add(timeUtc, new AppleHeartRateRecord
+                        {
+                            Time = timeUtc,
                             HeartRate = heartRate
                         });
                     }
@@ -32,15 +45,6 @@ public static class AppleHealthExportFileParser
         }
 
         return heartRateData;
-    }
-
-    public static int FindClosestHeartRate(List<AppleHeartRateRecord> heartRates, DateTime trackTime)
-    {
-        var closest = heartRates
-            .OrderBy(hr => Math.Abs((hr.Time - trackTime).TotalSeconds)) // Find nearest timestamp
-            .First();
-
-        return closest.HeartRate;
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿using FitSyncHub.Common.Applications.Apple;
+using FitSyncHub.Common.Extensions;
 using FitSyncHub.Common.Fit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,21 +35,20 @@ public class MergeFitWithAppleWorkoutHttpTriggerFunction
             return new BadRequestObjectResult("wrong request");
         }
 
-        var heartRateData = AppleHealthExportFileParser.LoadHeartRateData(appleExportPath);
-
-        heartRateData = [.. heartRateData.Where(x => x.Time > DateTime.UtcNow.AddDays(-1))];
-
         var fitFileMessages = _decoder.Decode(fitPath);
+
+        var activityStartDate = fitFileMessages.RecordMesgs.Select(x => x.GetTimestamp().GetDateTime()).First();
+
+        var heartRateData = AppleHealthExportFileParser.LoadHeartRateData(appleExportPath,
+            from: activityStartDate.AddHours(-1));
 
         foreach (var recordMessage in fitFileMessages.RecordMesgs)
         {
             var timestamp = recordMessage.GetTimestamp().GetDateTime();
 
-            var heartRate = AppleHealthExportFileParser.FindClosestHeartRate(
-                heartRateData,
-                timestamp);
+            var closestHeartRateData = heartRateData.GetClosestValue(timestamp, (prev, curr) => prev.Ticks - curr.Ticks);
 
-            recordMessage.SetHeartRate((byte)heartRate);
+            recordMessage.SetHeartRate((byte)closestHeartRateData.HeartRate);
         }
 
         await using var memoryStream = new MemoryStream();
