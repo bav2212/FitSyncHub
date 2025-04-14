@@ -52,22 +52,21 @@ public class IntervalsIcuStorageService(
         {
             var weekNumber = groupByWeek.Key.WeekNumber;
 
-            foreach (var (index, item) in groupByWeek.Select((x, i) => (i, x)))
+            foreach (var (index, item) in groupByWeek.Index())
             {
                 var dayNumber = item.FileInfo.Day
                     // get day during week based on workouts per week count
                     ?? s_daysDistribution[groupByWeek.Count()][index];
 
-                var absoluteDayNumber = (weekNumber - weeksStartsFrom) * 7 + dayNumber - 1;
+                var absoluteDayNumber = ((weekNumber - weeksStartsFrom) * 7) + dayNumber - 1;
 
-                var createWorkoutRequestModel = new WorkoutCreateRequest
+                yield return new WorkoutCreateRequest
                 {
                     Name = item.FileInfo.Name,
                     Description = string.Join(Environment.NewLine, item.IntervalsIcuStructure),
                     FolderId = folderId,
                     Day = absoluteDayNumber,
                 };
-                yield return createWorkoutRequestModel;
             }
         }
     }

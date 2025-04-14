@@ -48,7 +48,7 @@ public class WhatsOnZwiftParser
 
     public static IEnumerable<IntervalsIcuWorkoutGroup> Parse(IReadOnlyCollection<string> workoutSteps)
     {
-        foreach (var (index, workoutStep) in workoutSteps.Select((x, i) => (i, x)))
+        foreach (var (index, workoutStep) in workoutSteps.Index())
         {
             var blockInfo = GetBlockInfo(workoutSteps, index);
             var lineSegments = workoutStep.Split(',', StringSplitOptions.TrimEntries);
