@@ -1,7 +1,9 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.HttpClients;
+using FitSyncHub.GarminConnect.Models.Responses.Workout;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -49,38 +51,58 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
             return new BadRequestObjectResult("No activities for specified date");
         }
 
-        var cyclingTaskListForDate = taskListForDate
-            .Where(x => x.TaskWorkout.SportType.SportTypeKey == "cycling")
-            .ToList();
-
-        if (cyclingTaskListForDate.Count == 0)
-        {
-            return new BadRequestObjectResult("No cycling activities for specified date");
-        }
-
         var result = new StringBuilder();
 
-        foreach (var cyclingTask in cyclingTaskListForDate)
+        foreach (var workout in taskListForDate)
         {
-            var workoutId = cyclingTask.TaskWorkout.WorkoutUuid;
+            var workoutId = workout.TaskWorkout.WorkoutUuid;
 
             var workoutResponse = await _garminConnectHttpClient.GetWorkout(workoutId, cancellationToken);
 
-            var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter
-                .ConvertGarminWorkoutToIntervalsIcuWorkoutGroups(workoutResponse, ftp);
-
-            var intervalsIcuWorkoutLines = IntervalsIcuConverter
-                .ConvertToIntervalsIcuFormat(icuGroups);
-
             result.AppendLine($"{workoutResponse.WorkoutName}");
-            result.AppendLine($"{workoutResponse.Description}\n");
-            foreach (var item in intervalsIcuWorkoutLines)
+
+            if (workout.TaskWorkout.SportType.SportTypeKey == "cycling")
             {
-                result.AppendLine(item);
+                var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter
+                    .ConvertGarminWorkoutToIntervalsIcuWorkoutGroups(workoutResponse, ftp);
+
+                var intervalsIcuWorkoutLines = IntervalsIcuConverter
+                    .ConvertToIntervalsIcuFormat(icuGroups);
+
+                result.AppendLine($"{GetWorkoutDescription(workoutResponse, ftp)}");
+                foreach (var item in intervalsIcuWorkoutLines)
+                {
+                    result.AppendLine(item);
+                }
             }
+
+            result.AppendLine();
             result.AppendLine();
         }
 
         return new OkObjectResult(result.ToString());
+    }
+
+    private static string GetWorkoutDescription(WorkoutResponse workoutResponse, int ftp)
+    {
+        var name = workoutResponse.Description;
+
+        // Capture optional @ as group "prefix" and watt number as group "watts"
+        var regex = new Regex(@"(?<prefix>@?)(?<watts>\d+)[wW]");
+        var match = regex.Match(name);
+
+        if (match.Success)
+        {
+            var watts = int.Parse(match.Groups["watts"].Value);
+            var rawPercent = (double)watts / ftp * 100;
+            var roundedPercent = (int)(Math.Round(rawPercent / 5.0) * 5);
+
+            var prefix = match.Groups["prefix"].Value;
+            var newText = $"{prefix}{roundedPercent}%";
+
+            name = regex.Replace(name, newText, 1); // Replace only the first match
+        }
+
+        return name;
     }
 }
