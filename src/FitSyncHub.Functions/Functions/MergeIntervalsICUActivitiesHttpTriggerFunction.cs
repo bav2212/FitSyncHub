@@ -196,8 +196,8 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
         var events = await _intervalsIcuHttpClient.ListEvents(
             Constants.AthleteId,
-            new DateTime(date, TimeOnly.MinValue),
-            new DateTime(date, TimeOnly.MaxValue),
+            date,
+            date,
             cancellationToken);
 
         return events.SingleOrDefault();

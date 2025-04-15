@@ -4,8 +4,8 @@ public record WorkoutResponse
 {
     public long? WorkoutId { get; init; }
     public long OwnerId { get; init; }
-    public string WorkoutName { get; init; } = default!;
-    public string Description { get; init; } = default!;
+    public required string WorkoutName { get; init; }
+    public string? Description { get; init; }
     public DateTime? CreatedDate { get; init; }
     public WorkoutSportTypeResponse SportType { get; init; } = default!;
     public string SubSportType { get; init; } = default!;

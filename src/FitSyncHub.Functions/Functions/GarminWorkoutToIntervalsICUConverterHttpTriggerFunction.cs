@@ -57,8 +57,7 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
 
             var workoutResponse = await _garminConnectHttpClient.GetWorkout(workoutId, cancellationToken);
 
-            result.AppendLine($"{workoutResponse.WorkoutName}");
-
+            result.AppendLine($"{GarminConnectToIntervalsIcuWorkoutConverter.GetGarminWorkoutTitle(workoutResponse, ftp)}");
             if (workout.TaskWorkout.SportType.SportTypeKey == "cycling")
             {
                 var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter
@@ -67,7 +66,6 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
                 var intervalsIcuWorkoutDescription = IntervalsIcuConverter
                     .ConvertToIntervalsIcuFormat(icuGroups);
 
-                result.AppendLine($"{GarminConnectToIntervalsIcuWorkoutConverter.GetWorkoutDescription(workoutResponse, ftp)}");
                 result.AppendLine(intervalsIcuWorkoutDescription);
             }
 

@@ -6,13 +6,21 @@ namespace FitSyncHub.GarminConnect.Converters;
 
 public static partial class GarminConnectToIntervalsIcuWorkoutConverter
 {
-    public static string GetWorkoutDescription(WorkoutResponse workoutResponse, int ftp)
+    public static string GetGarminWorkoutTitle(WorkoutResponse workoutResponse, int ftp)
     {
-        var name = workoutResponse.Description;
+        return (workoutResponse.WorkoutName, workoutResponse.Description) switch
+        {
+            ({ } workoutName, { } description) => $"{workoutName} {GetDescription(ftp, description)}",
+            ({ } workoutName, null) => workoutName,
+            _ => throw new ArgumentException("Workout name and description cannot be null")
+        };
+    }
 
+    private static string GetDescription(int ftp, string description)
+    {
         // Capture optional @ as group "prefix" and watt number as group "watts"
         var absoluteWattsRegexPattern = AbsoluteWattsRegexPattern();
-        var match = AbsoluteWattsRegexPattern().Match(name);
+        var match = AbsoluteWattsRegexPattern().Match(description);
 
         if (match.Success)
         {
@@ -23,10 +31,10 @@ public static partial class GarminConnectToIntervalsIcuWorkoutConverter
             var prefix = match.Groups["prefix"].Value;
             var newText = $"{prefix}{roundedPercent}%";
 
-            name = absoluteWattsRegexPattern.Replace(name, newText, 1); // Replace only the first match
+            description = absoluteWattsRegexPattern.Replace(description, newText, 1); // Replace only the first match
         }
 
-        return name;
+        return description;
     }
 
     [GeneratedRegex(@"(?<prefix>@?)(?<watts>\d+)[wW]")]
