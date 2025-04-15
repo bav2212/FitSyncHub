@@ -1,11 +1,15 @@
-﻿namespace FitSyncHub.Common.Extensions;
+﻿using System.Numerics;
+
+namespace FitSyncHub.Common.Extensions;
 
 public static class SortedListExtensions
 {
-    public static TValue GetClosestValue<TKey, TValue>(
+    public static TValue GetClosestValue<TKey, TValue, TDiffResult>(
         this SortedList<TKey, TValue> sortedList,
         TKey target,
-        Func<TKey, TKey, double> compareFunc) where TKey : notnull, IComparable<TKey>
+        Func<TKey, TKey, TDiffResult> diffFunc)
+        where TKey : notnull, IComparable<TKey>
+        where TDiffResult : INumber<TDiffResult>
     {
         if (sortedList.Count == 0)
         {
@@ -50,9 +54,8 @@ public static class SortedListExtensions
         var before = keys[left - 1];
         var after = keys[left];
 
-
-        var diffBefore = Math.Abs(compareFunc(target, before));
-        var diffAfter = Math.Abs(compareFunc(after, target));
+        var diffBefore = TDiffResult.Abs(diffFunc(target, before));
+        var diffAfter = TDiffResult.Abs(diffFunc(after, target));
 
         return diffBefore <= diffAfter ? sortedList[before] : sortedList[after];
     }
