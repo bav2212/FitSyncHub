@@ -1,10 +1,37 @@
-﻿using FitSyncHub.Common.Applications.IntervalsIcu.Models;
+﻿using System.Text.RegularExpressions;
+using FitSyncHub.Common.Applications.IntervalsIcu.Models;
 using FitSyncHub.GarminConnect.Models.Responses.Workout;
 
 namespace FitSyncHub.GarminConnect.Converters;
 
-public static class GarminConnectToIntervalsIcuWorkoutConverter
+public static partial class GarminConnectToIntervalsIcuWorkoutConverter
 {
+    public static string GetWorkoutDescription(WorkoutResponse workoutResponse, int ftp)
+    {
+        var name = workoutResponse.Description;
+
+        // Capture optional @ as group "prefix" and watt number as group "watts"
+        var absoluteWattsRegexPattern = AbsoluteWattsRegexPattern();
+        var match = AbsoluteWattsRegexPattern().Match(name);
+
+        if (match.Success)
+        {
+            var watts = int.Parse(match.Groups["watts"].Value);
+            var rawPercent = (double)watts / ftp * 100;
+            var roundedPercent = (int)(Math.Round(rawPercent / 5.0) * 5);
+
+            var prefix = match.Groups["prefix"].Value;
+            var newText = $"{prefix}{roundedPercent}%";
+
+            name = absoluteWattsRegexPattern.Replace(name, newText, 1); // Replace only the first match
+        }
+
+        return name;
+    }
+
+    [GeneratedRegex(@"(?<prefix>@?)(?<watts>\d+)[wW]")]
+    private static partial Regex AbsoluteWattsRegexPattern();
+
     public static List<IntervalsIcuWorkoutGroup> ConvertGarminWorkoutToIntervalsIcuWorkoutGroups(
         WorkoutResponse workout, int garminConnectFtp)
     {

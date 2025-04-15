@@ -1,9 +1,7 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
 using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.HttpClients;
-using FitSyncHub.GarminConnect.Models.Responses.Workout;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -69,7 +67,7 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
                 var intervalsIcuWorkoutDescription = IntervalsIcuConverter
                     .ConvertToIntervalsIcuFormat(icuGroups);
 
-                result.AppendLine($"{GetWorkoutDescription(workoutResponse, ftp)}");
+                result.AppendLine($"{GarminConnectToIntervalsIcuWorkoutConverter.GetWorkoutDescription(workoutResponse, ftp)}");
                 result.AppendLine(intervalsIcuWorkoutDescription);
             }
 
@@ -78,28 +76,5 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
         }
 
         return new OkObjectResult(result.ToString());
-    }
-
-    private static string GetWorkoutDescription(WorkoutResponse workoutResponse, int ftp)
-    {
-        var name = workoutResponse.Description;
-
-        // Capture optional @ as group "prefix" and watt number as group "watts"
-        var regex = new Regex(@"(?<prefix>@?)(?<watts>\d+)[wW]");
-        var match = regex.Match(name);
-
-        if (match.Success)
-        {
-            var watts = int.Parse(match.Groups["watts"].Value);
-            var rawPercent = (double)watts / ftp * 100;
-            var roundedPercent = (int)(Math.Round(rawPercent / 5.0) * 5);
-
-            var prefix = match.Groups["prefix"].Value;
-            var newText = $"{prefix}{roundedPercent}%";
-
-            name = regex.Replace(name, newText, 1); // Replace only the first match
-        }
-
-        return name;
     }
 }
