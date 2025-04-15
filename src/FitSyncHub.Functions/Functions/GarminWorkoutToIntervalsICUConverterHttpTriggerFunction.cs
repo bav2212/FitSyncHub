@@ -66,14 +66,11 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
                 var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter
                     .ConvertGarminWorkoutToIntervalsIcuWorkoutGroups(workoutResponse, ftp);
 
-                var intervalsIcuWorkoutLines = IntervalsIcuConverter
+                var intervalsIcuWorkoutDescription = IntervalsIcuConverter
                     .ConvertToIntervalsIcuFormat(icuGroups);
 
                 result.AppendLine($"{GetWorkoutDescription(workoutResponse, ftp)}");
-                foreach (var item in intervalsIcuWorkoutLines)
-                {
-                    result.AppendLine(item);
-                }
+                result.AppendLine(intervalsIcuWorkoutDescription);
             }
 
             result.AppendLine();

@@ -1,5 +1,6 @@
 ﻿using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
+using FitSyncHub.IntervalsICU.Models;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.IntervalsICU.Services;
@@ -20,7 +21,7 @@ public class IntervalsIcuStorageService(
     };
 
     public async Task Store(
-        IReadOnlyCollection<ZwiftToIntervalsIcuConvertResult> items,
+        IReadOnlyCollection<WhatsOnZwiftToIntervalsIcuConvertResult> items,
         int intervalsIcuFolderId,
         CancellationToken cancellationToken)
     {
@@ -35,7 +36,7 @@ public class IntervalsIcuStorageService(
 
     private static IEnumerable<WorkoutCreateRequest> CreateCreateWorkoutRequestModels(
         int folderId,
-        IReadOnlyCollection<ZwiftToIntervalsIcuConvertResult> items)
+        IReadOnlyCollection<WhatsOnZwiftToIntervalsIcuConvertResult> items)
     {
         var groupsByWeek = items.GroupBy(x => x.FileInfo.Week)
             .OrderBy(x => x.Key.WeekNumber)
@@ -63,7 +64,7 @@ public class IntervalsIcuStorageService(
                 yield return new WorkoutCreateRequest
                 {
                     Name = item.FileInfo.Name,
-                    Description = string.Join(Environment.NewLine, item.IntervalsIcuStructure),
+                    Description = item.IntervalsIcuWorkoutDescription,
                     FolderId = folderId,
                     Day = absoluteDayNumber,
                 };

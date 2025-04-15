@@ -9,11 +9,11 @@ namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
 public class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
 {
-    private readonly ZwiftToIntervalsIcuService _zwiftToIntervalsIcuService;
+    private readonly WhatsOnZwiftToIntervalsIcuService _zwiftToIntervalsIcuService;
     private readonly ILogger<WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction> _logger;
 
     public WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction(
-        ZwiftToIntervalsIcuService zwiftToIntervalsIcuService,
+        WhatsOnZwiftToIntervalsIcuService zwiftToIntervalsIcuService,
         ILogger<WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction> logger)
     {
         _zwiftToIntervalsIcuService = zwiftToIntervalsIcuService;
@@ -43,10 +43,7 @@ public class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
 
             var result = new StringBuilder();
             result.AppendLine($"{workout.FileInfo.Name}\n");
-            foreach (var item in workout.IntervalsIcuStructure)
-            {
-                result.AppendLine(item);
-            }
+            result.AppendLine(workout.IntervalsIcuWorkoutDescription);
 
             return new OkObjectResult(result.ToString());
         }

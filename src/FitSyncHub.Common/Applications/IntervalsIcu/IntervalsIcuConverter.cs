@@ -5,21 +5,24 @@ namespace FitSyncHub.Common.Applications.IntervalsIcu;
 
 public static class IntervalsIcuConverter
 {
-    public static List<string> ConvertToIntervalsIcuFormat(IReadOnlyCollection<IntervalsIcuWorkoutGroup> workoutGroups)
+    public static string ConvertToIntervalsIcuFormat(IReadOnlyCollection<IntervalsIcuWorkoutGroup> workoutGroups)
     {
         var mergedGroups = MergeGroups(workoutGroups).ToList();
 
-        List<string> resultLines = [];
+        StringBuilder sb = new();
 
         foreach (var workoutGroup in mergedGroups)
         {
-            resultLines.Add(string.Empty);
-            resultLines.Add($"{workoutGroup.BlockInfo}");
+            sb.AppendLine(string.Empty);
+            sb.AppendLine($"{workoutGroup.BlockInfo}");
 
-            resultLines.AddRange(workoutGroup.Items.Select(ConvertToIntervalsIcuFormat));
+            foreach (var workoutLine in workoutGroup.Items.Select(ConvertToIntervalsIcuFormat))
+            {
+                sb.AppendLine(workoutLine);
+            }
         }
 
-        return resultLines;
+        return sb.ToString();
     }
 
     private static IEnumerable<IntervalsIcuWorkoutGroup> MergeGroups(IReadOnlyCollection<IntervalsIcuWorkoutGroup> workoutGroups)
