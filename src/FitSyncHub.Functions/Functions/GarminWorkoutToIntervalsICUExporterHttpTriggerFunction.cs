@@ -157,8 +157,6 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         return existingDescriptionParts.SequenceEqual(existingIntervalsIcuEventStructure);
     }
 
-
-
     private static string GetIntervalsIcuEventStructure(int ftp,
         WorkoutResponse workoutResponse)
     {
