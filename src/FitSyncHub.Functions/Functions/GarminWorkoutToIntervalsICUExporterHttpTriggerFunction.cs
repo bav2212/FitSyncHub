@@ -2,13 +2,11 @@
 using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.HttpClients;
-using FitSyncHub.GarminConnect.Models.Responses.TrainingPlan;
 using FitSyncHub.GarminConnect.Models.Responses.Workout;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
-using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -70,8 +68,13 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(Constants.AthleteId, today, lastDay, cancellationToken);
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
-        var garminWorkoutUuidToIntervalsIcuEventsMapping = await DeleteOutdatedEventsAndGetGarminWorkoutUuidToIntervalsIcuEventsMapping(
-            intervalsIcuEvents, garminTrainingPlanTaskList, cancellationToken);
+        var intervalsIcuEventsMapping = intervalsIcuEvents
+            .Where(x => x.Tags?.Contains(IntervalsIcuEventTagGarminConnect) == true && x.PairedActivityId == null)
+            .ToDictionary(x => new IntervalsIcuMappingKey
+            {
+                Date = DateOnly.FromDateTime(x.StartDateLocal),
+                Title = x.Name
+            });
 
         foreach (var workout in garminTrainingPlanTaskList)
         {
@@ -82,11 +85,22 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
             _logger.LogInformation("Retrieved Garmin workout details: {workoutId}", workoutId);
 
             var intervalsIcuEventStructure = IntervalsICUDescriptionHelper
-                .GenerateDescriptionBlock(workoutId, GetIntervalsIcuEventStructure(ftp, workoutResponse));
+                .GenerateDescriptionBlock(GetIntervalsIcuEventStructure(ftp, workoutResponse));
 
             var workoutName = GarminConnectToIntervalsIcuWorkoutConverter.GetGarminWorkoutTitle(workoutResponse, ftp);
-            if (garminWorkoutUuidToIntervalsIcuEventsMapping.TryGetValue(workoutId, out var existingIntervalsIcuEvent))
+
+            var mappingKey = new IntervalsIcuMappingKey
             {
+                Date = workout.CalendarDate,
+                Title = workoutName
+            };
+
+            if (intervalsIcuEventsMapping.TryGetValue(mappingKey, out var existingIntervalsIcuEvent))
+            {
+                // Check if the existing event is already paired with an activity
+                // we will delete items that are not paired with an activity
+                intervalsIcuEventsMapping.Remove(mappingKey);
+
                 if (existingIntervalsIcuEvent.Description is { } && HasSameGeneratedContent(intervalsIcuEventStructure, existingIntervalsIcuEvent.Description))
                 {
                     _logger.LogInformation("No changes needed for existing event {ExistingIntervalsIcuEventId}", existingIntervalsIcuEvent.Id);
@@ -124,6 +138,13 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
                 cancellationToken: cancellationToken);
         }
 
+        // Delete all events that are not paired with an activity
+        foreach (var (key, @event) in intervalsIcuEventsMapping)
+        {
+            _logger.LogInformation("Deleting unpaired event {EventId} for date {Date} and title {Title}", @event.Id, key.Date, key.Title);
+            await _intervalsIcuHttpClient.DeleteEvent(Constants.AthleteId, @event.Id, cancellationToken: cancellationToken);
+        }
+
         _logger.LogInformation("Export function completed successfully");
         return new OkObjectResult("Ok");
     }
@@ -136,42 +157,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         return existingDescriptionParts.SequenceEqual(existingIntervalsIcuEventStructure);
     }
 
-    private async Task<Dictionary<Guid, EventResponse>> DeleteOutdatedEventsAndGetGarminWorkoutUuidToIntervalsIcuEventsMapping(
-      IReadOnlyCollection<EventResponse> intervalsIcuEvents,
-      List<TrainingPlanTaskItemResponse> garminTrainingPlanTaskList,
-      CancellationToken cancellationToken)
-    {
-        var garminWorkoutIds = garminTrainingPlanTaskList.Select(x => x.TaskWorkout.WorkoutUuid).ToHashSet();
 
-        Dictionary<Guid, EventResponse> resultDictionary = [];
-
-        foreach (var intervalsIcuEvent in intervalsIcuEvents
-            .Where(x => x.Tags?.Contains(IntervalsIcuEventTagGarminConnect) == true && x.PairedActivityId == null))
-        {
-            if (!IntervalsICUDescriptionHelper
-                .TryGetGarminWorkoutUuidFromDescription(intervalsIcuEvent.Description, out var workoutUuid))
-            {
-                _logger.LogInformation("Garmin workout UUID not found in description: {Description}, Deleting Event: {EventId}",
-                   intervalsIcuEvent.Description,
-                   intervalsIcuEvent.Id);
-                await _intervalsIcuHttpClient.DeleteEvent(Constants.AthleteId, intervalsIcuEvent.Id, cancellationToken: cancellationToken);
-                continue;
-            }
-
-            if (!garminWorkoutIds.Contains(workoutUuid))
-            {
-                _logger.LogInformation("Garmin workouts does not contain UUID {GarminWorkoutUUID}, Deleting Event: {EventId}",
-                    workoutUuid,
-                    intervalsIcuEvent.Id);
-                await _intervalsIcuHttpClient.DeleteEvent(Constants.AthleteId, intervalsIcuEvent.Id, cancellationToken: cancellationToken);
-                continue;
-            }
-
-            resultDictionary.Add(workoutUuid, intervalsIcuEvent);
-        }
-
-        return resultDictionary;
-    }
 
     private static string GetIntervalsIcuEventStructure(int ftp,
         WorkoutResponse workoutResponse)
@@ -187,45 +173,25 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         return IntervalsIcuConverter.ConvertToIntervalsIcuFormat(icuGroups);
     }
 
+    private record IntervalsIcuMappingKey
+    {
+        public required DateOnly Date { get; init; }
+        public required string Title { get; init; }
+    }
+
     private static class IntervalsICUDescriptionHelper
     {
         private const string IntervalsIcuDescriptionAutogeneratedBlockStart = "<!-- BEGIN AUTOGENERATED BLOCK -->";
         private const string IntervalsIcuDescriptionAutogeneratedBlockEnd = "<!-- END AUTOGENERATED BLOCK -->";
-        private const string GarminWorkoutUuidBlockStart = "GarminWorkoutUuid = ";
 
-        public static string GenerateDescriptionBlock(Guid workoutId, string intervalsIcuWorkoutStructure)
+        public static string GenerateDescriptionBlock(string intervalsIcuWorkoutStructure)
         {
             var sb = new StringBuilder();
             sb.AppendLine(IntervalsIcuDescriptionAutogeneratedBlockStart);
-            sb.AppendLine($"{GarminWorkoutUuidBlockStart}{workoutId}");
             sb.AppendLine(intervalsIcuWorkoutStructure);
             sb.AppendLine(IntervalsIcuDescriptionAutogeneratedBlockEnd);
 
             return sb.ToString();
-        }
-
-        public static bool TryGetGarminWorkoutUuidFromDescription(string? description, out Guid workoutUuid)
-        {
-            workoutUuid = default;
-            if (description == null)
-            {
-                return false;
-            }
-
-            var mainBlockLines = ExtractMainBlock(description);
-            if (mainBlockLines.Count == 0)
-            {
-                return false;
-            }
-
-            var splitedFirstLine = mainBlockLines[0].Split(GarminWorkoutUuidBlockStart);
-            if (splitedFirstLine.Length < 2)
-            {
-                return false;
-            }
-
-            var workoutId = splitedFirstLine[1].Trim();
-            return Guid.TryParse(workoutId, out workoutUuid);
         }
 
         public static List<string> ExtractMainBlock(string intervalsIcuDescription)
