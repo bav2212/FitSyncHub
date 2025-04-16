@@ -25,8 +25,7 @@ public static partial class GarminConnectToIntervalsIcuWorkoutConverter
         if (match.Success)
         {
             var watts = int.Parse(match.Groups["watts"].Value);
-            var rawPercent = (double)watts / ftp * 100;
-            var roundedPercent = (int)(Math.Round(rawPercent / 5.0) * 5);
+            var roundedPercent = GetRoundedPercent(watts, ftp);
 
             var prefix = match.Groups["prefix"].Value;
             var newText = $"{prefix}{roundedPercent}%";
@@ -64,16 +63,36 @@ public static partial class GarminConnectToIntervalsIcuWorkoutConverter
                 var group = new IntervalsIcuWorkoutGroup
                 {
                     BlockInfo = IntervalsIcuWorkoutGroupBlockInfo.CreateInterval(repeatStep.NumberOfIterations),
-                    Items = [.. repeatStep.WorkoutSteps
-                        .OfType<WorkoutExecutableStepResponse>()
-                        .Select(x => GetIntervalsIcuWorkoutLine(x, garminConnectFtp))]
+                    Items = [.. GetIntervalsIcuWorkoutLineForRepeatableStep(garminConnectFtp, repeatStep)]
                 };
-
                 result.Add(group);
             }
         }
 
         return result;
+    }
+
+    private static IEnumerable<IntervalsIcuWorkoutLine> GetIntervalsIcuWorkoutLineForRepeatableStep(
+        int garminConnectFtp, WorkoutRepeatGroupResponse repeatStepRoot)
+    {
+        foreach (var step in repeatStepRoot.WorkoutSteps)
+        {
+            if (step is WorkoutRepeatGroupResponse repeatStep)
+            {
+                // flatten the repeatable step, cause intervals.icu does not support nested repeatable steps
+                foreach (var item in Enumerable
+                    .Repeat(GetIntervalsIcuWorkoutLineForRepeatableStep(garminConnectFtp, repeatStep), repeatStep.NumberOfIterations)
+                    .SelectMany(x => x))
+                {
+                    yield return item;
+                }
+            }
+
+            if (step is WorkoutExecutableStepResponse singleStep)
+            {
+                yield return GetIntervalsIcuWorkoutLine(singleStep, garminConnectFtp);
+            }
+        }
     }
 
     private static IntervalsIcuWorkoutGroupBlockInfo CreateBlockInfo(
@@ -97,8 +116,8 @@ public static partial class GarminConnectToIntervalsIcuWorkoutConverter
         var (from, to) = (workoutStep.TargetValueOne, workoutStep.TargetValueTwo) switch
         {
             ({ } fromValue, { } toValue) => (
-                (int)Math.Round(fromValue / garminConnectFtp * 100),
-                (int)Math.Round(toValue / garminConnectFtp * 100)
+                GetRoundedPercent(fromValue, garminConnectFtp),
+                GetRoundedPercent(toValue, garminConnectFtp)
             ),
             _ => throw new ArgumentException($"{nameof(workoutStep.TargetValueOne)} and {nameof(workoutStep.TargetValueTwo)} must be set"),
         };
@@ -139,5 +158,11 @@ public static partial class GarminConnectToIntervalsIcuWorkoutConverter
             "interval" or "recovery" => IntervalsIcuWorkoutGroupType.Interval,
             _ => throw new NotImplementedException(),
         };
+    }
+
+    private static int GetRoundedPercent(double watts, int ftp)
+    {
+        var rawPercent = (double)watts / ftp * 100;
+        return (int)(Math.Round(rawPercent / 5.0) * 5);
     }
 }

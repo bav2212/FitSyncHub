@@ -2,6 +2,7 @@
 using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.HttpClients;
+using FitSyncHub.GarminConnect.Models.Responses.TrainingPlan;
 using FitSyncHub.GarminConnect.Models.Responses.Workout;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
@@ -51,28 +52,28 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         var today = DateOnly.FromDateTime(DateTime.Today);
         _logger.LogInformation("Today's date: {Today}", today);
 
-        var taskList = trainingPlan.TaskList
+        var garminTrainingPlanTaskList = trainingPlan.TaskList
             .Where(x => x.TaskWorkout.SportType != null && x.TaskWorkout.AdaptiveCoachingWorkoutStatus == "NOT_COMPLETE")
             .ToList();
 
-        _logger.LogInformation("Found {Count} uncomplete tasks in training plan", taskList.Count);
+        _logger.LogInformation("Found {Count} uncomplete tasks in training plan", garminTrainingPlanTaskList.Count);
 
-        if (taskList.Count == 0)
+        if (garminTrainingPlanTaskList.Count == 0)
         {
             _logger.LogInformation("No uncomplete tasks to export");
             return new BadRequestObjectResult("No uncomplete activities");
         }
 
-        var lastDay = taskList.MaxBy(x => x.CalendarDate)!.CalendarDate;
+        var lastDay = garminTrainingPlanTaskList.MaxBy(x => x.CalendarDate)!.CalendarDate;
         _logger.LogInformation("Last calendar day among tasks {LastDay}", lastDay);
 
         var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(Constants.AthleteId, today, lastDay, cancellationToken);
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
-        var garminWorkoutUuidToIntervalsIcuEventsMapping =
-            await DeleteEventsAndGetGarminWorkoutUuidToIntervalsIcuEventsMapping(intervalsIcuEvents, cancellationToken);
+        var garminWorkoutUuidToIntervalsIcuEventsMapping = await DeleteOutdatedEventsAndGetGarminWorkoutUuidToIntervalsIcuEventsMapping(
+            intervalsIcuEvents, garminTrainingPlanTaskList, cancellationToken);
 
-        foreach (var workout in taskList)
+        foreach (var workout in garminTrainingPlanTaskList)
         {
             var workoutId = workout.TaskWorkout.WorkoutUuid;
             _logger.LogInformation("Processing workout {WorkoutId}", workoutId);
@@ -135,20 +136,32 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         return existingDescriptionParts.SequenceEqual(existingIntervalsIcuEventStructure);
     }
 
-    private async Task<Dictionary<Guid, EventResponse>> DeleteEventsAndGetGarminWorkoutUuidToIntervalsIcuEventsMapping(
+    private async Task<Dictionary<Guid, EventResponse>> DeleteOutdatedEventsAndGetGarminWorkoutUuidToIntervalsIcuEventsMapping(
       IReadOnlyCollection<EventResponse> intervalsIcuEvents,
+      List<TrainingPlanTaskItemResponse> garminTrainingPlanTaskList,
       CancellationToken cancellationToken)
     {
+        var garminWorkoutIds = garminTrainingPlanTaskList.Select(x => x.TaskWorkout.WorkoutUuid).ToHashSet();
+
         Dictionary<Guid, EventResponse> resultDictionary = [];
 
         foreach (var intervalsIcuEvent in intervalsIcuEvents
             .Where(x => x.Tags?.Contains(IntervalsIcuEventTagGarminConnect) == true && x.PairedActivityId == null))
         {
-            if (!IntervalsICUDescriptionHelper.TryGetGarminWorkoutUuidFromDescription(intervalsIcuEvent.Description,
-                out var workoutUuid))
+            if (!IntervalsICUDescriptionHelper
+                .TryGetGarminWorkoutUuidFromDescription(intervalsIcuEvent.Description, out var workoutUuid))
             {
                 _logger.LogInformation("Garmin workout UUID not found in description: {Description}, Deleting Event: {EventId}",
-                    intervalsIcuEvent.Description,
+                   intervalsIcuEvent.Description,
+                   intervalsIcuEvent.Id);
+                await _intervalsIcuHttpClient.DeleteEvent(Constants.AthleteId, intervalsIcuEvent.Id, cancellationToken: cancellationToken);
+                continue;
+            }
+
+            if (!garminWorkoutIds.Contains(workoutUuid))
+            {
+                _logger.LogInformation("Garmin workouts does not contain UUID {GarminWorkoutUUID}, Deleting Event: {EventId}",
+                    workoutUuid,
                     intervalsIcuEvent.Id);
                 await _intervalsIcuHttpClient.DeleteEvent(Constants.AthleteId, intervalsIcuEvent.Id, cancellationToken: cancellationToken);
                 continue;
