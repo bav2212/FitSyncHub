@@ -22,7 +22,8 @@ public class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
 
     [Function(nameof(WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction))]
     public async Task<ActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "whats-on-zwift-to-intervals")] HttpRequest req)
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "whats-on-zwift-to-intervals")] HttpRequest req,
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -39,7 +40,7 @@ public class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
 
         try
         {
-            var workout = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(uri);
+            var workout = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(uri, cancellationToken);
 
             var result = new StringBuilder();
             result.AppendLine($"{workout.FileInfo.Name}\n");

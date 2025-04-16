@@ -9,6 +9,7 @@ public static class ZwiftInsiderModule
     {
         services.AddScoped<ExcelReader>();
         services.AddScoped<ZwiftInsiderRoutesService>();
+        services.AddScoped<ZwiftInsiderScraperService>();
 
         return services;
     }

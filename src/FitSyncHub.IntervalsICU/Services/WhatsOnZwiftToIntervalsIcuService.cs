@@ -2,23 +2,27 @@
 using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.IntervalsICU.Models;
 using FitSyncHub.IntervalsICU.Parsers;
-using FitSyncHub.IntervalsICU.Scrapers;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.IntervalsICU.Services;
 
 public partial class WhatsOnZwiftToIntervalsIcuService
 {
+    private readonly WhatsOnZwiftScraperService _whatsOnZwiftScraper;
     private readonly ILogger<WhatsOnZwiftToIntervalsIcuService> _logger;
 
-    public WhatsOnZwiftToIntervalsIcuService(ILogger<WhatsOnZwiftToIntervalsIcuService> logger)
+    public WhatsOnZwiftToIntervalsIcuService(
+        WhatsOnZwiftScraperService whatsOnZwiftScraper,
+        ILogger<WhatsOnZwiftToIntervalsIcuService> logger)
     {
+        _whatsOnZwiftScraper = whatsOnZwiftScraper;
         _logger = logger;
     }
 
-    public async Task<WhatsOnZwiftToIntervalsIcuConvertResult> ScrapeAndConvertToIntervalsIcu(Uri workoutUri)
+    public async Task<WhatsOnZwiftToIntervalsIcuConvertResult> ScrapeAndConvertToIntervalsIcu(
+        Uri workoutUri, CancellationToken cancellationToken)
     {
-        var scrapeResult = await WhatsOnZwiftScraper.ScrapeWorkoutStructure(workoutUri);
+        var scrapeResult = await _whatsOnZwiftScraper.ScrapeWorkoutStructure(workoutUri, cancellationToken);
 
         var parsedRecords = WhatsOnZwiftParser.Parse(scrapeResult.WorkoutList).ToList();
         var workoutDescription = IntervalsIcuConverter.ConvertToIntervalsIcuFormat(parsedRecords);

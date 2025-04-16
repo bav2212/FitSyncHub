@@ -1,5 +1,4 @@
 ﻿using FitSyncHub.IntervalsICU.Models;
-using FitSyncHub.IntervalsICU.Scrapers;
 using FitSyncHub.IntervalsICU.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,15 +11,18 @@ namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
 {
     private readonly WhatsOnZwiftToIntervalsIcuService _zwiftToIntervalsIcuService;
+    private readonly WhatsOnZwiftScraperService _whatsOnZwiftScraper;
     private readonly IntervalsIcuStorageService _intervalsIcuStorageService;
     private readonly ILogger<WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction> _logger;
 
     public WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction(
         WhatsOnZwiftToIntervalsIcuService zwiftToIntervalsIcuService,
+        WhatsOnZwiftScraperService whatsOnZwiftScraper,
         IntervalsIcuStorageService intervalsIcuStorageService,
         ILogger<WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction> logger)
     {
         _zwiftToIntervalsIcuService = zwiftToIntervalsIcuService;
+        _whatsOnZwiftScraper = whatsOnZwiftScraper;
         _intervalsIcuStorageService = intervalsIcuStorageService;
         _logger = logger;
     }
@@ -40,12 +42,12 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
 
         try
         {
-            var links = await WhatsOnZwiftScraper.ScrapeWorkoutPlanLinks(planUri);
+            var links = await _whatsOnZwiftScraper.ScrapeWorkoutPlanLinks(planUri, cancellationToken);
             List<WhatsOnZwiftToIntervalsIcuConvertResult> items = [];
             foreach (var link in links)
             {
                 var linkUri = new Uri(link);
-                var result = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(linkUri);
+                var result = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(linkUri, cancellationToken);
                 items.Add(result);
             }
 

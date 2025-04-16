@@ -12,9 +12,10 @@ public static class IntervalsIcuModule
     public static IServiceCollection ConfigureIntervalsIcuModule(this IServiceCollection services,
         string? intervalsIcuApiKey)
     {
-        services.AddScoped<WhatsOnZwiftToIntervalsIcuService>();
         services.AddScoped<IntervalsIcuStorageService>();
         services.AddScoped<IntervalsIcuDeletePlanService>();
+        services.AddScoped<WhatsOnZwiftToIntervalsIcuService>();
+        services.AddScoped<WhatsOnZwiftScraperService>();
         services.AddHttpClient<IntervalsIcuHttpClient>(client =>
         {
             if (intervalsIcuApiKey is null)

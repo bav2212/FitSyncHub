@@ -1,27 +1,39 @@
 ﻿using System.Text.RegularExpressions;
+using FitSyncHub.ZwiftInsider.Models;
 using HtmlAgilityPack;
 
-namespace FitSyncHub.ZwiftInsider.Scrapers;
-public static class ZwiftInsiderScraper
+namespace FitSyncHub.ZwiftInsider.Services;
+
+public partial class ZwiftInsiderScraperService
 {
-    public static async Task<ZwiftInsiderScraperResponse> ScrapeZwiftInsiderWorkoutPage(Uri uri)
+    private readonly HttpClient _httpClient;
+
+    public ZwiftInsiderScraperService(HttpClient httpClient)
     {
-        var web = new HtmlWeb();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-        var htmlPageDoc = await web.LoadFromWebAsync(uri, null, null);
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+        _httpClient = httpClient;
+    }
+
+    public async Task<ZwiftInsiderScraperResult> ScrapeZwiftInsiderWorkoutPage(Uri uri, CancellationToken cancellationToken)
+    {
+        var response = await _httpClient.GetAsync(uri, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        var htmlPageDoc = new HtmlDocument();
+        htmlPageDoc.LoadHtml(content);
 
         var wattPerKgResult = ParseWattPerKg(htmlPageDoc);
         var leadInAndElevationResult = ParseLeadInAndElevation(htmlPageDoc);
 
-        return new ZwiftInsiderScraperResponse
+        return new ZwiftInsiderScraperResult
         {
             WattPerKg = wattPerKgResult,
             LeadInAndElevation = leadInAndElevationResult
         };
     }
 
-    private static ZwiftInsiderScraperWattPerKgElapsedTimeItemsResponse? ParseWattPerKg(
+    private static ZwiftInsiderScraperWattPerKgElapsedTimeItemsResult? ParseWattPerKg(
         HtmlDocument htmlPageDoc)
     {
         // Find the node containing "Time Estimates"
@@ -41,7 +53,7 @@ public static class ZwiftInsiderScraper
 
             var items = GetWattPerKgValues(containerNode.InnerHtml).ToList();
 
-            return new ZwiftInsiderScraperWattPerKgElapsedTimeItemsResponse
+            return new ZwiftInsiderScraperWattPerKgElapsedTimeItemsResult
             {
                 WattsPerKdTimeEstimate = items.ToDictionary(x => x.WattPerKg, x => x.Minutes)
             };
@@ -50,7 +62,7 @@ public static class ZwiftInsiderScraper
         return default;
     }
 
-    private static IEnumerable<ZwiftInsiderScraperWattPerKgElapsedTimeResponse> GetWattPerKgValues(
+    private static IEnumerable<ZwiftInsiderScraperWattPerKgElapsedTimeResult> GetWattPerKgValues(
         string html)
     {
         // Load the HTML document
@@ -67,17 +79,13 @@ public static class ZwiftInsiderScraper
         // Extract the inner text
         var timeEstimatesText = timeEstimatesNode.InnerText;
 
-        // Regular expression to match the time estimates
-        const string Pattern = @"(\d+)\sW/kg:\s(\d+)\sminutes";
-        var matches = Regex.Matches(timeEstimatesText, Pattern);
-
         // Parse and print the results
-        foreach (Match match in matches)
+        foreach (Match match in WattsPerKgAndMinutesPattern().Matches(timeEstimatesText))
         {
             var power = match.Groups[1].Value;
             var minutes = match.Groups[2].Value;
 
-            yield return new ZwiftInsiderScraperWattPerKgElapsedTimeResponse
+            yield return new ZwiftInsiderScraperWattPerKgElapsedTimeResult
             {
                 WattPerKg = int.Parse(power),
                 Minutes = double.Parse(minutes)
@@ -85,7 +93,7 @@ public static class ZwiftInsiderScraper
         }
     }
 
-    private static ZwiftInsiderScraperLeadInAndElevationResponse? ParseLeadInAndElevation(
+    private static ZwiftInsiderScraperLeadInAndElevationResult? ParseLeadInAndElevation(
         HtmlDocument htmlPageDoc)
     {
         // XPath to find <p> elements with all specified classes
@@ -98,7 +106,7 @@ public static class ZwiftInsiderScraper
         return GetLeadInAndElevation(paragraphNode.OuterHtml);
     }
 
-    private static ZwiftInsiderScraperLeadInAndElevationResponse? GetLeadInAndElevation(string html)
+    private static ZwiftInsiderScraperLeadInAndElevationResult? GetLeadInAndElevation(string html)
     {
         // Load HTML into HtmlDocument
         var htmlDoc = new HtmlDocument();
@@ -119,8 +127,7 @@ public static class ZwiftInsiderScraper
         var segment = node.InnerText.Trim();
 
         // Parse the length and elevation using regular expressions
-        const string Pattern = @"\+([\d\.]+)km.*?lead-in(?:.*?([\d\.]+)m.*elevation)?$";
-        var match = Regex.Match(segment, Pattern);
+        var match = LeadInDisatancePattern().Match(segment);
 
         if (!match.Success)
         {
@@ -132,10 +139,15 @@ public static class ZwiftInsiderScraper
             ? double.Parse(match.Groups[2].Value)
             : 0;
 
-        return new ZwiftInsiderScraperLeadInAndElevationResponse
+        return new ZwiftInsiderScraperLeadInAndElevationResult
         {
             Length = length,
             Elevation = elevation,
         };
     }
+
+    [GeneratedRegex(@"(\d+)\sW/kg:\s(\d+)\sminutes")]
+    private static partial Regex WattsPerKgAndMinutesPattern();
+    [GeneratedRegex(@"\+([\d\.]+)km.*?lead-in(?:.*?([\d\.]+)m.*elevation)?$")]
+    private static partial Regex LeadInDisatancePattern();
 }

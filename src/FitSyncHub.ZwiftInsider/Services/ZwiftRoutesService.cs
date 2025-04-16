@@ -1,22 +1,25 @@
 ﻿using System.Data;
 using System.Text.Json;
-using FitSyncHub.ZwiftInsider.Scrapers;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.ZwiftInsider.Services;
 public class ZwiftInsiderRoutesService
 {
     private readonly ExcelReader _excelReader;
+    private readonly ZwiftInsiderScraperService _zwiftInsiderScraper;
     private readonly ILogger<ZwiftInsiderRoutesService> _logger;
 
-    public ZwiftInsiderRoutesService(ExcelReader excelReader,
+    public ZwiftInsiderRoutesService(
+        ExcelReader excelReader,
+        ZwiftInsiderScraperService zwiftInsiderScraper,
         ILogger<ZwiftInsiderRoutesService> logger)
     {
         _excelReader = excelReader;
+        _zwiftInsiderScraper = zwiftInsiderScraper;
         _logger = logger;
     }
 
-    public async Task DoManipulation(string zwiftRoutesFilePath, string sheetName = "Sheet1")
+    public async Task DoManipulation(string zwiftRoutesFilePath, string sheetName = "Sheet1", CancellationToken cancellationToken = default)
     {
         var dt = _excelReader.Read(zwiftRoutesFilePath, sheetName);
 
@@ -38,7 +41,7 @@ public class ZwiftInsiderRoutesService
             }
 
             var link = row[ExcelReader.HyperlinkColumnName]?.ToString() ?? throw new Exception("No hyperlink");
-            var scrapeResult = await ZwiftInsiderScraper.ScrapeZwiftInsiderWorkoutPage(new Uri(link));
+            var scrapeResult = await _zwiftInsiderScraper.ScrapeZwiftInsiderWorkoutPage(new Uri(link), cancellationToken);
 
             var length = scrapeResult.LeadInAndElevation?.Length ?? 0;
             var elevation = scrapeResult.LeadInAndElevation?.Elevation ?? 0;

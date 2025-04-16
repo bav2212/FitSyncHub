@@ -1,36 +1,50 @@
-﻿using HtmlAgilityPack;
+﻿using FitSyncHub.IntervalsICU.Models;
+using HtmlAgilityPack;
 
-namespace FitSyncHub.IntervalsICU.Scrapers;
+namespace FitSyncHub.IntervalsICU.Services;
 
-public static class WhatsOnZwiftScraper
+public class WhatsOnZwiftScraperService
 {
-    public static async Task<WhatsOnZwiftScrapedResponse> ScrapeWorkoutStructure(Uri uri)
+    private readonly HttpClient _client;
+
+    public WhatsOnZwiftScraperService(HttpClient client)
     {
-        var web = new HtmlWeb();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-        var htmlPageDoc = await web.LoadFromWebAsync(uri, null, null);
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+        _client = client;
+    }
+
+    public async Task<WhatsOnZwiftScrapedResult> ScrapeWorkoutStructure(Uri uri, CancellationToken cancellationToken)
+    {
+        var response = await _client.GetAsync(uri, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        var htmlPageDoc = new HtmlDocument();
+        htmlPageDoc.LoadHtml(content);
 
         var workoutList = ParseWorkoutList(htmlPageDoc).ToList();
 
-        return new WhatsOnZwiftScrapedResponse()
+        return new WhatsOnZwiftScrapedResult()
         {
             NameSegments = [.. ParseNameSegments(htmlPageDoc)],
             WorkoutList = workoutList,
         };
     }
 
-    public static async Task<List<string>> ScrapeWorkoutPlanLinks(Uri uri)
+    public async Task<List<string>> ScrapeWorkoutPlanLinks(Uri uri, CancellationToken cancellationToken)
     {
-        var web = new HtmlWeb();
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-        var htmlPageDoc = await web.LoadFromWebAsync(uri, null, null);
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+        var response = await _client.GetAsync(uri, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        var htmlPageDoc = new HtmlDocument();
+        htmlPageDoc.LoadHtml(content);
 
         var viewWorkoutButtons = htmlPageDoc.DocumentNode
-            .SelectNodes("//a[@class=\"button\"]")
-            .Where(x => x.InnerText == "View workout")
-            .ToList();
+        .SelectNodes("//a[@class=\"button\"]")
+        .Where(x => x.InnerText == "View workout")
+        .ToList();
 
         return viewWorkoutButtons
             .ConvertAll(x => x.Attributes["href"].Value);
@@ -59,15 +73,15 @@ public static class WhatsOnZwiftScraper
         htmlDoc.LoadHtml(workoutListNode.OuterHtml);
 
         // Select all divs with class 'textbar'
-        var textbarDivs = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'textbar')]");
+        var textBarDivBlocks = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'textbar')]");
 
-        if (textbarDivs is null)
+        if (textBarDivBlocks is null)
         {
             yield break;
         }
 
         // Iterate over each textbar div and extract the relevant information
-        foreach (var div in textbarDivs)
+        foreach (var div in textBarDivBlocks)
         {
             // Get the inner text of the div (this will contain the time and other details)
             var divText = div.InnerText.Trim();
