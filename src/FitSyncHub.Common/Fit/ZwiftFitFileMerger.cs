@@ -39,7 +39,7 @@ public class ZwiftFitFileMerger : FitMessages
         SetOtherMessages();
     }
 
-    private Dictionary<System.DateTime, ZwiftRecordData> GetZwiftData(FitMessages zwiftFitMessages)
+    private static Dictionary<System.DateTime, ZwiftRecordData> GetZwiftData(FitMessages zwiftFitMessages)
     {
         Dictionary<System.DateTime, ZwiftRecordData> result = [];
 
