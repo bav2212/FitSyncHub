@@ -146,7 +146,8 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         }
 
         _logger.LogInformation("Export function completed successfully");
-        return new OkObjectResult("Ok");
+
+        return new OkObjectResult("Success");
     }
 
     private static bool HasSameGeneratedContent(string generatedDescription, string existingDescription)
