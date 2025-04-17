@@ -25,8 +25,16 @@ public class MergeFitWithZwiftHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "merge-fit-with-zwift")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        var fitPath = @"C:\Users\bav22\Downloads\18784196497_ACTIVITY.fit";
-        var zwiftFitPath = @"C:\Users\bav22\Downloads\Zwift_Pacer_Group_Ride_The_Big_Ring_in_Watopia_with_Maria.fit";
+        string? fitPath = req.Query["fitPath"];
+        string? zwiftFitPath = req.Query["zwiftFitPath"];
+        string? saveToPath = req.Query["saveToPath"];
+
+        if (string.IsNullOrWhiteSpace(fitPath)
+            || string.IsNullOrWhiteSpace(zwiftFitPath)
+            || string.IsNullOrWhiteSpace(saveToPath))
+        {
+            return new BadRequestObjectResult("wrong request");
+        }
 
         var fitFileMessages = _decoder.Decode(fitPath);
         var zwiftFitMessages = _decoder.Decode(zwiftFitPath);
@@ -35,7 +43,7 @@ public class MergeFitWithZwiftHttpTriggerFunction
         await using var memoryStream = new MemoryStream();
         _encoder.Encode(memoryStream, mergedFitFile);
 
-        File.WriteAllBytes(@"C:\Users\bav22\Downloads\merged.fit", memoryStream.ToArray());
+        File.WriteAllBytes(saveToPath, memoryStream.ToArray());
 
         return new OkObjectResult("Success");
     }

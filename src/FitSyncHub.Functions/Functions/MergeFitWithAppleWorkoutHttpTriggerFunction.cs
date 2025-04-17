@@ -29,8 +29,11 @@ public class MergeFitWithAppleWorkoutHttpTriggerFunction
     {
         string? fitPath = req.Query["fitPath"];
         string? appleExportPath = req.Query["appleExportPath"];
+        string? saveToPath = req.Query["saveToPath"];
 
-        if (string.IsNullOrWhiteSpace(fitPath) || string.IsNullOrWhiteSpace(appleExportPath))
+        if (string.IsNullOrWhiteSpace(fitPath)
+            || string.IsNullOrWhiteSpace(appleExportPath)
+            || string.IsNullOrWhiteSpace(saveToPath))
         {
             return new BadRequestObjectResult("wrong request");
         }
@@ -54,7 +57,7 @@ public class MergeFitWithAppleWorkoutHttpTriggerFunction
         await using var memoryStream = new MemoryStream();
         _encoder.Encode(memoryStream, fitFileMessages);
 
-        File.WriteAllBytes(@"C:\Users\bav22\Downloads\merged.fit", memoryStream.ToArray());
+        File.WriteAllBytes(saveToPath, memoryStream.ToArray());
 
         return new OkObjectResult("Success");
     }
