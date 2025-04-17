@@ -11,6 +11,7 @@ namespace ZwiftToIntervalsICUConverter.HttpClients.Models;
 [JsonSerializable(typeof(IReadOnlyCollection<AthleteFolderPlanWorkoutsResponse>))]
 [JsonSerializable(typeof(IReadOnlyCollection<ActivityResponse>))]
 [JsonSerializable(typeof(ActivityCreateResponse))]
+[JsonSerializable(typeof(CreateActivityRequest))]
 [JsonSerializable(typeof(ActivityUpdateRequest))]
 [JsonSerializable(typeof(IReadOnlyCollection<EventResponse>))]
 [JsonSerializable(typeof(CreateEventRequest))]

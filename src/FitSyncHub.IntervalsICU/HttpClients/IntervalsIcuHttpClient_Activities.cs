@@ -3,6 +3,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text.Json;
+using FitSyncHub.Common.Helpers;
+using FitSyncHub.Common.Models;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
@@ -103,36 +105,14 @@ public partial class IntervalsIcuHttpClient
 
     public async Task<ActivityCreateResponse> CreateActivity(
        string athleteId,
+       FileModel fileModel,
        CreateActivityRequest createActivityRequest,
        CancellationToken cancellationToken = default)
     {
         var requestUri = $"api/v1/athlete/{athleteId}/activities";
 
-        using var formData = new MultipartFormDataContent
-        {
-            // Add the file to the form-data with the key 'file'
-            { new ByteArrayContent(createActivityRequest.ActivityBytes), "file", createActivityRequest.ActivityFileName }
-        };
-
-        if (createActivityRequest.Name != null)
-        {
-            formData.Add(new StringContent(createActivityRequest.Name), "name");
-        }
-
-        if (createActivityRequest.Description != null)
-        {
-            formData.Add(new StringContent(createActivityRequest.Description), "description");
-        }
-
-        if (createActivityRequest.PairedEventId.HasValue)
-        {
-            formData.Add(new StringContent(createActivityRequest.PairedEventId.Value.ToString()), "paired_event_id");
-        }
-
-        if (createActivityRequest.ExternalId != null)
-        {
-            formData.Add(new StringContent(createActivityRequest.ExternalId), "external_id");
-        }
+        using var formData = FormDataContentHelper.CreateMultipartFormDataContent(
+            fileModel, createActivityRequest, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateActivityRequest);
 
         // Send POST request
         var response = await _httpClient.PostAsync(requestUri, formData, cancellationToken);

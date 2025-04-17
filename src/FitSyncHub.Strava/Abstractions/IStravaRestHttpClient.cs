@@ -1,4 +1,7 @@
-﻿using FitSyncHub.Strava.Models.BrowserSession;
+﻿using FitSyncHub.Common.Models;
+using FitSyncHub.Strava.Models.BrowserSession;
+using FitSyncHub.Strava.Models.Requests;
+using FitSyncHub.Strava.Models.Responses;
 using FitSyncHub.Strava.Models.Responses.Activities;
 using FitSyncHub.Strava.Models.Responses.Athletes;
 
@@ -27,4 +30,14 @@ public interface IStravaRestHttpClient
         long activityId,
         UpdatableActivityRequest model,
         CancellationToken cancellationToken);
+
+    Task<UploadActivityResponse> UploadStart(
+        FileModel file,
+        StartUploadActivityRequest model,
+        CancellationToken cancellationToken);
+
+    Task<UploadActivityResponse> GetUpload(
+       long uploadId,
+       CancellationToken cancellationToken);
+
 }

@@ -1,4 +1,5 @@
-﻿using FitSyncHub.GarminConnect.Auth;
+﻿using System.Net;
+using FitSyncHub.GarminConnect.Auth;
 using FitSyncHub.GarminConnect.Auth.Abstractions;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.Options;
@@ -14,19 +15,17 @@ public static class GarminConnectModule
         string garminAuthOptionsPath)
     {
         services.AddOptions<GarminConnectAuthOptions>()
-            .Configure<IConfiguration>((settings, configuration) =>
-            {
-                configuration.GetSection(garminAuthOptionsPath).Bind(settings);
-            })
+            .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(garminAuthOptionsPath).Bind(settings))
             .ValidateOnStart();
 
         services.AddHttpClient<IGarminAuthenticationService, GarminAuthenticationService>();
         services.AddTransient<GarminConnectAuthenticationDelegatingHandler>();
-        services.AddHttpClient<GarminConnectHttpClient>(client =>
-        {
-            client.BaseAddress = new Uri("https://connect.garmin.com");
-        })
-        .AddHttpMessageHandler<GarminConnectAuthenticationDelegatingHandler>();
+        services.AddHttpClient<GarminConnectHttpClient>(client => client.BaseAddress = new Uri("https://connect.garmin.com"))
+            .AddHttpMessageHandler<GarminConnectAuthenticationDelegatingHandler>()
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            });
 
         return services;
     }

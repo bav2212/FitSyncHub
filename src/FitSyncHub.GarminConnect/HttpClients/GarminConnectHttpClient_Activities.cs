@@ -62,4 +62,16 @@ public partial class GarminConnectHttpClient
         var response = await _httpClient.SendAsync(request, cancellationToken);
         return response;
     }
+
+    public async Task<Stream> DownloadActivityFile(
+      long activityId,
+      CancellationToken cancellationToken = default)
+    {
+        var url = $"/download-service/files/activity/{activityId}";
+
+        var response = await _httpClient.GetAsync(url, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadAsStreamAsync(cancellationToken);
+    }
 }

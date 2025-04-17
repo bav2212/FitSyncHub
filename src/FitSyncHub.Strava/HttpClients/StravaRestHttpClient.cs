@@ -1,13 +1,16 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using FitSyncHub.Common.Helpers;
+using FitSyncHub.Common.Models;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Strava.Abstractions;
-using FitSyncHub.Strava.Extensions;
 using FitSyncHub.Strava.Models.BrowserSession;
+using FitSyncHub.Strava.Models.Requests;
+using FitSyncHub.Strava.Models.Responses;
 using FitSyncHub.Strava.Models.Responses.Activities;
 using FitSyncHub.Strava.Models.Responses.Athletes;
 using Microsoft.Extensions.Logging;
+using Polly;
 
 namespace FitSyncHub.Strava.HttpClients;
 
@@ -29,9 +32,9 @@ public class StravaRestHttpClient : IStravaRestHttpClient
         CancellationToken cancellationToken)
     {
         var response = await _httpClient.PutAsync($"athlete?weight={weight}", null, cancellationToken);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return await HandleJsonResponse(response,
-            StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
+        return JsonSerializer.Deserialize(content, StravaRestApiSerializerContext.Default.DetailedAthleteResponse)!;
     }
 
     public async Task<List<SummaryActivityModelResponse>> GetActivities(
@@ -50,10 +53,10 @@ public class StravaRestHttpClient : IStravaRestHttpClient
         };
 
         var requestUri = $"athlete/activities?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
-        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
-
-        return await HandleJsonResponse(response,
+        var activities = await _httpClient.GetFromJsonAsync(requestUri,
             StravaRestApiSerializerContext.Default.ListSummaryActivityModelResponse, cancellationToken);
+
+        return activities!;
     }
 
     public async Task<ActivityModelResponse> GetActivity(
@@ -61,20 +64,17 @@ public class StravaRestHttpClient : IStravaRestHttpClient
         CancellationToken cancellationToken)
     {
         var requestUri = $"activities/{activityId}?include_all_efforts=false";
-        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+        var activity = await _httpClient.GetFromJsonAsync(requestUri, StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
 
-        return await HandleJsonResponse(response,
-            StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
+        return activity!;
     }
 
     public async Task<List<SummaryGearResponse>> GetBikes(CancellationToken cancellationToken)
     {
-        var response = await _httpClient.GetAsync("athlete", cancellationToken);
-
-        var detailedAthlete = await HandleJsonResponse(response,
+        var detailedAthlete = await _httpClient.GetFromJsonAsync("athlete",
             StravaRestApiSerializerContext.Default.DetailedAthleteResponse, cancellationToken);
 
-        return detailedAthlete.Bikes;
+        return detailedAthlete!.Bikes;
     }
 
     public async Task<ActivityModelResponse> UpdateActivity(
@@ -83,33 +83,64 @@ public class StravaRestHttpClient : IStravaRestHttpClient
        CancellationToken cancellationToken)
     {
         var requestUri = $"activities/{activityId}";
-        var content = JsonContent.Create(model, StravaBrowserSessionSerializerContext.Default.UpdatableActivityRequest);
-        var response = await _httpClient.PutAsync(requestUri, content, cancellationToken);
+        var response = await _httpClient.PutAsJsonAsync(requestUri, model,
+            StravaBrowserSessionSerializerContext.Default.UpdatableActivityRequest, cancellationToken);
 
-        return await HandleJsonResponse(response,
-            StravaRestApiSerializerContext.Default.ActivityModelResponse, cancellationToken);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        return JsonSerializer.Deserialize(content, StravaRestApiSerializerContext.Default.ActivityModelResponse)!;
     }
 
-    private async Task<T> HandleJsonResponse<T>(
-        HttpResponseMessage response,
-        JsonTypeInfo<T> jsonTypeInfo,
-        CancellationToken cancellationToken)
+    public async Task<UploadActivityResponse> UploadStart(
+       FileModel file,
+       StartUploadActivityRequest model,
+       CancellationToken cancellationToken)
     {
-        try
-        {
-            return await response.HandleJsonResponse(jsonTypeInfo, cancellationToken);
-        }
-        catch (JsonException)
-        {
-            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        const string RequestUri = "uploads";
 
-            _logger.LogError("Cannot deserialize json to type: {Type}, json: {json}", nameof(T), responseContent);
-            throw;
-        }
-        catch (Exception ex)
+        using var formData = FormDataContentHelper
+            .CreateMultipartFormDataContent(file, model, StravaRestApiSerializerContext.Default.StartUploadActivityRequest);
+
+        // Send POST request
+        var response = await _httpClient.PostAsync(RequestUri, formData, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        return JsonSerializer.Deserialize(content, StravaRestApiSerializerContext.Default.UploadActivityResponse)!;
+    }
+
+    public async Task<UploadActivityResponse> GetUpload(
+       long uploadId,
+       CancellationToken cancellationToken)
+    {
+        const int RetryCount = 3;
+        const int InitialWaitDurationMilliseconds = 4 * 1000;
+
+        var requestPolicy = Policy
+            .HandleResult<UploadActivityResponse>(r => r.Status == "Your activity is still being processed.")
+            .WaitAndRetryAsync(
+                retryCount: RetryCount,
+                retryAttempt => TimeSpan.FromMilliseconds(InitialWaitDurationMilliseconds * Math.Pow(2, retryAttempt - 1)),
+                (uploadResponseDelegate, timespan, retryAttempt, _) =>
+                {
+                    var uploadResponse = uploadResponseDelegate.Result;
+
+                    _logger.LogInformation("Upload completed with status: {Status}, Error: {Error}, retry {RetryCount} after {Timespan}",
+                        uploadResponse.Status,
+                        uploadResponse.Error,
+                        retryAttempt,
+                        timespan);
+                });
+
+
+        var requestUri = $"uploads/{uploadId}";
+
+        var result = await requestPolicy.ExecuteAsync(async () =>
         {
-            _logger.LogError(ex, "Error while handling json response");
-            throw;
-        }
+            var uploadActivityResponse = await _httpClient.GetFromJsonAsync(requestUri,
+                StravaRestApiSerializerContext.Default.UploadActivityResponse, cancellationToken);
+            return uploadActivityResponse!;
+        });
+
+        return result;
     }
 }
