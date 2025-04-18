@@ -77,7 +77,7 @@ public static class ZwiftResultsAnalyzer
         public string Build() => _sb.ToString();
 
         public void AppendFormattedText(
-          IList<ZwiftRaceResultEntryResponse> orderedByDurationItems,
+          List<ZwiftRaceResultEntryResponse> orderedByDurationItems,
           int dtoIndex)
         {
             var dto = orderedByDurationItems[dtoIndex];
@@ -96,7 +96,7 @@ public static class ZwiftResultsAnalyzer
         }
 
         public void AppendFormattedText(
-          IList<ZwiftRaceResultEntryResponse> orderedByDurationItems,
+          List<ZwiftRaceResultEntryResponse> orderedByDurationItems,
           ZwiftRaceResultEntryResponse dto)
         {
             var index = orderedByDurationItems.IndexOf(dto);
