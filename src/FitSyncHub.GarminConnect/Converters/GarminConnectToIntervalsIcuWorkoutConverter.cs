@@ -142,8 +142,9 @@ public static partial class GarminConnectToIntervalsIcuWorkoutConverter
             {
                 From = from,
                 To = to,
-                // ramp for warmup and cooldown
-                IsRampRange = workoutGroupType is IntervalsIcuWorkoutGroupType.Warmup or IntervalsIcuWorkoutGroupType.Cooldown,
+                // disable for now, to check how's better
+                //IsRampRange = workoutGroupType is IntervalsIcuWorkoutGroupType.Warmup or IntervalsIcuWorkoutGroupType.Cooldown,
+                IsRampRange = false,
             }
         };
     }
