@@ -54,12 +54,12 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
             .Where(x => x.TaskWorkout.SportType != null && x.TaskWorkout.AdaptiveCoachingWorkoutStatus == "NOT_COMPLETE")
             .ToList();
 
-        _logger.LogInformation("Found {Count} uncomplete tasks in training plan", garminTrainingPlanTaskList.Count);
+        _logger.LogInformation("Found {Count} incomplete tasks in training plan", garminTrainingPlanTaskList.Count);
 
         if (garminTrainingPlanTaskList.Count == 0)
         {
-            _logger.LogInformation("No uncomplete tasks to export");
-            return new BadRequestObjectResult("No uncomplete activities");
+            _logger.LogInformation("No incomplete tasks to export");
+            return new BadRequestObjectResult("No incomplete activities");
         }
 
         var lastDay = garminTrainingPlanTaskList.MaxBy(x => x.CalendarDate)!.CalendarDate;
