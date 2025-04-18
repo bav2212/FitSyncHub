@@ -18,8 +18,7 @@ public partial class GarminConnectHttpClient
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var result = JsonSerializer.Deserialize(content, GarminConnectCamelCaseSerializerContext.Default.GarminWeightResponse)!;
-        return result;
+        return JsonSerializer.Deserialize(content, GarminConnectCamelCaseSerializerContext.Default.GarminWeightResponse)!;
     }
 
     public async Task SetUserWeight(

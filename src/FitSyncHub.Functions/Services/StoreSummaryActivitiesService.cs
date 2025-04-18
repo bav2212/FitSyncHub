@@ -31,8 +31,7 @@ public class SummaryActivityService
         foreach (var activity in activities)
         {
             var dataModel = mapper.SummaryActivityResponseToDataModel(activity);
-            var response = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
-            _ = response;
+            _ = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
         }
 
         return activities.Count;
@@ -46,8 +45,7 @@ public class SummaryActivityService
         var mapper = new SummaryActivityMapper();
 
         var dataModel = mapper.ActivityResponseToSummaryDataModel(activity);
-        var response = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
-        _ = response;
+        _ = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
     }
 
     public async Task DeleteSummaryActivity(
@@ -61,9 +59,8 @@ public class SummaryActivityService
             return;
         }
 
-        var response = await _summaryActivityRepository
+        _ = await _summaryActivityRepository
             .DeleteItemAsync(existingActivitySummary, cancellationToken: cancellationToken);
-        _ = response;
     }
 
     private async Task<List<SummaryActivityModelResponse>> GetSummaryActivities(

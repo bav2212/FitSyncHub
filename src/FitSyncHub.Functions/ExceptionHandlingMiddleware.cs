@@ -55,9 +55,8 @@ internal sealed class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
     private static OutputBindingData<HttpResponseData>? GetHttpOutputBindingFromMultipleOutputBinding(FunctionContext context)
     {
         // The output binding entry name will be "$return" only when the function return type is HttpResponseData
-        var httpOutputBinding = context.GetOutputBindings<HttpResponseData>()
+        return context
+            .GetOutputBindings<HttpResponseData>()
             .FirstOrDefault(b => b.BindingType == "http" && b.Name != "$return");
-
-        return httpOutputBinding;
     }
 }

@@ -134,13 +134,11 @@ public class StravaRestHttpClient : IStravaRestHttpClient
 
         var requestUri = $"uploads/{uploadId}";
 
-        var result = await requestPolicy.ExecuteAsync(async () =>
+        return await requestPolicy.ExecuteAsync(async () =>
         {
             var uploadActivityResponse = await _httpClient.GetFromJsonAsync(requestUri,
                 StravaRestApiSerializerContext.Default.UploadActivityResponse, cancellationToken);
             return uploadActivityResponse!;
         });
-
-        return result;
     }
 }

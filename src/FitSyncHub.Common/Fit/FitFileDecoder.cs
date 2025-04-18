@@ -25,8 +25,7 @@ public class FitFileDecoder
             _logger.LogInformation("Decoding...");
             decoder.Read(stream);
 
-            var fitMessages = fitListener.FitMessages;
-            return fitMessages;
+            return fitListener.FitMessages;
         }
         catch (FitException ex)
         {

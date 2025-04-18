@@ -58,8 +58,7 @@ public class TssCalculator
             rollingAverages.Add(powerValues.Skip(i).Take(30).Average());
         }
 
-        var np = Math.Pow(rollingAverages.Average(p => Math.Pow(p, 4)), 0.25);
-        return np;
+        return Math.Pow(rollingAverages.Average(p => Math.Pow(p, 4)), 0.25);
     }
 
     private record FitMessageRawPowerAndTime
