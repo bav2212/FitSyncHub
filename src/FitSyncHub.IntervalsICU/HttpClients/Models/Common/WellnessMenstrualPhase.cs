@@ -3,12 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
-[JsonConverter(typeof(JsonStringEnumConverter<WellnessMenstrualPhase>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<WellnessMenstrualPhase>))]
 public enum WellnessMenstrualPhase
 {
-    PERIOD,
-    FOLLICULAR,
-    OVULATING,
-    LUTEAL,
-    NONE
+    Period,
+    Follicular,
+    Ovulating,
+    Luteal,
+    None,
 }

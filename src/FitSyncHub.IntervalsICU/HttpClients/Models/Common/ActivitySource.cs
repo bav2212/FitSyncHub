@@ -2,18 +2,18 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
-[JsonConverter(typeof(JsonStringEnumConverter<ActivitySource>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivitySource>))]
 public enum ActivitySource
 {
-    STRAVA,
-    UPLOAD,
-    MANUAL,
-    GARMIN_CONNECT,
-    OAUTH_CLIENT,
-    DROPBOX,
-    POLAR,
-    SUUNTO,
-    COROS,
-    WAHOO,
-    ZWIFT
+    Strava,
+    Upload,
+    Manual,
+    GarminConnect,
+    OAuthClient,
+    Dropbox,
+    Polar,
+    Suunto,
+    Coros,
+    Wahoo,
+    Zwift,
 }

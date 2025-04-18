@@ -121,12 +121,12 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 
             var createRequest = new CreateEventRequest
             {
-                Category = EventCategory.WORKOUT,
+                Category = EventCategory.Workout,
                 Description = intervalsIcuEventStructure,
                 Name = workoutName,
                 Indoor = indoor,
                 StartDateLocal = new DateTime(workout.CalendarDate, TimeOnly.MinValue),
-                SubType = ActivitySubType.NONE,
+                SubType = ActivitySubType.None,
                 Tags = [IntervalsIcuEventTagGarminConnect],
                 Type = eventType
             };

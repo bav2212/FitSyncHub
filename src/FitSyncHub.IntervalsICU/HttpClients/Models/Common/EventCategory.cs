@@ -2,20 +2,20 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
-[JsonConverter(typeof(JsonStringEnumConverter<EventCategory>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<EventCategory>))]
 public enum EventCategory
 {
-    WORKOUT,
-    RACE_A,
-    RACE_B,
-    RACE_C,
-    NOTE,
-    HOLIDAY,
-    SICK,
-    INJURED,
-    SET_EFTP,
-    FITNESS_DAYS,
-    SEASON_START,
-    TARGET,
-    SET_FITNESS,
+    Workout,
+    RaceA,
+    RaceB,
+    RaceC,
+    Note,
+    Holiday,
+    Sick,
+    Injured,
+    SetEftp,
+    FitnessDays,
+    SeasonStart,
+    Target,
+    SetFitness,
 }

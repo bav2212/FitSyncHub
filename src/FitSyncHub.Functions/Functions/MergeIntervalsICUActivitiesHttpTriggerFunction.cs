@@ -207,7 +207,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
     {
         if (raceActivity is null)
         {
-            return ActivitySubType.NONE;
+            return ActivitySubType.None;
         }
 
         var raceActivityStartDate = DateTime.Parse(raceActivity.StartDate);
@@ -215,15 +215,15 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
 
         if (raceActivityStartDate == activityStartDate)
         {
-            return ActivitySubType.RACE;
+            return ActivitySubType.Race;
         }
 
         if (raceActivityStartDate > activityStartDate)
         {
-            return ActivitySubType.WARMUP;
+            return ActivitySubType.Warmup;
         }
 
-        return ActivitySubType.COOLDOWN;
+        return ActivitySubType.Cooldown;
     }
 
     private static bool IsRaceEvent(EventResponse linkedPairedEvent)

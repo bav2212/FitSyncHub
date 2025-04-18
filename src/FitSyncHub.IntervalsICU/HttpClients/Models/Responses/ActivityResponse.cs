@@ -172,32 +172,38 @@ public record ActivityResponse
     public required double? IcuVariabilityIndex { get; init; }
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter<ActivityGapModel>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivityGapModel>))]
 public enum ActivityGapModel
 {
-    NONE,
-    STRAVA_RUN
+    None,
+    StravaRun,
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter<ActivityTizOrder>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivityTizOrder>))]
 public enum ActivityTizOrder
 {
-    POWER_HR_PACE, POWER_PACE_HR, HR_POWER_PACE, HR_PACE_POWER, PACE_POWER_HR, PACE_HR_POWER
+    PowerHrPace,
+    PowerPaceHr,
+    HrPowerPace,
+    HrPacePower,
+    PacePowerHr,
+    PaceHrPower,
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter<ActivityPaceLoadType>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivityPaceLoadType>))]
 public enum ActivityPaceLoadType
 {
-    SWIM,
-    RUN
+    Swim,
+    Run,
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter<ActivityHrLoadType>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivityHrLoadType>))]
 public enum ActivityHrLoadType
 {
-    AVG_HR,
-
-    HR_ZONES, HRSS
+    AvgHr,
+    HrZones,
+    [JsonStringEnumMemberName("HRSS")]
+    HeartRateStressScore,
 }
 
 public record ActivityGear
@@ -236,13 +242,13 @@ public record ActivityAchievement
     public required ActivityPoint Point { get; init; }
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter<ActivityAchievementType>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivityAchievementType>))]
 public enum ActivityAchievementType
 {
-    BEST_POWER,
-    FTP_UP,
-    LTHR_UP,
-    BEST_PACE
+    BestPower,
+    FtpUp,
+    LthrUp,
+    BestPace,
 }
 
 public record ActivityPoint

@@ -13,14 +13,14 @@ public class ActivityUpdateRequest
     public required GearUpdateRequest Gear { get; set; }
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter<ActivitySubType>))]
+[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivitySubType>))]
 public enum ActivitySubType
 {
-    NONE,
-    COMMUTE,
-    WARMUP,
-    COOLDOWN,
-    RACE
+    None,
+    Commute,
+    Warmup,
+    Cooldown,
+    Race,
 }
 
 public class GearUpdateRequest

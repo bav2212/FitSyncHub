@@ -46,7 +46,9 @@ public partial class IntervalsIcuHttpClient
 
         foreach (var jsonObject in jsonDocument.RootElement.EnumerateArray())
         {
-            if (jsonObject.GetProperty("source").GetString() == nameof(ActivitySource.STRAVA))
+            var activitySource = jsonObject.GetProperty("source")
+                .Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivitySource)!;
+            if (activitySource == ActivitySource.Strava)
             {
                 continue;
             }
