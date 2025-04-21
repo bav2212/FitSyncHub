@@ -8,6 +8,7 @@ public class Constants
     // Marin Nicasio 2 id
     public const string MyCityBikeGearId = "b9320665";
     public const string WahooSYSTMDeviceName = "Wahoo SYSTM";
+    public const string ZwiftDeviceName = "Zwift";
 
     public static Boundaries MyMapBoundaries => new(
         26.098528,

@@ -67,6 +67,15 @@ public class UpdateActivityService
             return;
         }
 
+        // temp hide zwift rides
+        var isZwiftRide = activity.Type == Constants.StravaActivityType.Ride
+            && activity.DeviceName != Constants.ZwiftDeviceName;
+        if (isZwiftRide)
+        {
+            await UpdateActivityVisibilityToOnlyMe(webhookEventData, activity, cancellationToken);
+            return;
+        }
+
         _logger.LogInformation("Skip activity with name: {Name}, id: {Id}, cause it's not walk or ride activity. Type: {Type}",
             activity.Name,
             activity.Id,
