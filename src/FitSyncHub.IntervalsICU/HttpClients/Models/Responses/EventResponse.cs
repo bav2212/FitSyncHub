@@ -10,4 +10,6 @@ public record EventResponse
     public required bool Indoor { get; init; }
     public required List<string>? Tags { get; init; }
     public string? PairedActivityId { get; init; }
+    public long? IcuTrainingLoad { get; init; }
+    public long? MovingTime { get; init; }
 }

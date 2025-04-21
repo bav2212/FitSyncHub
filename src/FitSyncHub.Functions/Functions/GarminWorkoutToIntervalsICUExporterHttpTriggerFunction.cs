@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.HttpClients;
@@ -151,14 +152,39 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
         var intervalsIcuFutureGarminEventsOverview = intervalsIcuEvents
-            .Select(x => new
-            {
-                x.Type,
-                x.Name,
-                Date = DateOnly.FromDateTime(x.StartDateLocal)
-            })
             .Aggregate(new StringBuilder(),
-                (sb, curr) => sb.AppendLine($"{curr.Date}: {curr.Name}"),
+                (sb, x) =>
+                {
+                    var abbreviatedDayName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(x.StartDateLocal.DayOfWeek);
+                    sb.Append(abbreviatedDayName);
+                    sb.Append('\t');
+
+                    sb.Append($"{x.Type}: {x.Name}");
+                    if (x.MovingTime.HasValue)
+                    {
+                        var timeSpan = TimeSpan.FromSeconds(x.MovingTime.Value);
+                        sb.Append(", ");
+
+                        if (timeSpan.Hours > 0)
+                        {
+                            sb.Append(timeSpan.Hours);
+                            sb.Append('h');
+                        }
+
+                        if (timeSpan.Minutes > 0)
+                        {
+                            sb.Append(timeSpan.Minutes);
+                            sb.Append('m');
+                        }
+                    }
+
+                    if (x.IcuTrainingLoad.HasValue)
+                    {
+                        sb.Append($", Load {x.IcuTrainingLoad.Value}");
+                    }
+
+                    return sb.AppendLine();
+                },
                 sb => sb.ToString());
 
         return new OkObjectResult(intervalsIcuFutureGarminEventsOverview);
