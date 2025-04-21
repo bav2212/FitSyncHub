@@ -5,7 +5,7 @@ namespace FitSyncHub.Common.Applications.IntervalsIcu;
 
 public static class IntervalsIcuConverter
 {
-    // to do. Return some strict model instead of string and this model should override ToString() and generate this string
+    // TODO. Return some strict model instead of string and this model should override ToString() and generate this string
     public static string ConvertToIntervalsIcuFormat(IReadOnlyCollection<IntervalsIcuWorkoutGroup> workoutGroups)
     {
         var mergedGroups = MergeGroups(workoutGroups).ToList();

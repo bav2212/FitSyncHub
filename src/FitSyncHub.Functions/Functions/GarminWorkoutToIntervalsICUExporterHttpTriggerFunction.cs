@@ -88,7 +88,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
             var intervalsIcuEventStructure = IntervalsICUDescriptionHelper
                 .GenerateDescriptionBlock(GetIntervalsIcuEventStructure(ftp, workoutResponse));
 
-            var workoutName = GarminConnectToIntervalsIcuWorkoutConverter.GetGarminWorkoutTitle(workoutResponse, ftp);
+            var workoutName = GarminConnectWorkoutHelper.GetWorkoutTitle(workoutResponse, ftp);
 
             var mappingKey = new IntervalsIcuMappingKey
             {
@@ -207,7 +207,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         }
 
         var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter
-            .ConvertGarminWorkoutToIntervalsIcuWorkoutGroups(workoutResponse, ftp);
+            .ConvertRideToIntervalsIcuStructure(workoutResponse, ftp);
 
         return IntervalsIcuConverter.ConvertToIntervalsIcuFormat(icuGroups);
     }
