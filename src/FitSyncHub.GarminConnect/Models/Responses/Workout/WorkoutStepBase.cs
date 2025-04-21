@@ -17,6 +17,8 @@ public record WorkoutExecutableStepResponse : WorkoutStepBase
     public WorkoutStepTargetTypeResponse? TargetType { get; init; }
     public double? TargetValueOne { get; init; }
     public double? TargetValueTwo { get; init; }
+    public string? Category { get; init; }
+    public string? ExerciseName { get; init; }
 }
 
 public record WorkoutRepeatGroupResponse : WorkoutStepBase

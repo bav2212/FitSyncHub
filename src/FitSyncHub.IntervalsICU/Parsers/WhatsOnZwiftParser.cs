@@ -62,7 +62,7 @@ public class WhatsOnZwiftParser
         }
     }
 
-    private static IEnumerable<IntervalsIcuWorkoutLine> ParseWorkoutLines(string[] lineSegments)
+    private static IEnumerable<IIntervalsIcuWorkoutLine> ParseWorkoutLines(string[] lineSegments)
     {
         foreach (var line in lineSegments)
         {
@@ -80,7 +80,7 @@ public class WhatsOnZwiftParser
             var isFreeRide = !string.IsNullOrEmpty(match.Groups[FreeRideRegexKey].Value);
             var isMaxEffort = !string.IsNullOrEmpty(match.Groups[MaxEffortRegexKey].Value);
 
-            yield return new IntervalsIcuWorkoutLine
+            yield return new IntervalsIcuRideWorkoutLine
             {
                 Time = time,
                 Rpm = rpm,

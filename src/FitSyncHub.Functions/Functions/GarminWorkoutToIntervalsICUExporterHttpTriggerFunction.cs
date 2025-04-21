@@ -3,7 +3,7 @@ using System.Text;
 using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.HttpClients;
-using FitSyncHub.GarminConnect.Models.Responses.Workout;
+using FitSyncHub.GarminConnect.Services;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
@@ -19,15 +19,18 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 {
     private const string IntervalsIcuEventTagGarminConnect = "GarminConnect";
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
+    private readonly GarminConnectToIntervalsIcuWorkoutStepConverterInitializer _garminConnectToIntervalsIcuWorkoutStepConverterInitializer;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly ILogger<GarminWorkoutToIntervalsICUExporterHttpTriggerFunction> _logger;
 
     public GarminWorkoutToIntervalsICUExporterHttpTriggerFunction(
         GarminConnectHttpClient garminConnectHttpClient,
+        GarminConnectToIntervalsIcuWorkoutStepConverterInitializer garminConnectToIntervalsIcuWorkoutStepConverterInitializer,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
         ILogger<GarminWorkoutToIntervalsICUExporterHttpTriggerFunction> logger)
     {
         _garminConnectHttpClient = garminConnectHttpClient;
+        _garminConnectToIntervalsIcuWorkoutStepConverterInitializer = garminConnectToIntervalsIcuWorkoutStepConverterInitializer;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
         _logger = logger;
     }
@@ -85,8 +88,13 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
             var workoutResponse = await _garminConnectHttpClient.GetWorkout(workoutId, cancellationToken);
             _logger.LogInformation("Retrieved Garmin workout details: {workoutId}", workoutId);
 
+            var converter = await _garminConnectToIntervalsIcuWorkoutStepConverterInitializer
+                .GetConverter(workoutResponse, cancellationToken);
+            var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter.Convert(workoutResponse, converter);
+            var intervalsIcuWorkoutDescription = IntervalsIcuConverter.ConvertToIntervalsIcuFormat(icuGroups);
+
             var intervalsIcuEventStructure = IntervalsICUDescriptionHelper
-                .GenerateDescriptionBlock(GetIntervalsIcuEventStructure(ftp, workoutResponse));
+                .GenerateDescriptionBlock(intervalsIcuWorkoutDescription);
 
             var workoutName = GarminConnectWorkoutHelper.GetWorkoutTitle(workoutResponse, ftp);
 
@@ -152,6 +160,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
         var intervalsIcuFutureGarminEventsOverview = intervalsIcuEvents
+            .Where(x => x.PairedActivityId == null)
             .Aggregate(new StringBuilder(),
                 (sb, x) =>
                 {
@@ -196,20 +205,6 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         var existingIntervalsIcuEventStructure = IntervalsICUDescriptionHelper.ExtractMainBlock(generatedDescription);
 
         return existingDescriptionParts.SequenceEqual(existingIntervalsIcuEventStructure);
-    }
-
-    private static string GetIntervalsIcuEventStructure(int ftp,
-        WorkoutResponse workoutResponse)
-    {
-        if (workoutResponse.SportType.SportTypeKey != "cycling")
-        {
-            return string.Empty;
-        }
-
-        var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter
-            .ConvertRideToIntervalsIcuStructure(workoutResponse, ftp);
-
-        return IntervalsIcuConverter.ConvertToIntervalsIcuFormat(icuGroups);
     }
 
     private record IntervalsIcuMappingKey

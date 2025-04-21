@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using FitSyncHub.Common.Applications.IntervalsIcu.Models;
 using FitSyncHub.GarminConnect.Models.Responses.Workout;
 
 namespace FitSyncHub.GarminConnect.Converters;
@@ -35,6 +36,17 @@ public static partial class GarminConnectWorkoutHelper
                 yield return singleStep;
             }
         }
+    }
+    internal static IntervalsIcuWorkoutGroupType GetWorkoutGroupType(
+       WorkoutExecutableStepResponse workoutStep)
+    {
+        return workoutStep.StepType.StepTypeKey switch
+        {
+            "warmup" => IntervalsIcuWorkoutGroupType.Warmup,
+            "cooldown" => IntervalsIcuWorkoutGroupType.Cooldown,
+            "interval" or "recovery" => IntervalsIcuWorkoutGroupType.Interval,
+            _ => throw new NotImplementedException(),
+        };
     }
 
     internal static int GetRoundedPercent(double watts, int ftp)

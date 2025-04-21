@@ -3,6 +3,7 @@ using FitSyncHub.GarminConnect.Auth;
 using FitSyncHub.GarminConnect.Auth.Abstractions;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.Options;
+using FitSyncHub.GarminConnect.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,8 @@ public static class GarminConnectModule
         this IServiceCollection services,
         string garminAuthOptionsPath)
     {
+        services.AddScoped<GarminConnectToIntervalsIcuWorkoutStepConverterInitializer>();
+
         services.AddOptions<GarminConnectAuthOptions>()
             .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(garminAuthOptionsPath).Bind(settings))
             .ValidateOnStart();

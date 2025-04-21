@@ -17,7 +17,7 @@ public static class IntervalsIcuConverter
             sb.AppendLine(string.Empty);
             sb.AppendLine($"{workoutGroup.BlockInfo}");
 
-            foreach (var workoutLine in workoutGroup.Items.Select(ConvertToIntervalsIcuFormat))
+            foreach (var workoutLine in workoutGroup.Items.Select(x => x.ConvertToIntervalsIcuFormat()))
             {
                 sb.AppendLine(workoutLine);
             }
@@ -26,7 +26,8 @@ public static class IntervalsIcuConverter
         return sb.ToString();
     }
 
-    private static IEnumerable<IntervalsIcuWorkoutGroup> MergeGroups(IReadOnlyCollection<IntervalsIcuWorkoutGroup> workoutGroups)
+    private static IEnumerable<IntervalsIcuWorkoutGroup> MergeGroups(
+        IReadOnlyCollection<IntervalsIcuWorkoutGroup> workoutGroups)
     {
         if (workoutGroups.Count == 0)
         {
@@ -57,79 +58,5 @@ public static class IntervalsIcuConverter
         }
 
         yield return previousGroup!;
-    }
-
-    private static string ConvertToIntervalsIcuFormat(IntervalsIcuWorkoutLine item)
-    {
-        var sb = new StringBuilder("-");
-        AppendTimeSegment(item, sb);
-
-        if (item.IsFreeRide)
-        {
-            sb.Append(" freeride");
-            return sb.ToString();
-        }
-
-        if (item.IsMaxEffort)
-        {
-            // maxeffort doesn't visible on chart + not calculated in TSS, so adding Z6 as hack
-            sb.Append(" maxeffort Z6");
-            return sb.ToString();
-        }
-
-        if (item.Rpm is { } rpm)
-        {
-            sb.Append($" {rpm}rpm");
-        }
-
-        AppendFtpSegment(item, sb);
-        return sb.ToString();
-    }
-
-    private static void AppendTimeSegment(IntervalsIcuWorkoutLine item, StringBuilder sb)
-    {
-        sb.Append(' ');
-        if (item.Time.Hours != 0)
-        {
-            sb.Append($"{item.Time.Hours}h");
-        }
-
-        if (item.Time.Minutes != 0)
-        {
-            sb.Append($"{item.Time.Minutes}m");
-        }
-
-        if (item.Time.Seconds != 0)
-        {
-            sb.Append($"{item.Time.Seconds}s");
-        }
-    }
-
-    private static void AppendFtpSegment(IntervalsIcuWorkoutLine item, StringBuilder sb)
-    {
-        if (item.Ftp is null)
-        {
-            return;
-        }
-
-        sb.Append(' ');
-        if (item.Ftp is IntervalsIcuWorkoutFtpRange ftpRange)
-        {
-            if (ftpRange.IsRampRange)
-            {
-                sb.Append("ramp ");
-            }
-
-            sb.Append($"{ftpRange.From}-{ftpRange.To}%");
-            return;
-        }
-
-        if (item.Ftp is IntervalsIcuWorkoutFtpSingle ftpSingle)
-        {
-            sb.Append($"{ftpSingle.Value}%");
-            return;
-        }
-
-        throw new NotImplementedException();
     }
 }

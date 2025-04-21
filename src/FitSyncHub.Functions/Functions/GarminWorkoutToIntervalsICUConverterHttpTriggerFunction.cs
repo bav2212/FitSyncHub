@@ -2,6 +2,7 @@
 using FitSyncHub.Common.Applications.IntervalsIcu;
 using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.HttpClients;
+using FitSyncHub.GarminConnect.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -12,13 +13,16 @@ namespace FitSyncHub.Functions.Functions;
 public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
 {
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
+    private readonly GarminConnectToIntervalsIcuWorkoutStepConverterInitializer _garminConnectToIntervalsIcuWorkoutStepConverterInitializer;
     private readonly ILogger<GarminWorkoutToIntervalsICUConverterHttpTriggerFunction> _logger;
 
     public GarminWorkoutToIntervalsICUConverterHttpTriggerFunction(
         GarminConnectHttpClient garminConnectHttpClient,
+        GarminConnectToIntervalsIcuWorkoutStepConverterInitializer garminConnectToIntervalsIcuWorkoutStepConverterInitializer,
         ILogger<GarminWorkoutToIntervalsICUConverterHttpTriggerFunction> logger)
     {
         _garminConnectHttpClient = garminConnectHttpClient;
+        _garminConnectToIntervalsIcuWorkoutStepConverterInitializer = garminConnectToIntervalsIcuWorkoutStepConverterInitializer;
         _logger = logger;
     }
 
@@ -58,16 +62,13 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
             var workoutResponse = await _garminConnectHttpClient.GetWorkout(workoutId, cancellationToken);
 
             result.AppendLine($"{GarminConnectWorkoutHelper.GetWorkoutTitle(workoutResponse, ftp)}");
-            if (workout.TaskWorkout.SportType.SportTypeKey == "cycling")
-            {
-                var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter
-                    .ConvertRideToIntervalsIcuStructure(workoutResponse, ftp);
 
-                var intervalsIcuWorkoutDescription = IntervalsIcuConverter
-                    .ConvertToIntervalsIcuFormat(icuGroups);
+            var converter = await _garminConnectToIntervalsIcuWorkoutStepConverterInitializer
+                .GetConverter(workoutResponse, cancellationToken);
+            var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter.Convert(workoutResponse, converter);
+            var intervalsIcuWorkoutDescription = IntervalsIcuConverter.ConvertToIntervalsIcuFormat(icuGroups);
 
-                result.AppendLine(intervalsIcuWorkoutDescription);
-            }
+            result.AppendLine(intervalsIcuWorkoutDescription);
 
             result.AppendLine();
             result.AppendLine();

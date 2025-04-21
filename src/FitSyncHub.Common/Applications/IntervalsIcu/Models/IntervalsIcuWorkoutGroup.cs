@@ -3,5 +3,5 @@
 public record IntervalsIcuWorkoutGroup
 {
     public required IntervalsIcuWorkoutGroupBlockInfo BlockInfo { get; init; }
-    public required List<IntervalsIcuWorkoutLine> Items { get; init; }
+    public required List<IIntervalsIcuWorkoutLine> Items { get; init; }
 }
