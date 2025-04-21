@@ -38,5 +38,4 @@ public interface IStravaRestHttpClient
     Task<UploadActivityResponse> GetUpload(
        long uploadId,
        CancellationToken cancellationToken);
-
 }

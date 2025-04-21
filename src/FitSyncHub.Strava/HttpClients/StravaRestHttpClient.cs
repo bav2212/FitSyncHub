@@ -130,7 +130,6 @@ public class StravaRestHttpClient : IStravaRestHttpClient
                         timespan);
                 });
 
-
         var requestUri = $"uploads/{uploadId}";
 
         return await requestPolicy.ExecuteAsync(async () =>

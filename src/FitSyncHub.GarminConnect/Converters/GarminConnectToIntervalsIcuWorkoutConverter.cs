@@ -43,7 +43,6 @@ public static class GarminConnectToIntervalsIcuWorkoutConverter
         return result;
     }
 
-
     private static IntervalsIcuWorkoutGroupBlockInfo CreateBlockInfo(
         WorkoutExecutableStepResponse workoutStep)
     {
