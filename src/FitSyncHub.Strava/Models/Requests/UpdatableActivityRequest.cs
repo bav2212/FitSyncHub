@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.Strava.Models.BrowserSession;
+﻿namespace FitSyncHub.Strava.Models.Requests;
 
 public record UpdatableActivityRequest
 {
@@ -7,7 +7,6 @@ public record UpdatableActivityRequest
     public required bool? HideFromHome { get; init; }
     public required string? Description { get; init; }
     public required string Name { get; init; }
-    public required string Type { get; init; }
-    public required string SportType { get; init; }
+    public required SportType SportType { get; init; }
     public required string? GearId { get; init; }
 }

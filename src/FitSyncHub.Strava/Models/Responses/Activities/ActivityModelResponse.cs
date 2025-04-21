@@ -12,7 +12,7 @@ public class ActivityModelResponse
     public int? ElapsedTime { get; init; }
     public float? TotalElevationGain { get; init; }
     public string? Type { get; init; }
-    public required string SportType { get; init; }
+    public required SportType SportType { get; init; }
     public long? Id { get; init; }
     public DateTime? StartDate { get; init; }
     public DateTime? StartDateLocal { get; init; }

@@ -4,7 +4,7 @@ using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Functions.Options;
 using FitSyncHub.Strava;
 using FitSyncHub.Strava.Abstractions;
-using FitSyncHub.Strava.Models.BrowserSession;
+using FitSyncHub.Strava.Models.Requests;
 using FitSyncHub.Strava.Models.Responses.Activities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -149,7 +149,6 @@ public class UpdateActivityService
             HideFromHome = false,
             Description = activity.Description,
             Name = activity.Name,
-            Type = activity.Type!,
             SportType = activity.SportType,
             GearId = Constants.MyCityBikeGearId
         };

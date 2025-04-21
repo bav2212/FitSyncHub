@@ -1,5 +1,4 @@
 ﻿using FitSyncHub.Common.Models;
-using FitSyncHub.Strava.Models.BrowserSession;
 using FitSyncHub.Strava.Models.Requests;
 using FitSyncHub.Strava.Models.Responses;
 using FitSyncHub.Strava.Models.Responses.Activities;

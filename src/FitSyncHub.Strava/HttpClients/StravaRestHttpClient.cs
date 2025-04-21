@@ -4,7 +4,6 @@ using FitSyncHub.Common.Helpers;
 using FitSyncHub.Common.Models;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Strava.Abstractions;
-using FitSyncHub.Strava.Models.BrowserSession;
 using FitSyncHub.Strava.Models.Requests;
 using FitSyncHub.Strava.Models.Responses;
 using FitSyncHub.Strava.Models.Responses.Activities;
@@ -124,7 +123,7 @@ public class StravaRestHttpClient : IStravaRestHttpClient
                 {
                     var uploadResponse = uploadResponseDelegate.Result;
 
-                    _logger.LogInformation("Upload completed with status: {Status}, Error: {Error}, retry {RetryCount} after {Timespan}",
+                    _logger.LogInformation("Upload status: {Status}, Error: {Error}, retry {RetryCount} after {Timespan}",
                         uploadResponse.Status,
                         uploadResponse.Error,
                         retryAttempt,

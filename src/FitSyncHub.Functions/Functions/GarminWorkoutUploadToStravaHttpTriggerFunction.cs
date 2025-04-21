@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.Strava.Abstractions;
+using FitSyncHub.Strava.Models;
 using FitSyncHub.Strava.Models.Requests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -128,6 +129,28 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
             {
                 _logger.LogError("Error from strava: {Error}", uploadResponse.Error);
                 return new BadRequestObjectResult(uploadResponse.Error);
+            }
+
+            if (!uploadResponse.ActivityId.HasValue)
+            {
+                _logger.LogError("Strava activityId is null after upload");
+                return new BadRequestObjectResult("Strava activityId is null after upload");
+            }
+
+            var savedActivity = await _stravaRestHttpClient.GetActivity(uploadResponse.ActivityId.Value, cancellationToken);
+            if (savedActivity.SportType != SportType.Workout)
+            {
+                await _stravaRestHttpClient.UpdateActivity(savedActivity.Id!.Value, new UpdatableActivityRequest
+                {
+                    Name = savedActivity.Name,
+                    Description = savedActivity.Description,
+                    Commute = savedActivity.Commute,
+                    Trainer = savedActivity.Trainer,
+                    GearId = savedActivity.GearId,
+                    HideFromHome = savedActivity.HideFromHome,
+                    SportType = SportType.Workout,
+                }, cancellationToken);
+                _logger.LogInformation("Updated sport type from {OldSportType} to Workout", savedActivity.SportType);
             }
         }
 

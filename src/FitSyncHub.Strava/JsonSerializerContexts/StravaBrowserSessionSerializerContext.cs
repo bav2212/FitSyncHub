@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using FitSyncHub.Strava.Models.BrowserSession;
+using FitSyncHub.Strava.Models.Requests;
 
 namespace FitSyncHub.Functions.JsonSerializerContexts;
 
