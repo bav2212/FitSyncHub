@@ -147,7 +147,21 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 
         _logger.LogInformation("Export function completed successfully");
 
-        return new OkObjectResult("Success");
+        intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(Constants.AthleteId, today, lastDay, cancellationToken);
+        _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
+
+        var intervalsIcuFutureGarminEventsOverview = intervalsIcuEvents
+            .Select(x => new
+            {
+                x.Type,
+                x.Name,
+                Date = DateOnly.FromDateTime(x.StartDateLocal)
+            })
+            .Aggregate(new StringBuilder(),
+                (sb, curr) => sb.AppendLine($"{curr.Date}: {curr.Name}"),
+                sb => sb.ToString());
+
+        return new OkObjectResult(intervalsIcuFutureGarminEventsOverview);
     }
 
     private static bool HasSameGeneratedContent(string generatedDescription, string existingDescription)
