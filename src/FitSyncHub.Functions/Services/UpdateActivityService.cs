@@ -68,7 +68,7 @@ public class UpdateActivityService
         }
 
         // temp hide zwift rides
-        var isZwiftRide = activity.Type == Constants.StravaActivityType.Ride
+        var isZwiftRide = activity.Type == Constants.StravaActivityType.VirtualRide
             && activity.DeviceName != Constants.ZwiftDeviceName;
         if (isZwiftRide)
         {
