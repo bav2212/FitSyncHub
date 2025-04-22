@@ -100,7 +100,7 @@ public partial class IntervalsIcuHttpClient
     {
         var requestUri = $"api/v1/activity/{activityId}";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityUpdateRequest);
+        var jsonContent = JsonContent.Create(model, IntervalsActivityUpdateSourceGenerationContext.Default.ActivityUpdateRequest);
         var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);
         response.EnsureSuccessStatusCode();
     }

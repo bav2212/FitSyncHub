@@ -3,8 +3,10 @@ using FitSyncHub.Common;
 using FitSyncHub.Common.Fit;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.Models.Requests;
+using FitSyncHub.GarminConnect.Models.Responses;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.IntervalsICU.HttpClients;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using Microsoft.AspNetCore.Http;
@@ -42,7 +44,6 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         _logger.LogInformation("C# HTTP trigger function processed a request.");
         string? countQueryParameter = req.Query["count"];
         string? dateQueryParameter = req.Query["date"];
-        string? syncWithGarminQueryParameter = req.Query["syncWithGarmin"];
 
         if (countQueryParameter is null)
         {
@@ -103,12 +104,63 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
                 = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
         }
 
-        if (bool.TryParse(syncWithGarminQueryParameter, out var syncWithGarmin) && syncWithGarmin)
-        {
-            await SyncWithGarmin(date, activitySummary, cancellationToken);
-        }
+        var garminActivity = await UpdateGarminSummaryWithIntervalsData(date, activitySummary, cancellationToken);
+        var intervalsActivities = await GetRideActivities(date, cancellationToken);
+        await UpdateIntervalsIcuActivitiesWithGarminData(garminActivity, intervalsActivities, cancellationToken);
 
         return new OkObjectResult("Success");
+    }
+
+    private async Task UpdateIntervalsIcuActivitiesWithGarminData(
+        GarminActivityResponse? garminActivity,
+        IReadOnlyCollection<ActivityResponse> intervalsActivities,
+        CancellationToken cancellationToken)
+    {
+        if (garminActivity is null)
+        {
+            return;
+        }
+
+        var garminRpe = garminActivity.SummaryDTO?.DirectWorkoutRpe;
+        var garminFeel = garminActivity.SummaryDTO?.DirectWorkoutFeel;
+
+        if (!garminRpe.HasValue || !garminFeel.HasValue)
+        {
+            _logger.LogWarning("Garmin activity does not have RPE or Feel values");
+            return;
+        }
+
+        var (intervalsRpe, intervalsFeel) = ConvertGarminValuesToIntervalsIcu(garminRpe.Value, garminFeel.Value);
+
+        foreach (var intervalsActivity in intervalsActivities)
+        {
+            if (intervalsRpe != intervalsActivity.IcuRpe || intervalsFeel != intervalsActivity.Feel)
+            {
+                var updateRequest = new ActivityUpdateRequest
+                {
+                    IcuRpe = intervalsRpe,
+                    Feel = intervalsFeel,
+                };
+
+                await _intervalsIcuHttpClient.UpdateActivity(intervalsActivity.Id, updateRequest, cancellationToken);
+            }
+        }
+
+        static (int rpe, int feel) ConvertGarminValuesToIntervalsIcu(int garminRpe, int garminFeel)
+        {
+            var rpe = garminRpe / 10;
+            var feel = garminFeel switch
+            {
+                0 => 5,
+                25 => 4,
+                50 => 3,
+                75 => 2,
+                100 => 1,
+                _ => throw new NotImplementedException(),
+            };
+
+            return (rpe, feel);
+        }
     }
 
     private async Task<IReadOnlyCollection<ActivityResponse>> GetRideActivities(DateOnly date, CancellationToken cancellationToken)
@@ -210,8 +262,8 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             return ActivitySubType.None;
         }
 
-        var raceActivityStartDate = DateTime.Parse(raceActivity.StartDate);
-        var activityStartDate = DateTime.Parse(activity.StartDate);
+        var raceActivityStartDate = raceActivity.StartDate;
+        var activityStartDate = activity.StartDate;
 
         if (raceActivityStartDate == activityStartDate)
         {
@@ -259,7 +311,7 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
         return activitiesWithNewTss;
     }
 
-    private async Task SyncWithGarmin(
+    private async Task<GarminActivityResponse?> UpdateGarminSummaryWithIntervalsData(
         DateOnly date,
         ActivitySummary activitySummary,
         CancellationToken cancellationToken)
@@ -283,12 +335,14 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             _logger.LogWarning("Skip syncing with Garmin, no Distance or Elevation. Distance: {Distance}, Elevation ascent: {ElevationAscent}",
                 activitySummary.Distance,
                 activitySummary.ElevationAscent);
-            return;
+            return default;
         }
+
+        var activityId = todaysGarminActivity.ActivityId;
 
         var updateModel = new GarminActivityUpdateRequest
         {
-            ActivityId = todaysGarminActivity.ActivityId,
+            ActivityId = activityId,
             ActivityName = activitySummary.Name,
             Description = activitySummary.Description,
             SummaryDTO = new GarminActivityUpdateSummary
@@ -298,9 +352,11 @@ public class MergeIntervalsICUActivitiesHttpTriggerFunction
             }
         };
 
-        _logger.LogInformation("Updating garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
+        _logger.LogInformation("Updating garmin activity with Id = {Id}", activityId);
         await _garminConnectHttpClient.UpdateActivity(updateModel, cancellationToken);
-        _logger.LogInformation("Updated garmin activity with Id = {Id}", todaysGarminActivity.ActivityId);
+        _logger.LogInformation("Updated garmin activity with Id = {Id}", activityId);
+
+        return await _garminConnectHttpClient.GetActivity(activityId, cancellationToken);
     }
 
     private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, double Tss);

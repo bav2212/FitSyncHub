@@ -1,29 +1,21 @@
-﻿using System.Text.Json.Serialization;
+﻿using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
 public class ActivityUpdateRequest
 {
-    public required ActivitySubType SubType { get; set; }
-    public required int? IcuTrainingLoad { get; set; }
-    public required bool? Trainer { get; set; }
-    public required string Name { get; set; }
-    public required string Description { get; set; }
-    public required string Type { get; set; }
-    public required GearUpdateRequest Gear { get; set; }
-}
-
-[JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivitySubType>))]
-public enum ActivitySubType
-{
-    None,
-    Commute,
-    Warmup,
-    Cooldown,
-    Race,
+    public ActivitySubType? SubType { get; init; }
+    public int? IcuTrainingLoad { get; init; }
+    public bool? Trainer { get; init; }
+    public string? Name { get; init; }
+    public string? Description { get; init; }
+    public string? Type { get; init; }
+    public GearUpdateRequest? Gear { get; init; }
+    public int? IcuRpe { get; init; }
+    public int? Feel { get; init; }
 }
 
 public class GearUpdateRequest
 {
-    public required string Id { get; set; }
+    public required string Id { get; init; }
 }

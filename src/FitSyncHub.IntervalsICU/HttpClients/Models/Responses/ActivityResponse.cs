@@ -33,7 +33,7 @@ public record ActivityResponse
     public required int? CarbsUsed { get; init; }
     public required string Name { get; init; }
     public required string Description { get; init; }
-    public required string StartDate { get; init; }
+    public required DateTime StartDate { get; init; }
     public required double? Distance { get; init; }
     public required double? IcuDistance { get; init; }
     public required int? MovingTime { get; init; }
