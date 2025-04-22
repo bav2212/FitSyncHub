@@ -67,7 +67,7 @@ internal partial class GarminAuthenticationService : IGarminAuthenticationServic
         var responseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);
         var content = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
 
-        return JsonSerializer.Deserialize(content, GarminConnectSnakeCaseSerializerContext.Default.ConsumerCredentials)
+        return JsonSerializer.Deserialize(content, GarminConnectOAuthSerializerContext.Default.ConsumerCredentials)
             ?? throw new InvalidOperationException("Failed to deserialize ConsumerCredentials from Garmin response.");
     }
 
@@ -314,7 +314,7 @@ internal partial class GarminAuthenticationService : IGarminAuthenticationServic
         var responseMessage = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
         var content = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
-        return JsonSerializer.Deserialize(content, GarminConnectSnakeCaseSerializerContext.Default.OAuth2Token)
+        return JsonSerializer.Deserialize(content, GarminConnectOAuthSerializerContext.Default.OAuth2Token)
             ?? throw new InvalidOperationException("Failed to deserialize OAuth2Token from Garmin response.");
     }
 

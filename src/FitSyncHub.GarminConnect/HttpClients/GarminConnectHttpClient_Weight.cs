@@ -18,7 +18,7 @@ public partial class GarminConnectHttpClient
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return JsonSerializer.Deserialize(content, GarminConnectCamelCaseSerializerContext.Default.GarminWeightResponse)!;
+        return JsonSerializer.Deserialize(content, GarminConnectWeightSerializerContext.Default.GarminWeightResponse)!;
     }
 
     public async Task SetUserWeight(
@@ -36,7 +36,7 @@ public partial class GarminConnectHttpClient
         const string Url = "/userprofile-service/userprofile/user-settings";
 
         var response = await _httpClient.PutAsJsonAsync(Url, body,
-            GarminConnectCamelCaseSerializerContext.Default.GarminSetUserWeightRequest, cancellationToken);
+            GarminConnectWeightSerializerContext.Default.GarminSetUserWeightRequest, cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 }

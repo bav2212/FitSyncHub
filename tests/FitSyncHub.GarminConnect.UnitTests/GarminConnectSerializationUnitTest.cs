@@ -7,11 +7,11 @@ public class GarminConnectSerializationUnitTest
 {
     [Theory]
     [ClassData(typeof(GarminActivitiesTestData))]
-    public async Task GarminActivityResponse_Deserialization_WorkCorrectly(string garminActivityFilePath)
+    public async Task GarminActivitySearchResponse_Deserialization_WorkCorrectly(string garminActivityFilePath)
     {
         var content = await File.ReadAllTextAsync(garminActivityFilePath);
 
-        JsonSerializer.Deserialize(content, GarminConnectCamelCaseSerializerContext.Default.GarminActivityResponse);
+        JsonSerializer.Deserialize(content, GarminConnectActivityListSerializerContext.Default.GarminActivitySearchResponse);
     }
 
     private class GarminActivitiesTestData : TheoryData<string>
