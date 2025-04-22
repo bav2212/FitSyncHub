@@ -19,18 +19,18 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 {
     private const string IntervalsIcuEventTagGarminConnect = "GarminConnect";
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
-    private readonly GarminConnectToIntervalsIcuWorkoutStepConverterInitializer _garminConnectToIntervalsIcuWorkoutStepConverterInitializer;
+    private readonly GarminConnectToIntervalsIcuWorkoutConvertionService _convertionService;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly ILogger<GarminWorkoutToIntervalsICUExporterHttpTriggerFunction> _logger;
 
     public GarminWorkoutToIntervalsICUExporterHttpTriggerFunction(
         GarminConnectHttpClient garminConnectHttpClient,
-        GarminConnectToIntervalsIcuWorkoutStepConverterInitializer garminConnectToIntervalsIcuWorkoutStepConverterInitializer,
+        GarminConnectToIntervalsIcuWorkoutConvertionService convertionService,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
         ILogger<GarminWorkoutToIntervalsICUExporterHttpTriggerFunction> logger)
     {
         _garminConnectHttpClient = garminConnectHttpClient;
-        _garminConnectToIntervalsIcuWorkoutStepConverterInitializer = garminConnectToIntervalsIcuWorkoutStepConverterInitializer;
+        _convertionService = convertionService;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
         _logger = logger;
     }
@@ -88,9 +88,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
             var workoutResponse = await _garminConnectHttpClient.GetWorkout(workoutId, cancellationToken);
             _logger.LogInformation("Retrieved Garmin workout details: {workoutId}", workoutId);
 
-            var converter = await _garminConnectToIntervalsIcuWorkoutStepConverterInitializer
-                .GetConverter(workoutResponse, cancellationToken);
-            var icuGroups = GarminConnectToIntervalsIcuWorkoutConverter.Convert(workoutResponse, converter);
+            var icuGroups = await _convertionService.Convert(workoutResponse, cancellationToken);
             var intervalsIcuWorkoutDescription = IntervalsIcuConverter.ConvertToIntervalsIcuFormat(icuGroups);
 
             var intervalsIcuEventStructure = IntervalsICUDescriptionHelper

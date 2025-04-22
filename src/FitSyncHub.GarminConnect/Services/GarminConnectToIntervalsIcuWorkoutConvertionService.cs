@@ -1,15 +1,27 @@
 ﻿using FitSyncHub.Common.Applications.IntervalsIcu.Models;
 using FitSyncHub.Common.Extensions;
+using FitSyncHub.GarminConnect.Converters;
 using FitSyncHub.GarminConnect.Models.Responses.Workout;
 
-namespace FitSyncHub.GarminConnect.Converters;
+namespace FitSyncHub.GarminConnect.Services;
 
-public static class GarminConnectToIntervalsIcuWorkoutConverter
+public class GarminConnectToIntervalsIcuWorkoutConvertionService
 {
-    public static List<IntervalsIcuWorkoutGroup> Convert(
-        WorkoutResponse workout,
-        IGarminConnectToIntervalsIcuWorkoutStepConverter converter)
+    private readonly Func<string, IGarminConnectToIntervalsIcuWorkoutStepConverterInitializer> _converterInitializerAccessor;
+
+    public GarminConnectToIntervalsIcuWorkoutConvertionService(
+        Func<string, IGarminConnectToIntervalsIcuWorkoutStepConverterInitializer> converterInitializerAccessor)
     {
+        _converterInitializerAccessor = converterInitializerAccessor;
+    }
+
+    public async Task<List<IntervalsIcuWorkoutGroup>> Convert(
+        WorkoutResponse workout,
+        CancellationToken cancellationToken)
+    {
+        var converter = await _converterInitializerAccessor(workout.SportType.SportTypeKey)
+            .Initialize(cancellationToken);
+
         List<IntervalsIcuWorkoutGroup> result = [];
 
         foreach (var step in workout.WorkoutSegments[0].WorkoutSteps)

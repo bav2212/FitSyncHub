@@ -15,7 +15,15 @@ public static class GarminConnectModule
         this IServiceCollection services,
         string garminAuthOptionsPath)
     {
-        services.AddScoped<GarminConnectToIntervalsIcuWorkoutStepConverterInitializer>();
+        services.AddScoped<GarminConnectToIntervalsIcuRideWorkoutStepConverterInitializer>();
+        services.AddScoped<GarminConnectToIntervalsIcuStrengthWorkoutStepConverterInitializer>();
+        services.AddScoped<Func<string, IGarminConnectToIntervalsIcuWorkoutStepConverterInitializer>>(sp => stepKey => stepKey switch
+        {
+            "cycling" => sp.GetRequiredService<GarminConnectToIntervalsIcuRideWorkoutStepConverterInitializer>(),
+            "strength_training" => sp.GetRequiredService<GarminConnectToIntervalsIcuStrengthWorkoutStepConverterInitializer>(),
+            _ => throw new NotImplementedException($"No converter found for step key: {stepKey}")
+        });
+        services.AddScoped<GarminConnectToIntervalsIcuWorkoutConvertionService>();
 
         services.AddOptions<GarminConnectAuthOptions>()
             .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(garminAuthOptionsPath).Bind(settings))
