@@ -1,0 +1,101 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34607.119
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Functions", "src\FitSyncHub.Functions\FitSyncHub.Functions.csproj", "{A1BB8BDF-F568-403B-BF62-235DB85BFBE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.IntervalsICU", "src\FitSyncHub.IntervalsICU\FitSyncHub.IntervalsICU.csproj", "{71732C2B-F039-467A-80A0-0F3CC4BF84B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.ZwiftInsider", "src\FitSyncHub.ZwiftInsider\FitSyncHub.ZwiftInsider.csproj", "{2FA9102A-57C3-4566-8ED1-28C33886B8FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Strava", "src\FitSyncHub.Strava\FitSyncHub.Strava.csproj", "{6583EF1B-7D25-4856-AADB-450E16BF437C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Common", "src\FitSyncHub.Common\FitSyncHub.Common.csproj", "{6B06EE9F-06CF-4CC3-AACB-587A2130A2F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.GarminConnect", "src\FitSyncHub.GarminConnect\FitSyncHub.GarminConnect.csproj", "{D57117FD-E51E-4548-B198-E30548207E57}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4F2169E7-30C9-4D10-A756-E8C787FED0DB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Common.UnitTests", "tests\FitSyncHub.Common.UnitTests\FitSyncHub.Common.UnitTests.csproj", "{499E7CBD-D667-E64B-E115-FACA24FC6D53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.GarminConnect.UnitTests", "tests\FitSyncHub.GarminConnect.UnitTests\FitSyncHub.GarminConnect.UnitTests.csproj", "{0305D233-CFB8-9FDC-A126-AF28AD30EADF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Zwift", "src\FitSyncHub.Zwift\FitSyncHub.Zwift.csproj", "{8A32E800-16AE-3807-1AD4-3A5BE867DB58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.IntervalsIcu.UnitTests", "tests\FitSyncHub.IntervalsIcu.UnitTests\FitSyncHub.IntervalsIcu.UnitTests.csproj", "{C40A8E26-61F9-D80C-3E44-399DB921CBF7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1BB8BDF-F568-403B-BF62-235DB85BFBE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1BB8BDF-F568-403B-BF62-235DB85BFBE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1BB8BDF-F568-403B-BF62-235DB85BFBE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1BB8BDF-F568-403B-BF62-235DB85BFBE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71732C2B-F039-467A-80A0-0F3CC4BF84B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71732C2B-F039-467A-80A0-0F3CC4BF84B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71732C2B-F039-467A-80A0-0F3CC4BF84B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71732C2B-F039-467A-80A0-0F3CC4BF84B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FA9102A-57C3-4566-8ED1-28C33886B8FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FA9102A-57C3-4566-8ED1-28C33886B8FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FA9102A-57C3-4566-8ED1-28C33886B8FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FA9102A-57C3-4566-8ED1-28C33886B8FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6583EF1B-7D25-4856-AADB-450E16BF437C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6583EF1B-7D25-4856-AADB-450E16BF437C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6583EF1B-7D25-4856-AADB-450E16BF437C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6583EF1B-7D25-4856-AADB-450E16BF437C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B06EE9F-06CF-4CC3-AACB-587A2130A2F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B06EE9F-06CF-4CC3-AACB-587A2130A2F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B06EE9F-06CF-4CC3-AACB-587A2130A2F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B06EE9F-06CF-4CC3-AACB-587A2130A2F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D57117FD-E51E-4548-B198-E30548207E57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D57117FD-E51E-4548-B198-E30548207E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D57117FD-E51E-4548-B198-E30548207E57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D57117FD-E51E-4548-B198-E30548207E57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{499E7CBD-D667-E64B-E115-FACA24FC6D53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{499E7CBD-D667-E64B-E115-FACA24FC6D53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{499E7CBD-D667-E64B-E115-FACA24FC6D53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{499E7CBD-D667-E64B-E115-FACA24FC6D53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0305D233-CFB8-9FDC-A126-AF28AD30EADF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0305D233-CFB8-9FDC-A126-AF28AD30EADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0305D233-CFB8-9FDC-A126-AF28AD30EADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0305D233-CFB8-9FDC-A126-AF28AD30EADF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C40A8E26-61F9-D80C-3E44-399DB921CBF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C40A8E26-61F9-D80C-3E44-399DB921CBF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C40A8E26-61F9-D80C-3E44-399DB921CBF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C40A8E26-61F9-D80C-3E44-399DB921CBF7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A1BB8BDF-F568-403B-BF62-235DB85BFBE6} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
+		{71732C2B-F039-467A-80A0-0F3CC4BF84B1} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
+		{2FA9102A-57C3-4566-8ED1-28C33886B8FB} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
+		{6583EF1B-7D25-4856-AADB-450E16BF437C} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
+		{6B06EE9F-06CF-4CC3-AACB-587A2130A2F5} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
+		{D57117FD-E51E-4548-B198-E30548207E57} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
+		{499E7CBD-D667-E64B-E115-FACA24FC6D53} = {4F2169E7-30C9-4D10-A756-E8C787FED0DB}
+		{0305D233-CFB8-9FDC-A126-AF28AD30EADF} = {4F2169E7-30C9-4D10-A756-E8C787FED0DB}
+		{8A32E800-16AE-3807-1AD4-3A5BE867DB58} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
+		{C40A8E26-61F9-D80C-3E44-399DB921CBF7} = {4F2169E7-30C9-4D10-A756-E8C787FED0DB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7625267B-BDC8-42BC-A028-0D457C18D56A}
+	EndGlobalSection
+EndGlobal

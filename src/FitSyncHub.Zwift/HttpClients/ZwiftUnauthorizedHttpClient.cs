@@ -1,0 +1,25 @@
+﻿using FitSyncHub.Zwift.HttpClients.Models.Requests.Activities;
+
+namespace FitSyncHub.Zwift.HttpClients;
+
+public class ZwiftUnauthorizedHttpClient
+{
+    private readonly HttpClient _httpClient;
+
+    public ZwiftUnauthorizedHttpClient(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
+
+    public async Task<Stream> DownloadActivityFitFile(
+        ZwiftDownloadActivityRequest model,
+        CancellationToken cancellationToken)
+    {
+        var fitFileUrl = $"https://{model.FitFileBucket}.s3.amazonaws.com/{model.FitFileKey}";
+
+        var response = await _httpClient.GetAsync(fitFileUrl, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadAsStreamAsync(cancellationToken);
+    }
+}

@@ -1,0 +1,177 @@
+{
+  "activityId": 18691864708,
+  "activityUUID": { "uuid": "495e9e37-8b2b-4634-a00c-9141a903e9eb" },
+  "activityName": "Cipressa climb + pacer group",
+  "userProfileId": 121857768,
+  "isMultiSportParent": false,
+  "activityTypeDTO": {
+    "typeId": 25,
+    "typeKey": "indoor_cycling",
+    "parentTypeId": 2,
+    "isHidden": false,
+    "restricted": false,
+    "trimmable": true
+  },
+  "eventTypeDTO": {
+    "typeId": 9,
+    "typeKey": "uncategorized",
+    "sortOrder": 10
+  },
+  "accessControlRuleDTO": {
+    "typeId": 3,
+    "typeKey": "subscribers"
+  },
+  "timeZoneUnitDTO": {
+    "unitId": 473,
+    "unitKey": "Europe/Athens",
+    "factor": 0.0,
+    "timeZone": "Europe/Athens"
+  },
+  "metadataDTO": {
+    "isOriginal": false,
+    "deviceApplicationInstallationId": 991274,
+    "agentApplicationInstallationId": null,
+    "agentString": null,
+    "fileFormat": {
+      "formatId": 7,
+      "formatKey": "fit"
+    },
+    "associatedCourseId": null,
+    "lastUpdateDate": "2025-04-22T14:36:06.0",
+    "uploadedDate": "2025-03-31T17:54:35.0",
+    "videoUrl": null,
+    "hasPolyline": false,
+    "hasChartData": true,
+    "hasHrTimeInZones": true,
+    "hasPowerTimeInZones": true,
+    "userInfoDto": {
+      "userProfilePk": 121857768,
+      "displayname": "2f279d18-8795-4c3e-bc93-2ba8b3250bf9",
+      "fullname": "Andrii Bondarchuk",
+      "profileImageUrlLarge": "https://s3.amazonaws.com/garmin-connect-prod/profile_images/1c4f33c4-a427-4b0e-b4bd-656ee98c403c-prof.png",
+      "profileImageUrlMedium": "https://s3.amazonaws.com/garmin-connect-prod/profile_images/1c4f33c4-a427-4b0e-b4bd-656ee98c403c-prfr.png",
+      "profileImageUrlSmall": "https://s3.amazonaws.com/garmin-connect-prod/profile_images/1c4f33c4-a427-4b0e-b4bd-656ee98c403c-prth.png",
+      "userPro": false
+    },
+    "childIds": [],
+    "childActivityTypes": [],
+    "sensors": [
+      {
+        "manufacturer": "POLAR_ELECTRO",
+        "serialNumber": 701632868,
+        "sourceType": "ANTPLUS",
+        "antplusDeviceType": "HEART_RATE",
+        "softwareVersion": 1.0,
+        "batteryStatus": "OK",
+        "batteryLevel": 100
+      },
+      {
+        "manufacturer": "TACX",
+        "serialNumber": 15448,
+        "sku": "1",
+        "fitProductNumber": 1,
+        "sourceType": "ANTPLUS",
+        "antplusDeviceType": "BIKE_POWER",
+        "softwareVersion": 0.7
+      }
+    ],
+    "activityImages": [],
+    "manufacturer": "GARMIN",
+    "diveNumber": null,
+    "lapCount": 1,
+    "associatedWorkoutId": null,
+    "isAtpActivity": null,
+    "deviceMetaDataDTO": {
+      "deviceId": "3502886942",
+      "deviceTypePk": 37162,
+      "deviceVersionPk": 991274
+    },
+    "hasIntensityIntervals": false,
+    "hasSplits": false,
+    "eBikeMaxAssistModes": null,
+    "eBikeBatteryUsage": null,
+    "eBikeBatteryRemaining": null,
+    "eBikeAssistModeInfoDTOList": null,
+    "hasRunPowerWindData": null,
+    "calendarEventInfo": null,
+    "groupRideUUID": null,
+    "hasHeatMap": false,
+    "trimmed": false,
+    "personalRecord": false,
+    "autoCalcCalories": false,
+    "favorite": false,
+    "gcj02": false,
+    "runPowerWindDataEnabled": null,
+    "manualActivity": false,
+    "elevationCorrected": false
+  },
+  "summaryDTO": {
+    "startTimeLocal": "2025-03-31T18:10:13.0",
+    "startTimeGMT": "2025-03-31T15:10:13.0",
+    "distance": 95538.0,
+    "duration": 9806.465,
+    "movingDuration": 0.0,
+    "elapsedDuration": 9806.465,
+    "elevationGain": 577.0,
+    "averageSpeed": 9.742348542517615,
+    "averageMovingSpeed": 0.0,
+    "calories": 1951.0,
+    "bmrCalories": 236.0,
+    "averageHR": 134.0,
+    "maxHR": 158.0,
+    "minHR": 58.0,
+    "averageBikeCadence": 84.0,
+    "maxBikeCadence": 138.0,
+    "averagePower": 175.0,
+    "maxPower": 1142.0,
+    "maxPowerTwentyMinutes": 213.98916666666668,
+    "minPower": 0.0,
+    "normalizedPower": 194.0,
+    "functionalThresholdPower": 286.0,
+    "totalWork": 409.06725982214886,
+    "trainingEffect": 4.0,
+    "anaerobicTrainingEffect": 2.200000047683716,
+    "aerobicTrainingEffectMessage": "HIGHLY_IMPROVING_AEROBIC_ENDURANCE_10",
+    "anaerobicTrainingEffectMessage": "MAINTAINING_FAST_FORCE_PRODUCTION_6",
+    "trainingStressScore": 124.69999694824219,
+    "intensityFactor": 0.6779999732971191,
+    "totalNumberOfStrokes": 13093,
+    "avgVerticalSpeed": 5.883873546685783,
+    "waterEstimated": 2361.0,
+    "minRespirationRate": 11.5600004196167,
+    "maxRespirationRate": 45.310001373291016,
+    "avgRespirationRate": 31.479999542236328,
+    "trainingEffectLabel": "AEROBIC_BASE",
+    "activityTrainingLoad": 220.23403930664062,
+    "minActivityLapDuration": 9806.465,
+    "moderateIntensityMinutes": 17,
+    "vigorousIntensityMinutes": 137,
+    "beginPotentialStamina": 100.0,
+    "endPotentialStamina": 68.0,
+    "minAvailableStamina": 62.0,
+    "avgElapsedDurationVerticalSpeed": 0.05883873546685783,
+    "differenceBodyBattery": -30
+  },
+  "connectIQMeasurements": [
+    {
+      "appID": "6957fe68-83fe-4ed6-8613-413f70624bb5",
+      "developerFieldNumber": 7,
+      "value": "36.91999816894531"
+    },
+    {
+      "appID": "6957fe68-83fe-4ed6-8613-413f70624bb5",
+      "developerFieldNumber": 5,
+      "value": "38.19624710083008"
+    },
+    {
+      "appID": "6957fe68-83fe-4ed6-8613-413f70624bb5",
+      "developerFieldNumber": 26,
+      "value": "127.0"
+    },
+    {
+      "appID": "6957fe68-83fe-4ed6-8613-413f70624bb5",
+      "developerFieldNumber": 6,
+      "value": "38.650001525878906"
+    }
+  ]
+}
