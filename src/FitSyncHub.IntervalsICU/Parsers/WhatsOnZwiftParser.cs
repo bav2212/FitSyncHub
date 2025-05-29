@@ -59,25 +59,26 @@ public static class WhatsOnZwiftParser
     {
         foreach (var (index, workoutStep) in workoutSteps.Index())
         {
-            if (index == 0)
+            var workoutStepSegments = workoutStep.Split(',', StringSplitOptions.TrimEntries);
+            var isSingleWorkoutStep = workoutStepSegments.Length == 1;
+
+            if (index == 0 && isSingleWorkoutStep)
             {
                 yield return ParseRideWorkoutStep(WorkoutStepType.Warmup, workoutStep);
                 continue;
             }
 
-            if (index == workoutSteps.Count - 1)
+            if (index == workoutSteps.Count - 1 && isSingleWorkoutStep)
             {
                 yield return ParseRideWorkoutStep(WorkoutStepType.Cooldown, workoutStep);
                 continue;
             }
 
-            var lineSegments = workoutStep.Split(',', StringSplitOptions.TrimEntries);
-
             yield return new RepeatableWorkoutStep
             {
                 Type = WorkoutStepType.Interval,
                 NumberOfIterations = GetRepeatCount(workoutStep),
-                Items = [.. lineSegments
+                Items = [.. workoutStepSegments
                     .Select(x => ParseRideWorkoutStep(WorkoutStepType.Interval, x))
                     .Cast<WorkoutStep>()]
             };
