@@ -12,13 +12,13 @@ public record GarminActivitySearchResponse
     public required EventType EventType { get; init; }
     public string? Comments { get; init; }
     public string? ParentId { get; init; }
-    public required double Distance { get; init; }
+    public double? Distance { get; init; }
     public required double Duration { get; init; }
     public required double ElapsedDuration { get; init; }
     public required double MovingDuration { get; init; }
     public double? ElevationGain { get; init; }
     public double? ElevationLoss { get; init; }
-    public required double AverageSpeed { get; init; }
+    public double? AverageSpeed { get; init; }
     public double? MaxSpeed { get; init; }
     public double? StartLatitude { get; init; }
     public double? StartLongitude { get; init; }
