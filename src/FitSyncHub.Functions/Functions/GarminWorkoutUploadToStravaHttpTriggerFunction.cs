@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using System.Text;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Strava.Models;
@@ -77,6 +78,8 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
             return new BadRequestObjectResult($"Found {activities.Count} todays activities, but specified {count} in request");
         }
 
+        var sb = new StringBuilder();
+
         foreach (var workoutActivity in activities)
         {
             var activityId = workoutActivity.ActivityId;
@@ -128,13 +131,15 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
             if (uploadResponse.Error is not null)
             {
                 _logger.LogError("Error from strava: {Error}", uploadResponse.Error);
-                return new BadRequestObjectResult(uploadResponse.Error);
+                sb.AppendLine($"Activity '{activityName}', error from strava: {uploadResponse.Error}");
+                continue;
             }
 
             if (!uploadResponse.ActivityId.HasValue)
             {
                 _logger.LogError("Strava activityId is null after upload");
-                return new BadRequestObjectResult("Strava activityId is null after upload");
+                sb.AppendLine($"Activity '{activityName}', activityId is null after upload");
+                continue;
             }
 
             var savedActivity = await _stravaHttpClient.GetActivity(uploadResponse.ActivityId.Value, cancellationToken);
@@ -146,8 +151,9 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
                 }, cancellationToken);
                 _logger.LogInformation("Updated sport type from {OldSportType} to Workout", savedActivity.SportType);
             }
+            sb.AppendLine($"Activity '{activityName}' uploaded");
         }
 
-        return new OkObjectResult("Success");
+        return new OkObjectResult(sb.ToString());
     }
 }
