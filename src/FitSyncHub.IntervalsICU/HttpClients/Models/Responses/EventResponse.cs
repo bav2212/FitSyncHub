@@ -7,7 +7,7 @@ public record EventResponse
     public required string Type { get; init; }
     public required string Name { get; init; }
     public required string? Description { get; init; }
-    public required bool Indoor { get; init; }
+    public bool? Indoor { get; init; }
     public required List<string>? Tags { get; init; }
     public string? PairedActivityId { get; init; }
     public long? IcuTrainingLoad { get; init; }
