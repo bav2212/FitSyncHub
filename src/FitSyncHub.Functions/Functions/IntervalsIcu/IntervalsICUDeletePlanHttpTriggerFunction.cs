@@ -6,20 +6,20 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
-public class IntervalsICUHttpTriggerFunction
+public class IntervalsICUDeletePlanHttpTriggerFunction
 {
     private readonly IntervalsIcuDeletePlanService _intervalsIcuDeletePlanService;
-    private readonly ILogger<IntervalsICUHttpTriggerFunction> _logger;
+    private readonly ILogger<IntervalsICUDeletePlanHttpTriggerFunction> _logger;
 
-    public IntervalsICUHttpTriggerFunction(
+    public IntervalsICUDeletePlanHttpTriggerFunction(
         IntervalsIcuDeletePlanService intervalsIcuDeletePlanService,
-        ILogger<IntervalsICUHttpTriggerFunction> logger)
+        ILogger<IntervalsICUDeletePlanHttpTriggerFunction> logger)
     {
         _intervalsIcuDeletePlanService = intervalsIcuDeletePlanService;
         _logger = logger;
     }
 
-    [Function(nameof(IntervalsICUHttpTriggerFunction))]
+    [Function(nameof(IntervalsICUDeletePlanHttpTriggerFunction))]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "intervals-icu-delete-plan/{folderId}")]
         HttpRequest req,
