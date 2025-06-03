@@ -323,7 +323,7 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
         var garminActivities = await _garminConnectHttpClient.GetActivitiesByDate(
             new DateTime(date, TimeOnly.MinValue),
             new DateTime(date, TimeOnly.MaxValue),
-            null,
+            "cycling",
             cancellationToken);
         _logger.LogInformation("Got {Count} activities from Garmin", garminActivities.Count);
         if (garminActivities.Count != 1)
