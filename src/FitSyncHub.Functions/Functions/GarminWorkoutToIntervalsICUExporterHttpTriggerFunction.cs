@@ -44,6 +44,11 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "export-garmin-workouts-to-intervals")] HttpRequest req,
        CancellationToken cancellationToken)
     {
+        _ = req;
+
+        string? dateQueryParameter = req.Query["date"];
+        var date = DateOnly.TryParse(dateQueryParameter, out var dateParsed) ? dateParsed : default;
+
         _logger.LogInformation("Starting Garmin to Intervals.icu export function");
 
         var ftp = await _garminConnectHttpClient.GetCyclingFtp(cancellationToken: cancellationToken);
@@ -55,11 +60,11 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         var trainingPlan = await _garminConnectHttpClient.GetTrainingPlan(trainingPlanId, cancellationToken);
         _logger.LogInformation("Retrieved training plan {TrainingPlan}", trainingPlan);
 
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        _logger.LogInformation("Today's date: {Today}", today);
 
         var garminTrainingPlanTaskList = trainingPlan.TaskList
             .Where(x => x.TaskWorkout.SportType != null && x.TaskWorkout.AdaptiveCoachingWorkoutStatus == "NOT_COMPLETE")
+            // filter by date if provided
+            .Where(x => date == default || x.CalendarDate == date)
             .ToList();
 
         _logger.LogInformation("Found {Count} incomplete tasks in training plan", garminTrainingPlanTaskList.Count);
@@ -70,11 +75,14 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
             return new BadRequestObjectResult("No incomplete activities");
         }
 
-        var lastDay = garminTrainingPlanTaskList.MaxBy(x => x.CalendarDate)!.CalendarDate;
+        var garminTrainingPlanTaskListDates = garminTrainingPlanTaskList.Select(x => x.CalendarDate).Order().ToArray();
+
+        var firstDay = garminTrainingPlanTaskListDates[0];
+        var lastDay = garminTrainingPlanTaskListDates[^1];
         _logger.LogInformation("Last calendar day among tasks {LastDay}", lastDay);
 
         var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(_athleteId,
-            new ListEventsQueryParams(today, lastDay), cancellationToken);
+            new ListEventsQueryParams(firstDay, lastDay), cancellationToken);
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
         var intervalsIcuEventsMapping = intervalsIcuEvents
@@ -162,7 +170,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         _logger.LogInformation("Export function completed successfully");
 
         intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(_athleteId,
-            new ListEventsQueryParams(today, lastDay), cancellationToken);
+            new ListEventsQueryParams(firstDay, lastDay), cancellationToken);
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
         var intervalsIcuFutureGarminEventsOverview = intervalsIcuEvents
