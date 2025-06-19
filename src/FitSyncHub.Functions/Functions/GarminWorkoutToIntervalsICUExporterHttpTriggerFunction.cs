@@ -60,11 +60,10 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         var trainingPlan = await _garminConnectHttpClient.GetTrainingPlan(trainingPlanId, cancellationToken);
         _logger.LogInformation("Retrieved training plan {TrainingPlan}", trainingPlan);
 
-
         var garminTrainingPlanTaskList = trainingPlan.TaskList
-            .Where(x => x.TaskWorkout.SportType != null && x.TaskWorkout.AdaptiveCoachingWorkoutStatus == "NOT_COMPLETE")
-            // filter by date if provided
-            .Where(x => date == default || x.CalendarDate == date)
+            .Where(x => x.TaskWorkout.SportType != null && x.TaskWorkout.AdaptiveCoachingWorkoutStatus == "NOT_COMPLETE"
+                // filter by date if provided
+                && (date == default || x.CalendarDate == date))
             .ToList();
 
         _logger.LogInformation("Found {Count} incomplete tasks in training plan", garminTrainingPlanTaskList.Count);
