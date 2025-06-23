@@ -122,9 +122,16 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
 
 internal static class MacroNutrientsCalculator
 {
+    // 65% carbs 20% fats 14% protein 1% spices/additives
+    // https://www.cyclingapps.net/blog/in-search-of-the-optimal-diet-for-longevity/
     private const float CarbsRatio = 0.65f;
-    private const float ProteinRatio = 0.18f;
-    private const float FatRatio = 0.17f;
+    private const float ProteinRatio = 0.15f;
+    private const float FatRatio = 0.20f;
+
+    // trainerroad .com recommends 65% carbs, 17% fats, 18% protein
+    //private const float CarbsRatio = 0.65f;
+    //private const float ProteinRatio = 0.18f;
+    //private const float FatRatio = 0.17f;
 
     private const int CarbsEnergyCapacity = 4;
     private const int ProteinEnergyCapacity = 4;
