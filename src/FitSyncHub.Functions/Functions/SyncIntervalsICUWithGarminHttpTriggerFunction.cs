@@ -199,8 +199,8 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
         ActivityResponse? raceActivity = default;
         if (pairedEvent != null && IsRaceEvent(pairedEvent))
         {
-            // activity with most tss is race
-            raceActivity = activities.MaxBy(x => x.IcuTrainingLoad);
+            // activity with most intensity is race
+            raceActivity = activities.MaxBy(x => x.IcuIntensity);
         }
 
         var newTssForActivities = CalculateNewTssForActivities(activities, mergedFitFile);
