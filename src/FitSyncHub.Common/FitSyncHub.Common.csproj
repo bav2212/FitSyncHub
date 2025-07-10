@@ -8,9 +8,9 @@
 
   <ItemGroup>
       <PackageReference Include="Garmin.FIT.Sdk" Version="21.171.0" />
-      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.6" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" />
-      <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.6.0" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.7" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
+      <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0" />
       <PackageReference Include="morelinq" Version="4.4.0" />
       <PackageReference Include="Scrutor" Version="6.1.0" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
