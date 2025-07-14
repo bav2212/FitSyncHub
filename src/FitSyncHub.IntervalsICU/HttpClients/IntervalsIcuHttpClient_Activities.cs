@@ -14,7 +14,7 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 
 public partial class IntervalsIcuHttpClient
 {
-    public async Task<IReadOnlyCollection<ActivityResponse>> ListActivities(
+    public async Task<IReadOnlyCollection<ActivityResponse?>> ListActivities(
         string athleteId,
         DateTime oldest,
         DateTime newest,
@@ -117,7 +117,7 @@ public partial class IntervalsIcuHttpClient
         response.EnsureSuccessStatusCode();
     }
 
-    private static IEnumerable<ActivityResponse> FilterStravaActivitiesAndDeserialize(string content)
+    private static IEnumerable<ActivityResponse?> FilterStravaActivitiesAndDeserialize(string content)
     {
         var jsonDocument = JsonDocument.Parse(content);
 
@@ -127,6 +127,8 @@ public partial class IntervalsIcuHttpClient
                 .Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivitySource)!;
             if (activitySource == ActivitySource.Strava)
             {
+                // return null for strava activities, but we need it in pagination
+                yield return null; // Skip Strava activities
                 continue;
             }
 

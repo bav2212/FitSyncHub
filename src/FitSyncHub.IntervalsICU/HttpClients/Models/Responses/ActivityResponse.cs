@@ -6,7 +6,7 @@ namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 public record ActivityResponse
 {
     public required string Id { get; init; }
-    public required string StartDateLocal { get; init; }
+    public required DateTime StartDateLocal { get; init; }
     public required string Type { get; init; }
     public required bool? IcuIgnoreTime { get; init; }
     public required int? IcuPmCp { get; init; }
@@ -28,7 +28,7 @@ public record ActivityResponse
     public required int? IcuFtp { get; init; }
     public required int? IcuJoules { get; init; }
     public required int? IcuRecordingTime { get; init; }
-    public required int? ElapsedTime { get; init; }
+    public required int ElapsedTime { get; init; }
     public required int? IcuWeightedAvgWatts { get; init; }
     public required int? CarbsUsed { get; init; }
     public required string Name { get; init; }
@@ -170,6 +170,13 @@ public record ActivityResponse
     public required double? IcuPowerHr { get; init; }
     public required int? IcuAverageWatts { get; init; }
     public required double? IcuVariabilityIndex { get; init; }
+    #region Custom fields
+    [JsonPropertyName("Lactate")]
+    public double? Lactate { get; init; }
+    #endregion Custom fields
+
+    [JsonIgnore]
+    public DateTime EndTimeLocal => StartDateLocal.AddSeconds(ElapsedTime);
 }
 
 [JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivityGapModel>))]

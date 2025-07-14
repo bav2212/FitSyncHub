@@ -1,4 +1,5 @@
-﻿using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
+﻿using System.Text.Json.Serialization;
+using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
@@ -13,6 +14,10 @@ public record ActivityUpdateRequest
     public GearUpdateRequest? Gear { get; init; }
     public int? IcuRpe { get; init; }
     public int? Feel { get; init; }
+    #region Custom fields
+    [JsonPropertyName("Lactate")]
+    public double? Lactate { get; init; }
+    #endregion Custom fields
 }
 
 public record GearUpdateRequest

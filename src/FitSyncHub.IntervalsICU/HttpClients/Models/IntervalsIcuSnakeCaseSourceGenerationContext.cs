@@ -14,4 +14,6 @@ namespace FitSyncHub.IntervalsICU.HttpClients.Models;
 [JsonSerializable(typeof(CreateActivityRequest))]
 [JsonSerializable(typeof(IReadOnlyCollection<EventResponse>))]
 [JsonSerializable(typeof(CreateEventRequest))]
+[JsonSerializable(typeof(AddMessageRequest))]
+[JsonSerializable(typeof(IReadOnlyCollection<ActivityMessageResponse>))]
 internal partial class IntervalsIcuSnakeCaseSourceGenerationContext : JsonSerializerContext;

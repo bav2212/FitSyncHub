@@ -1,5 +1,6 @@
 ﻿using Dynastream.Fit;
 using FitSyncHub.Common;
+using FitSyncHub.Common.Extensions;
 using FitSyncHub.Common.Fit;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.Models.Requests;
@@ -171,7 +172,10 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
     {
         var activities = await _intervalsIcuHttpClient.ListActivities(_intervalsIcuAthleteId,
                     new DateTime(date, TimeOnly.MinValue), new DateTime(date, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
-        return [.. activities.Where(x => x.Type.Contains("Ride"))];
+        return [.. activities
+            // skip strava activities
+            .WhereNotNull()
+            .Where(x => x.Type.Contains("Ride"))];
     }
 
     private async Task<ActivitySummary> UpdateActivitiesWithNewTssAndReturnSummary(

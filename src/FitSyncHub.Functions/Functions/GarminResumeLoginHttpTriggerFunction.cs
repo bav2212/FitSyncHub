@@ -26,6 +26,6 @@ public class GarminResumeLoginHttpTriggerFunction
         }
 
         await _garminAuthService.ResumeLogin(mfa, cancellationToken);
-        return new OkObjectResult("Sucess");
+        return new OkObjectResult("Success");
     }
 }
