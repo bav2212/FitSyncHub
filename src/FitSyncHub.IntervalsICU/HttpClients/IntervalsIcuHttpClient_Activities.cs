@@ -40,49 +40,9 @@ public partial class IntervalsIcuHttpClient
         return [.. FilterStravaActivitiesAndDeserialize(content)];
     }
 
-    private static IEnumerable<ActivityResponse> FilterStravaActivitiesAndDeserialize(string content)
-    {
-        var jsonDocument = JsonDocument.Parse(content);
-
-        foreach (var jsonObject in jsonDocument.RootElement.EnumerateArray())
-        {
-            var activitySource = jsonObject.GetProperty("source")
-                .Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivitySource)!;
-            if (activitySource == ActivitySource.Strava)
-            {
-                continue;
-            }
-
-            yield return jsonObject.Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse)!;
-        }
-    }
-
-    public async Task<Stream> DownloadOriginalActivityFitFile(
-       string activityId,
-       CancellationToken cancellationToken)
-    {
-        var requestUri = $"api/v1/activity/{activityId}/file";
-
-        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadAsStreamAsync(cancellationToken);
-    }
-
-    public async Task UnlinkPairedWorkout(
-       string activityId,
-       CancellationToken cancellationToken)
-    {
-        var requestUri = $"api/v1/activity/{activityId}";
-        var content = new StringContent("""{ "paired_event_id":0}""", MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json));
-
-        var response = await _httpClient.PutAsync(requestUri, content, cancellationToken);
-        response.EnsureSuccessStatusCode();
-    }
-
     public async Task<ActivityResponse> GetActivity(
-      string activityId,
-      CancellationToken cancellationToken)
+     string activityId,
+     CancellationToken cancellationToken)
     {
         var requestUri = $"api/v1/activity/{activityId}";
 
@@ -132,5 +92,45 @@ public partial class IntervalsIcuHttpClient
 
         var response = await _httpClient.DeleteAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<Stream> DownloadOriginalActivityFitFile(
+       string activityId,
+       CancellationToken cancellationToken)
+    {
+        var requestUri = $"api/v1/activity/{activityId}/file";
+
+        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadAsStreamAsync(cancellationToken);
+    }
+
+    public async Task UnlinkPairedWorkout(
+       string activityId,
+       CancellationToken cancellationToken)
+    {
+        var requestUri = $"api/v1/activity/{activityId}";
+        var content = new StringContent("""{ "paired_event_id":0}""", MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json));
+
+        var response = await _httpClient.PutAsync(requestUri, content, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    private static IEnumerable<ActivityResponse> FilterStravaActivitiesAndDeserialize(string content)
+    {
+        var jsonDocument = JsonDocument.Parse(content);
+
+        foreach (var jsonObject in jsonDocument.RootElement.EnumerateArray())
+        {
+            var activitySource = jsonObject.GetProperty("source")
+                .Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivitySource)!;
+            if (activitySource == ActivitySource.Strava)
+            {
+                continue;
+            }
+
+            yield return jsonObject.Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse)!;
+        }
     }
 }
