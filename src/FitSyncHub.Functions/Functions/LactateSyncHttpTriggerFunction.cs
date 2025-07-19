@@ -158,32 +158,32 @@ public class LactateSyncHttpTriggerFunction
                 throw new InvalidOperationException($"No activities found for date {date:yyyy-MM-dd} in IntervalsICU data.");
             }
 
-            foreach (var (index, intervalsIcuActivity) in intervalsIcuActivitiesByDate.Index())
+            foreach (var lactateResult in lactateResults)
             {
-                var isLast = index == intervalsIcuActivitiesByDate.Count - 1;
+                var lactateResultActivity = intervalsIcuActivities
+                    .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndTimeLocal);
 
-                var activityStartDateLocal = intervalsIcuActivity.StartDateLocal;
-                var activityEndDateLocal = isLast
-                    ? intervalsIcuActivity.EndTimeLocal.AddMinutes(5) // extend the last activity by 5 minutes to catch lactate results that are close to the end of the activity
-                    : intervalsIcuActivity.EndTimeLocal;
-
-                var lactateResultsInActivity = lactateResults
-                    .Where(x => x.Time >= activityStartDateLocal && x.Time <= activityEndDateLocal)
-                    .ToList();
-
-                if (lactateResultsInActivity.Count == 0)
+                if (lactateResultActivity == null)
                 {
-                    continue;
+                    // If lactate result is not found in any activity, try to find it in the next 10 minutes of the activity
+                    lactateResultActivity = intervalsIcuActivities
+                        .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal
+                            && lactateResult.Time <= x.EndTimeLocal.AddMinutes(10));
+
+                    if (lactateResultActivity == null)
+                    {
+                        throw new InvalidDataException("Could not map all lactate results to activities");
+                    }
                 }
 
-                lactateResults.ExceptWith(lactateResultsInActivity);
-
-                result.Add(intervalsIcuActivity, lactateResultsInActivity);
-            }
-
-            if (lactateResults.Count != 0)
-            {
-                throw new InvalidDataException("Could not map all lactate results to activities");
+                if (result.TryGetValue(lactateResultActivity, out var lactateResultsInActivity))
+                {
+                    lactateResultsInActivity.Add(lactateResult);
+                }
+                else
+                {
+                    result.Add(lactateResultActivity, [lactateResult]);
+                }
             }
         }
 
