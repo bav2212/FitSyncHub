@@ -203,6 +203,12 @@ public class LactateSyncHttpTriggerFunction
             var nextPageExists = activitiesPortionWithStravaActivities.Count == Limit;
 
             var portion = activitiesPortionWithStravaActivities.WhereNotNull().ToList();
+            if (portion.Count == 0)
+            {
+                _logger.LogWarning("No activities found for date range {OldestDate} - {NewestDate}", oldestDate, newestDate);
+                break;
+            }
+
             activities.AddRange(portion);
 
             newestDate = portion.Min(x => x.StartDate.Date);
