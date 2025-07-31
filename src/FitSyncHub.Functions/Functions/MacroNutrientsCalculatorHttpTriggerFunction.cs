@@ -69,7 +69,7 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
             new DateTime(date, TimeOnly.MaxValue),
             cancellationToken: cancellationToken);
 
-        var activeWorkoutsCalories = activities.Sum(x => x.Calories - x.BmrCalories);
+        var activeWorkoutsCalories = activities.Sum(x => x.Calories - x.BmrCalories ?? throw new InvalidDataException("Activity does not contains bmrCalories"));
 
         var events = await _intervalsIcuHttpClient.ListEvents(_intervalsIcuAthleteId,
             new ListEventsQueryParams(date, date),

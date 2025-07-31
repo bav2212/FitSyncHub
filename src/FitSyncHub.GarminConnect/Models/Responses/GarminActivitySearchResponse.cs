@@ -31,7 +31,7 @@ public record GarminActivitySearchResponse
     public required string OwnerProfileImageUrlLarge { get; init; }
     public required double Calories { get; init; }
     // BMR (Basal Metabolic Rate) calories
-    public required double BmrCalories { get; init; }
+    public double? BmrCalories { get; init; }
     public required double AverageHR { get; init; }
     public required double MaxHR { get; init; }
     public double? AverageBikingCadenceInRevPerMinute { get; init; }
