@@ -52,10 +52,9 @@ public class StravaUpdateActivityService
             return;
         }
 
-        // temp hide zwift rides
-        var isZwiftRide = activity.Type == Constants.StravaActivityType.VirtualRide
-            && activity.DeviceName == Constants.ZwiftDeviceName;
-        if (isZwiftRide)
+        // temp hide virtual rides
+        var isVirtualRide = activity.Type == Constants.StravaActivityType.VirtualRide;
+        if (isVirtualRide)
         {
             await HideActivityFromHome(activityId, cancellationToken);
             return;
