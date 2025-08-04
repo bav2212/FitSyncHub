@@ -9,6 +9,7 @@ public enum ActivitySource
     Upload,
     Manual,
     GarminConnect,
+    [JsonStringEnumMemberName("OAUTH_CLIENT")]
     OAuthClient,
     Dropbox,
     Polar,
