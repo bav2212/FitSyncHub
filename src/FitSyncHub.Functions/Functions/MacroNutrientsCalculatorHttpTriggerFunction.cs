@@ -64,12 +64,17 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
             date = DateOnly.FromDateTime(DateTime.Today);
         }
 
-        var activities = await _garminConnectHttpClient.GetActivitiesByDate(
+        var activities = await _intervalsIcuHttpClient.ListActivities(_intervalsIcuAthleteId,
             new DateTime(date, TimeOnly.MinValue),
             new DateTime(date, TimeOnly.MaxValue),
-            cancellationToken: cancellationToken);
+            10,
+            cancellationToken);
 
-        var activeWorkoutsCalories = activities.Sum(x => x.Calories - x.BmrCalories ?? throw new InvalidDataException("Activity does not contains bmrCalories"));
+        // human efficiency is almost similar to 0.25, so we can use joules instead of kcal
+        var activeWorkoutsCalories = activities
+            .Select(x => x?.IcuJoules)
+            .WhereNotNull()
+            .Sum() / 1000.0f;
 
         var events = await _intervalsIcuHttpClient.ListEvents(_intervalsIcuAthleteId,
             new ListEventsQueryParams(date, date),
@@ -79,11 +84,11 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
         // human efficiency is almost similar to 0.25, so we can use joules instead of kcal
         var plannedCalories = plannedEvents.Select(x => x.Joules)
             .WhereNotNull()
-            .Sum() / 1000;
+            .Sum() / 1000.0f;
 
         var (weightInKg, bodyFat) = await GetWeightAndBodyFatAsync(date, cancellationToken);
 
-        var totalCalories = (float)activeWorkoutsCalories + plannedCalories;
+        var totalCalories = activeWorkoutsCalories + plannedCalories;
         var macroNutrients = MacroNutrientsCalculator
             .Calculate(optimalEvengyAvailability, weightInKg, bodyFat, totalCalories);
 
