@@ -44,6 +44,13 @@ public class StravaUpdateActivityService
             return;
         }
 
+        // temp hide workouts
+        if (activity.Type == Constants.StravaActivityType.Workout)
+        {
+            await HideActivityFromHome(activityId, cancellationToken);
+            return;
+        }
+
         var isOutdoorRide = activity.Type == Constants.StravaActivityType.Ride
             && activity.DeviceName != Constants.WahooSYSTMDeviceName;
         if (isOutdoorRide)
