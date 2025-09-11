@@ -136,18 +136,18 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 
             var (eventType, indoor) = internalWorkoutStructure.Type switch
             {
-                Common.Workouts.WorkoutType.Ride => ("Ride", true),
-                _ => ("Workout", false)
+                Common.Workouts.WorkoutType.Ride => (EventType.Ride, true),
+                _ => (EventType.Workout, false)
             };
 
-            var createRequest = new CreateEventRequest
+            var createRequest = new CreateEventFromDescriptionRequest
             {
                 Category = EventCategory.Workout,
                 Description = intervalsIcuEventStructure,
                 Name = workoutName,
                 Indoor = indoor,
                 StartDateLocal = new DateTime(workout.CalendarDate, TimeOnly.MinValue),
-                SubType = ActivitySubType.None,
+                SubType = EventSubType.None,
                 Tags = [IntervalsIcuEventTagGarminConnect],
                 Type = eventType
             };

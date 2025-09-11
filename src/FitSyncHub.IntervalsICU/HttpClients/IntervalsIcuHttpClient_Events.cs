@@ -64,12 +64,27 @@ public partial class IntervalsIcuHttpClient
 
     public async Task<EventResponse> CreateEvent(
        string athleteId,
-       CreateEventRequest model,
+       CreateEventFromDescriptionRequest model,
        CancellationToken cancellationToken)
     {
         var requestUri = $"api/v1/athlete/{athleteId}/events";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateEventRequest);
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateEventFromDescriptionRequest);
+        var response = await _httpClient.PostAsync(requestUri, jsonContent, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
+        return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.EventResponse)!;
+    }
+
+    public async Task<EventResponse> CreateEvent(
+       string athleteId,
+       CreateEventFromFileRequest model,
+       CancellationToken cancellationToken)
+    {
+        var requestUri = $"api/v1/athlete/{athleteId}/events";
+
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateEventFromFileRequest);
         var response = await _httpClient.PostAsync(requestUri, jsonContent, cancellationToken);
         response.EnsureSuccessStatusCode();
 

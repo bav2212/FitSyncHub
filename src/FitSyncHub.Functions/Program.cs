@@ -8,6 +8,7 @@ using FitSyncHub.Functions.Services;
 using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
+using FitSyncHub.Xert;
 using FitSyncHub.Zwift;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
@@ -50,6 +51,7 @@ builder.Services.ConfigureStravaModule<StravaOAuthService>();
 builder.Services.ConfigureIntervalsIcuModule();
 builder.Services.ConfigureGarminConnectModule("GarminConnect:Credentials");
 builder.Services.ConfigureZwiftModule("Zwift:Credentials");
+builder.Services.ConfigureXertModule("Xert");
 //builder.Services.ConfigureZwiftInsiderModule();
 
 builder.Services.AddCosmosCache(cacheOptions =>
