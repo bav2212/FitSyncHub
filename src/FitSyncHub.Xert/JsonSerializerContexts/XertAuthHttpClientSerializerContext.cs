@@ -5,6 +5,4 @@ namespace FitSyncHub.Functions.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(XertTokenResponse))]
-internal partial class XertAuthHttpClientSerializerContext : JsonSerializerContext
-{
-}
+internal partial class XertAuthHttpClientSerializerContext : JsonSerializerContext;
