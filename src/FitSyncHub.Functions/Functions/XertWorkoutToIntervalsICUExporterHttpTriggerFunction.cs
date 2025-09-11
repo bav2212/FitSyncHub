@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
+using FitSyncHub.Functions.Helpers;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
@@ -46,7 +46,7 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
         _logger.LogInformation("Retrieved training info value from Xert");
 
         var zwo = await _xertHttpClient.GetDownloadWorkout(ti.Wotd.Url, cancellationToken);
-        _logger.LogInformation("Downloaded workput zwo from Xert");
+        _logger.LogInformation("Downloaded workout zwo from Xert");
 
         var base64EncodedWorkoutStructure = Convert.ToBase64String(Encoding.UTF8.GetBytes(zwo));
 
@@ -58,43 +58,7 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
             FileContentsBase64 = base64EncodedWorkoutStructure
         }, default);
 
-        // copied from GarminWorkoutToIntervalsICUExporterHttpTriggerFunction, can do it better and reuse
-        var intervalsIcuFutureGarminEventsOverview = new[] { createdEvent }
-            .Where(x => x.PairedActivityId == null)
-            .Aggregate(new StringBuilder(),
-                (sb, x) =>
-                {
-                    var abbreviatedDayName = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(x.StartDateLocal.DayOfWeek);
-                    sb.Append(abbreviatedDayName);
-                    sb.Append('\t');
-
-                    sb.Append($"{x.Type}: {x.Name}");
-                    if (x.MovingTime.HasValue)
-                    {
-                        var timeSpan = TimeSpan.FromSeconds(x.MovingTime.Value);
-                        sb.Append(", ");
-
-                        if (timeSpan.Hours > 0)
-                        {
-                            sb.Append(timeSpan.Hours);
-                            sb.Append('h');
-                        }
-
-                        if (timeSpan.Minutes > 0)
-                        {
-                            sb.Append(timeSpan.Minutes);
-                            sb.Append('m');
-                        }
-                    }
-
-                    if (x.IcuTrainingLoad.HasValue)
-                    {
-                        sb.Append($", Load {x.IcuTrainingLoad.Value}");
-                    }
-
-                    return sb.AppendLine();
-                },
-                sb => sb.ToString());
+        var intervalsIcuFutureGarminEventsOverview = ResponseOverviewHelper.IntervalsIcuEventsResponseOverview(createdEvent);
 
         return new OkObjectResult(intervalsIcuFutureGarminEventsOverview);
     }
