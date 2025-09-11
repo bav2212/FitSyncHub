@@ -27,6 +27,7 @@ HashSet<string> functionsCalledByUser = [
     nameof(GarminWorkoutUploadToStravaHttpTriggerFunction),
     nameof(MacroNutrientsCalculatorHttpTriggerFunction),
     nameof(LactateSyncHttpTriggerFunction),
+    nameof(XertWorkoutToIntervalsICUExporterHttpTriggerFunction),
 ];
 
 var builder = FunctionsApplication.CreateBuilder(args);

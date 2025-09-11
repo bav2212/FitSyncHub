@@ -1,4 +1,6 @@
-﻿namespace FitSyncHub.Xert.Models.Responses;
+﻿using System.Text.Json.Serialization;
+
+namespace FitSyncHub.Xert.Models.Responses;
 
 public record TrainingInfoResponse
 {
@@ -9,7 +11,8 @@ public record TrainingInfoResponse
     public required TrainingLoad Tl { get; init; }
     public required string Source { get; init; }
     public required TrainingLoad TargetXSS { get; init; }
-    public required WorkoutOfTheDay Wotd { get; init; }
+    [JsonPropertyName("wotd")]
+    public required WorkoutOfTheDay WorkoutOfTheDay { get; init; }
 }
 
 public record Signature
@@ -30,11 +33,11 @@ public record TrainingLoad
 
 public record WorkoutOfTheDay
 {
-    public required string Name { get; init; }
-    public required string WorkoutId { get; init; }
-    public required string Description { get; init; }
     public required string Type { get; init; }
-    public required double Difficulty { get; init; }
-    public required string Url { get; init; }
+    public string? Name { get; init; }
+    public string? WorkoutId { get; init; }
+    public string? Description { get; init; }
+    public double? Difficulty { get; init; }
+    public string? Url { get; init; }
 }
 

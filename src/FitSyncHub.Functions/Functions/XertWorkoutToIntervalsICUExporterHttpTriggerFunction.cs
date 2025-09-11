@@ -45,7 +45,13 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
         var ti = await _xertHttpClient.GetTrainingInfo(XertWorkoutFormat.ZWO, cancellationToken);
         _logger.LogInformation("Retrieved training info value from Xert");
 
-        var zwo = await _xertHttpClient.GetDownloadWorkout(ti.Wotd.Url, cancellationToken);
+        var workoutOfTheDayUrl = ti.WorkoutOfTheDay.Url;
+        if (workoutOfTheDayUrl is null)
+        {
+            return new OkObjectResult("Nothing to export, no xert workouts for today");
+        }
+
+        var zwo = await _xertHttpClient.GetDownloadWorkout(workoutOfTheDayUrl, cancellationToken);
         _logger.LogInformation("Downloaded workout zwo from Xert");
 
         var base64EncodedWorkoutStructure = Convert.ToBase64String(Encoding.UTF8.GetBytes(zwo));
