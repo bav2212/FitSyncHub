@@ -19,6 +19,7 @@
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Caching.Cosmos" Version="1.8.0" />
 	<PackageReference Include="Riok.Mapperly" Version="4.2.1" />
+	<PackageReference Include="Sep" Version="0.11.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,7 +27,6 @@
     <ProjectReference Include="..\FitSyncHub.IntervalsICU\FitSyncHub.IntervalsICU.csproj" />
     <ProjectReference Include="..\FitSyncHub.Strava\FitSyncHub.Strava.csproj" />
     <ProjectReference Include="..\FitSyncHub.Xert\FitSyncHub.Xert.csproj" />
-    <ProjectReference Include="..\FitSyncHub.ZwiftInsider\FitSyncHub.ZwiftInsider.csproj" />
     <ProjectReference Include="..\FitSyncHub.Zwift\FitSyncHub.Zwift.csproj" />
   </ItemGroup>
 
