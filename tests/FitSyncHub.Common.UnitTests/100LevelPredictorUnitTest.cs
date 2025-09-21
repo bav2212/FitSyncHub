@@ -1,4 +1,4 @@
-﻿using Xunit.Abstractions;
+using Xunit.Abstractions;
 
 namespace FitSyncHub.Common.UnitTests;
 
@@ -47,6 +47,7 @@ public class _100LevelPredictorUnitTest
             { new DateOnly(2025,05,16), 69 },
             { new DateOnly(2025,09,04), 79 },
             { new DateOnly(2025,09,08), 80 },
+            { new DateOnly(2025,09,20), 81 },
         };
 
         var predictedDate = PredictLevelDate(dateToLevelMapping, 100, degree: polynomialRegression);
