@@ -1,4 +1,4 @@
-using Dynastream.Fit;
+﻿using Dynastream.Fit;
 using FitSyncHub.Common;
 using FitSyncHub.Common.Extensions;
 using FitSyncHub.Common.Fit;
@@ -109,7 +109,7 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
                 = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
         }
 
-//temp till Garmin in repair
+        //temp till Garmin in repair
         //var garminActivity = await UpdateGarminSummaryWithIntervalsData(date, activitySummary, cancellationToken);
         //var intervalsActivities = await GetRideActivities(date, cancellationToken);
         //await UpdateIntervalsIcuActivitiesWithGarminData(garminActivity, intervalsActivities, cancellationToken);

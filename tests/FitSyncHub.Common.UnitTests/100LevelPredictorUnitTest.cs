@@ -1,4 +1,4 @@
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 
 namespace FitSyncHub.Common.UnitTests;
 
@@ -36,8 +36,9 @@ public class _100LevelPredictorUnitTest
 
     [Theory]
     [InlineData(1)]
-    [InlineData(2)]
     [InlineData(3)]
+    [InlineData(5)]
+    // better use Excel forecast sheet with linear, polynomial, moving average, exponential smoothing etc.
     public void Calculate_WorkCorrectly(int polynomialRegression)
     {
         var dateToLevelMapping = new Dictionary<DateOnly, int>
