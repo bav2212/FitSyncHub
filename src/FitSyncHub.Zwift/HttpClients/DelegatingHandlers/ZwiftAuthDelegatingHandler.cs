@@ -3,7 +3,7 @@ using FitSyncHub.Zwift.Auth.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 
-namespace FitSyncHub.Zwift.HttpClients;
+namespace FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
 
 public class ZwiftAuthDelegatingHandler : DelegatingHandler
 {

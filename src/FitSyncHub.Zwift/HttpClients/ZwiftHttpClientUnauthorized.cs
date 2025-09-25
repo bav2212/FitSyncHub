@@ -2,11 +2,11 @@
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public class ZwiftUnauthorizedHttpClient
+public class ZwiftHttpClientUnauthorized
 {
     private readonly HttpClient _httpClient;
 
-    public ZwiftUnauthorizedHttpClient(HttpClient httpClient)
+    public ZwiftHttpClientUnauthorized(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }

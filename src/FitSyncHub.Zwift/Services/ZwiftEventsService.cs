@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
@@ -14,7 +15,8 @@ public partial class ZwiftEventsService
 
     public async Task DownloadEventsAndStoreToFile(IReadOnlyCollection<string> zwiftEventURLs,
         string subgroupLabel,
-        string storeToFolder)
+        string storeToFolder,
+        CancellationToken cancellationToken)
     {
         foreach (var zwiftEventUrl in zwiftEventURLs)
         {
@@ -26,14 +28,14 @@ public partial class ZwiftEventsService
 
             if (File.Exists(resultFilePath))
             {
-                var jsonContent = await File.ReadAllTextAsync(resultFilePath);
+                var jsonContent = await File.ReadAllTextAsync(resultFilePath, cancellationToken);
                 if (IsRaceCompleted(jsonContent))
                 {
                     continue;
                 }
             }
 
-            var zwiftEventDto = await _zwiftHttpClient.GetEvent(zwiftEventUrl);
+            var zwiftEventDto = await _zwiftHttpClient.GetEvent(zwiftEventUrl, cancellationToken);
             if (DateTime.UtcNow < zwiftEventDto.EventStart)
             {
                 continue;
@@ -48,7 +50,7 @@ public partial class ZwiftEventsService
             var eventSubgroupId = zwiftEventDto.EventSubgroups
                 .Single(x => x.SubgroupLabel == subgroupLabel).Id;
 
-            var content = await _zwiftHttpClient.GetRaceResultsForSubgroup(eventSubgroupId);
+            var content = await _zwiftHttpClient.GetEventSubgroupResults(eventSubgroupId, cancellationToken);
 
             if (JsonDocument.Parse(content)
                 .RootElement.GetProperty("entries")
@@ -61,6 +63,18 @@ public partial class ZwiftEventsService
         }
     }
 
+    public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEntrants(string zwiftEventUrl,
+      string subgroupLabel, CancellationToken cancellationToken)
+    {
+        var zwiftEventId = GetEventId(zwiftEventUrl);
+
+        var zwiftEventDto = await _zwiftHttpClient.GetEvent(zwiftEventUrl, cancellationToken);
+        var eventSubgroupId = zwiftEventDto.EventSubgroups
+            .Single(x => x.SubgroupLabel == subgroupLabel).Id;
+
+        return await _zwiftHttpClient.GetEventSubgroupEntrants(eventSubgroupId, cancellationToken: cancellationToken);
+    }
+
     private static int GetEventId(string zwiftEventUrl)
     {
         var regex = ZwiftEventIdRegex();
@@ -68,7 +82,7 @@ public partial class ZwiftEventsService
 
         if (!match.Success || !int.TryParse(match.Groups["eventId"].Value, out var eventId))
         {
-            throw new Exception("Wrong url format");
+            throw new Exception("Wrong zwift event url format");
         }
 
         return eventId;

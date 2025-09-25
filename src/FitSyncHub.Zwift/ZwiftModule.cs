@@ -2,6 +2,7 @@
 using FitSyncHub.Zwift.Auth;
 using FitSyncHub.Zwift.Auth.Abstractions;
 using FitSyncHub.Zwift.HttpClients;
+using FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
 using FitSyncHub.Zwift.Options;
 using FitSyncHub.Zwift.Services;
 using Microsoft.Extensions.Configuration;
@@ -36,7 +37,7 @@ public static class ZwiftModule
 
         AddZwiftAuthResiliencePipeline(services);
 
-        services.AddHttpClient<ZwiftUnauthorizedHttpClient>();
+        services.AddHttpClient<ZwiftHttpClientUnauthorized>();
 
         services.AddTransient<ZwiftAuthDelegatingHandler>();
         services.AddHttpClient<ZwiftHttpClient>(client => client.BaseAddress = new Uri("https://us-or-rly101.zwift.com"))
@@ -45,6 +46,8 @@ public static class ZwiftModule
             {
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             });
+
+        services.AddHttpClient<ZwiftRacingHttpClient>(client => client.BaseAddress = new Uri("https://www.zwiftracing.app"));
 
         return services;
     }
