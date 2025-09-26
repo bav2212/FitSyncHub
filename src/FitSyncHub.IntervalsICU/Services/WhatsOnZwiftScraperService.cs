@@ -54,7 +54,7 @@ public class WhatsOnZwiftScraperService
     private static IEnumerable<string> ParseNameSegments(HtmlDocument htmlPageDoc)
     {
         var breadcrumbs = htmlPageDoc.DocumentNode
-            .SelectSingleNode("//div[@class=\"breadcrumbs\"]") ?? throw new InvalidDataException("No breadcrumbs containers");
+            .SelectSingleNode("//nav[@aria-label=\"Breadcrumbs\"]") ?? throw new InvalidDataException("No breadcrumbs containers");
 
         var breadcrumbSegments = breadcrumbs.InnerText
             .Replace("\n", "")
@@ -66,16 +66,8 @@ public class WhatsOnZwiftScraperService
 
     private static IEnumerable<string> ParseWorkoutList(HtmlDocument htmlPageDoc)
     {
-        var workoutListNode = htmlPageDoc.DocumentNode
-            .SelectSingleNode("//div[@class=\"one-third column workoutlist\"]")
-            ?? throw new InvalidDataException("no workoutListNode");
-
-        // Load the HTML content
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(workoutListNode.OuterHtml);
-
         // Select all divs with class 'textbar'
-        var textBarDivBlocks = htmlDoc.DocumentNode.SelectNodes("//div[contains(@class, 'textbar')]");
+        var textBarDivBlocks = htmlPageDoc.DocumentNode.SelectNodes("//div[contains(@class, 'textbar')]");
 
         if (textBarDivBlocks is null)
         {
