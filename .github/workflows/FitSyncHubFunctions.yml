@@ -9,52 +9,32 @@ env:
   AZURE_FUNCTIONAPP_NAME: FitSyncHubFunctionsApp
   AZURE_FUNCTIONAPP_PACKAGE_PATH: src/FitSyncHub.Functions/published
   CONFIGURATION: Release
-  DOTNET_CORE_VERSION: 9.0.x
+  DOTNET_VERSION: 9.0.x
   WORKING_DIRECTORY: src/FitSyncHub.Functions
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v4
 
-    - name: Setup .NET SDK
+    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Restore
-      run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
-
-    - name: Build
-      run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
-
-    - name: Publish
-      run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}"
-
-    - name: Publish Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: functionapp
-        path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        include-hidden-files: true
-        retention-days: 30
-  deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write #This is required for requesting the JWT
-    needs: build
-    steps:
-
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v4
-      with:
-        name: functionapp
-        path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+    - name: 'Resolve Project Dependencies Using Dotnet'
+      shell: bash
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet build --configuration Release --output ./output
+        popd
 
     - name: Deploy to Azure Function App
       uses: Azure/functions-action@v1
       id: fa
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+        sku: 'flexconsumption'    # Parameter required when using a publish profile with Flex Consumption
         publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
