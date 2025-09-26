@@ -10,6 +10,7 @@ using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
 using FitSyncHub.Xert;
 using FitSyncHub.Zwift;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.Functions.Worker;
@@ -36,6 +37,7 @@ builder.ConfigureFunctionsWebApplication();
 
 // apply ExceptionHandlingMiddleware for functions called by user only, otherwise will see error in azure portal
 builder.UseWhen<ExceptionHandlingMiddleware>((context) => functionsCalledByUser.Contains(context.FunctionDefinition.Name));
+builder.UseMiddleware<HttpContextAccessorMiddleware>();
 
 builder.Configuration.AddUserSecrets<Program>();
 
@@ -46,6 +48,9 @@ builder.Services
 
 builder.Services.AddOptions<BodyMeasurementsOptions>()
     .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings));
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
 builder.Services.ConfigureStravaModule<StravaOAuthService>();

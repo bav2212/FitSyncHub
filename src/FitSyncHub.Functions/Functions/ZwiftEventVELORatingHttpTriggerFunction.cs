@@ -49,7 +49,7 @@ public class ZwiftEventVELORatingHttpTriggerFunction
 
         foreach (var rider in entrants)
         {
-            var history = await _zwiftRacingHttpClient.GetRiderHistory(cookie, rider.Id, year: year, cancellationToken: cancellationToken);
+            var history = await _zwiftRacingHttpClient.GetRiderHistory(rider.Id, year: year, cancellationToken: cancellationToken);
 
             var maxVelo = history.History.Max(x => x.Rating);
             var minVelo = history.History.Min(x => x.Rating);

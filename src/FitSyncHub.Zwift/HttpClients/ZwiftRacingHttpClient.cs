@@ -14,18 +14,13 @@ public class ZwiftRacingHttpClient
     }
 
     public async Task<ZwiftRacingRiderResponse> GetRiderHistory(
-        // it was awful solution with delegating handler to add cookie(cause scoped service resolves two times), so i just pass cookie here
-        string cookie,
         long riderId,
         int? year = default,
         CancellationToken cancellationToken = default)
     {
         var url = $"/api/riders/{riderId}/history?year={year ?? DateTime.Now.Year}";
 
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Cookie", cookie);
-
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
