@@ -1,17 +1,14 @@
-﻿using FitSyncHub.Functions.Options;
-using FitSyncHub.GarminConnect.HttpClients;
+﻿using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.Strava.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Functions.Functions;
 
 public class WeightHttpTriggerFunction
 {
-    private readonly BodyMeasurementsOptions _options;
     private readonly IStravaHttpClient _stravaHttpClient;
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
     private readonly ILogger<WeightHttpTriggerFunction> _logger;
@@ -19,10 +16,8 @@ public class WeightHttpTriggerFunction
     public WeightHttpTriggerFunction(
         IStravaHttpClient stravaHttpClient,
         GarminConnectHttpClient garminConnectHttpClient,
-        IOptions<BodyMeasurementsOptions> options,
         ILogger<WeightHttpTriggerFunction> logger)
     {
-        _options = options.Value;
         _stravaHttpClient = stravaHttpClient;
         _garminConnectHttpClient = garminConnectHttpClient;
         _logger = logger;
@@ -36,16 +31,9 @@ public class WeightHttpTriggerFunction
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         string? weight = req.Query["weight"];
-        string? verifyToken = req.Query["verify_token"];
-
-        if (weight is null || verifyToken is null)
+        if (weight is null)
         {
             return new BadRequestObjectResult("wrong request");
-        }
-
-        if (verifyToken != _options.VerifyToken)
-        {
-            return new BadRequestObjectResult("VerifyToken is wrong");
         }
 
         if (!float.TryParse(weight, out var parsedWeight))

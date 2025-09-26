@@ -2,7 +2,6 @@
 using FitSyncHub.Functions;
 using FitSyncHub.Functions.Functions;
 using FitSyncHub.Functions.Functions.IntervalsIcu;
-using FitSyncHub.Functions.Options;
 using FitSyncHub.Functions.Repositories;
 using FitSyncHub.Functions.Services;
 using FitSyncHub.GarminConnect;
@@ -45,9 +44,6 @@ builder.Services
     .AddApplicationInsightsTelemetryWorkerService()
     .ConfigureFunctionsApplicationInsights()
     .AddSingleton(_ => new CosmosClient(builder.Configuration["AzureWebJobsStorageConnectionString"]));
-
-builder.Services.AddOptions<BodyMeasurementsOptions>()
-    .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(BodyMeasurementsOptions.Position).Bind(settings));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
