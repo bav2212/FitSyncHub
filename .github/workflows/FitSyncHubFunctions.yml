@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_NAME: FitSyncHubFunctions
+  AZURE_FUNCTIONAPP_NAME: FitSyncHubFunctionsApp
   AZURE_FUNCTIONAPP_PACKAGE_PATH: src/FitSyncHub.Functions/published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 9.0.x
