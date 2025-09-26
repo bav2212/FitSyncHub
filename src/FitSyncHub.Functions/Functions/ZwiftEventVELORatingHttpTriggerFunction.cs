@@ -41,7 +41,6 @@ public class ZwiftEventVELORatingHttpTriggerFunction
             return new BadRequestObjectResult("wrong url");
         }
 
-
         var entrants = await _zwiftEventsService.GetEntrants(zwiftEventUrl, subcategory, cancellationToken);
 
         var year = DateTime.UtcNow.Year;
@@ -81,7 +80,6 @@ public class ZwiftEventVELORatingHttpTriggerFunction
         return new OkObjectResult(result);
     }
 }
-
 
 public record ZwiftEventVELORatingResponse
 {
