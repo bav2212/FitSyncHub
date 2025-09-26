@@ -7,10 +7,8 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: FitSyncHubFunctionsApp
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: src/FitSyncHub.Functions/published
-  CONFIGURATION: Release
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
   DOTNET_VERSION: 9.0.x
-  WORKING_DIRECTORY: src/FitSyncHub.Functions
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
