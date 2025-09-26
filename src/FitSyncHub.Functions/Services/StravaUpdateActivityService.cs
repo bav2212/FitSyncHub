@@ -63,7 +63,15 @@ public class StravaUpdateActivityService
         var isVirtualRide = activity.Type == Constants.StravaActivityType.VirtualRide;
         if (isVirtualRide)
         {
-            await HideActivityFromHome(activityId, cancellationToken);
+            // do not want to spam home feed with warmups/cooldowns
+            if (IsWarmup(activity) || IsCooldown(activity))
+            {
+                await HideActivityFromHome(activityId, cancellationToken);
+                return;
+            }
+
+            // stop hiding virtual rides for autumn/winter. Uncomment next line if need to hide again
+            //await HideActivityFromHome(activityId, cancellationToken);
             return;
         }
 
@@ -71,6 +79,34 @@ public class StravaUpdateActivityService
             activity.Name,
             activity.Id,
             activity.Type);
+    }
+
+    private static bool IsWarmup(ActivityModelResponse activity)
+    {
+        var warmupKeywords = new[]
+        {
+            "warmup", "warm-up", "warm"
+        };
+
+        var isWarmupName = activity.Name.Split([' '], StringSplitOptions.TrimEntries)
+            .Intersect(warmupKeywords, StringComparer.InvariantCultureIgnoreCase)
+            .Any();
+
+        return isWarmupName;
+    }
+
+    private static bool IsCooldown(ActivityModelResponse activity)
+    {
+        var warmupKeywords = new[]
+        {
+            "cooldown", "cool-down"
+        };
+
+        var isCooldownName = activity.Name.Split([' '], StringSplitOptions.TrimEntries)
+            .Intersect(warmupKeywords, StringComparer.InvariantCultureIgnoreCase)
+            .Any();
+
+        return isCooldownName;
     }
 
     private async Task HideActivityFromHome(
