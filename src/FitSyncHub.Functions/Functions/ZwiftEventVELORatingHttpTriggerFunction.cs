@@ -55,6 +55,14 @@ public class ZwiftEventVELORatingHttpTriggerFunction
             var velo = history.History
                     .OrderByDescending(x => x.UpdatedAt)
                     .FirstOrDefault()?.Rating;
+
+            var fiveMinuteBest = history.History
+                .Select(x => x.Wkg300)
+                .Where(x => x.HasValue)
+                .Select(x => x.Value)
+                .OrderByDescending(x => x)
+                .FirstOrDefault();
+
             var ftpPerKg = rider.Ftp / (rider.Weight / 1000.0);
 
             items.Add(new ZwiftEventVELORatingResponseItem
@@ -65,19 +73,39 @@ public class ZwiftEventVELORatingHttpTriggerFunction
                 Age = rider.Age,
                 Weight = rider.Weight / 1000.0,
                 FtpPerKg = ftpPerKg,
+                FiveMinBest = fiveMinuteBest,
                 MaxVELO = maxVelo,
                 MinVELO = minVelo,
                 VELO = velo,
             });
         }
 
-        var result = new ZwiftEventVELORatingResponse
+        string? format = req.Query["format"];
+        if (string.Equals(format, "csv", StringComparison.OrdinalIgnoreCase))
         {
-            Year = DateTime.UtcNow.Year,
-            Items = [.. items.OrderByDescending(x => x.MaxVELO)],
-        };
+            var csvLines = new List<string>
+            {
+                "Id,FirstName,LastName,Age,Weight,FtpPerKg,5MinBest,MaxVELO,MinVELO,VELO"
+            };
+            csvLines.AddRange(items.Select(item =>
+                $"{item.Id},{item.FirstName},{item.LastName},{item.Age},{item.Weight:F2},{item.FtpPerKg:F2},{item.FiveMinBest:F2},{item.MaxVELO:F2},{item.MinVELO:F2},{item.VELO:F2}"));
+            var csvContent = string.Join(Environment.NewLine, csvLines);
 
-        return new OkObjectResult(result);
+            return new OkObjectResult(csvContent);
+        }
+
+        if (string.IsNullOrWhiteSpace(format) || string.Equals(format, "json", StringComparison.OrdinalIgnoreCase))
+        {
+            var jsonResult = new ZwiftEventVELORatingResponse
+            {
+                Year = DateTime.UtcNow.Year,
+                Items = [.. items.OrderByDescending(x => x.MaxVELO)],
+            };
+
+            return new OkObjectResult(jsonResult);
+        }
+
+        return new BadRequestObjectResult("wrong format");
     }
 }
 
@@ -100,4 +128,5 @@ public record ZwiftEventVELORatingResponseItem
     public required double? MinVELO { get; init; }
     public required double? VELO { get; init; }
     public required double FtpPerKg { get; init; }
+    public required double FiveMinBest { get; init; }
 }
