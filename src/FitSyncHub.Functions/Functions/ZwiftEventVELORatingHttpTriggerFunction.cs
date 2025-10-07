@@ -1,4 +1,6 @@
-﻿using FitSyncHub.Zwift.HttpClients;
+﻿using System.Text;
+using FitSyncHub.Zwift.HttpClients;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -56,13 +58,6 @@ public class ZwiftEventVELORatingHttpTriggerFunction
                     .OrderByDescending(x => x.UpdatedAt)
                     .FirstOrDefault()?.Rating;
 
-            var fiveMinuteBest = history.History
-                .Select(x => x.Wkg300)
-                .Where(x => x.HasValue)
-                .Select(x => x.Value)
-                .OrderByDescending(x => x)
-                .FirstOrDefault();
-
             var ftpPerKg = rider.Ftp / (rider.Weight / 1000.0);
 
             items.Add(new ZwiftEventVELORatingResponseItem
@@ -73,7 +68,13 @@ public class ZwiftEventVELORatingHttpTriggerFunction
                 Age = rider.Age,
                 Weight = rider.Weight / 1000.0,
                 FtpPerKg = ftpPerKg,
-                FiveMinBest = fiveMinuteBest,
+                Best5Sec = GetWkgValue(history, x => x.Wkg5),
+                Best15Sec = GetWkgValue(history, x => x.Wkg15),
+                Best30Sec = GetWkgValue(history, x => x.Wkg30),
+                Best1Min = GetWkgValue(history, x => x.Wkg60),
+                Best2Min = GetWkgValue(history, x => x.Wkg120),
+                Best5Min = GetWkgValue(history, x => x.Wkg300),
+                Best20Min = GetWkgValue(history, x => x.Wkg1200),
                 MaxVELO = maxVelo,
                 MinVELO = minVelo,
                 VELO = velo,
@@ -85,10 +86,29 @@ public class ZwiftEventVELORatingHttpTriggerFunction
         {
             var csvLines = new List<string>
             {
-                "Id,FirstName,LastName,Age,Weight,FtpPerKg,5MinBest,MaxVELO,MinVELO,VELO"
+                "Id,FirstName,LastName,Age,Weight,FtpPerKg,Best5Sec,Best15Sec,Best30Sec,Best1Min,Best2Min,Best5Min,Best20Min,MaxVELO,MinVELO,VELO\r\n"
             };
             csvLines.AddRange(items.Select(item =>
-                $"{item.Id},{item.FirstName},{item.LastName},{item.Age},{item.Weight:F2},{item.FtpPerKg:F2},{item.FiveMinBest:F2},{item.MaxVELO:F2},{item.MinVELO:F2},{item.VELO:F2}"));
+            {
+                var sb = new StringBuilder();
+                sb.Append($"{item.Id},");
+                sb.Append($"{item.FirstName},");
+                sb.Append($"{item.LastName},");
+                sb.Append($"{item.Age},");
+                sb.Append($"{item.Weight:F2},");
+                sb.Append($"{item.FtpPerKg:F2},");
+                sb.Append($"{item.Best5Sec:F2},");
+                sb.Append($"{item.Best15Sec:F2},");
+                sb.Append($"{item.Best30Sec:F2},");
+                sb.Append($"{item.Best1Min:F2},");
+                sb.Append($"{item.Best2Min:F2},");
+                sb.Append($"{item.Best5Min:F2},");
+                sb.Append($"{item.Best20Min:F2},");
+                sb.Append($"{item.MaxVELO:F2},");
+                sb.Append($"{item.MinVELO:F2},");
+                sb.Append($"{item.VELO:F2}");
+                return sb.ToString();
+            }));
             var csvContent = string.Join(Environment.NewLine, csvLines);
 
             return new OkObjectResult(csvContent);
@@ -106,6 +126,15 @@ public class ZwiftEventVELORatingHttpTriggerFunction
         }
 
         return new BadRequestObjectResult("wrong format");
+    }
+
+    private static double? GetWkgValue(ZwiftRacingRiderResponse history, Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
+    {
+        return history.History
+            .Select(x => wkgSelector(x))
+            .Where(x => x.HasValue)
+            .OrderByDescending(x => x)
+            .FirstOrDefault();
     }
 }
 
@@ -128,5 +157,11 @@ public record ZwiftEventVELORatingResponseItem
     public required double? MinVELO { get; init; }
     public required double? VELO { get; init; }
     public required double FtpPerKg { get; init; }
-    public required double FiveMinBest { get; init; }
+    public required double? Best5Sec { get; init; }
+    public required double? Best15Sec { get; init; }
+    public required double? Best30Sec { get; init; }
+    public required double? Best1Min { get; init; }
+    public required double? Best2Min { get; init; }
+    public required double? Best5Min { get; init; }
+    public required double? Best20Min { get; init; }
 }
