@@ -86,7 +86,7 @@ public class ZwiftEventVELORatingHttpTriggerFunction
         {
             var csvLines = new List<string>
             {
-                "Id,FirstName,LastName,Age,Weight,FtpPerKg,Best5Sec,Best15Sec,Best30Sec,Best1Min,Best2Min,Best5Min,Best20Min,MaxVELO,MinVELO,VELO\r\n"
+                "Id,FirstName,LastName,Age,Weight,FtpPerKg,Best5Sec,Best15Sec,Best30Sec,Best1Min,Best2Min,Best5Min,Best20Min,MaxVELO,MinVELO,VELO"
             };
             csvLines.AddRange(items.Select(item =>
             {
@@ -143,7 +143,6 @@ public record ZwiftEventVELORatingResponse
     public required int Year { get; init; }
     public required ZwiftEventVELORatingResponseItem[] Items { get; init; }
     public int Count => Items.Length;
-
 }
 
 public record ZwiftEventVELORatingResponseItem
