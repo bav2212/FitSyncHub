@@ -1,4 +1,6 @@
-﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
+﻿using System.Text.Json.Serialization;
+
+namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
 public record EventResponse
 {
@@ -13,4 +15,7 @@ public record EventResponse
     public long? IcuTrainingLoad { get; init; }
     public long? MovingTime { get; init; }
     public long? Joules { get; init; }
+    [JsonPropertyName("workout_doc")]
+    public required EventWorkoutDocument WorkoutDocument { get; init; }
 }
+

@@ -86,6 +86,12 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
             .WhereNotNull()
             .Sum() / 1000.0f;
 
+        // use another field if joules is not set
+        if (plannedCalories == 0)
+        {
+            plannedCalories = plannedEvents.Sum(x => x.WorkoutDocument.WorkCalculated) / 1000.0f;
+        }
+
         var (weightInKg, bodyFat) = await GetWeightAndBodyFatAsync(date, cancellationToken);
 
         var totalCalories = activeWorkoutsCalories + plannedCalories;
