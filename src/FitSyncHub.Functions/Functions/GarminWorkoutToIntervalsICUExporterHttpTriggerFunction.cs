@@ -7,12 +7,10 @@ using FitSyncHub.IntervalsICU.Builders;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
-using FitSyncHub.IntervalsICU.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Functions.Functions;
 
@@ -22,20 +20,17 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
     private readonly GarminConnectToInternalWorkoutConverterService _converterService;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
-    private readonly string _athleteId;
     private readonly ILogger<GarminWorkoutToIntervalsICUExporterHttpTriggerFunction> _logger;
 
     public GarminWorkoutToIntervalsICUExporterHttpTriggerFunction(
         GarminConnectHttpClient garminConnectHttpClient,
         GarminConnectToInternalWorkoutConverterService converterService,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
-        IOptions<IntervalsIcuOptions> intervalsIcuOptions,
         ILogger<GarminWorkoutToIntervalsICUExporterHttpTriggerFunction> logger)
     {
         _garminConnectHttpClient = garminConnectHttpClient;
         _converterService = converterService;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
-        _athleteId = intervalsIcuOptions.Value.AthleteId;
         _logger = logger;
     }
 
@@ -80,8 +75,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         var lastDay = garminTrainingPlanTaskListDates[^1];
         _logger.LogInformation("Last calendar day among tasks {LastDay}", lastDay);
 
-        var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(_athleteId,
-            new ListEventsQueryParams(firstDay, lastDay), cancellationToken);
+        var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(firstDay, lastDay), cancellationToken);
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
         var intervalsIcuEventsMapping = intervalsIcuEvents
@@ -130,7 +124,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
                 else
                 {
                     _logger.LogInformation("Updating existing event by deletion: {existingIntervalsIcuEventId}", existingIntervalsIcuEvent.Id);
-                    await _intervalsIcuHttpClient.DeleteEvent(_athleteId, new(existingIntervalsIcuEvent.Id), cancellationToken: cancellationToken);
+                    await _intervalsIcuHttpClient.DeleteEvent(new(existingIntervalsIcuEvent.Id), cancellationToken);
                 }
             }
 
@@ -153,23 +147,19 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
             };
 
             _logger.LogInformation("Creating new Intervals.icu event: {CreateRequest}", createRequest);
-            await _intervalsIcuHttpClient.CreateEvent(
-                _athleteId,
-                createRequest,
-                cancellationToken: cancellationToken);
+            await _intervalsIcuHttpClient.CreateEvent(createRequest, cancellationToken);
         }
 
         // Delete all events that are not paired with an activity
         foreach (var (key, @event) in intervalsIcuEventsMapping)
         {
             _logger.LogInformation("Deleting unpaired event {EventId} for date {Date} and title {Title}", @event.Id, key.Date, key.Title);
-            await _intervalsIcuHttpClient.DeleteEvent(_athleteId, new(@event.Id), cancellationToken: cancellationToken);
+            await _intervalsIcuHttpClient.DeleteEvent(new(@event.Id), cancellationToken);
         }
 
         _logger.LogInformation("Export function completed successfully");
 
-        intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(_athleteId,
-            new ListEventsQueryParams(firstDay, lastDay), cancellationToken);
+        intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(firstDay, lastDay), cancellationToken);
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
         var intervalsIcuFutureGarminEventsOverview = ResponseOverviewHelper.IntervalsIcuEventsResponseOverview(intervalsIcuEvents);

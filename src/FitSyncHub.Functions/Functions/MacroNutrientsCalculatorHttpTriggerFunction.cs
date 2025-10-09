@@ -2,13 +2,10 @@
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.Models.Responses;
 using FitSyncHub.IntervalsICU.HttpClients;
-using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
-using FitSyncHub.IntervalsICU.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
@@ -17,18 +14,15 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
 {
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
-    private readonly string _intervalsIcuAthleteId;
     private readonly ILogger<MacroNutrientsCalculatorHttpTriggerFunction> _logger;
 
     public MacroNutrientsCalculatorHttpTriggerFunction(
         IntervalsIcuHttpClient intervalsIcuHttpClient,
         GarminConnectHttpClient garminConnectHttpClient,
-        IOptions<IntervalsIcuOptions> intervalsIcuOptions,
         ILogger<MacroNutrientsCalculatorHttpTriggerFunction> logger)
     {
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
         _garminConnectHttpClient = garminConnectHttpClient;
-        _intervalsIcuAthleteId = intervalsIcuOptions.Value.AthleteId;
         _logger = logger;
     }
 
@@ -80,9 +74,7 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
 
     private async Task<float> GetCompletedActivititiesKiloCalories(DateOnly date, CancellationToken cancellationToken)
     {
-        var activities = await _intervalsIcuHttpClient.ListActivities(_intervalsIcuAthleteId,
-            new ListActivitiesQueryParams(date, date),
-            cancellationToken);
+        var activities = await _intervalsIcuHttpClient.ListActivities(new(date, date), cancellationToken);
 
         // human efficiency is almost similar to 0.25, so we can use joules instead of kcal
         return activities
@@ -93,9 +85,7 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
 
     private async Task<float> GetPlannedActivititiesKiloCalories(DateOnly date, CancellationToken cancellationToken)
     {
-        var events = await _intervalsIcuHttpClient.ListEvents(_intervalsIcuAthleteId,
-            new ListEventsQueryParams(date, date),
-            cancellationToken);
+        var events = await _intervalsIcuHttpClient.ListEvents(new(date, date), cancellationToken);
         var plannedEvents = events.Where(x => x.PairedActivityId is null).ToList();
 
         float plannedCalories = 0;

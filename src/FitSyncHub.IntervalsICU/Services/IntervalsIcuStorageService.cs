@@ -1,19 +1,14 @@
 ﻿using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.Models;
-using FitSyncHub.IntervalsICU.Options;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.IntervalsICU.Services;
 
 public class IntervalsIcuStorageService(
     IntervalsIcuHttpClient httpClient,
-    IOptions<IntervalsIcuOptions> options,
     ILogger<IntervalsIcuStorageService> logger)
 {
-    private readonly string _athleteId = options.Value.AthleteId;
-
     private static readonly Dictionary<int, int[]> s_daysDistribution = new()
     {
         {1, [4]},
@@ -33,8 +28,7 @@ public class IntervalsIcuStorageService(
         var createWorkoutRequestModelList = CreateCreateWorkoutRequestModels(intervalsIcuFolderId, items)
             .ToList();
 
-        var response = await httpClient.CreateWorkouts(
-            _athleteId, createWorkoutRequestModelList, cancellationToken);
+        var response = await httpClient.CreateWorkouts(createWorkoutRequestModelList, cancellationToken);
 
         response.EnsureSuccessStatusCode();
         logger.LogInformation("Stored {ItemsCount} at intervals.icu folder {FolderId}", items.Count, intervalsIcuFolderId);

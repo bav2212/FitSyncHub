@@ -7,10 +7,9 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 public partial class IntervalsIcuHttpClient
 {
     public async Task<HttpResponseMessage> ListAllTheAthleteFoldersPlansAndWorkouts(
-        string athleteId,
         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{athleteId}/folders";
+        var url = $"api/v1/athlete/{_athleteId}/folders";
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -19,11 +18,10 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task<HttpResponseMessage> CreateWorkouts(
-        string athleteId,
         IReadOnlyCollection<WorkoutCreateRequest> model,
         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{athleteId}/workouts/bulk";
+        var url = $"api/v1/athlete/{_athleteId}/workouts/bulk";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.IReadOnlyCollectionWorkoutCreateRequest);
         var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
@@ -34,11 +32,10 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task<HttpResponseMessage> CreateWorkout(
-        string athleteId,
         WorkoutCreateRequest model,
         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{athleteId}/workouts";
+        var url = $"api/v1/athlete/{_athleteId}/workouts";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.WorkoutCreateRequest);
         var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
@@ -50,11 +47,10 @@ public partial class IntervalsIcuHttpClient
 
     // can change workoutId to DeleteWorkoutRequest if needed to pass 'others' query param
     public async Task<HttpResponseMessage> DeleteWorkout(
-        string athleteId,
         int workoutId,
         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{athleteId}/workouts/{workoutId}";
+        var url = $"api/v1/athlete/{_athleteId}/workouts/{workoutId}";
 
         var response = await _httpClient.DeleteAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();

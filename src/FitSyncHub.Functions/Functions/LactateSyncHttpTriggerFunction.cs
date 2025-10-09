@@ -6,12 +6,10 @@ using FitSyncHub.Common.Services;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
-using FitSyncHub.IntervalsICU.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using nietras.SeparatedValues;
 
 namespace FitSyncHub.Functions.Functions;
@@ -19,19 +17,16 @@ namespace FitSyncHub.Functions.Functions;
 public class LactateSyncHttpTriggerFunction
 {
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
-    private readonly string _intervalsIcuAthleteId;
     private readonly IDistributedCacheService _distributedCacheService;
     private readonly ILogger<LactateSyncHttpTriggerFunction> _logger;
     private readonly JsonTypeInfo<DateTime> _dateTimeJsonTypeInfo;
 
     public LactateSyncHttpTriggerFunction(
         IntervalsIcuHttpClient intervalsIcuHttpClient,
-         IOptions<IntervalsIcuOptions> intervalsIcuOptions,
         IDistributedCacheService distributedCacheService,
         ILogger<LactateSyncHttpTriggerFunction> logger)
     {
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
-        _intervalsIcuAthleteId = intervalsIcuOptions.Value.AthleteId;
         _distributedCacheService = distributedCacheService;
         _logger = logger;
 
@@ -198,7 +193,7 @@ public class LactateSyncHttpTriggerFunction
         for (; ; )
         {
             var activitiesPortionWithStravaActivities = await _intervalsIcuHttpClient
-               .ListActivities(_intervalsIcuAthleteId, new(oldestDate, newestDate) { Limit = Limit }, cancellation);
+               .ListActivities(new(oldestDate, newestDate) { Limit = Limit }, cancellation);
 
             var nextPageExists = activitiesPortionWithStravaActivities.Count == Limit;
 

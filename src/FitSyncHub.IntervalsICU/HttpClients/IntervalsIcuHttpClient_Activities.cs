@@ -15,11 +15,10 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 public partial class IntervalsIcuHttpClient
 {
     public async Task<IReadOnlyCollection<ActivityResponse?>> ListActivities(
-        string athleteId,
         ListActivitiesQueryParams query,
         CancellationToken cancellationToken)
     {
-        var baseUrl = $"api/v1/athlete/{athleteId}/activities";
+        var baseUrl = $"api/v1/athlete/{_athleteId}/activities";
 
         var queryParams = new Dictionary<string, string>()
         {
@@ -64,12 +63,11 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task<ActivityCreateResponse> CreateActivity(
-        string athleteId,
         FileModel fileModel,
         CreateActivityRequest createActivityRequest,
         CancellationToken cancellationToken = default)
     {
-        var requestUri = $"api/v1/athlete/{athleteId}/activities";
+        var requestUri = $"api/v1/athlete/{_athleteId}/activities";
 
         using var formData = FormDataContentHelper.CreateMultipartFormDataContent(
             fileModel, createActivityRequest, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateActivityRequest);

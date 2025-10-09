@@ -9,11 +9,10 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 public partial class IntervalsIcuHttpClient
 {
     public async Task<WellnessResponse> GetWellness(
-        string athleteId,
         DateOnly date,
         CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/athlete/{athleteId}/wellness/{date:yyyy-MM-dd}";
+        var requestUri = $"api/v1/athlete/{_athleteId}/wellness/{date:yyyy-MM-dd}";
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -23,11 +22,10 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task<WellnessResponse> UpdateWellness(
-        string athleteId,
         WellnessRequest model,
         CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/athlete/{athleteId}/wellness/{model.Id}";
+        var requestUri = $"api/v1/athlete/{_athleteId}/wellness/{model.Id}";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuCamelCaseSourceGenerationContext.Default.WellnessRequest);
         var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);

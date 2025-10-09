@@ -3,14 +3,12 @@ using FitSyncHub.Functions.Helpers;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
-using FitSyncHub.IntervalsICU.Options;
 using FitSyncHub.Xert;
 using FitSyncHub.Xert.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Functions.Functions;
 
@@ -20,18 +18,15 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
 
     private readonly IXertHttpClient _xertHttpClient;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
-    private readonly string _athleteId;
     private readonly ILogger<XertWorkoutToIntervalsICUExporterHttpTriggerFunction> _logger;
 
     public XertWorkoutToIntervalsICUExporterHttpTriggerFunction(
-       IXertHttpClient xertHttpClient,
+        IXertHttpClient xertHttpClient,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
-        IOptions<IntervalsIcuOptions> intervalsIcuOptions,
         ILogger<XertWorkoutToIntervalsICUExporterHttpTriggerFunction> logger)
     {
         _xertHttpClient = xertHttpClient;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
-        _athleteId = intervalsIcuOptions.Value.AthleteId;
         _logger = logger;
     }
 
@@ -58,8 +53,7 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
         var zwo = await _xertHttpClient.GetDownloadWorkout(workoutOfTheDayUrl, cancellationToken);
         _logger.LogInformation("Downloaded workout zwo from Xert");
 
-        var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(_athleteId,
-            new ListEventsQueryParams(DateOnly.FromDateTime(today), DateOnly.FromDateTime(today)), cancellationToken);
+        var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(today, today), cancellationToken);
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
         var intervalsIcuEventsMapping = intervalsIcuEvents
@@ -73,7 +67,7 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
 
         var base64EncodedWorkoutStructure = Convert.ToBase64String(Encoding.UTF8.GetBytes(zwo));
 
-        var createdEvent = await _intervalsIcuHttpClient.CreateEvent(_athleteId, new CreateEventFromFileRequest
+        var createdEvent = await _intervalsIcuHttpClient.CreateEvent(new CreateEventFromFileRequest
         {
             Category = EventCategory.Workout,
             Type = EventType.Ride,

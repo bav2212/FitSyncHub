@@ -9,12 +9,10 @@ using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
-using FitSyncHub.IntervalsICU.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
@@ -24,20 +22,17 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
     private readonly FitFileDecoder _decoder;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
-    private readonly string _intervalsIcuAthleteId;
     private readonly ILogger<SyncIntervalsICUWithGarminHttpTriggerFunction> _logger;
 
     public SyncIntervalsICUWithGarminHttpTriggerFunction(
         FitFileDecoder decoder,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
         GarminConnectHttpClient garminConnectHttpClient,
-        IOptions<IntervalsIcuOptions> intervalsIcuOptions,
         ILogger<SyncIntervalsICUWithGarminHttpTriggerFunction> logger)
     {
         _decoder = decoder;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
         _garminConnectHttpClient = garminConnectHttpClient;
-        _intervalsIcuAthleteId = intervalsIcuOptions.Value.AthleteId;
         _logger = logger;
     }
 
@@ -171,7 +166,7 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
 
     private async Task<IReadOnlyCollection<ActivityResponse>> GetRideActivities(DateOnly date, CancellationToken cancellationToken)
     {
-        var activities = await _intervalsIcuHttpClient.ListActivities(_intervalsIcuAthleteId, new(date, date), cancellationToken)
+        var activities = await _intervalsIcuHttpClient.ListActivities(new(date, date), cancellationToken)
             ?? [];
         return [.. activities
             // skip strava activities
@@ -245,7 +240,7 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
         if (activityWithLinkedPairedEvent?.PairedEventId is { } pairedEventId)
         {
             _logger.LogInformation("Get linked paired event");
-            var pairedEvent = await _intervalsIcuHttpClient.GetEvent(_intervalsIcuAthleteId, pairedEventId, cancellationToken);
+            var pairedEvent = await _intervalsIcuHttpClient.GetEvent(pairedEventId, cancellationToken);
 
             _logger.LogInformation("Unlinking paired event {EventId} from activity {ActivityId}", pairedEvent, activityWithLinkedPairedEvent.Id);
             await _intervalsIcuHttpClient.UnlinkPairedWorkout(activityWithLinkedPairedEvent.Id, cancellationToken);
@@ -253,10 +248,7 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
             return pairedEvent;
         }
 
-        var events = await _intervalsIcuHttpClient.ListEvents(
-            _intervalsIcuAthleteId,
-            new ListEventsQueryParams(date, date),
-            cancellationToken);
+        var events = await _intervalsIcuHttpClient.ListEvents(new(date, date), cancellationToken);
 
         return events
             .SingleOrDefault(x => x.Type.Contains("Ride"));
