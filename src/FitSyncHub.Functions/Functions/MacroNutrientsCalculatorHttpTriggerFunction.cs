@@ -64,44 +64,61 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
             date = DateOnly.FromDateTime(DateTime.Today);
         }
 
+        var activeKiloCalories = await GetCompletedActivititiesKiloCalories(date, cancellationToken);
+        var plannedKiloCalories = await GetPlannedActivititiesKiloCalories(date, cancellationToken);
+        var totalKiloCalories = activeKiloCalories + plannedKiloCalories;
+
+        var (weightInKg, bodyFat) = await GetWeightAndBodyFat(date, cancellationToken);
+
+        var macroNutrients = MacroNutrientsCalculator
+            .Calculate(optimalEvengyAvailability, weightInKg, bodyFat, totalKiloCalories);
+
+        var resultString = $"Carbs: {macroNutrients.Carbs:0}, protein: {macroNutrients.Protein:0}, fat: {macroNutrients.Fat:0}, kCal: {macroNutrients.Calories:0}";
+
+        return new OkObjectResult(resultString);
+    }
+
+    private async Task<float> GetCompletedActivititiesKiloCalories(DateOnly date, CancellationToken cancellationToken)
+    {
         var activities = await _intervalsIcuHttpClient.ListActivities(_intervalsIcuAthleteId,
             new ListActivitiesQueryParams(date, date),
             cancellationToken);
 
         // human efficiency is almost similar to 0.25, so we can use joules instead of kcal
-        var activeWorkoutsCalories = activities
+        return activities
             .Select(x => x?.IcuJoules)
             .WhereNotNull()
             .Sum() / 1000.0f;
+    }
 
+    private async Task<float> GetPlannedActivititiesKiloCalories(DateOnly date, CancellationToken cancellationToken)
+    {
         var events = await _intervalsIcuHttpClient.ListEvents(_intervalsIcuAthleteId,
             new ListEventsQueryParams(date, date),
             cancellationToken);
         var plannedEvents = events.Where(x => x.PairedActivityId is null).ToList();
 
-        // human efficiency is almost similar to 0.25, so we can use joules instead of kcal
-        var plannedCalories = plannedEvents.Select(x => x.Joules)
-            .WhereNotNull()
-            .Sum() / 1000.0f;
-
-        // use another field if joules is not set
-        if (plannedCalories == 0)
+        float plannedCalories = 0;
+        foreach (var plannedEvent in plannedEvents)
         {
-            plannedCalories = plannedEvents.Sum(x => x.WorkoutDocument.WorkCalculated) / 1000.0f;
+            if (plannedEvent.Joules is { } joules)
+            {
+                // human efficiency is almost similar to 0.25, so we can use joules instead of kcal
+                plannedCalories += joules;
+                continue;
+            }
+
+            if (plannedEvent.WorkoutDocument?.WorkCalculated is not null)
+            {
+                plannedCalories += plannedEvent.WorkoutDocument.WorkCalculated;
+                continue;
+            }
         }
 
-        var (weightInKg, bodyFat) = await GetWeightAndBodyFatAsync(date, cancellationToken);
-
-        var totalCalories = activeWorkoutsCalories + plannedCalories;
-        var macroNutrients = MacroNutrientsCalculator
-            .Calculate(optimalEvengyAvailability, weightInKg, bodyFat, totalCalories);
-
-        var resultString = $"Carbs: {macroNutrients.Carbs:0}, protein: {macroNutrients.Protein:0}, fat: {macroNutrients.Fat:0}, calories: {macroNutrients.Calories:0}";
-
-        return new OkObjectResult(resultString);
+        return plannedCalories / 1000.0f;
     }
 
-    private async Task<(float weightKg, float bodyFat)> GetWeightAndBodyFatAsync(
+    private async Task<(float weightKg, float bodyFat)> GetWeightAndBodyFat(
         DateOnly date,
         CancellationToken cancellationToken)
     {
