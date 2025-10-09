@@ -171,8 +171,8 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
 
     private async Task<IReadOnlyCollection<ActivityResponse>> GetRideActivities(DateOnly date, CancellationToken cancellationToken)
     {
-        var activities = await _intervalsIcuHttpClient.ListActivities(_intervalsIcuAthleteId,
-                    new DateTime(date, TimeOnly.MinValue), new DateTime(date, TimeOnly.MaxValue), 10, cancellationToken) ?? [];
+        var activities = await _intervalsIcuHttpClient.ListActivities(_intervalsIcuAthleteId, new(date, date), cancellationToken)
+            ?? [];
         return [.. activities
             // skip strava activities
             .WhereNotNull()

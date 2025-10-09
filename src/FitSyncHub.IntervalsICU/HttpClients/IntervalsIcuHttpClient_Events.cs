@@ -94,15 +94,13 @@ public partial class IntervalsIcuHttpClient
 
     public async Task DeleteEvent(
         string athleteId,
-        int eventId,
-        bool others = false,
-        DateOnly? notBefore = null,
+        DeleteEventRequest model,
         CancellationToken cancellationToken = default)
     {
-        notBefore ??= DateOnly.FromDateTime(DateTime.Today);
-        var notBeforeQueryParam = new DateTime(notBefore.Value, TimeOnly.MinValue).ToString("s", CultureInfo.InvariantCulture);
+        var notBeforeQueryParam = new DateTime(model.NotBefore, TimeOnly.MinValue)
+            .ToString("s", CultureInfo.InvariantCulture);
 
-        var requestUri = $"api/v1/athlete/{athleteId}/events/{eventId}?others={others}&notBefore={notBeforeQueryParam}";
+        var requestUri = $"api/v1/athlete/{athleteId}/events/{model.EventId}?others={model.Others}&notBefore={notBeforeQueryParam}";
 
         var response = await _httpClient.DeleteAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();

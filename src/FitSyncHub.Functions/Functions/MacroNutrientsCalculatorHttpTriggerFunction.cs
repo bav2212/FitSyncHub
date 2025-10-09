@@ -65,9 +65,7 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
         }
 
         var activities = await _intervalsIcuHttpClient.ListActivities(_intervalsIcuAthleteId,
-            new DateTime(date, TimeOnly.MinValue),
-            new DateTime(date, TimeOnly.MaxValue),
-            10,
+            new ListActivitiesQueryParams(date, date),
             cancellationToken);
 
         // human efficiency is almost similar to 0.25, so we can use joules instead of kcal

@@ -130,7 +130,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
                 else
                 {
                     _logger.LogInformation("Updating existing event by deletion: {existingIntervalsIcuEventId}", existingIntervalsIcuEvent.Id);
-                    await _intervalsIcuHttpClient.DeleteEvent(_athleteId, existingIntervalsIcuEvent.Id, cancellationToken: cancellationToken);
+                    await _intervalsIcuHttpClient.DeleteEvent(_athleteId, new(existingIntervalsIcuEvent.Id), cancellationToken: cancellationToken);
                 }
             }
 
@@ -163,7 +163,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         foreach (var (key, @event) in intervalsIcuEventsMapping)
         {
             _logger.LogInformation("Deleting unpaired event {EventId} for date {Date} and title {Title}", @event.Id, key.Date, key.Title);
-            await _intervalsIcuHttpClient.DeleteEvent(_athleteId, @event.Id, cancellationToken: cancellationToken);
+            await _intervalsIcuHttpClient.DeleteEvent(_athleteId, new(@event.Id), cancellationToken: cancellationToken);
         }
 
         _logger.LogInformation("Export function completed successfully");

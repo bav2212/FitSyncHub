@@ -198,7 +198,7 @@ public class LactateSyncHttpTriggerFunction
         for (; ; )
         {
             var activitiesPortionWithStravaActivities = await _intervalsIcuHttpClient
-               .ListActivities(_intervalsIcuAthleteId, oldestDate, newestDate, Limit, cancellation);
+               .ListActivities(_intervalsIcuAthleteId, new(oldestDate, newestDate) { Limit = Limit }, cancellation);
 
             var nextPageExists = activitiesPortionWithStravaActivities.Count == Limit;
 

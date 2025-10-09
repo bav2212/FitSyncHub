@@ -16,18 +16,16 @@ public partial class IntervalsIcuHttpClient
 {
     public async Task<IReadOnlyCollection<ActivityResponse?>> ListActivities(
         string athleteId,
-        DateTime oldest,
-        DateTime newest,
-        int limit,
+        ListActivitiesQueryParams query,
         CancellationToken cancellationToken)
     {
         var baseUrl = $"api/v1/athlete/{athleteId}/activities";
 
         var queryParams = new Dictionary<string, string>()
         {
-            { "oldest", oldest.ToString("s", CultureInfo.InvariantCulture) },
-            { "newest", newest.ToString("s", CultureInfo.InvariantCulture) },
-            { "limit",  limit.ToString() },
+            { "oldest", query.Oldest.ToString("s", CultureInfo.InvariantCulture) },
+            { "newest", query.Oldest.ToString("s", CultureInfo.InvariantCulture) },
+            { "limit",  query.Limit.ToString() },
         };
 
         var requestUri = $"{baseUrl}?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
@@ -41,8 +39,8 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task<ActivityResponse> GetActivity(
-     string activityId,
-     CancellationToken cancellationToken)
+        string activityId,
+        CancellationToken cancellationToken)
     {
         var requestUri = $"api/v1/activity/{activityId}";
 
@@ -66,10 +64,10 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task<ActivityCreateResponse> CreateActivity(
-       string athleteId,
-       FileModel fileModel,
-       CreateActivityRequest createActivityRequest,
-       CancellationToken cancellationToken = default)
+        string athleteId,
+        FileModel fileModel,
+        CreateActivityRequest createActivityRequest,
+        CancellationToken cancellationToken = default)
     {
         var requestUri = $"api/v1/athlete/{athleteId}/activities";
 

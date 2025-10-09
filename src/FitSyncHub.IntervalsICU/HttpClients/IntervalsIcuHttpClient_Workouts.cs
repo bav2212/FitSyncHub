@@ -48,6 +48,7 @@ public partial class IntervalsIcuHttpClient
         return response;
     }
 
+    // can change workoutId to DeleteWorkoutRequest if needed to pass 'others' query param
     public async Task<HttpResponseMessage> DeleteWorkout(
         string athleteId,
         int workoutId,
