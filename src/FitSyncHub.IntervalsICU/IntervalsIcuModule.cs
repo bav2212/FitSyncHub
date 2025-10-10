@@ -25,7 +25,7 @@ public static class IntervalsIcuModule
         {
             var options = sp.GetRequiredService<IOptions<IntervalsIcuOptions>>().Value;
             var intervalsIcuApiKey = options.ApiKey ?? throw new InvalidOperationException("IntervalsIcuApiKey is null");
-            client.BaseAddress = new Uri("https://intervals.icu");
+            client.BaseAddress = new Uri("https://intervals.icu/api/v1/");
 
             var authenticationString = $"API_KEY:{intervalsIcuApiKey}";
             var base64EncodedAuthenticationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(authenticationString));

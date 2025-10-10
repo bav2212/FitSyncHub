@@ -18,12 +18,12 @@ public partial class IntervalsIcuHttpClient
         ListActivitiesQueryParams query,
         CancellationToken cancellationToken)
     {
-        var baseUrl = $"api/v1/athlete/{_athleteId}/activities";
+        var baseUrl = $"{AthleteBaseUrl}/activities";
 
         var queryParams = new Dictionary<string, string>()
         {
             { "oldest", query.Oldest.ToString("s", CultureInfo.InvariantCulture) },
-            { "newest", query.Oldest.ToString("s", CultureInfo.InvariantCulture) },
+            { "newest", query.Newest.ToString("s", CultureInfo.InvariantCulture) },
             { "limit",  query.Limit.ToString() },
         };
 
@@ -41,7 +41,7 @@ public partial class IntervalsIcuHttpClient
         string activityId,
         CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/activity/{activityId}";
+        var requestUri = $"activity/{activityId}";
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -55,7 +55,7 @@ public partial class IntervalsIcuHttpClient
        ActivityUpdateRequest model,
        CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/activity/{activityId}";
+        var requestUri = $"activity/{activityId}";
 
         var jsonContent = JsonContent.Create(model, IntervalsActivityUpdateSourceGenerationContext.Default.ActivityUpdateRequest);
         var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);
@@ -67,7 +67,7 @@ public partial class IntervalsIcuHttpClient
         CreateActivityRequest createActivityRequest,
         CancellationToken cancellationToken = default)
     {
-        var requestUri = $"api/v1/athlete/{_athleteId}/activities";
+        var requestUri = $"{AthleteBaseUrl}/activities";
 
         using var formData = FormDataContentHelper.CreateMultipartFormDataContent(
             fileModel, createActivityRequest, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateActivityRequest);
@@ -84,7 +84,7 @@ public partial class IntervalsIcuHttpClient
          string activityId,
          CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/activity/{activityId}";
+        var requestUri = $"activity/{activityId}";
 
         var response = await _httpClient.DeleteAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -94,7 +94,7 @@ public partial class IntervalsIcuHttpClient
        string activityId,
        CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/activity/{activityId}/file";
+        var requestUri = $"activity/{activityId}/file";
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -106,7 +106,7 @@ public partial class IntervalsIcuHttpClient
        string activityId,
        CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/activity/{activityId}";
+        var requestUri = $"activity/{activityId}";
         var content = new StringContent("""{ "paired_event_id":0}""", MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json));
 
         var response = await _httpClient.PutAsync(requestUri, content, cancellationToken);

@@ -13,7 +13,7 @@ public partial class IntervalsIcuHttpClient
       ListEventsQueryParams query,
       CancellationToken cancellationToken)
     {
-        var baseUrl = $"api/v1/athlete/{_athleteId}/events";
+        var baseUrl = $"{AthleteBaseUrl}/events";
 
         var queryParams = new Dictionary<string, string>()
         {
@@ -51,7 +51,7 @@ public partial class IntervalsIcuHttpClient
         int eventId,
         CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/athlete/{_athleteId}/events/{eventId}";
+        var requestUri = $"{AthleteBaseUrl}/events/{eventId}";
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -64,7 +64,7 @@ public partial class IntervalsIcuHttpClient
        CreateEventFromDescriptionRequest model,
        CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/athlete/{_athleteId}/events";
+        var requestUri = $"{AthleteBaseUrl}/events";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateEventFromDescriptionRequest);
         var response = await _httpClient.PostAsync(requestUri, jsonContent, cancellationToken);
@@ -78,7 +78,7 @@ public partial class IntervalsIcuHttpClient
        CreateEventFromFileRequest model,
        CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/athlete/{_athleteId}/events";
+        var requestUri = $"{AthleteBaseUrl}/events";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateEventFromFileRequest);
         var response = await _httpClient.PostAsync(requestUri, jsonContent, cancellationToken);
@@ -95,7 +95,7 @@ public partial class IntervalsIcuHttpClient
         var notBeforeQueryParam = new DateTime(model.NotBefore, TimeOnly.MinValue)
             .ToString("s", CultureInfo.InvariantCulture);
 
-        var requestUri = $"api/v1/athlete/{_athleteId}/events/{model.EventId}?others={model.Others}&notBefore={notBeforeQueryParam}";
+        var requestUri = $"{AthleteBaseUrl}/events/{model.EventId}?others={model.Others}&notBefore={notBeforeQueryParam}";
 
         var response = await _httpClient.DeleteAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();

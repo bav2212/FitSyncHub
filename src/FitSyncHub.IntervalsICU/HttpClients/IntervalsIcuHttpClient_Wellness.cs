@@ -12,7 +12,7 @@ public partial class IntervalsIcuHttpClient
         DateOnly date,
         CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/athlete/{_athleteId}/wellness/{date:yyyy-MM-dd}";
+        var requestUri = $"{AthleteBaseUrl}/wellness/{date:yyyy-MM-dd}";
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -25,7 +25,7 @@ public partial class IntervalsIcuHttpClient
         WellnessRequest model,
         CancellationToken cancellationToken)
     {
-        var requestUri = $"api/v1/athlete/{_athleteId}/wellness/{model.Id}";
+        var requestUri = $"{AthleteBaseUrl}/wellness/{model.Id}";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuCamelCaseSourceGenerationContext.Default.WellnessRequest);
         var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);

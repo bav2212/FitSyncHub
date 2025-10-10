@@ -6,11 +6,12 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 public partial class IntervalsIcuHttpClient
 {
     private readonly HttpClient _httpClient;
-    private readonly string _athleteId;
 
     public IntervalsIcuHttpClient(HttpClient httpClient, IOptions<IntervalsIcuOptions> options)
     {
         _httpClient = httpClient;
-        _athleteId = options.Value.AthleteId;
+        AthleteBaseUrl = $"athlete/{options.Value.AthleteId}";
     }
+
+    internal string AthleteBaseUrl { get; private set; }
 }

@@ -12,7 +12,7 @@ public partial class IntervalsIcuHttpClient
         string activityId,
         CancellationToken cancellationToken = default)
     {
-        var requestUri = $"api/v1/activity/{activityId}/messages";
+        var requestUri = $"activity/{activityId}/messages";
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
 
@@ -25,7 +25,7 @@ public partial class IntervalsIcuHttpClient
         AddMessageRequest model,
         CancellationToken cancellationToken = default)
     {
-        var requestUri = $"api/v1/activity/{activityId}/messages";
+        var requestUri = $"activity/{activityId}/messages";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.AddMessageRequest);
         var response = await _httpClient.PostAsync(requestUri, jsonContent, cancellationToken);

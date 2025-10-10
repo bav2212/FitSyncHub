@@ -32,15 +32,14 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
-        string? optimalEvengyAvailabilityQueryParameter = req.Query["oea"];
-
-        if (optimalEvengyAvailabilityQueryParameter is null)
+        string? optimalEnergyAvailabilityQueryParameter = req.Query["oea"];
+        if (optimalEnergyAvailabilityQueryParameter is null)
         {
             _logger.LogInformation("optimal energy availability is not set. Set 'OEA' parameter");
             return new BadRequestObjectResult("optimal energy availability is not set. Set 'OEA' parameter");
         }
 
-        if (!int.TryParse(optimalEvengyAvailabilityQueryParameter, out var optimalEvengyAvailability))
+        if (!int.TryParse(optimalEnergyAvailabilityQueryParameter, out var optimalEvengyAvailability))
         {
             _logger.LogInformation("OEA has wrong format");
             return new BadRequestObjectResult("OEA has wrong format");
@@ -58,8 +57,8 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
             date = DateOnly.FromDateTime(DateTime.Today);
         }
 
-        var activeKiloCalories = await GetCompletedActivititiesKiloCalories(date, cancellationToken);
-        var plannedKiloCalories = await GetPlannedActivititiesKiloCalories(date, cancellationToken);
+        var activeKiloCalories = await GetCompletedActivitiesKiloCalories(date, cancellationToken);
+        var plannedKiloCalories = await GetPlannedActivitiesKiloCalories(date, cancellationToken);
         var totalKiloCalories = activeKiloCalories + plannedKiloCalories;
 
         var (weightInKg, bodyFat) = await GetWeightAndBodyFat(date, cancellationToken);
@@ -72,7 +71,9 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
         return new OkObjectResult(resultString);
     }
 
-    private async Task<float> GetCompletedActivititiesKiloCalories(DateOnly date, CancellationToken cancellationToken)
+    private async Task<float> GetCompletedActivitiesKiloCalories(
+        DateOnly date,
+        CancellationToken cancellationToken)
     {
         var activities = await _intervalsIcuHttpClient.ListActivities(new(date, date), cancellationToken);
 
@@ -83,7 +84,9 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
             .Sum() / 1000.0f;
     }
 
-    private async Task<float> GetPlannedActivititiesKiloCalories(DateOnly date, CancellationToken cancellationToken)
+    private async Task<float> GetPlannedActivitiesKiloCalories(
+        DateOnly date,
+        CancellationToken cancellationToken)
     {
         var events = await _intervalsIcuHttpClient.ListEvents(new(date, date), cancellationToken);
         var plannedEvents = events.Where(x => x.PairedActivityId is null).ToList();

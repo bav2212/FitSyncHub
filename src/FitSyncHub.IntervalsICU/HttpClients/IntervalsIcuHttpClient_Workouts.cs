@@ -9,7 +9,7 @@ public partial class IntervalsIcuHttpClient
     public async Task<HttpResponseMessage> ListAllTheAthleteFoldersPlansAndWorkouts(
         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{_athleteId}/folders";
+        var url = $"{AthleteBaseUrl}/folders";
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -21,7 +21,7 @@ public partial class IntervalsIcuHttpClient
         IReadOnlyCollection<WorkoutCreateRequest> model,
         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{_athleteId}/workouts/bulk";
+        var url = $"{AthleteBaseUrl}/workouts/bulk";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.IReadOnlyCollectionWorkoutCreateRequest);
         var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
@@ -35,7 +35,7 @@ public partial class IntervalsIcuHttpClient
         WorkoutCreateRequest model,
         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{_athleteId}/workouts";
+        var url = $"{AthleteBaseUrl}/workouts";
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.WorkoutCreateRequest);
         var response = await _httpClient.PostAsync(url, jsonContent, cancellationToken);
@@ -50,7 +50,7 @@ public partial class IntervalsIcuHttpClient
         int workoutId,
         CancellationToken cancellationToken)
     {
-        var url = $"api/v1/athlete/{_athleteId}/workouts/{workoutId}";
+        var url = $"{AthleteBaseUrl}/workouts/{workoutId}";
 
         var response = await _httpClient.DeleteAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
