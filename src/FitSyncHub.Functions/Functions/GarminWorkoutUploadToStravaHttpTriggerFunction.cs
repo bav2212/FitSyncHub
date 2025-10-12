@@ -143,11 +143,13 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
             }
 
             var savedActivity = await _stravaHttpClient.GetActivity(uploadResponse.ActivityId.Value, cancellationToken);
-            if (savedActivity.SportType != SportType.Workout)
+            // TODO manually check it tomorrow
+            // need WeightTraining for Athletica.ai
+            if (savedActivity.SportType != SportType.WeightTraining)
             {
                 await _stravaHttpClient.UpdateActivity(savedActivity.Id!.Value, new UpdatableActivityRequest
                 {
-                    SportType = SportType.Workout,
+                    SportType = SportType.WeightTraining,
                 }, cancellationToken);
                 _logger.LogInformation("Updated sport type from {OldSportType} to Workout", savedActivity.SportType);
             }
