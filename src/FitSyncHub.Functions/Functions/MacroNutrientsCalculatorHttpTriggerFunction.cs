@@ -71,6 +71,7 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
         return new OkObjectResult(resultString);
     }
 
+    // TODO: check how it works for weight trainings. Maybe need to pull from garmin connect
     private async Task<float> GetCompletedActivitiesKiloCalories(
         DateOnly date,
         CancellationToken cancellationToken)
