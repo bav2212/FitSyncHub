@@ -104,10 +104,9 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
                 = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
         }
 
-        //temp till Garmin in repair
-        //var garminActivity = await UpdateGarminSummaryWithIntervalsData(date, activitySummary, cancellationToken);
-        //var intervalsActivities = await GetRideActivities(date, cancellationToken);
-        //await UpdateIntervalsIcuActivitiesWithGarminData(garminActivity, intervalsActivities, cancellationToken);
+        var garminActivity = await UpdateGarminSummaryWithIntervalsData(date, activitySummary, cancellationToken);
+        var intervalsActivities = await GetRideActivities(date, cancellationToken);
+        await UpdateIntervalsIcuActivitiesWithGarminData(garminActivity, intervalsActivities, cancellationToken);
 
         return new OkObjectResult("Success");
     }
