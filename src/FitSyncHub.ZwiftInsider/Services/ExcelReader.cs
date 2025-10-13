@@ -103,7 +103,7 @@ public class ExcelReader
         var hyperlinkRelationship = hyperlinkRelationships.SingleOrDefault(i => i.Id == hyperlink.Id);
         var url = hyperlinkRelationship!.Uri.ToString();
 
-        return string.IsNullOrWhiteSpace(location) ? url.ToString() : $"{url}#{location}";
+        return string.IsNullOrWhiteSpace(location) ? url : $"{url}#{location}";
     }
 
     private static IEnumerable<DataColumn> CreateDataColumns(SpreadsheetDocument spreadSheetDocument, Row headerRow)

@@ -33,6 +33,7 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
         [FromBody] IntervalICUPlanExporterRequest request,
         CancellationToken cancellationToken)
     {
+        _ = req;
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         if (!Uri.TryCreate(request.PlanUrl, UriKind.Absolute, out var planUri))

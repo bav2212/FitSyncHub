@@ -57,7 +57,7 @@ public class MergeFitWithAppleWorkoutHttpTriggerFunction
         await using var memoryStream = new MemoryStream();
         _encoder.Encode(memoryStream, fitFileMessages);
 
-        File.WriteAllBytes(saveToPath, memoryStream.ToArray());
+        await File.WriteAllBytesAsync(saveToPath, memoryStream.ToArray(), cancellationToken);
 
         return new OkObjectResult("Success");
     }

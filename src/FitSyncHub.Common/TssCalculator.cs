@@ -3,7 +3,7 @@ using DateTime = System.DateTime;
 
 namespace FitSyncHub.Common;
 
-public class TssCalculator
+public static class TssCalculator
 {
     public static CalculateTssResult? Calculate(FitMessages fitMessages, double ftp)
     {
@@ -29,7 +29,7 @@ public class TssCalculator
     {
         // can't use timestamps, cause it could be pauses during ride
         var totalDuration = fitData.Count;
-        var powerValues = fitData.Select(d => (double)d.Power).ToList();
+        var powerValues = fitData.ConvertAll(d => d.Power);
 
         var np = CalculateNormalizedPower(powerValues);
         var intensityFactor = np / ftp;
@@ -44,8 +44,10 @@ public class TssCalculator
         };
     }
 
-    private static double CalculateNormalizedPower(List<double> powerValues)
+    private static double CalculateNormalizedPower(List<ushort> powerValuesRaw)
     {
+        var powerValues = powerValuesRaw.ConvertAll(x => (double)x);
+
         if (powerValues.Count < 30)
         {
             // If too few data points, fallback to average

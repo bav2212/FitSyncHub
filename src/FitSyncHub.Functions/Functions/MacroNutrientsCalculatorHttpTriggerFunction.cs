@@ -39,13 +39,13 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
             return new BadRequestObjectResult("optimal energy availability is not set. Set 'OEA' parameter");
         }
 
-        if (!int.TryParse(optimalEnergyAvailabilityQueryParameter, out var optimalEvengyAvailability))
+        if (!int.TryParse(optimalEnergyAvailabilityQueryParameter, out var optimalEnergyAvailability))
         {
             _logger.LogInformation("OEA has wrong format");
             return new BadRequestObjectResult("OEA has wrong format");
         }
 
-        if (optimalEvengyAvailability == 0)
+        if (optimalEnergyAvailability == 0)
         {
             _logger.LogInformation("OEA should be more than 0");
             return new BadRequestObjectResult("OEA should be more than 0");
@@ -64,7 +64,7 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
         var (weightInKg, bodyFat) = await GetWeightAndBodyFat(date, cancellationToken);
 
         var macroNutrients = MacroNutrientsCalculator
-            .Calculate(optimalEvengyAvailability, weightInKg, bodyFat, totalKiloCalories);
+            .Calculate(optimalEnergyAvailability, weightInKg, bodyFat, totalKiloCalories);
 
         var resultString = $"Carbs: {macroNutrients.Carbs:0}, protein: {macroNutrients.Protein:0}, fat: {macroNutrients.Fat:0}, kCal: {macroNutrients.Calories:0}";
 

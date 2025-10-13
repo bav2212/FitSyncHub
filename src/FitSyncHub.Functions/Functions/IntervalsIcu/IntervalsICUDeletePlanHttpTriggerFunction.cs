@@ -26,6 +26,8 @@ public class IntervalsICUDeletePlanHttpTriggerFunction
         int folderId,
         CancellationToken cancellationToken)
     {
+        _ = req;
+
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         try

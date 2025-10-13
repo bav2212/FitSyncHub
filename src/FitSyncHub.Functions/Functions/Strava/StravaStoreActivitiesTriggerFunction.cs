@@ -27,6 +27,7 @@ public class StravaStoreActivitiesTriggerFunction
         [FromBody] StoreStravaActivitiesRequest request,
         CancellationToken cancellationToken)
     {
+        _ = req;
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var result = await _summaryActivityService.StoreSummaryActivities(

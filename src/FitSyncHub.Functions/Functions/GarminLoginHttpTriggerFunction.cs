@@ -19,6 +19,8 @@ public class GarminLoginHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "garmin/login")] HttpRequest req,
         CancellationToken cancellationToken)
     {
+        _ = req;
+
         var loginResult = await _garminAuthService.Login(cancellationToken);
 
         return loginResult.MfaRequired

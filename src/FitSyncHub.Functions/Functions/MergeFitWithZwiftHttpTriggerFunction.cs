@@ -43,7 +43,7 @@ public class MergeFitWithZwiftHttpTriggerFunction
         await using var memoryStream = new MemoryStream();
         _encoder.Encode(memoryStream, mergedFitFile);
 
-        File.WriteAllBytes(saveToPath, memoryStream.ToArray());
+        await File.WriteAllBytesAsync(saveToPath, memoryStream.ToArray(), cancellationToken);
 
         return new OkObjectResult("Success");
     }

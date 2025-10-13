@@ -2,6 +2,4 @@
 
 namespace FitSyncHub.GarminConnect;
 
-public class GarminSsoCookieContainer : CookieContainer
-{
-}
+public class GarminSsoCookieContainer : CookieContainer;

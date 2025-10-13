@@ -66,10 +66,7 @@ public class CosmosDbRepository<T> where T : DataModel
             var response = await linqFeed.ReadNextAsync(cancellationToken);
 
             // Iterate query results
-            foreach (var item in response)
-            {
-                result.Add(item);
-            }
+            result.AddRange(response);
         }
 
         return result;
