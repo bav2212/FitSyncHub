@@ -2,7 +2,6 @@
 using System.Text;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.Strava.Abstractions;
-using FitSyncHub.Strava.Models;
 using FitSyncHub.Strava.Models.Requests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -142,17 +141,17 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
                 continue;
             }
 
-            var savedActivity = await _stravaHttpClient.GetActivity(uploadResponse.ActivityId.Value, cancellationToken);
-            // TODO manually check it tomorrow
-            // need WeightTraining for Athletica.ai
-            if (savedActivity.SportType != SportType.WeightTraining)
-            {
-                await _stravaHttpClient.UpdateActivity(savedActivity.Id!.Value, new UpdatableActivityRequest
-                {
-                    SportType = SportType.WeightTraining,
-                }, cancellationToken);
-                _logger.LogInformation("Updated sport type from {OldSportType} to Workout", savedActivity.SportType);
-            }
+            // hope Strava has some mapping for Garmin activities. Maybe will need this later. 
+            // For now I need Garmin `Strength` workout to be uploaded as `WeightTraining` workout to Strava
+            //var savedActivity = await _stravaHttpClient.GetActivity(uploadResponse.ActivityId.Value, cancellationToken);
+            //if (savedActivity.SportType != SportType.WeightTraining)
+            //{
+            //    await _stravaHttpClient.UpdateActivity(savedActivity.Id!.Value, new UpdatableActivityRequest
+            //    {
+            //        SportType = SportType.WeightTraining,
+            //    }, cancellationToken);
+            //    _logger.LogInformation("Updated sport type from {OldSportType} to Workout", savedActivity.SportType);
+            //}
             sb.AppendLine($"Activity '{activityName}' uploaded");
         }
 
