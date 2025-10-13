@@ -156,7 +156,6 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
             {
                 sb.AppendLine($"Activity '{activityName}' uploaded to Intervals.icu");
             }
-
         }
 
         return new OkObjectResult(sb.ToString());
