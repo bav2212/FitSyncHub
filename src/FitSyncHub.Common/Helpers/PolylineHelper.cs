@@ -5,7 +5,7 @@ namespace FitSyncHub.Common.Helpers;
 /// <summary>
 /// <see cref="https://github.com/mapbox/polyline/blob/master/src/polyline.js" if you need methods: encode, fromGeoJSON, toGeoJSON  methods/>
 /// </summary>
-public static class Polyline
+public static class PolylineHelper
 {
     public static List<Coordinate> Decode(string str, int? precision = default)
     {
