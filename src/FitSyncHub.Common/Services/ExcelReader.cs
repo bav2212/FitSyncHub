@@ -2,10 +2,10 @@
 using System.Diagnostics;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using FitSyncHub.ZwiftInsider.Helpers;
+using FitSyncHub.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
-namespace FitSyncHub.ZwiftInsider.Services;
+namespace FitSyncHub.Common.Services;
 
 public class ExcelReader
 {

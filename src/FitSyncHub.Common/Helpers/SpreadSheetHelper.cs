@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml.Spreadsheet;
 
-namespace FitSyncHub.ZwiftInsider.Helpers;
+namespace FitSyncHub.Common.Helpers;
 
 internal partial class SpreadSheetHelper
 {

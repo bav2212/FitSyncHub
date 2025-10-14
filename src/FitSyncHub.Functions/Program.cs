@@ -54,7 +54,6 @@ builder.Services.ConfigureIntervalsIcuModule();
 builder.Services.ConfigureGarminConnectModule("GarminConnect:Credentials");
 builder.Services.ConfigureZwiftModule("Zwift:Credentials");
 builder.Services.ConfigureXertModule("Xert");
-//builder.Services.ConfigureZwiftInsiderModule();
 
 builder.Services.AddCosmosCache(cacheOptions =>
 {
