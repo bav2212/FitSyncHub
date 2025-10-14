@@ -31,7 +31,7 @@ public class IntervalsIcuWorkoutBuilderRideUnitTest
         var workout = new Workout { Type = WorkoutType.Ride, Steps = steps };
 
         var actualWorkoutStructure = new IntervalsIcuWorkoutBuilder().Build(workout);
-        Assert.Equal(Expected, actualWorkoutStructure.Trim());
+        Assert.Equal(Expected, actualWorkoutStructure.Trim(), ignoreLineEndingDifferences: true);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class IntervalsIcuWorkoutBuilderRideUnitTest
         var actualWorkoutStructure = new IntervalsIcuWorkoutBuilder()
             .WithSkipDoubledRecovery()
             .Build(workout);
-        Assert.Equal(Expected, actualWorkoutStructure.Trim());
+        Assert.Equal(Expected, actualWorkoutStructure.Trim(), ignoreLineEndingDifferences: true);
     }
 
     [Fact]
@@ -104,7 +104,7 @@ public class IntervalsIcuWorkoutBuilderRideUnitTest
         var actualWorkoutStructure = new IntervalsIcuWorkoutBuilder()
             .WithSkipDoubledRecovery()
             .Build(workout);
-        Assert.Equal(Expected, actualWorkoutStructure.Trim());
+        Assert.Equal(Expected, actualWorkoutStructure.Trim(), ignoreLineEndingDifferences: true);
     }
 
     private static RideWorkoutStep GetWarmupStep(long minutes = 5)
