@@ -98,7 +98,12 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
         }
         else
         {
-            var pairedEvent = await GetPairedEvent(activities, date, cancellationToken);
+            var pairedEvent = await GetPairedEvent(activities, cancellationToken);
+            if (pairedEvent is null)
+            {
+                var events = await _intervalsIcuHttpClient.ListEvents(new(date, date), cancellationToken);
+                pairedEvent = events.SingleOrDefault(x => x.Type.Contains("Ride"));
+            }
 
             activitySummary
                 = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
@@ -232,25 +237,21 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
 
     private async Task<EventResponse?> GetPairedEvent(
         IReadOnlyCollection<ActivityResponse> activities,
-        DateOnly date,
         CancellationToken cancellationToken)
     {
         var activityWithLinkedPairedEvent = activities.SingleOrDefault(x => x.PairedEventId.HasValue);
-        if (activityWithLinkedPairedEvent?.PairedEventId is { } pairedEventId)
+        if (activityWithLinkedPairedEvent?.PairedEventId is not { } pairedEventId)
         {
-            _logger.LogInformation("Get linked paired event");
-            var pairedEvent = await _intervalsIcuHttpClient.GetEvent(pairedEventId, cancellationToken);
-
-            _logger.LogInformation("Unlinking paired event {EventId} from activity {ActivityId}", pairedEvent, activityWithLinkedPairedEvent.Id);
-            await _intervalsIcuHttpClient.UnlinkPairedWorkout(activityWithLinkedPairedEvent.Id, cancellationToken);
-
-            return pairedEvent;
+            return default;
         }
 
-        var events = await _intervalsIcuHttpClient.ListEvents(new(date, date), cancellationToken);
+        _logger.LogInformation("Get linked paired event");
+        var pairedEvent = await _intervalsIcuHttpClient.GetEvent(pairedEventId, cancellationToken);
 
-        return events
-            .SingleOrDefault(x => x.Type.Contains("Ride"));
+        _logger.LogInformation("Unlinking paired event {EventId} from activity {ActivityId}", pairedEvent, activityWithLinkedPairedEvent.Id);
+        await _intervalsIcuHttpClient.UnlinkPairedWorkout(activityWithLinkedPairedEvent.Id, cancellationToken);
+
+        return pairedEvent;
     }
 
     private static ActivitySubType GetSubType(ActivityResponse? raceActivity, ActivityResponse activity)

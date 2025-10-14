@@ -6,6 +6,7 @@ public record EventResponse
 {
     public required int Id { get; init; }
     public required DateTime StartDateLocal { get; init; }
+    // string in API, maybe cause it's not interals.icu field. Maybe it's comming from Strava/Garmin directly?
     public required string Type { get; init; }
     public required string Name { get; init; }
     public required string? Description { get; init; }
