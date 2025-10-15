@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace FitSyncHub.IntervalsICU.HttpClients.Models;
+namespace FitSyncHub.Common.Json;
 public class JsonStringEnumConverterSnakeCaseUpper<TEnum> : JsonStringEnumConverter<TEnum>
     where TEnum : struct, Enum
 {

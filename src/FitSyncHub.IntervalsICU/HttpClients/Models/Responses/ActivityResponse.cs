@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using FitSyncHub.Common.Json;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
