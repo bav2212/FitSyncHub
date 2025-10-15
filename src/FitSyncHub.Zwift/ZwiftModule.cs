@@ -28,7 +28,7 @@ public static class ZwiftModule
         services.AddScoped<ZwiftEventsService>();
         services.AddScoped<ZwiftPowerService>();
         services.AddScoped<ZwiftResultsAnalyzerService>();
-        services.AddScoped<ZwiftAchievementsService>();
+        services.AddScoped<ZwiftGameInfoService>();
 
         services.AddHttpClient<IZwiftAuthenticator, ZwiftAuthHttpClient>(
             client => client.BaseAddress = new Uri("https://secure.zwift.com"));

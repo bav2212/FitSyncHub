@@ -3,11 +3,32 @@ using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftOffline;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Services;
-public class ZwiftAchievementsService
+
+public class ZwiftGameInfoService
 {
     private readonly ZwiftHttpClient _zwiftHttpClient;
     private readonly ZwiftOfflineHttpClient _zwiftOfflineHttpClient;
-    private readonly ILogger<ZwiftAchievementsService> _logger;
+    private readonly ILogger<ZwiftGameInfoService> _logger;
+
+    private readonly Dictionary<string, string> _mapNameMapping = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // check maybe it's wrong
+        {"", "Climb Portal"},
+        {"NEWYORK", "New York"},
+        {"WATOPIA", "Watopia"},
+        {"SCOTLAND", "Scotland"},
+        {"RICHMOND", "Richmond"},
+        {"PARIS", "Paris"},
+        {"MAKURIISLANDS", "Makuri Islands"},
+        {"LONDON", "London"},
+        {"YORKSHIRE", "Yorkshire"},
+        {"FRANCE", "France"},
+        {"INNSBRUCK", "Innsbruck"},
+        {"CRITCITY", "Crit City"},
+        {"BOLOGNATT", "Bologna"},
+        {"GRAVEL MOUNTAIN", "Gravel Mountain"},
+    };
+
 
     // from https://github.com/zoffline/zwift-offline/blob/master/scripts/get_game_dictionary.py
     private readonly Dictionary<string, string> _routeExceptions = new(StringComparer.OrdinalIgnoreCase)
@@ -34,15 +55,68 @@ public class ZwiftAchievementsService
         {"TRIPLE TWISTS", "TRIPLE TWIST"},
     };
 
-    public ZwiftAchievementsService(
+    public ZwiftGameInfoService(
         ZwiftHttpClient zwiftHttpClient,
         ZwiftOfflineHttpClient zwiftOfflineHttpClient,
-        ILogger<ZwiftAchievementsService> logger)
+        ILogger<ZwiftGameInfoService> logger)
     {
         _zwiftHttpClient = zwiftHttpClient;
         _zwiftOfflineHttpClient = zwiftOfflineHttpClient;
         _logger = logger;
     }
+
+    public async Task<List<ZwiftDataRoutesInfoModel>> GetRoutesInfo(CancellationToken cancellationToken)
+    {
+        var gameInfo = await _zwiftOfflineHttpClient.GetGameInfo(cancellationToken);
+
+        var worldRoutePairs = gameInfo.Maps.SelectMany(x => x.Routes.Select(y => new
+        {
+            World = x,
+            Route = y,
+        })).ToList();
+
+        var result = worldRoutePairs
+            .Where(x => x.Route.Sports.Contains(ZwiftDataGameInfoSport.Cycling))
+            .Select(pair =>
+            {
+                var route = pair.Route;
+                var world = pair.World;
+
+                var restictions = new List<string>();
+
+                if (route.Sports.Count == 1 && route.Sports.Contains(ZwiftDataGameInfoSport.Running))
+                {
+                    restictions.Add("Run Only");
+                }
+
+                if (route.PublicEventsOnly)
+                {
+                    restictions.Add("Event Only");
+                }
+
+                if (route.LevelLocked > 1)
+                {
+                    restictions.Add($"Level {route.LevelLocked}+");
+
+                }
+
+                return new ZwiftDataRoutesInfoModel
+                {
+                    Name = route.Name,
+                    WorldName = _mapNameMapping[world.Name],
+                    Distance = Math.Round(route.DistanceInMeters / 1000, 1),
+                    ElevationGain = Math.Round(route.AscentInMeters),
+                    LeadIn = Math.Round(route.LeadinDistanceInMeters / 1000, 1),
+                    LeadInElevationGain = Math.Round(route.LeadinAscentInMeters),
+                    Restrictions = restictions.Count != 0 ? string.Join(", ", restictions) : null,
+                };
+            });
+
+        return [..result
+            .OrderBy(x => x.WorldName)
+            .ThenBy(x => x.Name)];
+    }
+
 
     public async Task<List<ZwiftDataGameInfoAchievement>> GetMissingCyclingRouteAchievements(CancellationToken cancellationToken)
     {
@@ -92,4 +166,15 @@ public class ZwiftAchievementsService
 
         return result;
     }
+}
+
+public record ZwiftDataRoutesInfoModel
+{
+    public required string Name { get; init; }
+    public required string WorldName { get; init; }
+    public required double Distance { get; init; }
+    public required double ElevationGain { get; init; }
+    public required double LeadIn { get; init; }
+    public required double LeadInElevationGain { get; init; }
+    public required string? Restrictions { get; init; }
 }

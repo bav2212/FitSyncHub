@@ -8,12 +8,12 @@ namespace FitSyncHub.Functions.Functions;
 
 public class ZwiftMissingRouteAchievementsHttpTriggerFunction
 {
-    private readonly ZwiftAchievementsService _zwiftAchievementsService;
+    private readonly ZwiftGameInfoService _zwiftGameInfoService;
 
     public ZwiftMissingRouteAchievementsHttpTriggerFunction(
-        ZwiftAchievementsService zwiftAchievementsService)
+        ZwiftGameInfoService zwiftGameInfoService)
     {
-        _zwiftAchievementsService = zwiftAchievementsService;
+        _zwiftGameInfoService = zwiftGameInfoService;
     }
 
     [Function(nameof(ZwiftMissingRouteAchievementsHttpTriggerFunction))]
@@ -23,7 +23,8 @@ public class ZwiftMissingRouteAchievementsHttpTriggerFunction
     {
         _ = req;
 
-        var missingAchievements = await _zwiftAchievementsService.GetMissingCyclingRouteAchievements(cancellationToken);
+
+        var missingAchievements = await _zwiftGameInfoService.GetMissingCyclingRouteAchievements(cancellationToken);
         var sb = new StringBuilder();
 
         foreach (var missingAchievement in missingAchievements)
