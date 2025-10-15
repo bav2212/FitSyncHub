@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.32.1" />
+    <PackageReference Include="Grpc.Tools" Version="2.72.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
@@ -19,7 +24,11 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
+    <ItemGroup>
+        <Protobuf Include="protobuf\achievements.proto" />
+    </ItemGroup>
+
+    <ItemGroup>
     <ProjectReference Include="..\FitSyncHub.Common\FitSyncHub.Common.csproj" />
   </ItemGroup>
 

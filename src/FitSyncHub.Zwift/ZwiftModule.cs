@@ -28,6 +28,7 @@ public static class ZwiftModule
         services.AddScoped<ZwiftEventsService>();
         services.AddScoped<ZwiftPowerService>();
         services.AddScoped<ZwiftResultsAnalyzerService>();
+        services.AddScoped<ZwiftAchievementsService>();
 
         services.AddHttpClient<IZwiftAuthenticator, ZwiftAuthHttpClient>(
             client => client.BaseAddress = new Uri("https://secure.zwift.com"));
@@ -46,6 +47,8 @@ public static class ZwiftModule
             {
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             });
+
+        services.AddHttpClient<ZwiftOfflineHttpClient>();
 
         services.AddTransient<ZwiftRacingAuthDelegatingHandler>();
         services.AddHttpClient<ZwiftRacingHttpClient>(client => client.BaseAddress = new Uri("https://www.zwiftracing.app"))
