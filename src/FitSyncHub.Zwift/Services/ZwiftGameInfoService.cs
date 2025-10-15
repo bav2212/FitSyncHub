@@ -1,5 +1,5 @@
 ﻿using FitSyncHub.Zwift.HttpClients;
-using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftOffline;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Services;
@@ -7,7 +7,6 @@ namespace FitSyncHub.Zwift.Services;
 public class ZwiftGameInfoService
 {
     private readonly ZwiftHttpClient _zwiftHttpClient;
-    private readonly ZwiftOfflineHttpClient _zwiftOfflineHttpClient;
     private readonly ILogger<ZwiftGameInfoService> _logger;
 
     private readonly Dictionary<string, string> _mapNameMapping = new(StringComparer.OrdinalIgnoreCase)
@@ -57,17 +56,15 @@ public class ZwiftGameInfoService
 
     public ZwiftGameInfoService(
         ZwiftHttpClient zwiftHttpClient,
-        ZwiftOfflineHttpClient zwiftOfflineHttpClient,
         ILogger<ZwiftGameInfoService> logger)
     {
         _zwiftHttpClient = zwiftHttpClient;
-        _zwiftOfflineHttpClient = zwiftOfflineHttpClient;
         _logger = logger;
     }
 
     public async Task<List<ZwiftDataRoutesInfoModel>> GetRoutesInfo(CancellationToken cancellationToken)
     {
-        var gameInfo = await _zwiftOfflineHttpClient.GetGameInfo(cancellationToken);
+        var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
 
         var worldRoutePairs = gameInfo.Maps.SelectMany(x => x.Routes.Select(y => new
         {
@@ -76,7 +73,7 @@ public class ZwiftGameInfoService
         })).ToList();
 
         var result = worldRoutePairs
-            .Where(x => x.Route.Sports.Contains(ZwiftDataGameInfoSport.Cycling))
+            .Where(x => x.Route.Sports.Contains(ZwiftGameInfoSport.Cycling))
             .Select(pair =>
             {
                 var route = pair.Route;
@@ -84,7 +81,7 @@ public class ZwiftGameInfoService
 
                 var restictions = new List<string>();
 
-                if (route.Sports.Count == 1 && route.Sports.Contains(ZwiftDataGameInfoSport.Running))
+                if (route.Sports.Count == 1 && route.Sports.Contains(ZwiftGameInfoSport.Running))
                 {
                     restictions.Add("Run Only");
                 }
@@ -118,9 +115,9 @@ public class ZwiftGameInfoService
     }
 
 
-    public async Task<List<ZwiftDataGameInfoAchievement>> GetMissingCyclingRouteAchievements(CancellationToken cancellationToken)
+    public async Task<List<ZwiftGameInfoAchievement>> GetMissingCyclingRouteAchievements(CancellationToken cancellationToken)
     {
-        var gameInfo = await _zwiftOfflineHttpClient.GetGameInfo(cancellationToken);
+        var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
         var routeAchievements = gameInfo.Achievements
             .Where(x => x.ImageUrl.EndsWith("RouteComplete.png"))
             .ToList();
@@ -128,7 +125,7 @@ public class ZwiftGameInfoService
         var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes(
             gameInfo.Maps, routeAchievements);
         var cyclingRouteAchievements = mappedRouteAchievementsToRoutes
-            .Where(x => x.Value.Sports.Contains(ZwiftDataGameInfoSport.Cycling))
+            .Where(x => x.Value.Sports.Contains(ZwiftGameInfoSport.Cycling))
             .Select(x => x.Key)
             .ToList();
 
@@ -137,11 +134,11 @@ public class ZwiftGameInfoService
         return [.. cyclingRouteAchievements.Where(x => !userAchievements.Contains(x.Id))];
     }
 
-    private Dictionary<ZwiftDataGameInfoAchievement, ZwiftDataGameInfoRoute> MapRouteAchievementsToRoutes(
-        List<ZwiftDataGameInfoMap> maps,
-        List<ZwiftDataGameInfoAchievement> routeAchievements)
+    private Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> MapRouteAchievementsToRoutes(
+        List<ZwiftGameInfoMap> maps,
+        List<ZwiftGameInfoAchievement> routeAchievements)
     {
-        var result = new Dictionary<ZwiftDataGameInfoAchievement, ZwiftDataGameInfoRoute>();
+        var result = new Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute>();
 
         var routesDictionary = maps
             .SelectMany(x => x.Routes)

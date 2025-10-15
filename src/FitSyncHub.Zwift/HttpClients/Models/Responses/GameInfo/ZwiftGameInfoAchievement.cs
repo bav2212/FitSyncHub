@@ -1,6 +1,6 @@
-﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftOffline;
+﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 
-public record ZwiftDataGameInfoAchievement
+public record ZwiftGameInfoAchievement
 {
     public required int Id { get; init; }
     public required string Name { get; init; }

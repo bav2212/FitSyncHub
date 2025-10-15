@@ -1,6 +1,6 @@
-﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftOffline;
+﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 
-public record ZwiftDataGameInfoRoute
+public record ZwiftGameInfoRoute
 {
     public required string Name { get; init; }
     public required long Id { get; init; }
@@ -26,5 +26,5 @@ public record ZwiftDataGameInfoRoute
     public required int Xp { get; init; }
     public required int Duration { get; init; }
     public required double Difficulty { get; init; }
-    public required IReadOnlyList<ZwiftDataGameInfoSport> Sports { get; init; }
+    public required IReadOnlyList<ZwiftGameInfoSport> Sports { get; init; }
 }
