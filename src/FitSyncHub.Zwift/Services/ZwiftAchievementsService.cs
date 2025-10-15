@@ -44,16 +44,12 @@ public class ZwiftAchievementsService
         _logger = logger;
     }
 
-    public async Task<List<ZwiftDataGameInfoAchievement>> GetMissingAchievements(CancellationToken cancellationToken)
+    public async Task<List<ZwiftDataGameInfoAchievement>> GetMissingCyclingRouteAchievements(CancellationToken cancellationToken)
     {
         var gameInfo = await _zwiftOfflineHttpClient.GetGameInfo(cancellationToken);
-        var allAchievements = gameInfo.Achievements;
-        var allAchievementsLookup = allAchievements
-            .Where(x => !x.ImageUrl.Contains("Run"))
-            .ToLookup(x => x.ImageUrl.EndsWith("RouteComplete.png"));
-
-        var generalAchievements = allAchievementsLookup[false].ToList();
-        var routeAchievements = allAchievementsLookup[true].ToList();
+        var routeAchievements = gameInfo.Achievements
+            .Where(x => x.ImageUrl.EndsWith("RouteComplete.png"))
+            .ToList();
 
         var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes(
             gameInfo.Maps, routeAchievements);
@@ -62,16 +58,9 @@ public class ZwiftAchievementsService
             .Select(x => x.Key)
             .ToList();
 
-        var userAchievements = await _zwiftHttpClient.GetAchievements(cancellationToken);
-        var missingGeneralAchievements = generalAchievements
-              .Where(x => !userAchievements.Contains(x.Id))
-              .ToList();
+        var userAchievements = (await _zwiftHttpClient.GetAchievements(cancellationToken)).ToHashSet();
 
-        var missingCyclingRouteAchievements = cyclingRouteAchievements
-              .Where(x => !userAchievements.Contains(x.Id))
-              .ToList();
-
-        return [.. missingGeneralAchievements.Concat(missingCyclingRouteAchievements)];
+        return [.. cyclingRouteAchievements.Where(x => !userAchievements.Contains(x.Id))];
     }
 
     private Dictionary<ZwiftDataGameInfoAchievement, ZwiftDataGameInfoRoute> MapRouteAchievementsToRoutes(

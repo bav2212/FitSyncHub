@@ -6,24 +6,24 @@ using Microsoft.Azure.Functions.Worker;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class ZwiftMissingAchievementsHttpTriggerFunction
+public class ZwiftMissingRouteAchievementsHttpTriggerFunction
 {
     private readonly ZwiftAchievementsService _zwiftAchievementsService;
 
-    public ZwiftMissingAchievementsHttpTriggerFunction(
+    public ZwiftMissingRouteAchievementsHttpTriggerFunction(
         ZwiftAchievementsService zwiftAchievementsService)
     {
         _zwiftAchievementsService = zwiftAchievementsService;
     }
 
-    [Function(nameof(ZwiftMissingAchievementsHttpTriggerFunction))]
+    [Function(nameof(ZwiftMissingRouteAchievementsHttpTriggerFunction))]
     public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-achievements")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-route-achievements")] HttpRequest req,
         CancellationToken cancellationToken)
     {
         _ = req;
 
-        var missingAchievements = await _zwiftAchievementsService.GetMissingAchievements(cancellationToken);
+        var missingAchievements = await _zwiftAchievementsService.GetMissingCyclingRouteAchievements(cancellationToken);
         var sb = new StringBuilder();
 
         foreach (var missingAchievement in missingAchievements)
