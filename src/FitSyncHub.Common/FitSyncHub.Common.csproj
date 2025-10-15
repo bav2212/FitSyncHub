@@ -9,7 +9,7 @@
   <ItemGroup>
       <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
       <PackageReference Include="Garmin.FIT.Sdk" Version="21.171.0" />
-      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.9" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.10" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 
