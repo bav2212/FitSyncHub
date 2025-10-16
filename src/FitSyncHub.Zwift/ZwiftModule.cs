@@ -4,6 +4,8 @@ using FitSyncHub.Zwift.Auth.Abstractions;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
 using FitSyncHub.Zwift.Options;
+using FitSyncHub.Zwift.Providers;
+using FitSyncHub.Zwift.Providers.Abstractions;
 using FitSyncHub.Zwift.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,10 +27,27 @@ public static class ZwiftModule
                 .Bind(settings))
             .ValidateOnStart();
 
+        var env = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT");
+        var zwiftRoutesInfoFromWADFiles = Environment.GetEnvironmentVariable("ZWIFT_ROUTES_INFO_FROM_WAD_FILES");
+
+        var isDevelopment = string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase);
+        var useZwiftRoutesInfoFromWADFiles = string.Equals(zwiftRoutesInfoFromWADFiles, "true", StringComparison.OrdinalIgnoreCase);
+        if (isDevelopment && useZwiftRoutesInfoFromWADFiles)
+        {
+            services.AddScoped<IZwiftRoutesProvider, ZwiftRoutesFromZwiftWADFilesProvider>();
+        }
+        else
+        {
+            services.AddScoped<IZwiftRoutesProvider, ZwiftRoutesFromGameInfoProvider>();
+        }
+
+        services.AddScoped<ZwiftWadDecoder>();
+
         services.AddScoped<ZwiftEventsService>();
         services.AddScoped<ZwiftPowerService>();
         services.AddScoped<ZwiftResultsAnalyzerService>();
         services.AddScoped<ZwiftGameInfoService>();
+        services.AddScoped<ZwiftRoutesService>();
 
         services.AddHttpClient<IZwiftAuthenticator, ZwiftAuthHttpClient>(
             client => client.BaseAddress = new Uri("https://secure.zwift.com"));

@@ -23,7 +23,6 @@ public class ZwiftMissingRouteAchievementsHttpTriggerFunction
     {
         _ = req;
 
-
         var missingAchievements = await _zwiftGameInfoService.GetMissingCyclingRouteAchievements(cancellationToken);
         var sb = new StringBuilder();
 

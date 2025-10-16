@@ -1,5 +1,6 @@
 ﻿using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+using FitSyncHub.Zwift.Providers.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Services;
@@ -7,27 +8,8 @@ namespace FitSyncHub.Zwift.Services;
 public class ZwiftGameInfoService
 {
     private readonly ZwiftHttpClient _zwiftHttpClient;
+    private readonly IZwiftRoutesProvider _zwiftRoutesProvider;
     private readonly ILogger<ZwiftGameInfoService> _logger;
-
-    private readonly Dictionary<string, string> _mapNameMapping = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // check maybe it's wrong
-        {"", "Climb Portal"},
-        {"NEWYORK", "New York"},
-        {"WATOPIA", "Watopia"},
-        {"SCOTLAND", "Scotland"},
-        {"RICHMOND", "Richmond"},
-        {"PARIS", "Paris"},
-        {"MAKURIISLANDS", "Makuri Islands"},
-        {"LONDON", "London"},
-        {"YORKSHIRE", "Yorkshire"},
-        {"FRANCE", "France"},
-        {"INNSBRUCK", "Innsbruck"},
-        {"CRITCITY", "Crit City"},
-        {"BOLOGNATT", "Bologna"},
-        {"GRAVEL MOUNTAIN", "Gravel Mountain"},
-    };
-
 
     // from https://github.com/zoffline/zwift-offline/blob/master/scripts/get_game_dictionary.py
     private readonly Dictionary<string, string> _routeExceptions = new(StringComparer.OrdinalIgnoreCase)
@@ -56,64 +38,13 @@ public class ZwiftGameInfoService
 
     public ZwiftGameInfoService(
         ZwiftHttpClient zwiftHttpClient,
+        IZwiftRoutesProvider zwiftRoutesProvider,
         ILogger<ZwiftGameInfoService> logger)
     {
         _zwiftHttpClient = zwiftHttpClient;
+        _zwiftRoutesProvider = zwiftRoutesProvider;
         _logger = logger;
     }
-
-    public async Task<List<ZwiftDataRoutesInfoModel>> GetRoutesInfo(CancellationToken cancellationToken)
-    {
-        var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
-
-        var worldRoutePairs = gameInfo.Maps.SelectMany(x => x.Routes.Select(y => new
-        {
-            World = x,
-            Route = y,
-        })).ToList();
-
-        var result = worldRoutePairs
-            .Where(x => x.Route.Sports.Contains(ZwiftGameInfoSport.Cycling))
-            .Select(pair =>
-            {
-                var route = pair.Route;
-                var world = pair.World;
-
-                var restictions = new List<string>();
-
-                if (route.Sports.Count == 1 && route.Sports.Contains(ZwiftGameInfoSport.Running))
-                {
-                    restictions.Add("Run Only");
-                }
-
-                if (route.PublicEventsOnly)
-                {
-                    restictions.Add("Event Only");
-                }
-
-                if (route.LevelLocked > 1)
-                {
-                    restictions.Add($"Level {route.LevelLocked}+");
-
-                }
-
-                return new ZwiftDataRoutesInfoModel
-                {
-                    Name = route.Name,
-                    WorldName = _mapNameMapping[world.Name],
-                    Distance = Math.Round(route.DistanceInMeters / 1000, 1),
-                    ElevationGain = Math.Round(route.AscentInMeters),
-                    LeadIn = Math.Round(route.LeadinDistanceInMeters / 1000, 1),
-                    LeadInElevationGain = Math.Round(route.LeadinAscentInMeters),
-                    Restrictions = restictions.Count != 0 ? string.Join(", ", restictions) : null,
-                };
-            });
-
-        return [..result
-            .OrderBy(x => x.WorldName)
-            .ThenBy(x => x.Name)];
-    }
-
 
     public async Task<List<ZwiftGameInfoAchievement>> GetMissingCyclingRouteAchievements(CancellationToken cancellationToken)
     {
@@ -122,8 +53,9 @@ public class ZwiftGameInfoService
             .Where(x => x.ImageUrl.EndsWith("RouteComplete.png"))
             .ToList();
 
-        var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes(
-            gameInfo.Maps, routeAchievements);
+        var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
+
+        var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes(routeAchievements, routes);
         var cyclingRouteAchievements = mappedRouteAchievementsToRoutes
             .Where(x => x.Value.Sports.Contains(ZwiftGameInfoSport.Cycling))
             .Select(x => x.Key)
@@ -135,13 +67,13 @@ public class ZwiftGameInfoService
     }
 
     private Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> MapRouteAchievementsToRoutes(
-        List<ZwiftGameInfoMap> maps,
-        List<ZwiftGameInfoAchievement> routeAchievements)
+        List<ZwiftGameInfoAchievement> routeAchievements,
+        List<ZwiftDataWorldRoutePair> routes)
     {
         var result = new Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute>();
 
-        var routesDictionary = maps
-            .SelectMany(x => x.Routes)
+        var routesDictionary = routes
+            .Select(x => x.Route)
             .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
 
         foreach (var routeAchievement in routeAchievements)
@@ -163,15 +95,4 @@ public class ZwiftGameInfoService
 
         return result;
     }
-}
-
-public record ZwiftDataRoutesInfoModel
-{
-    public required string Name { get; init; }
-    public required string WorldName { get; init; }
-    public required double Distance { get; init; }
-    public required double ElevationGain { get; init; }
-    public required double LeadIn { get; init; }
-    public required double LeadInElevationGain { get; init; }
-    public required string? Restrictions { get; init; }
 }
