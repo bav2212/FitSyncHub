@@ -1,4 +1,6 @@
-﻿using System.Xml;
+﻿using System.Security.Cryptography;
+using System.Text.Json;
+using System.Xml;
 using System.Xml.Serialization;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Providers.Abstractions;
@@ -47,6 +49,7 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
     private readonly ZwiftWadDecoder _zwiftWadDecoder;
     private readonly ILogger<ZwiftRoutesFromZwiftWADFilesProvider> _logger;
     private readonly string _unpackedWADFilesDirectory;
+    private readonly string _unpackedWADFilesStateFilePath;
 
     public ZwiftRoutesFromZwiftWADFilesProvider(
         ZwiftWadDecoder zwiftWadDecoder,
@@ -55,22 +58,18 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         _zwiftWadDecoder = zwiftWadDecoder;
         _logger = logger;
 
-        _unpackedWADFilesDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        _unpackedWADFilesDirectory = Path.Combine(Path.GetTempPath(), "ZwiftWADFilesUnpacked");
+        _unpackedWADFilesStateFilePath = Path.Combine(_unpackedWADFilesDirectory, "state.json");
     }
 
-    public Task<List<ZwiftDataWorldRoutePair>> GetRoutesInfo(CancellationToken cancellationToken)
+    public async Task<List<ZwiftDataWorldRoutePair>> GetRoutesInfo(CancellationToken cancellationToken)
     {
         if (!Directory.Exists(_unpackedWADFilesDirectory))
         {
             Directory.CreateDirectory(_unpackedWADFilesDirectory);
         }
 
-        //inspired by https://github.com/zoffline/zwift-offline/blob/master/scripts/get_start_lines.py#L29
-        foreach (var file in Directory.EnumerateFiles(_zwiftWorldsPath,
-            "data_1.wad", new EnumerationOptions() { RecurseSubdirectories = true }))
-        {
-            _zwiftWadDecoder.Unpack(file, _unpackedWADFilesDirectory);
-        }
+        await UnpackWADFiles(cancellationToken);
 
         var worldRouteFilePaths = Directory.EnumerateFiles(
             Path.Combine(_unpackedWADFilesDirectory, "Worlds"),
@@ -85,10 +84,51 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             });
 
         // TODO
-        // If need climb portal, use https://github.com/zoffline/zwift-offline/blob/master/scripts/get_climbs.py as reference
-        var routesInfo = ReadRouteFilesAndParse(worldRouteFilePaths).ToList();
+        // If need climb portal, use reference https://github.com/zoffline/zwift-offline/blob/master/scripts/get_climbs.py as reference
 
-        return Task.FromResult(routesInfo);
+        return [.. ReadRouteFilesAndParse(worldRouteFilePaths)];
+    }
+
+    private async Task UnpackWADFiles(CancellationToken cancellationToken)
+    {
+        Dictionary<string, UnpackedWADFilesStateItem> unpackedWADFilesStateDictionary = [];
+        if (File.Exists(_unpackedWADFilesStateFilePath))
+        {
+            var unpackedWADFilesStateJson = await File.ReadAllTextAsync(_unpackedWADFilesStateFilePath, cancellationToken);
+            var unpackedWADFilesStateList = JsonSerializer
+                .Deserialize<List<UnpackedWADFilesStateItem>>(unpackedWADFilesStateJson)!;
+            unpackedWADFilesStateDictionary = unpackedWADFilesStateList
+                .ToDictionary(x => x.FilePath, StringComparer.OrdinalIgnoreCase);
+        }
+
+        //inspired by https://github.com/zoffline/zwift-offline/blob/master/scripts/get_start_lines.py#L29
+        // do it inside 'if block' cause service is singleton and _unpackedWADFilesDirectory will be the same during application run
+        foreach (var file in Directory.EnumerateFiles(_zwiftWorldsPath,
+            "data_1.wad", new EnumerationOptions() { RecurseSubdirectories = true }))
+        {
+            var hash = ComputeHash(file);
+            if (unpackedWADFilesStateDictionary.TryGetValue(file, out var unpackedWADFilesStateItem)
+                && unpackedWADFilesStateItem.Hash == hash)
+            {
+                continue;
+            }
+
+            _zwiftWadDecoder.Unpack(file, _unpackedWADFilesDirectory);
+            unpackedWADFilesStateDictionary[file] = new UnpackedWADFilesStateItem { FilePath = file, Hash = hash };
+        }
+
+        var updatedUnpackedWADFilesStateList = JsonSerializer.Serialize(unpackedWADFilesStateDictionary.Values.ToList())!;
+        await File.WriteAllTextAsync(_unpackedWADFilesStateFilePath, updatedUnpackedWADFilesStateList, cancellationToken);
+    }
+
+    // move to common if need
+    private static string ComputeHash(string filePath)
+    {
+        using var md5 = MD5.Create();
+        using var stream = File.OpenRead(filePath);
+        var myHash = md5.ComputeHash(stream);
+
+        return Convert.ToBase64String(myHash);
     }
 
     private string[] GetRelativePathParts(string filePath)
@@ -168,6 +208,14 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             }
         };
     }
+
+
+    private record UnpackedWADFilesStateItem
+    {
+        public required string FilePath { get; init; }
+        public required string Hash { get; init; }
+    }
+
 
     [XmlRoot("route")]
     public class ZwiftInGameRouteXmlDTO
