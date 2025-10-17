@@ -6,29 +6,29 @@ using Microsoft.Azure.Functions.Worker;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class ZwiftMissingRouteAchievementsHttpTriggerFunction
+public class ZwiftUncompletedRouteAchievementsHttpTriggerFunction
 {
     private readonly ZwiftGameInfoService _zwiftGameInfoService;
 
-    public ZwiftMissingRouteAchievementsHttpTriggerFunction(
+    public ZwiftUncompletedRouteAchievementsHttpTriggerFunction(
         ZwiftGameInfoService zwiftGameInfoService)
     {
         _zwiftGameInfoService = zwiftGameInfoService;
     }
 
-    [Function(nameof(ZwiftMissingRouteAchievementsHttpTriggerFunction))]
+    [Function(nameof(ZwiftUncompletedRouteAchievementsHttpTriggerFunction))]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-route-achievements")] HttpRequest req,
         CancellationToken cancellationToken)
     {
         _ = req;
 
-        var missingAchievements = await _zwiftGameInfoService.GetMissingCyclingRouteAchievements(cancellationToken);
+        var uncompletedAchievements = await _zwiftGameInfoService.GetUncompletedCyclingRouteAchievements(cancellationToken);
         var sb = new StringBuilder();
 
-        foreach (var missingAchievement in missingAchievements)
+        foreach (var uncompletedAchievement in uncompletedAchievements)
         {
-            sb.AppendLine(missingAchievement.Name);
+            sb.AppendLine(uncompletedAchievement.Name);
         }
 
         return new OkObjectResult(sb.ToString());

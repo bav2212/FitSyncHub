@@ -1,4 +1,6 @@
 ﻿using FitSyncHub.Zwift.HttpClients;
+using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Providers.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -46,7 +48,44 @@ public class ZwiftGameInfoService
         _logger = logger;
     }
 
-    public async Task<List<ZwiftGameInfoAchievement>> GetMissingCyclingRouteAchievements(CancellationToken cancellationToken)
+
+    public async Task<List<ZwiftGameInfoAchievement>> GetUncompletedCyclingRouteAchievements(
+    CancellationToken cancellationToken)
+    {
+        return [.. (await GetUncompletedCyclingRouteAchievementsWithMappingToRoute(cancellationToken)).Keys];
+    }
+
+    public async Task<Dictionary<string, List<ZwiftEventResponse>>> GetUncompletedRouteToEventsMappingAchievements(
+        DateTimeOffset from,
+        DateTimeOffset to,
+        CancellationToken cancellationToken)
+    {
+        var uncompletedCyclingRouteAchievementsWithMappingToRoute = await GetUncompletedCyclingRouteAchievementsWithMappingToRoute(cancellationToken);
+
+        var events = await _zwiftHttpClient.GetEventFeedFullRangeBuggy(new ZwiftEventFeedRequest
+        {
+            From = from,
+            To = to,
+            PageLimit = 30,
+        }, cancellationToken);
+
+        var routesWithUncompletedAchievementsDictionary = uncompletedCyclingRouteAchievementsWithMappingToRoute.Values
+            .ToDictionary(x => x.Id, x => x);
+
+        var eventsToRouteMapping = events
+            .Join(routesWithUncompletedAchievementsDictionary,
+                x => x.RouteId,
+                x => x.Key,
+                (@event, route) => new { Event = @event, Route = route.Value })
+            .ToList();
+
+        return eventsToRouteMapping
+            .GroupBy(x => x.Route.Name)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Event).ToList());
+    }
+
+    private async Task<Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute>> GetUncompletedCyclingRouteAchievementsWithMappingToRoute(
+        CancellationToken cancellationToken)
     {
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
         var routeAchievements = gameInfo.Achievements
@@ -58,12 +97,12 @@ public class ZwiftGameInfoService
         var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes(routeAchievements, routes);
         var cyclingRouteAchievements = mappedRouteAchievementsToRoutes
             .Where(x => x.Value.Sports.Contains(ZwiftGameInfoSport.Cycling))
-            .Select(x => x.Key)
             .ToList();
 
         var userAchievements = (await _zwiftHttpClient.GetAchievements(cancellationToken)).ToHashSet();
 
-        return [.. cyclingRouteAchievements.Where(x => !userAchievements.Contains(x.Id))];
+        return cyclingRouteAchievements.Where(x => !userAchievements.Contains(x.Key.Id))
+            .ToDictionary(x => x.Key, x => x.Value);
     }
 
     private Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> MapRouteAchievementsToRoutes(
