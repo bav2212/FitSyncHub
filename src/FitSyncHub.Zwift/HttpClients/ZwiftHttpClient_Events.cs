@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
+using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.JsonSerializerContexts;
 
@@ -6,6 +8,78 @@ namespace FitSyncHub.Zwift.HttpClients;
 
 public partial class ZwiftHttpClient
 {
+    public async Task<List<ZwiftEventResponse>> GetEventFeedFullRangeBuggy(
+        ZwiftEventFeedRequest request,
+        CancellationToken cancellationToken)
+    {
+        const string BaseUrl = "/api/event-feed";
+        var from = request.From;
+        // this field look buggy, maybe zwift api does not support to fiel
+        var to = request.To;
+        var pageLimit = request.PageLimit;
+        var limit = request.Limit;
+
+        var ids = new HashSet<long>();
+        var results = new List<ZwiftEventResponse>();
+
+        var queryParams = new Dictionary<string, string>
+        {
+            ["from"] = from.ToUnixTimeMilliseconds().ToString(),
+            ["to"] = to.ToUnixTimeMilliseconds().ToString(),
+            ["limit"] = limit.ToString()
+        };
+
+        var pages = 0;
+        var done = false;
+        string? cursor = null;
+
+        while (!done)
+        {
+            if (cursor != null)
+            {
+                queryParams["cursor"] = cursor;
+            }
+
+            var requestUri = $"{BaseUrl}?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"))}";
+
+            var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var page = await response.Content.ReadFromJsonAsync(
+                ZwiftEventsGenerationContext.Default.ZwiftEventFeedResponse, cancellationToken);
+
+            if (page?.Data == null)
+            {
+                break;
+            }
+
+            foreach (var item in page.Data)
+            {
+                var ev = item.Event;
+                if (ev.EventStart >= to)
+                {
+                    done = true;
+                    break;
+                }
+
+                if (!ids.Contains(ev.Id))
+                {
+                    results.Add(ev);
+                    ids.Add(ev.Id);
+                }
+            }
+
+            if (page.Data.Count == 0 || (page.Data.Count < limit) || ++pages >= pageLimit)
+            {
+                break;
+            }
+
+            cursor = page.Cursor;
+        }
+
+        return results;
+    }
+
     public async Task<ZwiftEventResponse> GetEvent(string eventUrl, CancellationToken cancellationToken)
     {
         var url = eventUrl.Replace(

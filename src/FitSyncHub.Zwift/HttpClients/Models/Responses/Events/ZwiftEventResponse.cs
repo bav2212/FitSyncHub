@@ -2,13 +2,26 @@
 
 public record ZwiftEventResponse
 {
-    public DateTime EventStart { get; set; }
-    public required ZwiftEventSubgroupResponse[] EventSubgroups { get; set; }
+    public required long Id { get; init; }
+    public required int WorldId { get; init; }
+    public required string Name { get; init; }
+    public required long RouteId { get; init; }
+    public required DateTime EventStart { get; init; }
+    public required ZwiftEventSubgroupResponse[] EventSubgroups { get; init; }
+    public required ZwiftEvenSeriesResponse? EventSeries { get; init; }
 }
 
 public record ZwiftEventSubgroupResponse
 {
-    public int Id { get; set; }
-    public string? SubgroupLabel { get; set; }
-    public string[]? RulesSet { get; set; }
+    public required int Id { get; init; }
+    public required string? SubgroupLabel { get; init; }
+    public required string[] RulesSet { get; init; }
+}
+
+public record ZwiftEvenSeriesResponse
+{
+    public required int Id { get; init; }
+    public required string Name { get; init; }
+    public required string? Description { get; init; }
+    public required bool Imported { get; init; }
 }
