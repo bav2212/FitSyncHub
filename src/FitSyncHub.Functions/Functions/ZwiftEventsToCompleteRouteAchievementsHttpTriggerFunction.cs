@@ -42,7 +42,7 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 
             foreach (var @event in events)
             {
-                sb.AppendLine($" - {@event.EventStart.ToLocalTime()}: '{@event.Name}', Id: {@event.Id}");
+                sb.AppendLine($" - {@event.EventStart.ToUniversalTime()}: '{@event.Name}', Id: {@event.Id}");
             }
 
             sb.AppendLine();

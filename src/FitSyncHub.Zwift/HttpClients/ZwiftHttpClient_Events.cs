@@ -3,16 +3,20 @@ using System.Text.Json;
 using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.JsonSerializerContexts;
+using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
 public partial class ZwiftHttpClient
 {
+
     public async Task<List<ZwiftEventResponse>> GetEventFeedFullRangeBuggy(
         ZwiftEventFeedRequest request,
         CancellationToken cancellationToken)
     {
         const string BaseUrl = "/api/event-feed";
+        const int MaxRequests = 100;
+
         var from = request.From;
         // this field look buggy, maybe zwift api does not support to fiel
         var to = request.To;
@@ -69,8 +73,19 @@ public partial class ZwiftHttpClient
                 }
             }
 
-            if (page.Data.Count == 0 || (page.Data.Count < limit) || ++pages >= pageLimit)
+            if (page.Data.Count == 0 || (page.Data.Count < limit))
             {
+                break;
+            }
+
+            if (pageLimit.HasValue && ++pages >= pageLimit)
+            {
+                break;
+            }
+
+            if (pages > MaxRequests)
+            {
+                _logger.LogWarning("To much pages to iterate. Stopping to avoid some block from Zwift");
                 break;
             }
 

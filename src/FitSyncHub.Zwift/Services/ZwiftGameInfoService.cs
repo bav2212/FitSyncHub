@@ -66,7 +66,6 @@ public class ZwiftGameInfoService
         {
             From = from,
             To = to,
-            PageLimit = 30,
         }, cancellationToken);
 
         var routesWithUncompletedAchievementsDictionary = uncompletedCyclingRouteAchievementsWithMappingToRoute.Values

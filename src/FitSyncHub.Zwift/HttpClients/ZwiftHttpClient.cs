@@ -2,16 +2,19 @@
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.JsonSerializerContexts;
 using FitSyncHub.Zwift.Protobuf;
+using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
 public partial class ZwiftHttpClient
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<ZwiftHttpClient> _logger;
 
-    public ZwiftHttpClient(HttpClient httpClient)
+    public ZwiftHttpClient(HttpClient httpClient, ILogger<ZwiftHttpClient> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<List<int>> GetAchievements(CancellationToken cancellationToken)
