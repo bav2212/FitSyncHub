@@ -21,10 +21,26 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-events-to-complete-achievements")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        _ = req;
+        DateTimeOffset from;
+        DateTimeOffset to;
 
-        var from = DateTimeOffset.UtcNow;
-        var to = from.AddDays(7);
+        string? fromQueryParameter = req.Query["from"];
+        from = DateOnly.TryParse(fromQueryParameter, out var fromDateOnly)
+            ? new DateTimeOffset(new DateTime(fromDateOnly, TimeOnly.MinValue))
+            : DateTimeOffset.UtcNow;
+
+        string? toQueryParameter = req.Query["to"];
+        to = DateOnly.TryParse(toQueryParameter, out var toDateOnly)
+            ? new DateTimeOffset(new DateTime(toDateOnly, TimeOnly.MaxValue))
+            : from.AddDays(7);
+
+        string? forceQueryParameter = req.Query["force"];
+        var force = bool.TryParse(forceQueryParameter, out var parsedForce) && parsedForce;
+
+        if (to - from > TimeSpan.FromDays(7) && !force)
+        {
+            return new BadRequestObjectResult("Date range should not exceed 7 days, set 'force'=true in query to proceed");
+        }
 
         var cyclingRouteToEventMapping = await _zwiftGameInfoService.GetUncompletedRouteToEventsMappingAchievements(
             from, to, cancellationToken);
