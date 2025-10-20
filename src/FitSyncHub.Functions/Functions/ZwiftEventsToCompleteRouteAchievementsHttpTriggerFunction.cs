@@ -32,12 +32,6 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 
         foreach (var (routeName, events) in cyclingRouteToEventMapping)
         {
-            if (events.Count == 0)
-            {
-                sb.AppendLine($"No events for route: {routeName}");
-                continue;
-            }
-
             sb.AppendLine(routeName);
 
             foreach (var @event in events)
