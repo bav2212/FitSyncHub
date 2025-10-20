@@ -9,11 +9,14 @@ namespace FitSyncHub.Functions.Functions;
 public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 {
     private readonly ZwiftGameInfoService _zwiftGameInfoService;
+    private readonly IHttpContextAccessor _contextAccessor;
 
     public ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction(
-        ZwiftGameInfoService zwiftGameInfoService)
+        ZwiftGameInfoService zwiftGameInfoService,
+        IHttpContextAccessor contextAccessor)
     {
         _zwiftGameInfoService = zwiftGameInfoService;
+        _contextAccessor = contextAccessor;
     }
 
     [Function(nameof(ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction))]
@@ -21,6 +24,13 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-events-to-complete-achievements")] HttpRequest req,
         CancellationToken cancellationToken)
     {
+        string? timezoneQueryParameter = req.Query["timezone"];
+        // In the receiving application, convert UTC to a specific time zone
+
+        var timezone = timezoneQueryParameter is { } && TimeZoneInfo.TryFindSystemTimeZoneById(timezoneQueryParameter, out var parsedTimeZone)
+            ? parsedTimeZone
+            : TimeZoneInfo.Utc;
+
         DateTimeOffset from;
         DateTimeOffset to;
 
@@ -52,7 +62,10 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 
             foreach (var @event in events)
             {
-                sb.AppendLine($" - {@event.EventStart.ToUniversalTime()}: '{@event.Name}', Id: {@event.Id}");
+                var eventStartTime =
+                    TimeZoneInfo.ConvertTimeFromUtc(@event.EventStart, timezone);
+
+                sb.AppendLine($" - {eventStartTime.ToString("yyyy-MM-dd HH:mm:ss zzz")}: '{@event.Name.Trim()}', Id: {@event.Id}");
             }
 
             sb.AppendLine();
