@@ -72,10 +72,10 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 
             foreach (var @event in events)
             {
-                var eventStartTime =
-                    TimeZoneInfo.ConvertTimeFromUtc(@event.EventStart, timezone);
+                var eventStartTime = TimeZoneInfo.ConvertTimeFromUtc(@event.EventStart, timezone);
+                var eventStartOffset = new DateTimeOffset(eventStartTime, timezone.GetUtcOffset(@event.EventStart));
 
-                sb.AppendLine($" - {eventStartTime.ToString("yyyy-MM-dd HH:mm:ss zzz")}: '{@event.Name.Trim()}', Id: {@event.Id}");
+                sb.AppendLine($" - {eventStartOffset.ToString("yyyy-MM-dd HH:mm:ss zzz")}: '{@event.Name.Trim()}', Id: {@event.Id}");
             }
 
             sb.AppendLine();
