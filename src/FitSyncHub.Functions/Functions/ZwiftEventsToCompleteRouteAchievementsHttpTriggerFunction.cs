@@ -3,17 +3,21 @@ using FitSyncHub.Zwift.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions;
 
 public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 {
     private readonly ZwiftGameInfoService _zwiftGameInfoService;
+    private readonly ILogger<ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction> _logger;
 
     public ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction(
-        ZwiftGameInfoService zwiftGameInfoService)
+        ZwiftGameInfoService zwiftGameInfoService,
+        ILogger<ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction> logger)
     {
         _zwiftGameInfoService = zwiftGameInfoService;
+        _logger = logger;
     }
 
     [Function(nameof(ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction))]
@@ -22,11 +26,20 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
         CancellationToken cancellationToken)
     {
         string? timezoneQueryParameter = req.Query["timezone"];
-        // In the receiving application, convert UTC to a specific time zone
 
-        var timezone = timezoneQueryParameter is { } && TimeZoneInfo.TryFindSystemTimeZoneById(timezoneQueryParameter, out var parsedTimeZone)
-            ? parsedTimeZone
-            : TimeZoneInfo.Utc;
+        _logger.LogInformation("Timezone request query parameter: {QueryParam}", timezoneQueryParameter);
+
+        TimeZoneInfo timezone;
+        if (timezoneQueryParameter is { } && TimeZoneInfo.TryFindSystemTimeZoneById(timezoneQueryParameter, out var parsedTimeZone))
+        {
+            _logger.LogInformation("Using timezone: {TimeZone}", parsedTimeZone);
+            timezone = parsedTimeZone;
+        }
+        else
+        {
+            _logger.LogWarning("Invalid or missing timezone parameter, defaulting to UTC");
+            timezone = TimeZoneInfo.Utc;
+        }
 
         DateTimeOffset from;
         DateTimeOffset to;
