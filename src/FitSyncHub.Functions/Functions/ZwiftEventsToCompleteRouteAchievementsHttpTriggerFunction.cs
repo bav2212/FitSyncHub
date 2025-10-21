@@ -9,14 +9,11 @@ namespace FitSyncHub.Functions.Functions;
 public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 {
     private readonly ZwiftGameInfoService _zwiftGameInfoService;
-    private readonly IHttpContextAccessor _contextAccessor;
 
     public ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction(
-        ZwiftGameInfoService zwiftGameInfoService,
-        IHttpContextAccessor contextAccessor)
+        ZwiftGameInfoService zwiftGameInfoService)
     {
         _zwiftGameInfoService = zwiftGameInfoService;
-        _contextAccessor = contextAccessor;
     }
 
     [Function(nameof(ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction))]
