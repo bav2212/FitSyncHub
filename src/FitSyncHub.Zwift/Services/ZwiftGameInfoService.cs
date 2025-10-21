@@ -55,7 +55,7 @@ public class ZwiftGameInfoService
         return [.. (await GetUncompletedCyclingRouteAchievementsWithMappingToRoute(cancellationToken)).Keys];
     }
 
-    public async Task<Dictionary<string, List<ZwiftEventResponse>>> GetUncompletedRouteToEventsMappingAchievements(
+    public async Task<Dictionary<ZwiftGameInfoRoute, List<ZwiftEventResponse>>> GetUncompletedRouteToEventsMappingAchievements(
         DateTimeOffset from,
         DateTimeOffset to,
         CancellationToken cancellationToken)
@@ -79,7 +79,7 @@ public class ZwiftGameInfoService
             .ToList();
 
         return eventsToRouteMapping
-            .GroupBy(x => x.Route.Name)
+            .GroupBy(x => x.Route)
             .ToDictionary(g => g.Key, g => g.Select(x => x.Event).ToList());
     }
 

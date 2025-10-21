@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Text.Json.Serialization;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -64,23 +66,79 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 
         var cyclingRouteToEventMapping = await _zwiftGameInfoService.GetUncompletedRouteToEventsMappingAchievements(
             from, to, cancellationToken);
-        var sb = new StringBuilder();
+        var result = Convert(cyclingRouteToEventMapping, timezone).ToList();
 
-        foreach (var (routeName, events) in cyclingRouteToEventMapping)
-        {
-            sb.AppendLine(routeName);
-
-            foreach (var @event in events)
-            {
-                var eventStartTime = TimeZoneInfo.ConvertTimeFromUtc(@event.EventStart, timezone);
-                var eventStartOffset = new DateTimeOffset(eventStartTime, timezone.GetUtcOffset(@event.EventStart));
-
-                sb.AppendLine($" - {eventStartOffset.ToString("yyyy-MM-dd HH:mm:ss zzz")}: '{@event.Name.Trim()}', Id: {@event.Id}");
-            }
-
-            sb.AppendLine();
-        }
-
-        return new OkObjectResult(sb.ToString());
+        return new OkObjectResult(result);
     }
+
+    private static IEnumerable<ZwiftEventsToCompleteRouteAchievementsResponse> Convert(
+        Dictionary<ZwiftGameInfoRoute, List<ZwiftEventResponse>> cyclingRouteToEventMapping,
+        TimeZoneInfo timezone)
+    {
+        foreach (var (route, events) in cyclingRouteToEventMapping)
+        {
+            yield return new ZwiftEventsToCompleteRouteAchievementsResponse
+            {
+                RouteName = route.Name,
+                Events = events.ConvertAll(e =>
+                {
+                    var eventStartTime = TimeZoneInfo.ConvertTimeFromUtc(e.EventStart, timezone);
+                    var eventStartOffset = new DateTimeOffset(eventStartTime, timezone.GetUtcOffset(e.EventStart));
+
+                    double distanceImMeters;
+                    double? elevation;
+                    if (e.Laps > 0)
+                    {
+                        distanceImMeters = route.LeadinDistanceInMeters + (route.DistanceInMeters * e.Laps);
+                        elevation = route.LeadinAscentInMeters + (route.AscentInMeters * e.Laps);
+                    }
+                    else if (e.DistanceInMeters > 0)
+                    {
+                        distanceImMeters = e.DistanceInMeters;
+                        elevation = default;
+                    }
+                    else
+                    {
+                        distanceImMeters = route.LeadinDistanceInMeters + route.DistanceInMeters;
+                        elevation = route.LeadinAscentInMeters + route.AscentInMeters;
+                    }
+
+                    var item = new ZwiftEventsToCompleteRouteAchievementsEventItem
+                    {
+                        EventStart = eventStartOffset,
+                        EventName = e.Name,
+                        Id = e.Id,
+                        Distance = Math.Round(distanceImMeters / 1000.0, 1),
+                        Elevation = elevation is null ? null : Math.Round(elevation.Value),
+                    };
+
+                    if (e.DurationInSeconds > 0)
+                    {
+                        item = item with { DurationInSeconds = e.DurationInSeconds };
+                    }
+
+                    return item;
+                })
+            };
+        }
+    }
+}
+
+public record ZwiftEventsToCompleteRouteAchievementsResponse
+{
+    public required string RouteName { get; init; }
+    public required List<ZwiftEventsToCompleteRouteAchievementsEventItem> Events { get; init; }
+}
+
+public record ZwiftEventsToCompleteRouteAchievementsEventItem
+{
+    public required DateTimeOffset EventStart { get; init; }
+    public required string EventName { get; init; }
+    public required long Id { get; init; }
+    public required double Distance { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public required double? Elevation { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public double? DurationInSeconds { get; init; }
+    public string ZwiftUrl => $"https://www.zwift.com/events/view/{Id}";
 }

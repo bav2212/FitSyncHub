@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
+﻿using System.Text.Json;
 using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.JsonSerializerContexts;
@@ -49,8 +48,9 @@ public partial class ZwiftHttpClient
             var response = await _httpClient.GetAsync(requestUri, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            var page = await response.Content.ReadFromJsonAsync(
-                ZwiftEventsGenerationContext.Default.ZwiftEventFeedResponse, cancellationToken);
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            var page = JsonSerializer.Deserialize(content, ZwiftEventsGenerationContext.Default.ZwiftEventFeedResponse)!;
 
             if (page?.Data == null)
             {
