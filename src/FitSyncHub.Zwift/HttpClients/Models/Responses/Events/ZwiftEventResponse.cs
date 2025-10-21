@@ -9,7 +9,7 @@ public record ZwiftEventResponse
     public required DateTime EventStart { get; init; }
     public required int? Laps { get; init; }
     public required double DurationInSeconds { get; init; }
-    public required double DistanceInMeters { get; init; }
+    public required double? DistanceInMeters { get; init; }
     public required ZwiftEventSubgroupResponse[] EventSubgroups { get; init; }
     public required ZwiftEvenSeriesResponse? EventSeries { get; init; }
 }
