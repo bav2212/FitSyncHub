@@ -87,10 +87,10 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 
                     double distanceImMeters;
                     double? elevation;
-                    if (e.Laps > 0)
+                    if (e.Laps is { } eventLaps)
                     {
-                        distanceImMeters = route.LeadinDistanceInMeters + (route.DistanceInMeters * e.Laps);
-                        elevation = route.LeadinAscentInMeters + (route.AscentInMeters * e.Laps);
+                        distanceImMeters = route.LeadinDistanceInMeters + (route.DistanceInMeters * eventLaps);
+                        elevation = route.LeadinAscentInMeters + (route.AscentInMeters * eventLaps);
                     }
                     else if (e.DistanceInMeters > 0)
                     {
