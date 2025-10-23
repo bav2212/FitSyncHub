@@ -48,19 +48,12 @@ public class ZwiftGameInfoService
         _logger = logger;
     }
 
-
-    public async Task<List<ZwiftGameInfoAchievement>> GetUncompletedCyclingRouteAchievements(
-    CancellationToken cancellationToken)
-    {
-        return [.. (await GetUncompletedCyclingRouteAchievementsWithMappingToRoute(cancellationToken)).Keys];
-    }
-
     public async Task<Dictionary<ZwiftGameInfoRoute, List<ZwiftEventResponse>>> GetUncompletedRouteToEventsMappingAchievements(
         DateTimeOffset from,
         DateTimeOffset to,
         CancellationToken cancellationToken)
     {
-        var uncompletedCyclingRouteAchievementsWithMappingToRoute = await GetUncompletedCyclingRouteAchievementsWithMappingToRoute(cancellationToken);
+        var uncompletedCyclingRouteAchievementsWithMappingToRoute = await GetMappedUncompletedAchievements(cancellationToken);
 
         var events = await _zwiftHttpClient.GetEventFeedFullRangeBuggy(new ZwiftEventFeedRequest
         {
@@ -68,7 +61,9 @@ public class ZwiftGameInfoService
             To = to,
         }, cancellationToken);
 
-        var routesWithUncompletedAchievementsDictionary = uncompletedCyclingRouteAchievementsWithMappingToRoute.Values
+        var routesWithUncompletedAchievementsDictionary = uncompletedCyclingRouteAchievementsWithMappingToRoute
+            .CyclingRouteAchievementsToRouteMapping
+            .Values
             .ToDictionary(x => x.Id, x => x);
 
         var eventsToRouteMapping = events
@@ -83,25 +78,34 @@ public class ZwiftGameInfoService
             .ToDictionary(g => g.Key, g => g.Select(x => x.Event).ToList());
     }
 
-    private async Task<Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute>> GetUncompletedCyclingRouteAchievementsWithMappingToRoute(
+    public async Task<MappedUncompletedAchievementsModel> GetMappedUncompletedAchievements(
         CancellationToken cancellationToken)
     {
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
-        var routeAchievements = gameInfo.Achievements
-            .Where(x => x.ImageUrl.EndsWith("RouteComplete.png"))
-            .ToList();
+        var isRouteAchievementsLookup = gameInfo.Achievements
+            .ToLookup(x => x.ImageUrl.EndsWith("RouteComplete.png"));
+
+        var routeAchievements = isRouteAchievementsLookup[true];
+        var generalAchievements = isRouteAchievementsLookup[false];
 
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
-
-        var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes(routeAchievements, routes);
-        var cyclingRouteAchievements = mappedRouteAchievementsToRoutes
-            .Where(x => x.Value.Sports.Contains(ZwiftGameInfoSport.Cycling))
-            .ToList();
-
         var userAchievements = (await _zwiftHttpClient.GetAchievements(cancellationToken)).ToHashSet();
 
-        return cyclingRouteAchievements.Where(x => !userAchievements.Contains(x.Key.Id))
-            .ToDictionary(x => x.Key, x => x.Value);
+        var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes([.. routeAchievements], routes);
+
+        return new MappedUncompletedAchievementsModel
+        {
+            CyclingRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Cycling),
+            RunningRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Running),
+            GeneralAchievements = [.. generalAchievements.Where(x => !userAchievements.Contains(x.Id))]
+        };
+
+        Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport sport)
+        {
+            return mappedRouteAchievementsToRoutes
+                .Where(x => x.Value.Sports.Contains(sport) && !userAchievements.Contains(x.Key.Id))
+                .ToDictionary(x => x.Key, x => x.Value);
+        }
     }
 
     private Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> MapRouteAchievementsToRoutes(
@@ -133,4 +137,11 @@ public class ZwiftGameInfoService
 
         return result;
     }
+}
+
+public record MappedUncompletedAchievementsModel
+{
+    public required Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> CyclingRouteAchievementsToRouteMapping { get; init; }
+    public required Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> RunningRouteAchievementsToRouteMapping { get; init; }
+    public required List<ZwiftGameInfoAchievement> GeneralAchievements { get; init; }
 }
