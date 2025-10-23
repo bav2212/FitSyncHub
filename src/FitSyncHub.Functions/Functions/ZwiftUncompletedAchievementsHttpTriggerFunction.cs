@@ -46,7 +46,10 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
             sb.AppendLine("Cycling routes:");
             foreach (var (_, route) in uncompletedAchievements.CyclingRouteAchievementsToRouteMapping)
             {
-                sb.AppendLine($"- {route.Name}");
+                var totalDistanceKm = Math.Round((route.TotalDistanceInMeters) / 1000.0, 1);
+                var totalElevation = Math.Round(route.TotalAscentInMeters, 0);
+
+                sb.AppendLine($"- {route.Name} ({totalDistanceKm}km, {totalElevation}m)");
             }
             sb.AppendLine();
         }

@@ -1,4 +1,6 @@
-﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+﻿using System.Text.Json.Serialization;
+
+namespace FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 
 public record ZwiftGameInfoRoute
 {
@@ -17,4 +19,9 @@ public record ZwiftGameInfoRoute
     public required int Duration { get; init; }
     public required double Difficulty { get; init; }
     public required IReadOnlyList<ZwiftGameInfoSport> Sports { get; init; }
+
+    [JsonIgnore]
+    public double TotalDistanceInMeters => DistanceInMeters + LeadinAscentInMeters;
+    [JsonIgnore]
+    public double TotalAscentInMeters => AscentInMeters + LeadinAscentInMeters;
 }

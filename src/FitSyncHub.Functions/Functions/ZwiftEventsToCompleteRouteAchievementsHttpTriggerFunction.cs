@@ -101,8 +101,8 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
                     }
                     else
                     {
-                        distanceImMeters = route.LeadinDistanceInMeters + route.DistanceInMeters;
-                        elevation = route.LeadinAscentInMeters + route.AscentInMeters;
+                        distanceImMeters = route.TotalDistanceInMeters;
+                        elevation = route.TotalAscentInMeters;
                     }
 
                     var item = new ZwiftEventsToCompleteRouteAchievementsEventItem
