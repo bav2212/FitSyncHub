@@ -25,7 +25,7 @@
   </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="protobuf\achievements.proto" />
+        <Protobuf Include="protobuf\profile.proto" />
     </ItemGroup>
 
     <ItemGroup>

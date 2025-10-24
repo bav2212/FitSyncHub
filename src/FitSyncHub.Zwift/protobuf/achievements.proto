@@ -1,9 +1,0 @@
-﻿option csharp_namespace = "FitSyncHub.Zwift.Protobuf";
-
-message AchievementEntry {
-    required int32 id = 1;
-}
-
-message Achievements {
-    repeated AchievementEntry achievements = 1;
-}
