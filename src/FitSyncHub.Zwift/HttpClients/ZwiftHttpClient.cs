@@ -33,7 +33,7 @@ public partial class ZwiftHttpClient
 
     public async Task<List<int>> GetAchievements(CancellationToken cancellationToken)
     {
-        const string Url = "/achievement/loadPlayerAchievements";
+        const string Url = "achievement/loadPlayerAchievements";
 
         var response = await _httpClient.GetAsync(Url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -47,7 +47,7 @@ public partial class ZwiftHttpClient
 
     public async Task<ZwiftGameInfoResponse> GetGameInfo(CancellationToken cancellationToken)
     {
-        const string Url = "/api/game_info";
+        const string Url = "api/game_info";
 
         var response = await _httpClient.GetAsync(Url, cancellationToken);
         response.EnsureSuccessStatusCode();

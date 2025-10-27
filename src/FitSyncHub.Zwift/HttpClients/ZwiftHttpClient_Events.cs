@@ -97,11 +97,11 @@ public partial class ZwiftHttpClient
         return results;
     }
 
-    public async Task<ZwiftEventResponse> GetEvent(string eventUrl, CancellationToken cancellationToken)
+    public async Task<ZwiftEventResponse> GetEventFromZwfitEventViewUrl(string eventUrl, CancellationToken cancellationToken)
     {
         var url = eventUrl.Replace(
             "https://www.zwift.com/uk/events/view/",
-            "/api/public/events/");
+            "api/public/events/");
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -118,7 +118,7 @@ public partial class ZwiftHttpClient
 
         do
         {
-            var url = $"/api/race-results/entries?event_subgroup_id={eventSubgroupId}&limit={TakeCount}&start={entriesResult.Count}";
+            var url = $"api/race-results/entries?event_subgroup_id={eventSubgroupId}&limit={TakeCount}&start={entriesResult.Count}";
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
@@ -145,7 +145,7 @@ public partial class ZwiftHttpClient
         const long TakeCount = 100;
         const long Start = 0;
 
-        var url = $"/api/events/subgroups/entrants/{eventSubgroupId}?type={type}&participation={participation}&limit={TakeCount}&start={Start}";
+        var url = $"api/events/subgroups/entrants/{eventSubgroupId}?type={type}&participation={participation}&limit={TakeCount}&start={Start}";
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();

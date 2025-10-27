@@ -12,7 +12,7 @@ public partial class ZwiftHttpClient
         int limit = 20,
         CancellationToken cancellationToken = default)
     {
-        var url = $"/api/profiles/{profileId}/activities?start={start}&limit={limit}";
+        var url = $"api/profiles/{profileId}/activities?start={start}&limit={limit}";
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -26,7 +26,7 @@ public partial class ZwiftHttpClient
     // create ZwiftActivity class if need this method
     public async Task<ZwiftActivityOverview> GetActivity(long profileId, long id, CancellationToken cancellationToken)
     {
-        var url = $"/api/profiles/{profileId}/activities/{id}";
+        var url = $"api/profiles/{profileId}/activities/{id}";
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();

@@ -35,19 +35,19 @@ public partial class ZwiftEventsService
                 }
             }
 
-            var zwiftEventDto = await _zwiftHttpClient.GetEvent(zwiftEventUrl, cancellationToken);
-            if (DateTime.UtcNow < zwiftEventDto.EventStart)
+            var zwiftEvent = await _zwiftHttpClient.GetEventFromZwfitEventViewUrl(zwiftEventUrl, cancellationToken);
+            if (DateTime.UtcNow < zwiftEvent.EventStart)
             {
                 continue;
             }
 
-            if (DateTime.UtcNow < zwiftEventDto.EventStart.AddHours(1.5))
+            if (DateTime.UtcNow < zwiftEvent.EventStart.AddHours(1.5))
             {
                 // do not want to store unfinished activity
                 continue;
             }
 
-            var eventSubgroupId = zwiftEventDto.EventSubgroups
+            var eventSubgroupId = zwiftEvent.EventSubgroups
                 .Single(x => x.SubgroupLabel == subgroupLabel).Id;
 
             var content = await _zwiftHttpClient.GetEventSubgroupResults(eventSubgroupId, cancellationToken);
@@ -68,8 +68,8 @@ public partial class ZwiftEventsService
     {
         var zwiftEventId = GetEventId(zwiftEventUrl);
 
-        var zwiftEventDto = await _zwiftHttpClient.GetEvent(zwiftEventUrl, cancellationToken);
-        var eventSubgroupId = zwiftEventDto.EventSubgroups
+        var zwiftEvent = await _zwiftHttpClient.GetEventFromZwfitEventViewUrl(zwiftEventUrl, cancellationToken);
+        var eventSubgroupId = zwiftEvent.EventSubgroups
             .Single(x => x.SubgroupLabel == subgroupLabel).Id;
 
         return await _zwiftHttpClient.GetEventSubgroupEntrants(eventSubgroupId, cancellationToken: cancellationToken);

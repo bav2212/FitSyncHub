@@ -18,7 +18,7 @@ public class ZwiftRacingHttpClient
         int? year = default,
         CancellationToken cancellationToken = default)
     {
-        var url = $"/api/riders/{riderId}/history?year={year ?? DateTime.Now.Year}";
+        var url = $"api/riders/{riderId}/history?year={year ?? DateTime.Now.Year}";
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
