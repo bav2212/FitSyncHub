@@ -63,11 +63,11 @@ public partial class ZwiftEventsService
         }
     }
 
-    public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEntrants(string zwiftEventUrl,
-      string subgroupLabel, CancellationToken cancellationToken)
+    public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEntrants(
+        string zwiftEventUrl,
+        string subgroupLabel,
+        CancellationToken cancellationToken)
     {
-        var zwiftEventId = GetEventId(zwiftEventUrl);
-
         var zwiftEvent = await _zwiftHttpClient.GetEventFromZwfitEventViewUrl(zwiftEventUrl, cancellationToken);
         var eventSubgroupId = zwiftEvent.EventSubgroups
             .Single(x => x.SubgroupLabel == subgroupLabel).Id;
