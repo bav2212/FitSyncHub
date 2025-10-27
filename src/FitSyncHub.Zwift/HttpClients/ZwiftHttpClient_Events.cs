@@ -10,17 +10,17 @@ public partial class ZwiftHttpClient
 {
 
     public async Task<List<ZwiftEventResponse>> GetEventFeedFullRangeBuggy(
-        ZwiftEventFeedRequest request,
+        ZwiftEventFeedRequest requestModel,
         CancellationToken cancellationToken)
     {
-        const string BaseUrl = "/api/event-feed";
+        const string BaseUrl = "api/event-feed";
         const int MaxRequests = 100;
 
-        var from = request.From;
+        var from = requestModel.From;
         // this field look buggy, maybe zwift api does not support to fiel
-        var to = request.To;
-        var pageLimit = request.PageLimit;
-        var limit = request.Limit;
+        var to = requestModel.To;
+        var pageLimit = requestModel.PageLimit;
+        var limit = requestModel.Limit;
 
         var ids = new HashSet<long>();
         var results = new List<ZwiftEventResponse>();
@@ -29,7 +29,9 @@ public partial class ZwiftHttpClient
         {
             ["from"] = from.ToUnixTimeMilliseconds().ToString(),
             ["to"] = to.ToUnixTimeMilliseconds().ToString(),
-            ["limit"] = limit.ToString()
+            ["limit"] = limit.ToString(),
+            // delete if need RUNNING
+            ["sport"] = "CYCLING"
         };
 
         var pages = 0;
