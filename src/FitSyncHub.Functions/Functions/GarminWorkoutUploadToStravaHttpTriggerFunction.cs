@@ -110,7 +110,7 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
             var activityFileStream = await _garminConnectHttpClient.DownloadActivityFile(garminActivityId, cancellationToken);
             _logger.LogInformation("Downloaded activity file {ActivityId}", garminActivityId);
 
-            using var zip = new ZipArchive(activityFileStream, ZipArchiveMode.Read);
+            await using var zip = new ZipArchive(activityFileStream, ZipArchiveMode.Read);
             if (zip.Entries.Count != 1)
             {
                 throw new Exception($"Expected 1 entry in zip, but found {zip.Entries.Count}");
