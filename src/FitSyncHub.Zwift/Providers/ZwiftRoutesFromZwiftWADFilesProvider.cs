@@ -233,13 +233,13 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         }
 
         [XmlIgnore]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         [XmlAttribute("nameHash")]
         public uint NameHash { get; set; }
 
         [XmlAttribute("locKey")]
-        public string LocKey { get; set; }
+        public string LocKey { get; set; } = null!;
 
         [XmlAttribute("distanceInMeters")]
         public double DistanceInMeters { get; set; }
@@ -254,9 +254,9 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         public double LeadInAscentInMeters { get; set; }
 
         [XmlAttribute("eventPaddocks")]
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        public string _EventPaddocksRaw { private get; set; }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable IDE1006 // Naming Styles
+        public string? _EventPaddocksRaw { private get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 
         [XmlIgnore]
         public int[] EventPaddocks => [.. (_EventPaddocksRaw ?? "")
