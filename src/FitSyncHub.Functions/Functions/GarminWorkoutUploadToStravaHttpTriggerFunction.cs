@@ -91,7 +91,6 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
         if (intervalsIcuEvents.Count != count)
         {
             _logger.LogInformation("Found {ActivitiesCount} intervals.icu events, but specified {ParsedCount} in request", intervalsIcuEvents.Count, count);
-            return new BadRequestObjectResult($"Found {intervalsIcuEvents.Count} intervals.icu events, but specified {count} in request");
         }
 
         var tuples = garminWorkoutActivities.Select((garminWorkoutActivity, index) =>
