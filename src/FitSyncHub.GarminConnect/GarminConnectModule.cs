@@ -13,26 +13,27 @@ namespace FitSyncHub.GarminConnect;
 
 public static class GarminConnectModule
 {
-    public static IServiceCollection ConfigureGarminConnectModule(
-        this IServiceCollection services,
-        string garminAuthOptionsPath)
+    extension(IServiceCollection services)
     {
-        services.AddScoped<GarminConnectToIntervalsIcuRideWorkoutStepConverterInitializer>();
-        services.AddScoped<GarminConnectToIntervalsIcuStrengthWorkoutStepConverterInitializer>();
-        services.AddScoped(ConverterInitializerImplementationFactory);
-        services.AddScoped<GarminConnectToInternalWorkoutConverterService>();
+        public IServiceCollection ConfigureGarminConnectModule(string garminAuthOptionsPath)
+        {
+            services.AddScoped<GarminConnectToIntervalsIcuRideWorkoutStepConverterInitializer>();
+            services.AddScoped<GarminConnectToIntervalsIcuStrengthWorkoutStepConverterInitializer>();
+            services.AddScoped(ConverterInitializerImplementationFactory);
+            services.AddScoped<GarminConnectToInternalWorkoutConverterService>();
 
-        ConfigureAuth(services, garminAuthOptionsPath);
+            ConfigureAuth(services, garminAuthOptionsPath);
 
-        services.AddTransient<GarminConnectAuthenticationDelegatingHandler>();
-        services.AddHttpClient<GarminConnectHttpClient>(client => client.BaseAddress = new Uri("https://connect.garmin.com"))
-            .AddHttpMessageHandler<GarminConnectAuthenticationDelegatingHandler>()
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
-            {
-                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
-            });
+            services.AddTransient<GarminConnectAuthenticationDelegatingHandler>();
+            services.AddHttpClient<GarminConnectHttpClient>(client => client.BaseAddress = new Uri("https://connect.garmin.com"))
+                .AddHttpMessageHandler<GarminConnectAuthenticationDelegatingHandler>()
+                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+                {
+                    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+                });
 
-        return services;
+            return services;
+        }
     }
 
     private static void ConfigureAuth(IServiceCollection services, string garminAuthOptionsPath)

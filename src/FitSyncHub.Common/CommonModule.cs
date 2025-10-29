@@ -7,17 +7,19 @@ namespace FitSyncHub.Common;
 
 public static class CommonModule
 {
-    public static IServiceCollection ConfigureCommonModule<
-        TStravaApplicationOptionsProvider>(this IServiceCollection services)
-        where TStravaApplicationOptionsProvider : class, IStravaApplicationOptionsProvider
+    extension(IServiceCollection services)
     {
-        services.AddScoped<IStravaApplicationOptionsProvider, TStravaApplicationOptionsProvider>();
+        public IServiceCollection ConfigureCommonModule<TStravaApplicationOptionsProvider>()
+            where TStravaApplicationOptionsProvider : class, IStravaApplicationOptionsProvider
+        {
+            services.AddScoped<IStravaApplicationOptionsProvider, TStravaApplicationOptionsProvider>();
 
-        services.AddScoped<FitFileDecoder>();
-        services.AddScoped<FitFileEncoder>();
+            services.AddScoped<FitFileDecoder>();
+            services.AddScoped<FitFileEncoder>();
 
-        services.AddSingleton<IDistributedCacheService, DistributedCacheService>();
+            services.AddSingleton<IDistributedCacheService, DistributedCacheService>();
 
-        return services;
+            return services;
+        }
     }
 }

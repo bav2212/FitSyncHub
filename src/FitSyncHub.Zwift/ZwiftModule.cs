@@ -17,63 +17,63 @@ namespace FitSyncHub.Zwift;
 
 public static class ZwiftModule
 {
-    public static IServiceCollection ConfigureZwiftModule(
-        this IServiceCollection services,
-        string zwiftAuthOptionsPath)
+    extension(IServiceCollection services)
     {
-        services.AddOptions<ZwiftAuthOptions>()
-            .Configure<IConfiguration>((settings, configuration) => configuration
-                .GetSection(zwiftAuthOptionsPath)
-                .Bind(settings))
-            .ValidateOnStart();
-
-        var env = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT");
-        var zwiftRoutesInfoFromWADFiles = Environment.GetEnvironmentVariable("ZWIFT_ROUTES_INFO_FROM_WAD_FILES");
-
-        var isDevelopment = string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase);
-        var useZwiftRoutesInfoFromWADFiles = string.Equals(zwiftRoutesInfoFromWADFiles, "true", StringComparison.OrdinalIgnoreCase);
-        if (isDevelopment && useZwiftRoutesInfoFromWADFiles)
+        public IServiceCollection ConfigureZwiftModule(string zwiftAuthOptionsPath)
         {
-            services.AddScoped<IZwiftRoutesProvider, ZwiftRoutesFromZwiftWADFilesProvider>();
-        }
-        else
-        {
-            services.AddScoped<IZwiftRoutesProvider, ZwiftRoutesFromGameInfoProvider>();
-        }
+            services.AddOptions<ZwiftAuthOptions>()
+                .Configure<IConfiguration>((settings, configuration) => configuration
+                    .GetSection(zwiftAuthOptionsPath)
+                    .Bind(settings))
+                .ValidateOnStart();
 
-        services.AddScoped<ZwiftWadDecoder>();
+            var env = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT");
+            var zwiftRoutesInfoFromWADFiles = Environment.GetEnvironmentVariable("ZWIFT_ROUTES_INFO_FROM_WAD_FILES");
 
-        services.AddScoped<ZwiftEventsService>();
-        services.AddScoped<ZwiftPowerService>();
-        services.AddScoped<ZwiftResultsAnalyzerService>();
-        services.AddScoped<ZwiftGameInfoService>();
-        services.AddScoped<ZwiftRoutesService>();
-
-        services.AddHttpClient<IZwiftAuthenticator, ZwiftAuthHttpClient>(
-            client => client.BaseAddress = new Uri("https://secure.zwift.com"));
-        services.Decorate<IZwiftAuthenticator, ZwiftAuthHttpClientCached>();
-        services.AddTransient<IZwiftTokenRefresher, ZwiftAuthHttpClient>();
-        services.AddTransient<IZwiftAuthCacheInvalidator, ZwiftAuthHttpClientCached>();
-
-        AddZwiftAuthResiliencePipeline(services);
-
-        services.AddHttpClient<ZwiftHttpClientUnauthorized>();
-
-        services.AddTransient<ZwiftAuthDelegatingHandler>();
-        services.AddHttpClient<ZwiftHttpClient>(client => client.BaseAddress = new Uri("https://us-or-rly101.zwift.com"))
-            .AddHttpMessageHandler<ZwiftAuthDelegatingHandler>()
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            var isDevelopment = string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase);
+            var useZwiftRoutesInfoFromWADFiles = string.Equals(zwiftRoutesInfoFromWADFiles, "true", StringComparison.OrdinalIgnoreCase);
+            if (isDevelopment && useZwiftRoutesInfoFromWADFiles)
             {
-                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
-            });
+                services.AddScoped<IZwiftRoutesProvider, ZwiftRoutesFromZwiftWADFilesProvider>();
+            }
+            else
+            {
+                services.AddScoped<IZwiftRoutesProvider, ZwiftRoutesFromGameInfoProvider>();
+            }
 
-        services.AddTransient<ZwiftRacingAuthDelegatingHandler>();
-        services.AddHttpClient<ZwiftRacingHttpClient>(client => client.BaseAddress = new Uri("https://www.zwiftracing.app"))
-            .AddHttpMessageHandler<ZwiftRacingAuthDelegatingHandler>();
+            services.AddScoped<ZwiftWadDecoder>();
 
-        return services;
+            services.AddScoped<ZwiftEventsService>();
+            services.AddScoped<ZwiftPowerService>();
+            services.AddScoped<ZwiftResultsAnalyzerService>();
+            services.AddScoped<ZwiftGameInfoService>();
+            services.AddScoped<ZwiftRoutesService>();
+
+            services.AddHttpClient<IZwiftAuthenticator, ZwiftAuthHttpClient>(
+                client => client.BaseAddress = new Uri("https://secure.zwift.com"));
+            services.Decorate<IZwiftAuthenticator, ZwiftAuthHttpClientCached>();
+            services.AddTransient<IZwiftTokenRefresher, ZwiftAuthHttpClient>();
+            services.AddTransient<IZwiftAuthCacheInvalidator, ZwiftAuthHttpClientCached>();
+
+            AddZwiftAuthResiliencePipeline(services);
+
+            services.AddHttpClient<ZwiftHttpClientUnauthorized>();
+
+            services.AddTransient<ZwiftAuthDelegatingHandler>();
+            services.AddHttpClient<ZwiftHttpClient>(client => client.BaseAddress = new Uri("https://us-or-rly101.zwift.com"))
+                .AddHttpMessageHandler<ZwiftAuthDelegatingHandler>()
+                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+                {
+                    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+                });
+
+            services.AddTransient<ZwiftRacingAuthDelegatingHandler>();
+            services.AddHttpClient<ZwiftRacingHttpClient>(client => client.BaseAddress = new Uri("https://www.zwiftracing.app"))
+                .AddHttpMessageHandler<ZwiftRacingAuthDelegatingHandler>();
+
+            return services;
+        }
     }
-
     private static void AddZwiftAuthResiliencePipeline(IServiceCollection services)
     {
         const int RetryCount = 3;

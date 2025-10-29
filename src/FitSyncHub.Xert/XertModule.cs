@@ -10,22 +10,25 @@ namespace FitSyncHub.Xert;
 
 public static class XertModule
 {
-    public static IServiceCollection ConfigureXertModule(this IServiceCollection services, string xertOptionsPath)
+    extension(IServiceCollection services)
     {
-        services.AddOptions<XertOptions>()
-            .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(xertOptionsPath).Bind(settings))
-            .ValidateOnStart();
+        public IServiceCollection ConfigureXertModule(string xertOptionsPath)
+        {
+            services.AddOptions<XertOptions>()
+                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(xertOptionsPath).Bind(settings))
+                .ValidateOnStart();
 
-        services.AddHttpClient<IXertAuthHttpClient, XertAuthHttpClient>(client
-            => client.BaseAddress = new Uri("https://www.xertonline.com"));
+            services.AddHttpClient<IXertAuthHttpClient, XertAuthHttpClient>(client
+                => client.BaseAddress = new Uri("https://www.xertonline.com"));
 
-        services.AddTransient<XertAuthenticationDelegatingHandler>();
-        services.AddHttpClient<IXertHttpClient, XertHttpClient>(client
-            => client.BaseAddress = new Uri("https://www.xertonline.com"))
-            .AddHttpMessageHandler<XertAuthenticationDelegatingHandler>();
+            services.AddTransient<XertAuthenticationDelegatingHandler>();
+            services.AddHttpClient<IXertHttpClient, XertHttpClient>(client
+                => client.BaseAddress = new Uri("https://www.xertonline.com"))
+                .AddHttpMessageHandler<XertAuthenticationDelegatingHandler>();
 
-        services.AddScoped<IXertAuthService, XertAuthService>();
+            services.AddScoped<IXertAuthService, XertAuthService>();
 
-        return services;
+            return services;
+        }
     }
 }

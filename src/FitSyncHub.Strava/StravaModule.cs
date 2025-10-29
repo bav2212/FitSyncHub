@@ -13,25 +13,27 @@ namespace FitSyncHub.Strava;
 
 public static class StravaModule
 {
-    public static IServiceCollection ConfigureStravaModule<
-        TStravaOAuthService>(this IServiceCollection services)
-        where TStravaOAuthService : class, IStravaOAuthService
+    extension(IServiceCollection services)
     {
-        services.AddOptions<StravaOptions>().Configure<IConfiguration>((settings, configuration)
-            => configuration.GetSection(StravaOptions.Position).Bind(settings));
+        public IServiceCollection ConfigureStravaModule<TStravaOAuthService>()
+            where TStravaOAuthService : class, IStravaOAuthService
+        {
+            services.AddOptions<StravaOptions>().Configure<IConfiguration>((settings, configuration)
+                => configuration.GetSection(StravaOptions.Position).Bind(settings));
 
-        services.AddTransient<IStravaOAuthService, TStravaOAuthService>();
-        services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client
-            => client.BaseAddress = new Uri("http://www.strava.com"));
+            services.AddTransient<IStravaOAuthService, TStravaOAuthService>();
+            services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client
+                => client.BaseAddress = new Uri("http://www.strava.com"));
 
-        AddStravaUploadActivityResiliencePipeline(services);
+            AddStravaUploadActivityResiliencePipeline(services);
 
-        services.AddTransient<StravaAuthenticationDelegatingHandler>();
-        services.AddHttpClient<IStravaHttpClient, StravaHttpClient>(client
-            => client.BaseAddress = new Uri("https://www.strava.com/api/v3/"))
-        .AddHttpMessageHandler<StravaAuthenticationDelegatingHandler>();
+            services.AddTransient<StravaAuthenticationDelegatingHandler>();
+            services.AddHttpClient<IStravaHttpClient, StravaHttpClient>(client
+                => client.BaseAddress = new Uri("https://www.strava.com/api/v3/"))
+            .AddHttpMessageHandler<StravaAuthenticationDelegatingHandler>();
 
-        return services;
+            return services;
+        }
     }
 
     private static void AddStravaUploadActivityResiliencePipeline(IServiceCollection services)
