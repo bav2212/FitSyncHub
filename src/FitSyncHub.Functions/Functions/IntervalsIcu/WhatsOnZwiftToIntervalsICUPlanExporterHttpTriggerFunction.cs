@@ -53,8 +53,6 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
             }
 
             await _intervalsIcuStorageService.Store(items, request.FolderId, cancellationToken);
-            _logger.LogInformation("Stored plan");
-
             return new OkObjectResult("Stored plan");
         }
         catch (Exception ex)

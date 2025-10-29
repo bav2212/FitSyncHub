@@ -35,19 +35,16 @@ public class MacroNutrientsCalculatorHttpTriggerFunction
         string? optimalEnergyAvailabilityQueryParameter = req.Query["oea"];
         if (optimalEnergyAvailabilityQueryParameter is null)
         {
-            _logger.LogInformation("optimal energy availability is not set. Set 'OEA' parameter");
             return new BadRequestObjectResult("optimal energy availability is not set. Set 'OEA' parameter");
         }
 
         if (!int.TryParse(optimalEnergyAvailabilityQueryParameter, out var optimalEnergyAvailability))
         {
-            _logger.LogInformation("OEA has wrong format");
             return new BadRequestObjectResult("OEA has wrong format");
         }
 
         if (optimalEnergyAvailability == 0)
         {
-            _logger.LogInformation("OEA should be more than 0");
             return new BadRequestObjectResult("OEA should be more than 0");
         }
 

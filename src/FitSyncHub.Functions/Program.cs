@@ -2,6 +2,7 @@
 using FitSyncHub.Functions;
 using FitSyncHub.Functions.Functions;
 using FitSyncHub.Functions.Functions.IntervalsIcu;
+using FitSyncHub.Functions.Middlewares;
 using FitSyncHub.Functions.Repositories;
 using FitSyncHub.Functions.Services;
 using FitSyncHub.GarminConnect;
@@ -37,6 +38,7 @@ builder.ConfigureFunctionsWebApplication();
 // apply ExceptionHandlingMiddleware for functions called by user only, otherwise will see error in azure portal
 builder.UseWhen<ExceptionHandlingMiddleware>((context) => functionsCalledByUser.Contains(context.FunctionDefinition.Name));
 builder.UseMiddleware<HttpContextAccessorMiddleware>();
+builder.UseMiddleware<LogBadRequestMiddleware>();
 
 builder.Configuration.AddUserSecrets<Program>();
 

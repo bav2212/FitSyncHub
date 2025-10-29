@@ -33,8 +33,6 @@ public class IntervalsICUDeletePlanHttpTriggerFunction
         try
         {
             await _intervalsIcuDeletePlanService.DeleteWorkouts(folderId, cancellationToken);
-
-            _logger.LogInformation("Deleted workouts from folder {FolderId}", folderId);
             return new OkObjectResult($"Deleted workouts from folder {folderId}");
         }
         catch (Exception ex)

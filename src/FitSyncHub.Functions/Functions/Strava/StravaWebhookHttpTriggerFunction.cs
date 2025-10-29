@@ -43,9 +43,6 @@ public class StravaWebhookHttpTriggerFunction
             return new BadRequestObjectResult("WebhookVerifyToken is wrong");
         }
 
-        // Responds with the challenge token from the request
-        _logger.LogInformation("WEBHOOK_VERIFIED");
-
         return new OkObjectResult(new WebhookVerificationResponse
         {
             HubChallenge = challenge
