@@ -224,16 +224,14 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         public int MapId { get; set; }
 
         [XmlAttribute("name")]
-#pragma warning disable IDE1006 // Naming Styles
-        public string _NameRaw
-#pragma warning restore IDE1006 // Naming Styles
+#pragma warning disable CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or safely handling the case where 'field' is null in the 'get' accessor.
+        public string Name
+#pragma warning restore CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or safely handling the case where 'field' is null in the 'get' accessor.
         {
-            private get => Name;
-            set => Name = value!.Trim();
+            get;
+            set => field = value!.Trim();
         }
 
-        [XmlIgnore]
-        public string Name { get; set; } = null!;
 
         [XmlAttribute("nameHash")]
         public uint NameHash { get; set; }
@@ -254,12 +252,10 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         public double LeadInAscentInMeters { get; set; }
 
         [XmlAttribute("eventPaddocks")]
-#pragma warning disable IDE1006 // Naming Styles
-        public string? _EventPaddocksRaw { private get; set; }
-#pragma warning restore IDE1006 // Naming Styles
+        public string? EventPaddocksRaw { get; set; }
 
         [XmlIgnore]
-        public int[] EventPaddocks => [.. (_EventPaddocksRaw ?? "")
+        public int[] EventPaddocksArray => [.. (EventPaddocksRaw ?? "")
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(int.Parse)];
 
