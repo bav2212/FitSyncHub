@@ -47,25 +47,21 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
 
         if (countQueryParameter is null)
         {
-            _logger.LogInformation("wrong request");
             return new BadRequestObjectResult("wrong request");
         }
 
         if (!int.TryParse(countQueryParameter, out var count))
         {
-            _logger.LogInformation("Count has wrong format");
             return new BadRequestObjectResult("Count has wrong format");
         }
 
         if (count == 0)
         {
-            _logger.LogInformation("Count should be more than 0");
             return new BadRequestObjectResult("Count should be more than 0");
         }
 
         if (count > 10)
         {
-            _logger.LogInformation("Can't parse more that 10 activities");
             return new BadRequestObjectResult("Can't parse more that 10 activities");
         }
 
@@ -79,7 +75,6 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
 
         if (activities.Count != count)
         {
-            _logger.LogInformation("Found {ActivitiesCount} todays intervals.icu activities, but specified {ParsedCount} in request", activities.Count, count);
             return new BadRequestObjectResult($"Found {activities.Count} todays intervals.icu activities, but specified {count} in request");
         }
 
@@ -168,7 +163,7 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
         }
     }
 
-    private async Task<IReadOnlyCollection<ActivityResponse>> GetRideActivities(DateOnly date, CancellationToken cancellationToken)
+    private async Task<List<ActivityResponse>> GetRideActivities(DateOnly date, CancellationToken cancellationToken)
     {
         var activities = await _intervalsIcuHttpClient.ListActivities(new(date, date), cancellationToken)
             ?? [];

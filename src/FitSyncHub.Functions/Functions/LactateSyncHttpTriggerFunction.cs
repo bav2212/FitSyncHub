@@ -42,8 +42,7 @@ public class LactateSyncHttpTriggerFunction
 
         if (req.ContentType != "text/csv")
         {
-            _logger.LogError("Invalid content type: {ContentType}", req.ContentType);
-            return new BadRequestObjectResult("Invalid content type, should be csv file");
+            return new BadRequestObjectResult($"Invalid content type: {req.ContentType}, should be csv file");
         }
 
         const string CacheKey = "lactate-last-synced-data";
@@ -65,8 +64,7 @@ public class LactateSyncHttpTriggerFunction
 
         if (upcomingLactateResultsData.Count == 0)
         {
-            _logger.LogInformation("No new lactate data to sync, last sync date: {LastSyncDate}", lastSyncDate);
-            return new OkObjectResult("No new lactate data to sync");
+            return new OkObjectResult($"No new lactate data to sync, last sync date: {lastSyncDate}");
         }
 
         if (upcomingLactateResultsData.Count == 0)

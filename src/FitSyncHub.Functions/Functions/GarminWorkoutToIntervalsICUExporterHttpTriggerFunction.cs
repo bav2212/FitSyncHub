@@ -65,7 +65,6 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 
         if (garminTrainingPlanTaskList.Count == 0)
         {
-            _logger.LogInformation("No incomplete tasks to export");
             return new BadRequestObjectResult("No incomplete activities");
         }
 

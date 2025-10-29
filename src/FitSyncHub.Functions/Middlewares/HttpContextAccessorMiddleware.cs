@@ -2,7 +2,7 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 
-namespace FitSyncHub.Functions;
+namespace FitSyncHub.Functions.Middlewares;
 
 // https://github.com/Azure/azure-functions-dotnet-worker/issues/2372
 public class HttpContextAccessorMiddleware(IHttpContextAccessor httpContextAccessor) : IFunctionsWorkerMiddleware

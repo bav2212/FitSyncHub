@@ -4,7 +4,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Logging;
 
-namespace FitSyncHub.Functions;
+namespace FitSyncHub.Functions.Middlewares;
 
 /// <summary>
 /// This middleware catches any exceptions during function invocations and
@@ -23,7 +23,7 @@ internal sealed class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
     {
         try
         {
-            await next(context);
+           await next(context);
         }
         catch (Exception ex)
         {
