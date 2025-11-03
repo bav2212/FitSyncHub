@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 
 namespace FitSyncHub.Common.Json;
+
 public class JsonStringEnumConverterSnakeCaseUpper<TEnum> : JsonStringEnumConverter<TEnum>
     where TEnum : struct, Enum
 {

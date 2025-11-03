@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace FitSyncHub.GarminConnect.Models.Responses;
+
 public record GarminActivitySearchResponse
 {
     public required long ActivityId { get; init; }

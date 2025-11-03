@@ -1,4 +1,5 @@
 ﻿namespace FitSyncHub.Common.Extensions;
+
 public static class EnumerableExtensions
 {
     public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source)
