@@ -4,9 +4,9 @@ using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
 namespace FitSyncHub.Functions.Helpers;
 
-public static class ResponseOverviewHelper
+public static class IntervalsIcuResponseOverviewHelper
 {
-    public static string IntervalsIcuEventsResponseOverview(params IEnumerable<EventResponse> events)
+    public static string ToStringOverview(params IEnumerable<EventResponse> events)
     {
         return events
             .Where(x => x.PairedActivityId == null)
