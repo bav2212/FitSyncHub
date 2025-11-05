@@ -19,7 +19,7 @@
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Caching.Cosmos" Version="1.8.0" />
 	<PackageReference Include="Riok.Mapperly" Version="4.3.0" />
-	<PackageReference Include="Sep" Version="0.11.3" />
+	<PackageReference Include="Sep" Version="0.11.4" />
   </ItemGroup>
 
   <ItemGroup>
