@@ -17,30 +17,35 @@ public partial class GarminConnectHttpClient
         const int Limit = 20;
         List<GarminActivitySearchResponse> result = [];
 
+        Dictionary<string, StringValues> commonQueryParams = new()
+        {
+            { "startDate", $"{startDate:yyyy-MM-dd}" },
+            { "endDate", $"{endDate:yyyy-MM-dd}" },
+            { "limit", Limit.ToString() },
+        };
+
+        if (!string.IsNullOrEmpty(activityType))
+        {
+            commonQueryParams.Add("activityType", activityType);
+        }
+
         do
         {
-            Dictionary<string, StringValues> queryParams = new()
+            Dictionary<string, StringValues> queryParams = new(commonQueryParams)
             {
-                { "startDate", startDate.ToString("yyyy-MM-dd") },
-                { "endDate", endDate.ToString("yyyy-MM-dd") },
                 { "start", start.ToString() },
-                { "limit", Limit.ToString() },
             };
 
-            if (!string.IsNullOrEmpty(activityType))
-            {
-                queryParams.Add("activityType", activityType);
-            }
-
-            var url = QueryHelpers.AddQueryString("/activitylist-service/activities/search/activities", queryParams);
+            var url = QueryHelpers
+                .AddQueryString("/activitylist-service/activities/search/activities", queryParams);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            var array = JsonSerializer.Deserialize(content, GarminConnectActivityListSerializerContext.Default.GarminActivitySearchResponseArray) ?? [];
-            if (array.Length == 0)
+            var array = JsonSerializer.Deserialize(content, GarminConnectActivityListSerializerContext.Default.GarminActivitySearchResponseArray);
+            if (array is null || array.Length == 0)
             {
                 break;
             }
