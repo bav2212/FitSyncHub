@@ -2,6 +2,8 @@
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Xert.Abstractions;
 using FitSyncHub.Xert.Models.Responses;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Xert.HttpClients;
 
@@ -17,8 +19,13 @@ public class XertHttpClient : IXertHttpClient
 
     public async Task<TrainingInfoResponse> GetTrainingInfo(XertWorkoutFormat format, CancellationToken cancellationToken)
     {
-        var response = await _httpClient.GetAsync($"/oauth/training_info?format={format}", cancellationToken);
+        var queryParams = new Dictionary<string, StringValues>
+        {
+            { "format", format.ToString() }
+        };
+        var requestUri = QueryHelpers.AddQueryString("oauth/training_info", queryParams);
 
+        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync(XertHttpClientSerializerContext.Default.TrainingInfoResponse,

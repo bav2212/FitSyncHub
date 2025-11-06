@@ -9,6 +9,8 @@ using FitSyncHub.IntervalsICU.HttpClients.Models;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.IntervalsICU.HttpClients;
 
@@ -18,16 +20,14 @@ public partial class IntervalsIcuHttpClient
         ListActivitiesQueryParams query,
         CancellationToken cancellationToken)
     {
-        var baseUrl = $"{AthleteBaseUrl}/activities";
-
-        var queryParams = new Dictionary<string, string>()
+        var queryParams = new Dictionary<string, StringValues>()
         {
             { "oldest", query.Oldest.ToString("s", CultureInfo.InvariantCulture) },
             { "newest", query.Newest.ToString("s", CultureInfo.InvariantCulture) },
             { "limit",  query.Limit.ToString() },
         };
 
-        var requestUri = $"{baseUrl}?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
+        var requestUri = QueryHelpers.AddQueryString($"{AthleteBaseUrl}/activities", queryParams);
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();

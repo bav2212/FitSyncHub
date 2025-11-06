@@ -2,6 +2,7 @@
 using FitSyncHub.Xert.Abstractions;
 
 namespace FitSyncHub.Xert.DelegatingHandlers;
+
 public class XertAuthenticationDelegatingHandler : DelegatingHandler
 {
     private readonly IXertAuthService _xertAuthService;

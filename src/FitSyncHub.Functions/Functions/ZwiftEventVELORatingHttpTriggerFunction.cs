@@ -111,7 +111,12 @@ public class ZwiftEventVELORatingHttpTriggerFunction
             }));
             var csvContent = string.Join(Environment.NewLine, csvLines);
 
-            return new OkObjectResult(csvContent);
+            return new ContentResult
+            {
+                Content = csvContent,
+                ContentType = "text/plain",
+                StatusCode = 200
+            };
         }
 
         if (string.IsNullOrWhiteSpace(format) || string.Equals(format, "json", StringComparison.OrdinalIgnoreCase))

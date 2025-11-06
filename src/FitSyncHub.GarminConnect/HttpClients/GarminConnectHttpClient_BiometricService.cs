@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
@@ -10,7 +12,13 @@ public partial class GarminConnectHttpClient
     {
         date ??= DateOnly.FromDateTime(DateTime.UtcNow);
 
-        var url = $"/biometric-service/biometric/powerToWeight/latest/{date:yyyy-MM-dd}";
+        Dictionary<string, StringValues> queryParams = new()
+        {
+            { "date", date.Value.ToString("yyyy-MM-dd") },
+        };
+
+        var url = QueryHelpers.AddQueryString(
+            "/biometric-service/biometric/powerToWeight/latest", queryParams);
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();

@@ -23,7 +23,7 @@ internal sealed class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
     {
         try
         {
-           await next(context);
+            await next(context);
         }
         catch (Exception ex)
         {

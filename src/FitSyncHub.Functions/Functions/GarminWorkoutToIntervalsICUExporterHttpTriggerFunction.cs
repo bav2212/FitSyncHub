@@ -161,7 +161,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(firstDay, lastDay), cancellationToken);
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
 
-        var intervalsIcuFutureGarminEventsOverview = ResponseOverviewHelper.IntervalsIcuEventsResponseOverview(intervalsIcuEvents);
+        var intervalsIcuFutureGarminEventsOverview = IntervalsIcuResponseOverviewHelper.ToStringOverview(intervalsIcuEvents);
 
         return new OkObjectResult(intervalsIcuFutureGarminEventsOverview);
     }

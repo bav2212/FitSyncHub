@@ -4,8 +4,10 @@ using FitSyncHub.GarminConnect.Auth.Exceptions;
 using FitSyncHub.GarminConnect.Auth.Models;
 using FitSyncHub.GarminConnect.Options;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.GarminConnect.Auth;
 
@@ -15,8 +17,8 @@ internal partial class GarminSsoHttpClient
     private readonly ILogger<GarminSsoHttpClient> _logger;
     private readonly GarminConnectAuthOptions _authOptions;
     private readonly string _embedUrl;
-    private readonly Dictionary<string, string> _embedParams;
-    private readonly Dictionary<string, string> _signInParams;
+    private readonly Dictionary<string, StringValues> _embedParams;
+    private readonly Dictionary<string, StringValues> _signInParams;
     private readonly string _signInUrl;
     private readonly string _verifyMFA;
 
@@ -102,9 +104,7 @@ internal partial class GarminSsoHttpClient
 
     private async Task SetCookies(CancellationToken cancellationToken)
     {
-        var query = QueryString.Create(_embedParams);
-
-        var url = $"{_embedUrl}{query}";
+        var url = QueryHelpers.AddQueryString(_embedUrl, _embedParams);
 
         var response = await _ssoClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -112,8 +112,7 @@ internal partial class GarminSsoHttpClient
 
     private async Task<string> RequestCsrfToken(CancellationToken cancellationToken)
     {
-        var queryParams = QueryString.Create(_signInParams);
-        var url = $"{_signInUrl}{queryParams}";
+        var url = QueryHelpers.AddQueryString(_signInUrl, _signInParams);
 
         var response = await _ssoClient.GetAsync(url, cancellationToken);
         if (response.StatusCode != HttpStatusCode.OK)
@@ -134,9 +133,9 @@ internal partial class GarminSsoHttpClient
 
     private async Task<string> GetOAuthTicket(string csrf, CancellationToken cancellationToken)
     {
-        var query = QueryString.Create(_signInParams);
+        var url = QueryHelpers.AddQueryString(_signInUrl, _signInParams);
 
-        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_signInUrl}{query}");
+        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url);
 
         httpRequestMessage.Headers.Add("referer", _signInUrl);
         httpRequestMessage.Content = new FormUrlEncodedContent(new Dictionary<string, string>

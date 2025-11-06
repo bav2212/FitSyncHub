@@ -76,7 +76,7 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
             Tags = [IntervalsIcuEventTagXert],
         }, default);
 
-        var intervalsIcuFutureGarminEventsOverview = ResponseOverviewHelper.IntervalsIcuEventsResponseOverview(createdEvent);
+        var intervalsIcuFutureGarminEventsOverview = IntervalsIcuResponseOverviewHelper.ToStringOverview(createdEvent);
 
         return new OkObjectResult(intervalsIcuFutureGarminEventsOverview);
     }

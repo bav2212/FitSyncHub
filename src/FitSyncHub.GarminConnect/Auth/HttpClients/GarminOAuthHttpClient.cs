@@ -3,6 +3,8 @@ using System.Web;
 using FitSyncHub.GarminConnect.Auth.Exceptions;
 using FitSyncHub.GarminConnect.Auth.Models;
 using FitSyncHub.GarminConnect.JsonSerializerContexts;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 using OAuth;
 
 namespace FitSyncHub.GarminConnect.Auth.HttpClients;
@@ -25,8 +27,13 @@ internal class GarminOAuthHttpClient
             const string LoginUrl = "https://sso.garmin.com/sso/embed";
 
             var oauthClient = OAuthRequest.ForRequestToken(credentials.ConsumerKey, credentials.ConsumerSecret);
-            oauthClient.RequestUrl =
-                $"{_httpClient.BaseAddress}/preauthorized?ticket={ticket}&login-url={LoginUrl}&accepts-mfa-tokens=true";
+            oauthClient.RequestUrl = QueryHelpers.AddQueryString($"{_httpClient.BaseAddress}/preauthorized",
+                new Dictionary<string, StringValues>
+                {
+                    { "ticket", ticket },
+                    { "login-url", LoginUrl },
+                    { "accepts-mfa-tokens", "true" },
+                });
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, oauthClient.RequestUrl);
             httpRequestMessage.Headers.Add("Authorization", oauthClient.GetAuthorizationHeader());

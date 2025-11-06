@@ -4,6 +4,7 @@ using FitSyncHub.Strava.Options;
 using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Strava.DelegatingHandlers;
+
 public class StravaAuthenticationDelegatingHandler : DelegatingHandler
 {
     private readonly IStravaOAuthService _stravaOAuthService;

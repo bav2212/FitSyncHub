@@ -3,6 +3,8 @@ using System.Text.Json;
 using FitSyncHub.GarminConnect.JsonSerializerContexts;
 using FitSyncHub.GarminConnect.Models.Requests;
 using FitSyncHub.GarminConnect.Models.Responses;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
@@ -11,7 +13,12 @@ public partial class GarminConnectHttpClient
     public async Task<GarminWeightResponse> GetWeightDayView(DateOnly date,
         CancellationToken cancellationToken = default)
     {
-        var url = $"/weight-service/weight/dayview/{date:yyyy-MM-dd}";
+        var queryParams = new Dictionary<string, StringValues>
+        {
+            { "date", date.ToString("yyyy-MM-dd") }
+        };
+
+        var url = QueryHelpers.AddQueryString("/weight-service/weight/dayview", queryParams);
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
