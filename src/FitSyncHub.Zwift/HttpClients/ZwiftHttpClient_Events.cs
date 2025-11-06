@@ -2,7 +2,9 @@
 using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.JsonSerializerContexts;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
@@ -25,7 +27,7 @@ public partial class ZwiftHttpClient
         var ids = new HashSet<long>();
         var results = new List<ZwiftEventResponse>();
 
-        var queryParams = new Dictionary<string, string>
+        var queryParams = new Dictionary<string, StringValues>
         {
             ["from"] = from.ToUnixTimeMilliseconds().ToString(),
             ["to"] = to.ToUnixTimeMilliseconds().ToString(),
@@ -45,7 +47,7 @@ public partial class ZwiftHttpClient
                 queryParams["cursor"] = cursor;
             }
 
-            var requestUri = $"{BaseUrl}?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"))}";
+            var requestUri = QueryHelpers.AddQueryString(BaseUrl, queryParams);
 
             var response = await _httpClient.GetAsync(requestUri, cancellationToken);
             response.EnsureSuccessStatusCode();

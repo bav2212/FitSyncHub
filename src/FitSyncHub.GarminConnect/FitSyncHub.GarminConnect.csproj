@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+        <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.10" />
         <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
         <PackageReference Include="OAuth.DotNetCore" Version="3.0.1" />
         <PackageReference Include="Scrutor" Version="6.1.0" />

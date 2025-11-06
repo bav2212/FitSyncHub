@@ -4,6 +4,8 @@ using System.Text.Json;
 using FitSyncHub.IntervalsICU.HttpClients.Models;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.IntervalsICU.HttpClients;
 
@@ -13,9 +15,7 @@ public partial class IntervalsIcuHttpClient
       ListEventsQueryParams query,
       CancellationToken cancellationToken)
     {
-        var baseUrl = $"{AthleteBaseUrl}/events";
-
-        var queryParams = new Dictionary<string, string>()
+        var queryParams = new Dictionary<string, StringValues>()
         {
             { "oldest", new DateTime(query.Oldest, TimeOnly.MinValue).ToString("s", CultureInfo.InvariantCulture) },
             { "newest", new DateTime(query.Newest, TimeOnly.MaxValue).ToString("s", CultureInfo.InvariantCulture) },
@@ -37,7 +37,7 @@ public partial class IntervalsIcuHttpClient
             queryParams.Add("limit", query.Limit.Value.ToString(CultureInfo.InvariantCulture));
         }
 
-        var requestUri = $"{baseUrl}?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
+        var requestUri = QueryHelpers.AddQueryString($"{AthleteBaseUrl}/events", queryParams);
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -95,7 +95,14 @@ public partial class IntervalsIcuHttpClient
         var notBeforeQueryParam = new DateTime(model.NotBefore, TimeOnly.MinValue)
             .ToString("s", CultureInfo.InvariantCulture);
 
-        var requestUri = $"{AthleteBaseUrl}/events/{model.EventId}?others={model.Others}&notBefore={notBeforeQueryParam}";
+        var queryParams = new Dictionary<string, StringValues>()
+        {
+            { "others", model.Others.ToString() },
+            { "notBefore", notBeforeQueryParam }
+        };
+
+        var requestUri = QueryHelpers.AddQueryString(
+            $"{AthleteBaseUrl}/events/{model.EventId}", queryParams);
 
         var response = await _httpClient.DeleteAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();

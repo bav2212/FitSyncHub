@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using FitSyncHub.GarminConnect.JsonSerializerContexts;
 using FitSyncHub.GarminConnect.Models.Responses;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
@@ -13,12 +15,24 @@ public partial class GarminConnectHttpClient
     {
         var start = 0;
         const int Limit = 20;
-        var activitySlug = string.IsNullOrEmpty(activityType) ? "" : "&activityType=" + activityType;
         List<GarminActivitySearchResponse> result = [];
 
         do
         {
-            var url = $"/activitylist-service/activities/search/activities?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}&start={start}&limit={Limit}{activitySlug}";
+            Dictionary<string, StringValues> queryParams = new()
+            {
+                { "startDate", startDate.ToString("yyyy-MM-dd") },
+                { "endDate", endDate.ToString("yyyy-MM-dd") },
+                { "start", start.ToString() },
+                { "limit", Limit.ToString() },
+            };
+
+            if (!string.IsNullOrEmpty(activityType))
+            {
+                queryParams.Add("activityType", activityType);
+            }
+
+            var url = QueryHelpers.AddQueryString("/activitylist-service/activities/search/activities", queryParams);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();

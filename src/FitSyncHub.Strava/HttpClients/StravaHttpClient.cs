@@ -8,7 +8,9 @@ using FitSyncHub.Strava.Models.Requests;
 using FitSyncHub.Strava.Models.Responses;
 using FitSyncHub.Strava.Models.Responses.Activities;
 using FitSyncHub.Strava.Models.Responses.Athletes;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using Polly;
 
 namespace FitSyncHub.Strava.HttpClients;
@@ -31,7 +33,14 @@ public class StravaHttpClient : IStravaHttpClient
         float weight,
         CancellationToken cancellationToken)
     {
-        var response = await _httpClient.PutAsync($"athlete?weight={weight}", null, cancellationToken);
+        var queryParams = new Dictionary<string, StringValues>()
+        {
+            { "weight", weight.ToString() },
+        };
+
+        var requestUri = QueryHelpers.AddQueryString("athlete", queryParams);
+
+        var response = await _httpClient.PutAsync(requestUri, null, cancellationToken);
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return JsonSerializer.Deserialize(content, StravaHttpClientSerializerContext.Default.DetailedAthleteResponse)!;
@@ -44,7 +53,7 @@ public class StravaHttpClient : IStravaHttpClient
         int perPage,
         CancellationToken cancellationToken)
     {
-        var queryParams = new Dictionary<string, string>()
+        var queryParams = new Dictionary<string, StringValues>()
         {
             { "before", before.ToString() },
             { "after", after.ToString() },
@@ -52,7 +61,7 @@ public class StravaHttpClient : IStravaHttpClient
             { "per_page",  perPage.ToString() }
         };
 
-        var requestUri = $"athlete/activities?{string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
+        var requestUri = QueryHelpers.AddQueryString("athlete/activities", queryParams);
         var activities = await _httpClient.GetFromJsonAsync(requestUri,
             StravaHttpClientSerializerContext.Default.ListSummaryActivityModelResponse, cancellationToken);
 
@@ -63,7 +72,12 @@ public class StravaHttpClient : IStravaHttpClient
         long activityId,
         CancellationToken cancellationToken)
     {
-        var requestUri = $"activities/{activityId}?include_all_efforts=false";
+        var queryParams = new Dictionary<string, StringValues>()
+        {
+            { "include_all_efforts", "false" },
+        };
+
+        var requestUri = QueryHelpers.AddQueryString($"activities/{activityId}", queryParams);
         var activity = await _httpClient.GetFromJsonAsync(requestUri, StravaHttpClientSerializerContext.Default.ActivityModelResponse, cancellationToken);
 
         return activity!;
