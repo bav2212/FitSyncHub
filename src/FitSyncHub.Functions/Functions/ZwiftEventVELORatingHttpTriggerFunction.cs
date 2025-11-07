@@ -1,5 +1,4 @@
-﻿using System.Text;
-using FitSyncHub.Common.Extensions;
+﻿using FitSyncHub.Common.Extensions;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 using Microsoft.AspNetCore.Http;
@@ -94,7 +93,7 @@ public class ZwiftEventVELORatingHttpTriggerFunction
     }
 
     private static double? GetWkgValue(
-        ZwiftRacingRiderResponse history, 
+        ZwiftRacingRiderResponse history,
         Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
     {
         return history.History
