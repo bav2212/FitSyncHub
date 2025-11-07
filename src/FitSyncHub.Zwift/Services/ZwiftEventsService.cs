@@ -4,7 +4,7 @@ using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public partial class ZwiftEventsService
+public class ZwiftEventsService
 {
     private readonly ZwiftHttpClient _zwiftHttpClient;
 
@@ -13,98 +13,58 @@ public partial class ZwiftEventsService
         _zwiftHttpClient = zwiftHttpClient;
     }
 
-    public async Task DownloadEventsAndStoreToFile(IReadOnlyCollection<string> zwiftEventURLs,
-        string subgroupLabel,
-        string storeToFolder,
-        CancellationToken cancellationToken)
-    {
-        foreach (var zwiftEventUrl in zwiftEventURLs)
-        {
-            var zwiftEventId = GetEventId(zwiftEventUrl);
-
-            var resultFilePath = Path.Combine(storeToFolder,
-                subgroupLabel,
-                zwiftEventId.ToString() + ".json");
-
-            if (File.Exists(resultFilePath))
-            {
-                var jsonContent = await File.ReadAllTextAsync(resultFilePath, cancellationToken);
-                if (IsRaceCompleted(jsonContent))
-                {
-                    continue;
-                }
-            }
-
-            var zwiftEvent = await _zwiftHttpClient.GetEventFromZwfitEventViewUrl(zwiftEventUrl, cancellationToken);
-            if (DateTime.UtcNow < zwiftEvent.EventStart)
-            {
-                continue;
-            }
-
-            if (DateTime.UtcNow < zwiftEvent.EventStart.AddHours(1.5))
-            {
-                // do not want to store unfinished activity
-                continue;
-            }
-
-            var eventSubgroupId = zwiftEvent.EventSubgroups
-                .Single(x => x.SubgroupLabel == subgroupLabel).Id;
-
-            var content = await _zwiftHttpClient.GetEventSubgroupResults(eventSubgroupId, cancellationToken);
-
-            if (JsonDocument.Parse(content)
-                .RootElement.GetProperty("entries")
-                .GetArrayLength() == 0)
-            {
-                continue;
-            }
-
-            File.WriteAllText(resultFilePath, content);
-        }
-    }
-
-    public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEntrants(
+    public async Task<IReadOnlyCollection<ZwiftEntrantResponseModel>> GetEntrants(
         string zwiftEventUrl,
         string subgroupLabel,
-        CancellationToken cancellationToken)
+        bool includeMyself = false,
+        CancellationToken cancellationToken = default)
     {
         var zwiftEvent = await _zwiftHttpClient.GetEventFromZwfitEventViewUrl(zwiftEventUrl, cancellationToken);
         var eventSubgroupId = zwiftEvent.EventSubgroups
             .Single(x => x.SubgroupLabel == subgroupLabel).Id;
 
-        return await _zwiftHttpClient.GetEventSubgroupEntrants(eventSubgroupId, cancellationToken: cancellationToken);
-    }
+        var entrants = await _zwiftHttpClient
+            .GetEventSubgroupEntrants(eventSubgroupId, cancellationToken: cancellationToken);
 
-    private static int GetEventId(string zwiftEventUrl)
-    {
-        var regex = ZwiftEventIdRegex();
-        var match = regex.Match(zwiftEventUrl);
-
-        if (!match.Success || !int.TryParse(match.Groups["eventId"].Value, out var eventId))
+        var result = entrants.Select(e => new ZwiftEntrantResponseModel
         {
-            throw new Exception("Wrong zwift event url format");
+            Id = e.Id,
+            FirstName = e.FirstName,
+            LastName = e.LastName,
+            Age = e.Age,
+            Ftp = e.Ftp,
+            WeightInGrams = e.Weight
+        }).ToList();
+
+        if (!includeMyself)
+        {
+            return result;
         }
 
-        return eventId;
-    }
-
-    [GeneratedRegex("https:\\/\\/www\\.zwift\\.com\\/uk\\/events\\/view\\/(?<eventId>\\d+)(\\?)?")]
-    private static partial Regex ZwiftEventIdRegex();
-
-    private static bool IsRaceCompleted(string jsonContent)
-    {
-        var jsonDocument = JsonDocument.Parse(jsonContent);
-        var entriesProperty = jsonDocument.RootElement.GetProperty("entries");
-        if (entriesProperty.GetArrayLength() == 0)
+        var profileMe = await _zwiftHttpClient.GetProfileMe(cancellationToken);
+        if (entrants.Any(x => x.Id == profileMe.Id))
         {
-            return false;
+            return result;
         }
 
-        var lastEntity = entriesProperty.EnumerateArray().Last();
-        var trainerDifficulty = lastEntity
-            .GetProperty("sensorData")
-            .GetProperty("trainerDifficulty")
-            .GetDouble();
-        return trainerDifficulty == 0 || trainerDifficulty == 1;
+        return [.. result, new ZwiftEntrantResponseModel
+                {
+                    Id = profileMe.Id,
+                    FirstName = profileMe.FirstName,
+                    LastName = profileMe.LastName,
+                    Age = profileMe.Age,
+                    Ftp = profileMe.Ftp,
+                    WeightInGrams = profileMe.WeightInGrams
+                }];
     }
+}
+
+public record ZwiftEntrantResponseModel
+{
+    public required long Id { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public required uint Age { get; set; }
+    public required uint WeightInGrams { get; set; }
+    public required uint Ftp { get; set; }
 }

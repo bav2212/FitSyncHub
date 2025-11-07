@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using FitSyncHub.Common.Extensions;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 using Microsoft.AspNetCore.Http;
@@ -44,22 +45,23 @@ public class ZwiftEventVELORatingHttpTriggerFunction
         }
 
         var entrants = await _zwiftEventsService
-            .GetEntrants(zwiftEventUrl, subcategory, cancellationToken);
+            .GetEntrants(zwiftEventUrl, subcategory, includeMyself: true, cancellationToken: cancellationToken);
 
         var year = DateTime.UtcNow.Year;
         List<ZwiftEventVELORatingResponseItem> items = [];
 
         foreach (var rider in entrants)
         {
-            var history = await _zwiftRacingHttpClient.GetRiderHistory(rider.Id, year: year, cancellationToken: cancellationToken);
+            var history = await _zwiftRacingHttpClient
+                .GetRiderHistory(rider.Id, year: year, cancellationToken: cancellationToken);
 
             var maxVelo = history.History.Max(x => x.Rating);
             var minVelo = history.History.Min(x => x.Rating);
             var velo = history.History
                     .OrderByDescending(x => x.UpdatedAt)
                     .FirstOrDefault()?.Rating;
-
-            var ftpPerKg = rider.Ftp / (rider.Weight / 1000.0);
+            var weigth = rider.WeightInGrams / 1000.0;
+            var ftpPerKg = rider.Ftp / weigth;
 
             items.Add(new ZwiftEventVELORatingResponseItem
             {
@@ -67,7 +69,7 @@ public class ZwiftEventVELORatingHttpTriggerFunction
                 FirstName = rider.FirstName,
                 LastName = rider.LastName,
                 Age = rider.Age,
-                Weight = rider.Weight / 1000.0,
+                Weight = weigth,
                 FtpPerKg = ftpPerKg,
                 Best5Sec = GetWkgValue(history, x => x.Wkg5),
                 Best15Sec = GetWkgValue(history, x => x.Wkg15),
@@ -91,11 +93,13 @@ public class ZwiftEventVELORatingHttpTriggerFunction
         return new OkObjectResult(result);
     }
 
-    private static double? GetWkgValue(ZwiftRacingRiderResponse history, Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
+    private static double? GetWkgValue(
+        ZwiftRacingRiderResponse history, 
+        Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
     {
         return history.History
-            .Select(x => wkgSelector(x))
-            .Where(x => x.HasValue)
+            .Select(wkgSelector)
+            .WhereNotNull()
             .OrderByDescending(x => x)
             .FirstOrDefault();
     }
@@ -110,10 +114,10 @@ public record ZwiftEventVELORatingResponse
 
 public record ZwiftEventVELORatingResponseItem
 {
-    public required int Id { get; init; }
+    public required long Id { get; init; }
     public required string FirstName { get; init; }
     public required string LastName { get; init; }
-    public required int Age { get; init; }
+    public required uint Age { get; init; }
     public required double Weight { get; init; }
     public required double? MaxVELO { get; init; }
     public required double? MinVELO { get; init; }
