@@ -43,7 +43,8 @@ public class ZwiftEventVELORatingHttpTriggerFunction
             return new BadRequestObjectResult("wrong url");
         }
 
-        var entrants = await _zwiftEventsService.GetEntrants(zwiftEventUrl, subcategory, cancellationToken);
+        var entrants = await _zwiftEventsService
+            .GetEntrants(zwiftEventUrl, subcategory, cancellationToken);
 
         var year = DateTime.UtcNow.Year;
         List<ZwiftEventVELORatingResponseItem> items = [];
@@ -81,56 +82,13 @@ public class ZwiftEventVELORatingHttpTriggerFunction
             });
         }
 
-        string? format = req.Query["format"];
-        if (string.Equals(format, "csv", StringComparison.OrdinalIgnoreCase))
+        var result = new ZwiftEventVELORatingResponse
         {
-            var csvLines = new List<string>
-            {
-                "Id,FirstName,LastName,Age,Weight,FtpPerKg,Best5Sec,Best15Sec,Best30Sec,Best1Min,Best2Min,Best5Min,Best20Min,MaxVELO,MinVELO,VELO"
-            };
-            csvLines.AddRange(items.Select(item =>
-            {
-                var sb = new StringBuilder();
-                sb.Append($"{item.Id},");
-                sb.Append($"{item.FirstName},");
-                sb.Append($"{item.LastName},");
-                sb.Append($"{item.Age},");
-                sb.Append($"{item.Weight:F2},");
-                sb.Append($"{item.FtpPerKg:F2},");
-                sb.Append($"{item.Best5Sec:F2},");
-                sb.Append($"{item.Best15Sec:F2},");
-                sb.Append($"{item.Best30Sec:F2},");
-                sb.Append($"{item.Best1Min:F2},");
-                sb.Append($"{item.Best2Min:F2},");
-                sb.Append($"{item.Best5Min:F2},");
-                sb.Append($"{item.Best20Min:F2},");
-                sb.Append($"{item.MaxVELO:F2},");
-                sb.Append($"{item.MinVELO:F2},");
-                sb.Append($"{item.VELO:F2}");
-                return sb.ToString();
-            }));
-            var csvContent = string.Join(Environment.NewLine, csvLines);
+            Year = DateTime.UtcNow.Year,
+            Items = [.. items.OrderByDescending(x => x.MaxVELO)],
+        };
 
-            return new ContentResult
-            {
-                Content = csvContent,
-                ContentType = "text/plain",
-                StatusCode = 200
-            };
-        }
-
-        if (string.IsNullOrWhiteSpace(format) || string.Equals(format, "json", StringComparison.OrdinalIgnoreCase))
-        {
-            var jsonResult = new ZwiftEventVELORatingResponse
-            {
-                Year = DateTime.UtcNow.Year,
-                Items = [.. items.OrderByDescending(x => x.MaxVELO)],
-            };
-
-            return new OkObjectResult(jsonResult);
-        }
-
-        return new BadRequestObjectResult("wrong format");
+        return new OkObjectResult(result);
     }
 
     private static double? GetWkgValue(ZwiftRacingRiderResponse history, Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
