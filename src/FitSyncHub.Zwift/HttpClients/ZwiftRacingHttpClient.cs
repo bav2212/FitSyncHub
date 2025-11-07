@@ -22,7 +22,7 @@ public class ZwiftRacingHttpClient
     {
         var queryParams = new Dictionary<string, StringValues>
         {
-            { "year", (year ?? DateTime.Now.Year).ToString() }
+            { "year", $"{year ?? DateTime.Now.Year}" }
         };
 
         var url = QueryHelpers.AddQueryString($"api/riders/{riderId}/history", queryParams);

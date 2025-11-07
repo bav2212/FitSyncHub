@@ -22,8 +22,8 @@ public partial class IntervalsIcuHttpClient
     {
         var queryParams = new Dictionary<string, StringValues>()
         {
-            { "oldest", query.Oldest.ToString("s", CultureInfo.InvariantCulture) },
-            { "newest", query.Newest.ToString("s", CultureInfo.InvariantCulture) },
+            { "oldest", $"{query.Oldest:s}" },
+            { "newest", $"{query.Newest:s}" },
             { "limit",  query.Limit.ToString() },
         };
 

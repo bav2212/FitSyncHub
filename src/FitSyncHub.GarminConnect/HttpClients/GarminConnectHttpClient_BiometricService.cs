@@ -10,11 +10,9 @@ public partial class GarminConnectHttpClient
         DateOnly? date = default,
         CancellationToken cancellationToken = default)
     {
-        date ??= DateOnly.FromDateTime(DateTime.UtcNow);
-
         Dictionary<string, StringValues> queryParams = new()
         {
-            { "date", date.Value.ToString("yyyy-MM-dd") },
+            { "date", $"{date ?? DateOnly.FromDateTime(DateTime.UtcNow):yyyy-MM-dd}" },
         };
 
         var url = QueryHelpers.AddQueryString(

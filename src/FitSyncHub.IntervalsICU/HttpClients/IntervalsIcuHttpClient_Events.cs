@@ -17,8 +17,8 @@ public partial class IntervalsIcuHttpClient
     {
         var queryParams = new Dictionary<string, StringValues>()
         {
-            { "oldest", new DateTime(query.Oldest, TimeOnly.MinValue).ToString("s", CultureInfo.InvariantCulture) },
-            { "newest", new DateTime(query.Newest, TimeOnly.MaxValue).ToString("s", CultureInfo.InvariantCulture) },
+            { "oldest", $"{new DateTime(query.Oldest, TimeOnly.MinValue):s}" },
+            { "newest", $"{new DateTime(query.Newest, TimeOnly.MaxValue):s}" },
         };
 
         if (query.Category is not null)
@@ -34,7 +34,7 @@ public partial class IntervalsIcuHttpClient
 
         if (query.Limit is not null)
         {
-            queryParams.Add("limit", query.Limit.Value.ToString(CultureInfo.InvariantCulture));
+            queryParams.Add("limit", query.Limit.Value.ToString());
         }
 
         var requestUri = QueryHelpers.AddQueryString($"{AthleteBaseUrl}/events", queryParams);
@@ -92,13 +92,10 @@ public partial class IntervalsIcuHttpClient
         DeleteEventRequest model,
         CancellationToken cancellationToken = default)
     {
-        var notBeforeQueryParam = new DateTime(model.NotBefore, TimeOnly.MinValue)
-            .ToString("s", CultureInfo.InvariantCulture);
-
         var queryParams = new Dictionary<string, StringValues>()
         {
             { "others", model.Others.ToString() },
-            { "notBefore", notBeforeQueryParam }
+            { "notBefore", $"{new DateTime(model.NotBefore, TimeOnly.MinValue):s}"}
         };
 
         var requestUri = QueryHelpers.AddQueryString(

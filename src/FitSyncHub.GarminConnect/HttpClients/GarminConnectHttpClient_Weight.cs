@@ -15,7 +15,7 @@ public partial class GarminConnectHttpClient
     {
         var queryParams = new Dictionary<string, StringValues>
         {
-            { "date", date.ToString("yyyy-MM-dd") }
+            { "date", $"{date:yyyy-MM-dd}" }
         };
 
         var url = QueryHelpers.AddQueryString("/weight-service/weight/dayview", queryParams);
