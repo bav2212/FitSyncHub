@@ -13,12 +13,7 @@ public partial class GarminConnectHttpClient
     public async Task<GarminWeightResponse> GetWeightDayView(DateOnly date,
         CancellationToken cancellationToken = default)
     {
-        var queryParams = new Dictionary<string, StringValues>
-        {
-            { "date", $"{date:yyyy-MM-dd}" }
-        };
-
-        var url = QueryHelpers.AddQueryString("/weight-service/weight/dayview", queryParams);
+        var url = $"/weight-service/weight/dayview/{date:yyyy-MM-dd}";
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
