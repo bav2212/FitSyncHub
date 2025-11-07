@@ -3,8 +3,6 @@ using System.Text.Json;
 using FitSyncHub.GarminConnect.JsonSerializerContexts;
 using FitSyncHub.GarminConnect.Models.Requests;
 using FitSyncHub.GarminConnect.Models.Responses;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
