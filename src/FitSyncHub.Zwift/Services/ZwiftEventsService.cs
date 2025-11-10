@@ -1,8 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.RegularExpressions;
-using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
-
-namespace FitSyncHub.Zwift.HttpClients;
+﻿namespace FitSyncHub.Zwift.HttpClients;
 
 public class ZwiftEventsService
 {

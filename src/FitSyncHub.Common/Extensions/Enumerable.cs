@@ -29,4 +29,24 @@ public static class Enumerable
             }
         }
     }
+
+    extension<TSource>(IEnumerable<TSource> source) where TSource : struct
+    {
+        public TSource? FirstOrNull(Func<TSource, bool> predicate)
+        {
+            foreach (var item in source)
+            {
+                if (predicate(item))
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+        public TSource? FirstOrNull()
+        {
+            return source.FirstOrNull(_ => true);
+        }
+    }
 }

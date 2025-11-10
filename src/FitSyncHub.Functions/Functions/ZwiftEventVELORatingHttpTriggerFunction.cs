@@ -1,5 +1,4 @@
-﻿using System.Text;
-using FitSyncHub.Common.Extensions;
+﻿using FitSyncHub.Common.Extensions;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 using Microsoft.AspNetCore.Http;
@@ -47,9 +46,19 @@ public class ZwiftEventVELORatingHttpTriggerFunction
         var entrants = await _zwiftEventsService
             .GetEntrants(zwiftEventUrl, subcategory, includeMyself: true, cancellationToken: cancellationToken);
 
-        var year = DateTime.UtcNow.Year;
-        List<ZwiftEventVELORatingResponseItem> items = [];
+        var result = await GetEntrantsVELO(entrants, cancellationToken);
+        result = [.. result.OrderByDescending(x => x.MaxVELO)];
 
+        return new OkObjectResult(result);
+    }
+
+    private async Task<List<ZwiftEventVELORatingResponseItem>> GetEntrantsVELO(
+        IReadOnlyCollection<ZwiftEntrantResponseModel> entrants, 
+        CancellationToken cancellationToken)
+    {
+        var year = DateTime.UtcNow.Year;
+
+        List<ZwiftEventVELORatingResponseItem> items = [];
         foreach (var rider in entrants)
         {
             var history = await _zwiftRacingHttpClient
@@ -84,32 +93,19 @@ public class ZwiftEventVELORatingHttpTriggerFunction
             });
         }
 
-        var result = new ZwiftEventVELORatingResponse
-        {
-            Year = DateTime.UtcNow.Year,
-            Items = [.. items.OrderByDescending(x => x.MaxVELO)],
-        };
-
-        return new OkObjectResult(result);
+        return items;
     }
 
     private static double? GetWkgValue(
-        ZwiftRacingRiderResponse history, 
+        ZwiftRacingRiderResponse history,
         Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
     {
         return history.History
             .Select(wkgSelector)
             .WhereNotNull()
             .OrderByDescending(x => x)
-            .FirstOrDefault();
+            .FirstOrNull();
     }
-}
-
-public record ZwiftEventVELORatingResponse
-{
-    public required int Year { get; init; }
-    public required ZwiftEventVELORatingResponseItem[] Items { get; init; }
-    public int Count => Items.Length;
 }
 
 public record ZwiftEventVELORatingResponseItem

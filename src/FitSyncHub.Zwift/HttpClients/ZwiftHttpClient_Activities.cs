@@ -20,7 +20,7 @@ public partial class ZwiftHttpClient
             { "limit", limit.ToString() }
         };
 
-        var url = QueryHelpers.AddQueryString( $"api/profiles/{profileId}/activities", queryParams);
+        var url = QueryHelpers.AddQueryString($"api/profiles/{profileId}/activities", queryParams);
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();

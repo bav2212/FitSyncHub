@@ -16,7 +16,7 @@ public partial class IntervalsIcuHttpClient
     {
         var queryParams = new Dictionary<string, StringValues>()
         {
-            { "date", date.ToString("yyyy-MM-dd") }
+            { "date", $"{date:yyyy-MM-dd}" }
         };
 
         var requestUri = QueryHelpers.AddQueryString($"{AthleteBaseUrl}/wellness", queryParams);

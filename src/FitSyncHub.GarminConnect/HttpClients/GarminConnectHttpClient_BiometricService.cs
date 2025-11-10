@@ -12,13 +12,7 @@ public partial class GarminConnectHttpClient
     {
         date ??= DateOnly.FromDateTime(DateTime.UtcNow);
 
-        Dictionary<string, StringValues> queryParams = new()
-        {
-            { "date", date.Value.ToString("yyyy-MM-dd") },
-        };
-
-        var url = QueryHelpers.AddQueryString(
-            "/biometric-service/biometric/powerToWeight/latest", queryParams);
+        var url = $"/biometric-service/biometric/powerToWeight/latest/{date:yyyy-MM-dd}";
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
