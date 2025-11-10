@@ -25,4 +25,24 @@ public static class EnumerableExtensions
             }
         }
     }
+
+
+    public static T? FirstOrNull<T>(this IEnumerable<T> values, Func<T, bool> predicate)
+        where T : struct
+    {
+        foreach (var v in values)
+        {
+            if (predicate(v))
+            {
+                return v;
+            }
+        }
+        return null;
+    }
+
+    public static T? FirstOrNull<T>(this IEnumerable<T> values)
+      where T : struct
+    {
+        return FirstOrNull(values, _ => true);
+    }
 }

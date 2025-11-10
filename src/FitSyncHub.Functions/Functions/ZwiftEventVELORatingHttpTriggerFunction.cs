@@ -104,7 +104,7 @@ public class ZwiftEventVELORatingHttpTriggerFunction
             .Select(wkgSelector)
             .WhereNotNull()
             .OrderByDescending(x => x)
-            .FirstOrDefault();
+            .FirstOrNull();
     }
 }
 
