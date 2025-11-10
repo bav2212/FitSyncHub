@@ -15,11 +15,11 @@
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.CosmosDB" Version="4.14.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.1.0" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.3.1" />
-	<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.5" />
+	<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.6" />
 	<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Caching.Cosmos" Version="1.8.0" />
 	<PackageReference Include="Riok.Mapperly" Version="4.3.0" />
-	<PackageReference Include="Sep" Version="0.11.4" />
+	<PackageReference Include="Sep" Version="0.11.5" />
   </ItemGroup>
 
   <ItemGroup>
