@@ -53,7 +53,7 @@ public class ZwiftEventVELORatingHttpTriggerFunction
     }
 
     private async Task<List<ZwiftEventVELORatingResponseItem>> GetEntrantsVELO(
-        IReadOnlyCollection<ZwiftEntrantResponseModel> entrants, 
+        IReadOnlyCollection<ZwiftEntrantResponseModel> entrants,
         CancellationToken cancellationToken)
     {
         var year = DateTime.UtcNow.Year;
