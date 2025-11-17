@@ -1,4 +1,6 @@
-﻿namespace FitSyncHub.Zwift.HttpClients;
+﻿using FitSyncHub.Zwift.HttpClients;
+
+namespace FitSyncHub.Zwift.Services;
 
 public class ZwiftEventsService
 {

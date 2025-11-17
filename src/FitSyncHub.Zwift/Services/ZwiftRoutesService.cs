@@ -12,7 +12,8 @@ public class ZwiftRoutesService
         _zwiftRoutesProvider = zwiftRoutesProvider;
     }
 
-    public async Task<List<ZwiftDataRoutesInfoModel>> GetRoutesInfo(CancellationToken cancellationToken)
+    public async Task<List<ZwiftDataRoutesInfoModel>> GetRoutesInfo(
+        CancellationToken cancellationToken)
     {
         var worldRoutePairs = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
 
@@ -48,6 +49,7 @@ public class ZwiftRoutesService
                   LeadIn = Math.Round(route.LeadinDistanceInMeters / 1000, 1),
                   LeadInElevationGain = Math.Round(route.LeadinAscentInMeters),
                   Restrictions = restrictions.Count != 0 ? string.Join(", ", restrictions) : null,
+                  PublishedOn = route.PublishedOn,
               };
           });
 
@@ -68,4 +70,5 @@ public record ZwiftDataRoutesInfoModel
     public required double LeadIn { get; init; }
     public required double LeadInElevationGain { get; init; }
     public required string? Restrictions { get; init; }
+    public required DateOnly? PublishedOn { get; init; }
 }

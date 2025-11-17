@@ -1,6 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 

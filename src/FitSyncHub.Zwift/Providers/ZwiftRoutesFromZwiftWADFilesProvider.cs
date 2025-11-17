@@ -1,8 +1,6 @@
-﻿using System.Globalization;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text.Json;
 using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
