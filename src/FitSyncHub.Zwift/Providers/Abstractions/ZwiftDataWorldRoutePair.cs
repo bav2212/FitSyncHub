@@ -1,9 +1,9 @@
-﻿using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+﻿using FitSyncHub.Zwift.Models;
 
 namespace FitSyncHub.Zwift.Providers.Abstractions;
 
 public record ZwiftDataWorldRoutePair
 {
     public required string WorldName { get; init; }
-    public required ZwiftGameInfoRoute Route { get; init; }
+    public required ZwiftRouteModel Route { get; init; }
 }

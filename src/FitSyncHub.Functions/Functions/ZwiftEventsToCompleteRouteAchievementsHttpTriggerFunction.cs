@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
-using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -72,7 +72,7 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
     }
 
     private static IEnumerable<ZwiftEventsToCompleteRouteAchievementsResponse> Convert(
-        Dictionary<ZwiftGameInfoRoute, List<ZwiftEventResponse>> cyclingRouteToEventMapping,
+        Dictionary<ZwiftRouteModel, List<ZwiftEventResponse>> cyclingRouteToEventMapping,
         TimeZoneInfo timezone)
     {
         foreach (var (route, events) in cyclingRouteToEventMapping)
