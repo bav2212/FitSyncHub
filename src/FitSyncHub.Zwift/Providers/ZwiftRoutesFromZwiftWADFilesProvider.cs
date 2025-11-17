@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Xml;
 using System.Xml.Serialization;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Providers.Abstractions;
 using Microsoft.Extensions.Logging;
 
@@ -141,7 +142,8 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
     private IEnumerable<ZwiftDataWorldRoutePair> ReadRouteFilesAndParse(
         IEnumerable<string> filePaths)
     {
-        var serializer = new XmlSerializer(typeof(ZwiftInGameRouteXmlDTO));
+        var routeSerializer = new XmlSerializer(typeof(ZwiftInGameRouteXmlElementDTO));
+        var homemadeSerializer = new XmlSerializer(typeof(ZwiftInGameHomedataXmlElementDTO));
 
         foreach (var filePath in filePaths)
         {
@@ -156,149 +158,100 @@ public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
                 ConformanceLevel = ConformanceLevel.Fragment,
             });
 
+            ZwiftInGameRouteXmlElementDTO? routeXmlDTO = default;
+            ZwiftInGameHomedataXmlElementDTO? homedataXmlDTO = default;
+
             while (reader.Read())
             {
-                // Look for the <route> element
-                if (reader.NodeType == XmlNodeType.Element && reader.Name == "route")
+                if (reader.NodeType != XmlNodeType.Element)
                 {
-                    var zwiftInGameRouteXmlDTO = serializer.Deserialize(reader) as ZwiftInGameRouteXmlDTO
-                        ?? throw new InvalidDataException("Can't deserialize route");
+                    continue;
+                }
 
-                    yield return new ZwiftDataWorldRoutePair()
-                    {
-                        WorldName = worldName,
-                        Route = MapZwiftInGameRouteXmlDTO(zwiftInGameRouteXmlDTO)
-                    };
+                switch (reader.Name)
+                {
+                    case "route":
+                        {
+                            using var sub = reader.ReadSubtree();
+                            sub.Read(); // move into element
+                            routeXmlDTO = routeSerializer.Deserialize(sub) as ZwiftInGameRouteXmlElementDTO
+                                ?? throw new InvalidDataException("Can't deserialize route");
+                            break;
+                        }
+                    case "homedata":
+                        {
+                            using var sub = reader.ReadSubtree();
+                            sub.Read(); // move into element
+                            homedataXmlDTO = homemadeSerializer.Deserialize(sub) as ZwiftInGameHomedataXmlElementDTO
+                                ?? throw new InvalidDataException("Can't deserialize homedata");
+                            break;
 
-                    break;
+                        }
                 }
             }
+
+            if (routeXmlDTO == null || homedataXmlDTO == null)
+            {
+                _logger.LogWarning("Skipping route file {FilePath} due to missing route or homedata, route: {Route}",
+                    filePath,
+                    routeXmlDTO?.Name);
+                continue;
+            }
+
+            var zwiftInGameRoot = new ZwiftInGameRootXmlObject { Route = routeXmlDTO, Homedata = homedataXmlDTO };
+
+            yield return new ZwiftDataWorldRoutePair()
+            {
+                WorldName = worldName,
+                Route = MapZwiftInGameRootXmlDTOToRoute(zwiftInGameRoot)
+            };
         }
     }
 
-    private static ZwiftGameInfoRoute MapZwiftInGameRouteXmlDTO(ZwiftInGameRouteXmlDTO zwiftInGameRouteXmlDTO)
+    private static ZwiftRouteModel MapZwiftInGameRootXmlDTOToRoute(ZwiftInGameRootXmlObject zwiftInGameRoot)
     {
-        var routeName = s_nameMapping.TryGetValue(zwiftInGameRouteXmlDTO.Name, out var mappedName)
-            ? mappedName
-            : zwiftInGameRouteXmlDTO.Name;
+        var route = zwiftInGameRoot.Route;
+        var homedata = zwiftInGameRoot.Homedata;
 
-        return new ZwiftGameInfoRoute()
+        var routeName = s_nameMapping.TryGetValue(route.Name, out var mappedName)
+            ? mappedName
+            : route.Name;
+
+        var publishedOn = !string.IsNullOrWhiteSpace(homedata.PublishedOn)
+            ? DateOnly.ParseExact(homedata.PublishedOn, "yyyy-MM-dd")
+            : default(DateOnly?);
+
+        return new ZwiftRouteModel()
         {
             Name = routeName,
-            Id = zwiftInGameRouteXmlDTO.NameHash,
-            DistanceInMeters = zwiftInGameRouteXmlDTO.DistanceInMeters,
-            AscentInMeters = zwiftInGameRouteXmlDTO.AscentInMeters,
-            LocKey = zwiftInGameRouteXmlDTO.LocKey,
-            LevelLocked = zwiftInGameRouteXmlDTO.LevelLocked,
-            PublicEventsOnly = zwiftInGameRouteXmlDTO.EventOnly || zwiftInGameRouteXmlDTO.ZwiftEventOnly,
-            SupportedLaps = zwiftInGameRouteXmlDTO.SupportedLaps,
-            LeadinAscentInMeters = zwiftInGameRouteXmlDTO.LeadInAscentInMeters,
-            LeadinDistanceInMeters = zwiftInGameRouteXmlDTO.LeadInDistanceInMeters,
-            BlockedForMeetups = zwiftInGameRouteXmlDTO.BlockedForMeetups,
-            Xp = zwiftInGameRouteXmlDTO.Xp,
-            Duration = zwiftInGameRouteXmlDTO.Duration,
-            Difficulty = zwiftInGameRouteXmlDTO.Difficulty,
-            Sports = zwiftInGameRouteXmlDTO.SportType switch
+            Id = route.NameHash,
+            DistanceInMeters = route.DistanceInMeters,
+            AscentInMeters = route.AscentInMeters,
+            LocKey = route.LocKey,
+            LevelLocked = route.LevelLocked,
+            PublicEventsOnly = route.EventOnly || route.ZwiftEventOnly,
+            SupportedLaps = route.SupportedLaps,
+            LeadinAscentInMeters = route.LeadInAscentInMeters,
+            LeadinDistanceInMeters = route.LeadInDistanceInMeters,
+            BlockedForMeetups = route.BlockedForMeetups,
+            Xp = homedata.Xp,
+            Duration = homedata.Duration,
+            Difficulty = homedata.Difficulty,
+            Sports = route.SportType switch
             {
                 -1 or 0 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running, ZwiftGameInfoSport.Rowing],
                 1 => [ZwiftGameInfoSport.Cycling],
                 2 => [ZwiftGameInfoSport.Running],
                 3 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running],
                 _ => throw new ArgumentException("Unknown sport type")
-            }
+            },
+            PublishedOn = publishedOn,
         };
     }
-
 
     private record UnpackedWADFilesStateItem
     {
         public required string FilePath { get; init; }
         public required string Hash { get; init; }
     }
-
-
-    [XmlRoot("route")]
-    public class ZwiftInGameRouteXmlDTO
-    {
-        [XmlAttribute("mapID")]
-        public int MapId { get; set; }
-
-        [XmlAttribute("name")]
-#pragma warning disable CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or safely handling the case where 'field' is null in the 'get' accessor.
-        public string Name
-#pragma warning restore CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or safely handling the case where 'field' is null in the 'get' accessor.
-        {
-            get;
-            set => field = value!.Trim();
-        }
-
-
-        [XmlAttribute("nameHash")]
-        public uint NameHash { get; set; }
-
-        [XmlAttribute("locKey")]
-        public string LocKey { get; set; } = null!;
-
-        [XmlAttribute("distanceInMeters")]
-        public double DistanceInMeters { get; set; }
-
-        [XmlAttribute("ascentInMeters")]
-        public double AscentInMeters { get; set; }
-
-        [XmlAttribute("leadinDistanceInMeters")]
-        public double LeadInDistanceInMeters { get; set; }
-
-        [XmlAttribute("leadinAscentInMeters")]
-        public double LeadInAscentInMeters { get; set; }
-
-        [XmlAttribute("eventPaddocks")]
-        public string? EventPaddocksRaw { get; set; }
-
-        [XmlIgnore]
-        public int[] EventPaddocksArray => [.. (EventPaddocksRaw ?? "")
-            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(int.Parse)];
-
-        [XmlAttribute("excludeFromGameDictionary")]
-        public int ExcludeFromGameDictionary { get; set; }
-
-        [XmlAttribute("eventOnly")]
-        public bool EventOnly { get; set; }
-
-        [XmlAttribute("zwiftEventOnly")]
-        public bool ZwiftEventOnly { get; set; }
-
-        [XmlAttribute("blockedForMeetups")]
-        public int BlockedForMeetups { get; set; }
-
-        [XmlAttribute("freeRideLeadinDistanceInMeters")]
-        public double FreeRideLeadInDistanceInMeters { get; set; }
-
-        [XmlAttribute("freeRideLeadinAscentInMeters")]
-        public double FreeRideLeadInAscentInMeters { get; set; }
-
-        [XmlAttribute("meetupLeadinDistanceInMeters")]
-        public double MeetupLeadInDistanceInMeters { get; set; }
-
-        [XmlAttribute("meetupLeadinAscentInMeters")]
-        public double MeetupLeadInAscentInMeters { get; set; }
-
-        [XmlAttribute("useAlternateEventRamp")]
-        public int UseAlternateEventRamp { get; set; }
-
-        [XmlAttribute("sportType")]
-        public int SportType { get; set; }
-
-        [XmlAttribute("levelLocked")]
-        public int LevelLocked { get; set; }
-        [XmlAttribute("supportedLaps")]
-        public bool SupportedLaps { get; set; }
-        [XmlAttribute("xp")]
-        public int Xp { get; set; }
-        [XmlAttribute("duration")]
-        public int Duration { get; set; }
-        [XmlAttribute("difficulty")]
-        public double Difficulty { get; set; }
-    }
 }
-

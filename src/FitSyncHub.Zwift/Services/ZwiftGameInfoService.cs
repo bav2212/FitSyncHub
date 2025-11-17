@@ -2,6 +2,7 @@
 using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Providers.Abstractions;
 using Microsoft.Extensions.Logging;
 
@@ -48,7 +49,7 @@ public class ZwiftGameInfoService
         _logger = logger;
     }
 
-    public async Task<Dictionary<ZwiftGameInfoRoute, List<ZwiftEventResponse>>> GetUncompletedRouteToEventsMappingAchievements(
+    public async Task<Dictionary<ZwiftRouteModel, List<ZwiftEventResponse>>> GetUncompletedRouteToEventsMappingAchievements(
         DateTimeOffset from,
         DateTimeOffset to,
         CancellationToken cancellationToken)
@@ -100,7 +101,7 @@ public class ZwiftGameInfoService
             GeneralAchievements = [.. generalAchievements.Where(x => !userAchievements.Contains(x.Id))]
         };
 
-        Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport sport)
+        Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport sport)
         {
             return mappedRouteAchievementsToRoutes
                 .Where(x => x.Value.Sports.Contains(sport) && !userAchievements.Contains(x.Key.Id))
@@ -108,11 +109,11 @@ public class ZwiftGameInfoService
         }
     }
 
-    private Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> MapRouteAchievementsToRoutes(
+    private Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> MapRouteAchievementsToRoutes(
         List<ZwiftGameInfoAchievement> routeAchievements,
         List<ZwiftDataWorldRoutePair> routes)
     {
-        var result = new Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute>();
+        var result = new Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel>();
 
         var routesDictionary = routes
             .Select(x => x.Route)
@@ -141,7 +142,7 @@ public class ZwiftGameInfoService
 
 public record MappedUncompletedAchievementsModel
 {
-    public required Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> CyclingRouteAchievementsToRouteMapping { get; init; }
-    public required Dictionary<ZwiftGameInfoAchievement, ZwiftGameInfoRoute> RunningRouteAchievementsToRouteMapping { get; init; }
+    public required Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> CyclingRouteAchievementsToRouteMapping { get; init; }
+    public required Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> RunningRouteAchievementsToRouteMapping { get; init; }
     public required List<ZwiftGameInfoAchievement> GeneralAchievements { get; init; }
 }

@@ -1,6 +1,7 @@
 ﻿using FitSyncHub.Common.Extensions;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
+using FitSyncHub.Zwift.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;

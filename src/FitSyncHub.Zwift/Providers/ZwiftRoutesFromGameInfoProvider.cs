@@ -1,4 +1,6 @@
 ﻿using FitSyncHub.Zwift.HttpClients;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Providers.Abstractions;
 
 namespace FitSyncHub.Zwift.Providers;
@@ -37,7 +39,32 @@ public class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
         return [.. gameInfo.Maps.SelectMany(world => world.Routes.Select(route => new ZwiftDataWorldRoutePair
         {
             WorldName = _worldFriendlyNameMapping[world.Name],
-            Route = route,
+            Route = ConvertToZwiftRouteModel(route),
         }))];
+    }
+
+    private static ZwiftRouteModel ConvertToZwiftRouteModel(ZwiftGameInfoRoute route)
+    {
+        var blockedForMeetups = route.BlockedForMeetups != 0;
+
+        return new ZwiftRouteModel
+        {
+            Name = route.Name,
+            Id = route.Id,
+            DistanceInMeters = route.DistanceInMeters,
+            AscentInMeters = route.AscentInMeters,
+            LocKey = route.LocKey,
+            LevelLocked = route.LevelLocked,
+            PublicEventsOnly = route.PublicEventsOnly,
+            SupportedLaps = route.SupportedLaps,
+            LeadinAscentInMeters = route.LeadinAscentInMeters,
+            LeadinDistanceInMeters = route.LeadinDistanceInMeters,
+            BlockedForMeetups = blockedForMeetups,
+            Xp = route.Xp,
+            Duration = route.Duration,
+            Difficulty = route.Difficulty,
+            Sports = route.Sports,
+            PublishedOn = null,
+        };
     }
 }

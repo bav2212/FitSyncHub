@@ -44,12 +44,27 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
         if (uncompletedAchievements.CyclingRouteAchievementsToRouteMapping.Count != 0)
         {
             sb.AppendLine("Cycling routes:");
-            foreach (var (_, route) in uncompletedAchievements.CyclingRouteAchievementsToRouteMapping)
+            var orderdRoutes = uncompletedAchievements.CyclingRouteAchievementsToRouteMapping.Values
+                .OrderBy(x => x.PublicEventsOnly)
+                .ThenBy(x => x.PublishedOn)
+                .ToList();
+
+            foreach (var route in orderdRoutes)
             {
                 var totalDistanceKm = Math.Round((route.TotalDistanceInMeters) / 1000.0, 1);
                 var totalElevation = Math.Round(route.TotalAscentInMeters, 0);
 
-                sb.AppendLine($"- {route.Name} ({totalDistanceKm}km, {totalElevation}m)");
+                sb.Append($"- {route.Name} ({totalDistanceKm}km, {totalElevation}m)");
+                if (route.PublicEventsOnly)
+                {
+                    sb.Append(", events only");
+                }
+                if (route.PublishedOn.HasValue && route.PublishedOn > DateOnly.FromDateTime(DateTime.Today))
+                {
+                    sb.Append($", will published on {route.PublishedOn:yyyy-MM-dd}");
+                }
+                sb.AppendLine();
+
             }
             sb.AppendLine();
         }
