@@ -37,9 +37,9 @@ public class ZwiftInGameHomedataXmlElementDTO
 public class ZwiftInGameRouteXmlElementDTO
 {
     [XmlAttribute("name")]
-    public string Name
+    public required string Name
     {
-        get => field!;
+        get;
         set => field = value!.Trim();
     }
 
