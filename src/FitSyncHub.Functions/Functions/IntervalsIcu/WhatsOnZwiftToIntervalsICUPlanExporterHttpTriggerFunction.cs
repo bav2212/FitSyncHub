@@ -1,4 +1,5 @@
-﻿using FitSyncHub.IntervalsICU.Models;
+﻿using System.Runtime.CompilerServices;
+using FitSyncHub.IntervalsICU.Models;
 using FitSyncHub.IntervalsICU.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,13 +45,8 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
         try
         {
             var links = await _whatsOnZwiftScraper.ScrapeWorkoutPlanLinks(planUri, cancellationToken);
-            List<WhatsOnZwiftToIntervalsIcuConvertResult> items = [];
-            foreach (var link in links)
-            {
-                var linkUri = new Uri(link);
-                var result = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(linkUri, cancellationToken);
-                items.Add(result);
-            }
+            var items = await ScrapeWorkoutsAndConvertToIntervalsIcu(links, cancellationToken)
+                .ToListAsync(cancellationToken: cancellationToken);
 
             await _intervalsIcuStorageService.Store(items, request.FolderId, cancellationToken);
             return new OkObjectResult("Stored plan");
@@ -59,6 +55,17 @@ public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
         {
             _logger.LogError(ex, "Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
             return new BadRequestObjectResult("Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
+        }
+    }
+
+    private async IAsyncEnumerable<WhatsOnZwiftToIntervalsIcuConvertResult> ScrapeWorkoutsAndConvertToIntervalsIcu(
+        List<string> links,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        foreach (var link in links)
+        {
+            var linkUri = new Uri(link);
+            yield return await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(linkUri, cancellationToken);
         }
     }
 }
