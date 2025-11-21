@@ -31,21 +31,30 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
-        var dateFrom = DateTime.Today;
-        var dateTo = DateTime.Today.AddMonths(-1);
-        List<ActivityResponse> activities;
+        const int Limit = 100;
+        // do not change, just need some old date for api. Limit will handle paging
+        var oldest = DateTime.MinValue;
+
+        var newest = DateTime.Now;
+        List<ActivityResponse?> activitiesPortion;
 
         do
         {
-            activities = await GetRideActivities(dateFrom, dateTo, cancellationToken);
+            activitiesPortion = [.. await _intervalsIcuHttpClient.ListActivities(
+                new ListActivitiesQueryParams(oldest, newest) { Limit = Limit }, cancellationToken)];
+
+            var activities = activitiesPortion
+                // skip strava activities
+                .WhereNotNull()
+                .Where(x => x.Type.Contains("Ride"))
+                .ToList();
+
             await Implementation(activities, cancellationToken);
 
             // to be sure we don't miss any activities, we move the window by 1 day
-            dateFrom = dateTo.AddDays(1);
-            dateTo = dateFrom.AddMonths(-1);
-
+            newest = activities.Min(x => x.StartDateLocal).Date.AddDays(1);
         }
-        while (activities.Count != 0);
+        while (activitiesPortion.Count == Limit);
 
         return new OkObjectResult("Success");
     }
@@ -106,23 +115,5 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
                 SubType = subType
             }, cancellationToken: cancellationToken);
         }
-    }
-
-    private async Task<List<ActivityResponse>> GetRideActivities(DateTime from, DateTime to, CancellationToken cancellationToken)
-    {
-        const int Limit = 100;
-
-        var activities = await _intervalsIcuHttpClient.ListActivities(
-            new ListActivitiesQueryParams(to, from) { Limit = Limit }, cancellationToken) ?? [];
-
-        if (activities.Count == Limit)
-        {
-            throw new Exception($"More than {Limit} activities found between {from} and {to}. Consider increasing the limit.");
-        }
-
-        return [.. activities
-            // skip strava activities
-            .WhereNotNull()
-            .Where(x => x.Type.Contains("Ride"))];
     }
 }
