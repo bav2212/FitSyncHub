@@ -171,6 +171,7 @@ public record ActivityResponse
     public required double? IcuPowerHr { get; init; }
     public required int? IcuAverageWatts { get; init; }
     public required double? IcuVariabilityIndex { get; init; }
+    public required ActivitySubType? SubType { get; init; }
     #region Custom fields
     [JsonPropertyName("Lactate")]
     public double? Lactate { get; init; }

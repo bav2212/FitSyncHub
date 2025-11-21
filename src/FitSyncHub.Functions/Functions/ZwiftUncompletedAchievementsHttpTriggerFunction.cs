@@ -51,7 +51,7 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
 
             foreach (var route in orderdRoutes)
             {
-                var totalDistanceKm = Math.Round((route.TotalDistanceInMeters) / 1000.0, 1);
+                var totalDistanceKm = Math.Round(route.TotalDistanceInMeters / 1000.0, 1);
                 var totalElevation = Math.Round(route.TotalAscentInMeters, 0);
 
                 sb.Append($"- {route.Name} ({totalDistanceKm}km, {totalElevation}m)");

@@ -86,7 +86,7 @@ public class ZwiftWadDecoder
             for (var i = 0; i < count; i++)
             {
                 var b = data[i];
-                crc = crc >> 8 ^ CRC_TABLE[b ^ (crc & 0xff)];
+                crc = (crc >> 8) ^ CRC_TABLE[b ^ (crc & 0xff)];
             }
         }
 
@@ -174,14 +174,14 @@ public class ZwiftWadDecoder
         {
             retVal = buf[0] & 3;
             copyLen = (buf[0] >> 5) + 4;
-            copyOff = buf[1] | (buf[0] & 0xC) << 6;
+            copyOff = buf[1] | ((buf[0] & 0xC) << 6);
         }
         else if (encType == 192)
         {
             inFile.ReadExactly(buf, 2, 1);
             retVal = buf[1] & 3;
             copyLen = (buf[0] & 0x1F) + 4;
-            copyOff = buf[2] | (buf[1] & 0xFC) << 6;
+            copyOff = buf[2] | ((buf[1] & 0xFC) << 6);
         }
         else if (encType == 224)
         {
@@ -191,8 +191,8 @@ public class ZwiftWadDecoder
             if ((buf[0] & 0xF) != 0)
             {
                 retVal = buf[1] & 3;
-                var v15 = (buf[1] & 0xFC) | 16 * (buf[0] & 0x10);
-                copyOff = buf[2] | v15 << 6;
+                var v15 = (buf[1] & 0xFC) | (16 * (buf[0] & 0x10));
+                copyOff = buf[2] | (v15 << 6);
             }
             else
             {
@@ -202,15 +202,15 @@ public class ZwiftWadDecoder
                 {
                     inFile.ReadExactly(buf, 4, 2);
                     retVal = buf[4] & 3;
-                    copyLen = buf[3] | buf[2] << 8;
-                    var v15 = (buf[4] & 0xFC) | 16 * (buf[0] & 0x10);
-                    copyOff = buf[5] | v15 << 6;
+                    copyLen = buf[3] | (buf[2] << 8);
+                    var v15 = (buf[4] & 0xFC) | (16 * (buf[0] & 0x10));
+                    copyOff = buf[5] | (v15 << 6);
                 }
                 else
                 {
                     retVal = buf[2] & 3;
-                    var v15 = (buf[2] & 0xFC) | 16 * (buf[0] & 0x10);
-                    copyOff = buf[3] | v15 << 6;
+                    var v15 = (buf[2] & 0xFC) | (16 * (buf[0] & 0x10));
+                    copyOff = buf[3] | (v15 << 6);
                 }
             }
         }
@@ -241,7 +241,7 @@ public class ZwiftWadDecoder
         {
             var buf = new byte[2];
             inFile.ReadExactly(buf, 0, 2);
-            copyLen = buf[0] | buf[1] << 8;
+            copyLen = buf[0] | (buf[1] << 8);
         }
 
         var data = new byte[copyLen];

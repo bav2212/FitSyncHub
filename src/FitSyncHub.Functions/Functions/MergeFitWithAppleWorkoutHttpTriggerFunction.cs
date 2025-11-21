@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using FitSyncHub.Common.Applications.Apple;
-using FitSyncHub.Common.Extensions;
 using FitSyncHub.Common.Fit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
