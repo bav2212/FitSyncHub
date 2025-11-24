@@ -6,7 +6,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public partial class ZwiftHttpClient
+public sealed partial class ZwiftHttpClient
 {
     public async Task<IReadOnlyCollection<ZwiftActivityOverview>> ListActivities(
         long profileId,
@@ -31,7 +31,7 @@ public partial class ZwiftHttpClient
             ZwiftActivitiesGenerationContext.Default.IReadOnlyCollectionZwiftActivityOverview)!;
     }
 
-    // create ZwiftActivity class if need this method
+    // create ZwiftActivity sealed class if need this method
     public async Task<ZwiftActivityOverview> GetActivity(long profileId, long id, CancellationToken cancellationToken)
     {
         var url = $"api/profiles/{profileId}/activities/{id}";

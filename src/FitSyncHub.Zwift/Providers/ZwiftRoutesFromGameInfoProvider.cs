@@ -5,7 +5,7 @@ using FitSyncHub.Zwift.Providers.Abstractions;
 
 namespace FitSyncHub.Zwift.Providers;
 
-public class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
+public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
 {
     private readonly Dictionary<string, string> _worldFriendlyNameMapping = new(StringComparer.OrdinalIgnoreCase)
     {

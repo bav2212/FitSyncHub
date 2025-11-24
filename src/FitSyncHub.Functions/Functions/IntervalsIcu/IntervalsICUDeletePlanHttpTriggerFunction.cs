@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
-public class IntervalsICUDeletePlanHttpTriggerFunction
+public sealed class IntervalsICUDeletePlanHttpTriggerFunction
 {
     private readonly IntervalsIcuDeletePlanService _intervalsIcuDeletePlanService;
     private readonly ILogger<IntervalsICUDeletePlanHttpTriggerFunction> _logger;

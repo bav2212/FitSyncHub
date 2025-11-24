@@ -3,7 +3,7 @@ using FitSyncHub.GarminConnect.JsonSerializerContexts;
 
 namespace FitSyncHub.GarminConnect.UnitTests;
 
-public class GarminConnectWorkoutSerializationUnitTest
+public sealed class GarminConnectWorkoutSerializationUnitTest
 {
     [Theory]
     [ClassData(typeof(GarminWorkoutTestData))]
@@ -17,7 +17,7 @@ public class GarminConnectWorkoutSerializationUnitTest
         Assert.NotNull(value);
     }
 
-    private class GarminWorkoutTestData : TheoryData<string>
+    private sealed class GarminWorkoutTestData : TheoryData<string>
     {
         public GarminWorkoutTestData()
         {

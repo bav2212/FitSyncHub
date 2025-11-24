@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Common.Fit;
 
-public class SequentialFitFileMerger : FitMessages
+public sealed class SequentialFitFileMerger : FitMessages
 {
     private readonly List<FitMessages> _fitMessagesList;
     private readonly FitMessages _fitMessagesFirst;

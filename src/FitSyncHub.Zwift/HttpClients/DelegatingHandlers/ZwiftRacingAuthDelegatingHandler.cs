@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
 
-public class ZwiftRacingAuthDelegatingHandler : DelegatingHandler
+public sealed class ZwiftRacingAuthDelegatingHandler : DelegatingHandler
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 

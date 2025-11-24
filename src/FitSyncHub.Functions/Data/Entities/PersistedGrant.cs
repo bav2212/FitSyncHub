@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Functions.Data.Entities;
 
-public class PersistedGrant : DataModel
+public sealed class PersistedGrant : DataModel
 {
     public required string TokenType { get; set; }
     public required long ExpiresAt { get; set; }

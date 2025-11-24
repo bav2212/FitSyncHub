@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public partial class ZwiftHttpClient
+public sealed partial class ZwiftHttpClient
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<ZwiftHttpClient> _logger;

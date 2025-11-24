@@ -5,7 +5,7 @@ using Microsoft.Azure.Functions.Worker.Middleware;
 namespace FitSyncHub.Functions.Middlewares;
 
 // https://github.com/Azure/azure-functions-dotnet-worker/issues/2372
-public class HttpContextAccessorMiddleware(IHttpContextAccessor httpContextAccessor) : IFunctionsWorkerMiddleware
+public sealed class HttpContextAccessorMiddleware(IHttpContextAccessor httpContextAccessor) : IFunctionsWorkerMiddleware
 {
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {

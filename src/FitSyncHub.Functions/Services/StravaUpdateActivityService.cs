@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Functions.Services;
 
-public class StravaUpdateActivityService
+public sealed class StravaUpdateActivityService
 {
     private readonly IStravaHttpClient _stravaHttpClient;
     private readonly string? _cityBikeGearId;

@@ -3,7 +3,7 @@ using FitSyncHub.Strava.Models.Responses.Activities;
 
 namespace FitSyncHub.Functions.Data.Entities;
 
-public class SummaryActivityData : DataModel
+public sealed class SummaryActivityData : DataModel
 {
     public int? ResourceState { get; init; }
     public ActivityAthlete? Athlete { get; init; }

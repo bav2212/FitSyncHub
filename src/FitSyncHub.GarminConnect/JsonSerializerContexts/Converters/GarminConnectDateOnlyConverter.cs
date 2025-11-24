@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FitSyncHub.GarminConnect.JsonSerializerContexts.Converters;
 
-public class GarminConnectDateOnlyConverter : JsonConverter<DateOnly>
+public sealed class GarminConnectDateOnlyConverter : JsonConverter<DateOnly>
 {
     private const string DateFormat = "yyyy-MM-dd"; // Matches your format
 

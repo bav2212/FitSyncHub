@@ -10,7 +10,7 @@ using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribut
 
 namespace FitSyncHub.Functions.Functions.Strava;
 
-public class StravaWebhookEventReceiverFunction
+public sealed class StravaWebhookEventReceiverFunction
 {
     private readonly long _athleteId;
 

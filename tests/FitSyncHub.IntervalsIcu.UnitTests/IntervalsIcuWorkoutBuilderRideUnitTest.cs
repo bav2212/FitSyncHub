@@ -3,7 +3,7 @@ using FitSyncHub.IntervalsICU.Builders;
 
 namespace FitSyncHub.IntervalsIcu.UnitTests;
 
-public class IntervalsIcuWorkoutBuilderRideUnitTest
+public sealed class IntervalsIcuWorkoutBuilderRideUnitTest
 {
     [Fact]
     public void IntervalsIcuWorkoutBuilder_Builder_WorkCorrectly()

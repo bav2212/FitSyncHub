@@ -11,7 +11,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.GarminConnect.Auth;
 
-internal partial class GarminSsoHttpClient
+internal sealed partial class GarminSsoHttpClient
 {
     private readonly HttpClient _ssoClient;
     private readonly ILogger<GarminSsoHttpClient> _logger;

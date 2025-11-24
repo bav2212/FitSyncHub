@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FitSyncHub.Common.Json;
 
-public class JsonStringEnumConverterSnakeCaseUpper<TEnum> : JsonStringEnumConverter<TEnum>
+public sealed class JsonStringEnumConverterSnakeCaseUpper<TEnum> : JsonStringEnumConverter<TEnum>
     where TEnum : struct, Enum
 {
     public JsonStringEnumConverterSnakeCaseUpper() : base(

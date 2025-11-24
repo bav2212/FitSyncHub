@@ -8,4 +8,4 @@ namespace FitSyncHub.Zwift.JsonSerializerContexts;
     Converters = [typeof(DateTimeWithoutColonOffsetJsonConverter)]
 )]
 [JsonSerializable(typeof(IReadOnlyCollection<ZwiftActivityOverview>))]
-internal partial class ZwiftActivitiesGenerationContext : JsonSerializerContext;
+internal sealed partial class ZwiftActivitiesGenerationContext : JsonSerializerContext;

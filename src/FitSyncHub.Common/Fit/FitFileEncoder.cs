@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Common.Fit;
 
-public class FitFileEncoder
+public sealed class FitFileEncoder
 {
     private readonly ILogger<FitFileEncoder> _logger;
 

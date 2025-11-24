@@ -3,7 +3,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace FitSyncHub.Common.Helpers;
 
-internal partial class SpreadSheetHelper
+internal sealed partial class SpreadSheetHelper
 {
     ///<summary>returns an empty cell when a blank cell is encountered
     ///</summary>

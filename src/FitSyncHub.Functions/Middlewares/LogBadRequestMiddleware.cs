@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Middlewares;
 
-public class LogBadRequestMiddleware : IFunctionsWorkerMiddleware
+public sealed class LogBadRequestMiddleware : IFunctionsWorkerMiddleware
 {
     private readonly ILogger<LogBadRequestMiddleware> _logger;
 

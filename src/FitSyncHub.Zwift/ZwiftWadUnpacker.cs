@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace FitSyncHub.Zwift;
 
 // translated from https://gitlab.com/r3dey3/zwift-utils/-/blob/master/decode_wad.py?ref_type=heads by LLM
-public class ZwiftWadDecoder
+public sealed class ZwiftWadDecoder
 {
     private readonly ILogger<ZwiftWadDecoder> _logger;
 
@@ -249,7 +249,7 @@ public class ZwiftWadDecoder
         outFile.Write(data, 0, copyLen);
     }
 
-    private class CrcWriter : Stream
+    private sealed class CrcWriter : Stream
     {
         private readonly Stream _base;
         private readonly Action<byte[], int> _onWrite;

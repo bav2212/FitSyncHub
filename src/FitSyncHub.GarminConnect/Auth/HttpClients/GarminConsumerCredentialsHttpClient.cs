@@ -5,7 +5,7 @@ using FitSyncHub.GarminConnect.JsonSerializerContexts;
 
 namespace FitSyncHub.GarminConnect.Auth.HttpClients;
 
-internal class GarminConsumerCredentialsHttpClient : IGarminConsumerCredentialsProvider
+internal sealed class GarminConsumerCredentialsHttpClient : IGarminConsumerCredentialsProvider
 {
     private readonly HttpClient _httpClient;
 
@@ -24,7 +24,7 @@ internal class GarminConsumerCredentialsHttpClient : IGarminConsumerCredentialsP
     }
 }
 
-internal class GarminConsumerCredentialsProviderCached : IGarminConsumerCredentialsProvider
+internal sealed class GarminConsumerCredentialsProviderCached : IGarminConsumerCredentialsProvider
 {
     private readonly IGarminConsumerCredentialsProvider _provider;
     private GarminConsumerCredentials? _consumerCredentials;

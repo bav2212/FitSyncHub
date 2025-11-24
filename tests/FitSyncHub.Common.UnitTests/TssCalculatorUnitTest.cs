@@ -5,7 +5,7 @@ using Moq;
 
 namespace FitSyncHub.Common.UnitTests;
 
-public class TssCalculatorUnitTest
+public sealed class TssCalculatorUnitTest
 {
     [Theory]
     [ClassData(typeof(TssTestData))]
@@ -24,7 +24,7 @@ public class TssCalculatorUnitTest
         Assert.Equal(activityInfo.Tss, calculationResult.Tss, 1.5);
     }
 
-    private class TssTestData : TheoryData<string, string>
+    private sealed class TssTestData : TheoryData<string, string>
     {
         public TssTestData()
         {

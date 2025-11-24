@@ -3,7 +3,7 @@ using FitSyncHub.IntervalsICU.Builders;
 
 namespace FitSyncHub.IntervalsIcu.UnitTests;
 
-public class IntervalsIcuWorkoutBuilderFtpUnitTest
+public sealed class IntervalsIcuWorkoutBuilderFtpUnitTest
 {
     private readonly WorkoutType _workoutType = WorkoutType.Ride;
     private readonly TimeSpan _timespan = TimeSpan.FromMinutes(5);

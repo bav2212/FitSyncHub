@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Auth;
 
-internal class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAuthCacheInvalidator
+internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAuthCacheInvalidator
 {
     private readonly string _authenticationCacheKey = "zwift-auth";
 

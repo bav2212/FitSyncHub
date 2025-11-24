@@ -7,7 +7,7 @@ using Moq;
 
 namespace FitSyncHub.GarminConnect.UnitTests;
 
-public class GarminConnectToIntervalsIcuWorkoutConvertionServiceUnitTest
+public sealed class GarminConnectToIntervalsIcuWorkoutConvertionServiceUnitTest
 {
     private const int Ftp = 286;
 

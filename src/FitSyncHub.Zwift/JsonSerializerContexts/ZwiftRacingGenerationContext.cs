@@ -5,4 +5,4 @@ namespace FitSyncHub.Zwift.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(ZwiftRacingRiderResponse))]
-internal partial class ZwiftRacingGenerationContext : JsonSerializerContext;
+internal sealed partial class ZwiftRacingGenerationContext : JsonSerializerContext;

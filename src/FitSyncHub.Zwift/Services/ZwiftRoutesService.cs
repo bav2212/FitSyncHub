@@ -3,7 +3,7 @@ using FitSyncHub.Zwift.Providers.Abstractions;
 
 namespace FitSyncHub.Zwift.Services;
 
-public class ZwiftRoutesService
+public sealed class ZwiftRoutesService
 {
     private readonly IZwiftRoutesProvider _zwiftRoutesProvider;
 

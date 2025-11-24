@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Zwift.Services;
 
-public class ZwiftEventsService
+public sealed class ZwiftEventsService
 {
     private readonly ZwiftHttpClient _zwiftHttpClient;
 

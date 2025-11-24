@@ -9,7 +9,7 @@ using OAuth;
 
 namespace FitSyncHub.GarminConnect.Auth.HttpClients;
 
-internal class GarminOAuthHttpClient
+internal sealed class GarminOAuthHttpClient
 {
     private readonly HttpClient _httpClient;
 

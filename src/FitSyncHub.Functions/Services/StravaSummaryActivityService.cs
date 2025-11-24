@@ -6,7 +6,7 @@ using FitSyncHub.Strava.Models.Responses.Activities;
 
 namespace FitSyncHub.Functions.Services;
 
-public class StravaSummaryActivityService
+public sealed class StravaSummaryActivityService
 {
     private readonly IStravaHttpClient _stravaHttpClient;
     private readonly SummaryActivityRepository _summaryActivityRepository;

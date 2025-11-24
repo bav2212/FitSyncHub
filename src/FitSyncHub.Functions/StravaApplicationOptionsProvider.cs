@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Functions;
 
-public class StravaApplicationOptionsProvider : IStravaApplicationOptionsProvider
+public sealed class StravaApplicationOptionsProvider : IStravaApplicationOptionsProvider
 {
     private readonly StravaOptions _options;
 

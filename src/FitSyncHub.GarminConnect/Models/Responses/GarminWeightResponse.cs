@@ -42,7 +42,7 @@ public record DateWeightList
     public required float WeightDelta { get; init; }
 }
 
-public class GarminWeightResponseComparer : IEqualityComparer<GarminWeightResponse>
+public sealed class GarminWeightResponseComparer : IEqualityComparer<GarminWeightResponse>
 {
     public bool Equals(GarminWeightResponse? x, GarminWeightResponse? y)
     {

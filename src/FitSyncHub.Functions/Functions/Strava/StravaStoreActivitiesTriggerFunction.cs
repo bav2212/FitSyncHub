@@ -8,7 +8,7 @@ using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribut
 
 namespace FitSyncHub.Functions.Functions.Strava;
 
-public class StravaStoreActivitiesTriggerFunction
+public sealed class StravaStoreActivitiesTriggerFunction
 {
     private readonly StravaSummaryActivityService _summaryActivityService;
     private readonly ILogger<StravaStoreActivitiesTriggerFunction> _logger;

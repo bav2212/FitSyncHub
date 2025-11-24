@@ -5,7 +5,7 @@ using FitSyncHub.Strava.Models.Responses;
 
 namespace FitSyncHub.Functions.Services;
 
-public class StravaOAuthService : IStravaOAuthService
+public sealed class StravaOAuthService : IStravaOAuthService
 {
     private readonly IStravaOAuthHttpClient _stravaAuthHttpClient;
     private readonly PersistedGrantRepository _persistedGrantRepository;

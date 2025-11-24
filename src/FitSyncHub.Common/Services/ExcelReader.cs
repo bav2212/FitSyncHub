@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Common.Services;
 
-public class ExcelReader
+public sealed class ExcelReader
 {
     public static readonly string HyperlinkColumnName = "__Hyperlink";
     private readonly ILogger<ExcelReader> _logger;

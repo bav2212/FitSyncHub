@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Zwift.Auth;
 
-internal class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefresher
+internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefresher
 {
     private readonly HttpClient _httpClient;
     private readonly IOptions<ZwiftAuthOptions> _authOptions;

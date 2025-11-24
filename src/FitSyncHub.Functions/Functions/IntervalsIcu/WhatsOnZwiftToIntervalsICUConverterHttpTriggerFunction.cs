@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
-public class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
+public sealed class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
 {
     private readonly WhatsOnZwiftToIntervalsIcuService _zwiftToIntervalsIcuService;
     private readonly ILogger<WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction> _logger;

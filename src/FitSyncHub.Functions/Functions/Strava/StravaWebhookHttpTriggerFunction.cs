@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Functions.Functions.Strava;
 
-public class StravaWebhookHttpTriggerFunction
+public sealed class StravaWebhookHttpTriggerFunction
 {
     private readonly StravaOptions _options;
     private readonly ILogger<StravaWebhookHttpTriggerFunction> _logger;

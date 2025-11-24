@@ -5,7 +5,7 @@ using FitSyncHub.Zwift.JsonSerializerContexts;
 
 namespace FitSyncHub.Zwift.Services;
 
-public class ZwiftResultsAnalyzerService
+public sealed class ZwiftResultsAnalyzerService
 {
     private readonly ZwiftPowerService _zwiftPowerService;
 
@@ -76,7 +76,7 @@ public class ZwiftResultsAnalyzerService
         return dto.SensorData.AvgWatts / weight;
     }
 
-    private class ZwiftResultsTextBuilder()
+    private sealed class ZwiftResultsTextBuilder()
     {
         private readonly StringBuilder _sb = new();
 

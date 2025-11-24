@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Services;
 
-public class ZwiftGameInfoService
+public sealed class ZwiftGameInfoService
 {
     private readonly ZwiftHttpClient _zwiftHttpClient;
     private readonly IZwiftRoutesProvider _zwiftRoutesProvider;

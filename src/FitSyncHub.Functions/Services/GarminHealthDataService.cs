@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Services;
 
-public class GarminHealthDataService
+public sealed class GarminHealthDataService
 {
     private const string GarminLastWeightResponseKey = "garmin_last_weight_response";
 

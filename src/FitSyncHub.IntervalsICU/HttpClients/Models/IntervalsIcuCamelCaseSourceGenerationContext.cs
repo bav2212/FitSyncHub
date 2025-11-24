@@ -11,4 +11,4 @@ namespace FitSyncHub.IntervalsICU.HttpClients.Models;
 )]
 [JsonSerializable(typeof(WellnessRequest))]
 [JsonSerializable(typeof(WellnessResponse))]
-internal partial class IntervalsIcuCamelCaseSourceGenerationContext : JsonSerializerContext;
+internal sealed partial class IntervalsIcuCamelCaseSourceGenerationContext : JsonSerializerContext;

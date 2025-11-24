@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FitSyncHub.Zwift.JsonSerializerContexts.Converters;
 
-public class DateTimeWithoutColonOffsetJsonConverter : JsonConverter<DateTime>
+public sealed class DateTimeWithoutColonOffsetJsonConverter : JsonConverter<DateTime>
 {
     private const string Format = "yyyy-MM-ddTHH:mm:ss.fffzzz";
 

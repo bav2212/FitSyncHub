@@ -8,7 +8,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public partial class ZwiftHttpClient
+public sealed partial class ZwiftHttpClient
 {
 
     public async Task<List<ZwiftEventResponse>> GetEventFeedFullRangeBuggy(

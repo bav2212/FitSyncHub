@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions.Strava;
 
-public class StravaWebhookEventHandlerCosmosDBTriggerFunction
+public sealed class StravaWebhookEventHandlerCosmosDBTriggerFunction
 {
     private readonly StravaUpdateActivityService _updateActivityService;
     private readonly StravaSummaryActivityService _summaryActivityService;

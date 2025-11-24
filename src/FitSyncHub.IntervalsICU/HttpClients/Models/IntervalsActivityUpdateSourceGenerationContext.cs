@@ -9,4 +9,4 @@ namespace FitSyncHub.IntervalsICU.HttpClients.Models;
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 )]
 [JsonSerializable(typeof(ActivityUpdateRequest))]
-internal partial class IntervalsActivityUpdateSourceGenerationContext : JsonSerializerContext;
+internal sealed partial class IntervalsActivityUpdateSourceGenerationContext : JsonSerializerContext;

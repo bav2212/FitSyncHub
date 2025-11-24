@@ -9,7 +9,7 @@ using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribut
 
 namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
-public class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
+public sealed class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
 {
     private readonly WhatsOnZwiftToIntervalsIcuService _zwiftToIntervalsIcuService;
     private readonly WhatsOnZwiftScraperService _whatsOnZwiftScraper;

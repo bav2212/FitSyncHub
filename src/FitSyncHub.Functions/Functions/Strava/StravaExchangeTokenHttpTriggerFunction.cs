@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Functions.Functions.Strava;
 
-public class StravaExchangeTokenHttpTriggerFunction
+public sealed class StravaExchangeTokenHttpTriggerFunction
 {
     private readonly HashSet<string> _expectedScope = [
         "read",

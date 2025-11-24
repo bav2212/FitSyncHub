@@ -15,7 +15,7 @@ public interface IDistributedCacheService : IDistributedCache
     Task SetValueAsync<T>(string key, T value, JsonTypeInfo<T> jsonTypeInfo, DistributedCacheEntryOptions options, CancellationToken cancellationToken = default);
 }
 
-internal class DistributedCacheService : IDistributedCacheService
+internal sealed class DistributedCacheService : IDistributedCacheService
 {
     private readonly IDistributedCache _distributedCache;
     private readonly ILogger<DistributedCacheService> _logger;

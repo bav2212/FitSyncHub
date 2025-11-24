@@ -5,7 +5,7 @@ using Riok.Mapperly.Abstractions;
 namespace FitSyncHub.Functions.Mappers;
 
 [Mapper]
-internal partial class SummaryActivityMapper
+internal sealed partial class SummaryActivityMapper
 {
     [MapProperty(nameof(SummaryActivityModelResponse.Id), nameof(SummaryActivityData.id))]
     public partial SummaryActivityData SummaryActivityResponseToDataModel(SummaryActivityModelResponse activity);

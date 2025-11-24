@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Providers;
 
-public class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
+public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
 {
     private readonly string _zwiftWorldsPath = @"C:\Program Files (x86)\Zwift\assets\Worlds";
 

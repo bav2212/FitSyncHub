@@ -6,7 +6,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public class ZwiftRacingHttpClient
+public sealed class ZwiftRacingHttpClient
 {
     private readonly HttpClient _httpClient;
 

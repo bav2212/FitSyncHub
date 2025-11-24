@@ -5,11 +5,11 @@ using Microsoft.Azure.Cosmos.Linq;
 
 namespace FitSyncHub.Functions.Repositories.Abstractions;
 
-public class CosmosDbRepository<T> where T : DataModel
+public abstract class CosmosDbRepository<T> where T : DataModel
 {
     protected readonly Container Container;
 
-    public CosmosDbRepository(Container container)
+    protected CosmosDbRepository(Container container)
     {
         Container = container;
     }

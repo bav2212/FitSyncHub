@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Auth.Exceptions;
 
-public class GarminConnectAuthenticationException : Exception
+public sealed class GarminConnectAuthenticationException : Exception
 {
     public GarminConnectAuthenticationException(string message) : base(message)
     {

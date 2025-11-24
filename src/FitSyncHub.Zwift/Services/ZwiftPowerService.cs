@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Services;
 
-public class ZwiftPowerService
+public sealed class ZwiftPowerService
 {
     private readonly ILogger<ZwiftPowerService> _logger;
 

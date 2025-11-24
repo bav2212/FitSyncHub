@@ -5,7 +5,7 @@ using Polly;
 
 namespace FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
 
-public class ZwiftAuthDelegatingHandler : DelegatingHandler
+public sealed class ZwiftAuthDelegatingHandler : DelegatingHandler
 {
     private readonly IZwiftAuthenticator _authClient;
     private readonly ResiliencePipeline<HttpResponseMessage> _authResiliencePipeline;

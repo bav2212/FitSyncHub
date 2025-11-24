@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Functions.Data.Entities;
 
-public class WebhookEventData : DataModel
+public sealed class WebhookEventData : DataModel
 {
     public required string ObjectType { get; init; }
     public required long ObjectId { get; init; }

@@ -10,7 +10,7 @@ public record ZwiftInGameRootXmlObject
 }
 
 [XmlRoot(ElementName = "homedata")]
-public class ZwiftInGameHomedataXmlElementDTO
+public sealed class ZwiftInGameHomedataXmlElementDTO
 {
 
     [XmlAttribute(AttributeName = "difficulty")]
@@ -34,7 +34,7 @@ public class ZwiftInGameHomedataXmlElementDTO
 }
 
 [XmlRoot(ElementName = "route")]
-public class ZwiftInGameRouteXmlElementDTO
+public sealed class ZwiftInGameRouteXmlElementDTO
 {
     [XmlAttribute("name")]
     public required string Name

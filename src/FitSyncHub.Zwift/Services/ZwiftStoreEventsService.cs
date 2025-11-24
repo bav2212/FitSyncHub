@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public partial class ZwiftStoreEventsService
+public sealed partial class ZwiftStoreEventsService
 {
     private readonly ZwiftHttpClient _zwiftHttpClient;
 

@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public partial class ZwiftHttpClient
+public sealed partial class ZwiftHttpClient
 {
     public async Task<PlayerProfile> GetProfileMe(CancellationToken cancellationToken)
     {

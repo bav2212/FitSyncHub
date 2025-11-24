@@ -4,7 +4,7 @@ using Microsoft.Azure.Cosmos;
 
 namespace FitSyncHub.Functions.Repositories;
 
-public class PersistedGrantRepository : CosmosDbRepository<PersistedGrant>
+public sealed class PersistedGrantRepository : CosmosDbRepository<PersistedGrant>
 {
     public PersistedGrantRepository(CosmosClient cosmosClient)
         : base(cosmosClient.GetDatabase("fit-sync-hub").GetContainer("PersistedGrant"))

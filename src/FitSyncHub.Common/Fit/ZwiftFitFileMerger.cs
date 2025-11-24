@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Common.Fit;
 
-public class ZwiftFitFileMerger : FitMessages
+public sealed class ZwiftFitFileMerger : FitMessages
 {
     private readonly FitMessages _fitMessages;
     private readonly FitMessages _zwiftFitMessages;
@@ -153,7 +153,7 @@ public class ZwiftFitFileMerger : FitMessages
     }
 }
 
-internal class ZwiftRecordData
+internal sealed class ZwiftRecordData
 {
     public float Altitude { get; init; }
     public float Distance { get; init; }
