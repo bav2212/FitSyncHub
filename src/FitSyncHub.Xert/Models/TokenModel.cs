@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Xert.Models;
 
-public record TokenModel
+public sealed record TokenModel
 {
     public required string AccessToken { get; init; }
     public required int ExpiresIn { get; init; }

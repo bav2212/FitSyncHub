@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Strava.Models.Responses;
 
-public record UploadActivityResponse
+public sealed record UploadActivityResponse
 {
     public required long Id { get; init; }
     public required string IdStr { get; init; }

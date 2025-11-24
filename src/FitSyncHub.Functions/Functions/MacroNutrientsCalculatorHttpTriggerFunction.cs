@@ -10,7 +10,7 @@ using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class MacroNutrientsCalculatorHttpTriggerFunction
+public sealed class MacroNutrientsCalculatorHttpTriggerFunction
 {
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
@@ -198,7 +198,7 @@ internal static class MacroNutrientsCalculator
     }
 }
 
-public record MacroNutrientsResponse
+public sealed record MacroNutrientsResponse
 {
     public required float Calories { get; init; }
     public required float Carbs { get; init; }

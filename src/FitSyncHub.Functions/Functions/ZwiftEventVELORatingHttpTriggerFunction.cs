@@ -8,7 +8,7 @@ using Microsoft.Azure.Functions.Worker;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class ZwiftEventVELORatingHttpTriggerFunction
+public sealed class ZwiftEventVELORatingHttpTriggerFunction
 {
     private readonly ZwiftEventsService _zwiftEventsService;
     private readonly ZwiftRacingHttpClient _zwiftRacingHttpClient;
@@ -109,7 +109,7 @@ public class ZwiftEventVELORatingHttpTriggerFunction
     }
 }
 
-public record ZwiftEventVELORatingResponseItem
+public sealed record ZwiftEventVELORatingResponseItem
 {
     public required long Id { get; init; }
     public required string FirstName { get; init; }

@@ -1,11 +1,11 @@
 ﻿namespace FitSyncHub.GarminConnect.Models.Requests;
 
-public record GarminSetUserWeightRequest
+public sealed record GarminSetUserWeightRequest
 {
     public required WeightUserData UserData { get; init; }
 }
 
-public record WeightUserData
+public sealed record WeightUserData
 {
     public required double Weight { get; init; }
 }

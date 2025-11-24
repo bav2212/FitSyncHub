@@ -1,11 +1,11 @@
 ﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 
-public record ZwiftRaceResultResponse
+public sealed record ZwiftRaceResultResponse
 {
     public required List<ZwiftRaceResultEntryResponse> Entries { get; init; }
 }
 
-public record ZwiftRaceResultEntryResponse
+public sealed record ZwiftRaceResultEntryResponse
 {
     public required ZwiftRaceResultActivityData ActivityData { get; init; }
     public int BibNumber { get; init; }
@@ -25,12 +25,12 @@ public record ZwiftRaceResultEntryResponse
     public required ZwiftRaceResultSensorData SensorData { get; init; }
 }
 
-public record ZwiftRaceResultActivityData
+public sealed record ZwiftRaceResultActivityData
 {
     public long DurationInMilliseconds { get; init; }
 }
 
-public record ZwiftRaceResultCriticalP
+public sealed record ZwiftRaceResultCriticalP
 {
     public int CriticalP15Seconds { get; init; }
     public int CriticalP1Minute { get; init; }
@@ -38,7 +38,7 @@ public record ZwiftRaceResultCriticalP
     public int CriticalP5Minutes { get; init; }
 }
 
-public record ZwiftRaceResultProfileData
+public sealed record ZwiftRaceResultProfileData
 {
     public string? FirstName { get; init; }
     public string? Gender { get; init; }
@@ -47,14 +47,14 @@ public record ZwiftRaceResultProfileData
     public int WeightInGrams { get; init; }
 }
 
-public record ZwiftRaceResultScoreHistory
+public sealed record ZwiftRaceResultScoreHistory
 {
     public double NewScore { get; init; }
     public double PreviousScore { get; init; }
     public string? ScoreChangeType { get; init; }
 }
 
-public record ZwiftRaceResultSensorData
+public sealed record ZwiftRaceResultSensorData
 {
     public int AvgWatts { get; init; }
     public ZwiftRaceResultHeartRateData? HeartRateData { get; init; }
@@ -63,7 +63,7 @@ public record ZwiftRaceResultSensorData
     public double TrainerDifficulty { get; init; }
 }
 
-public record ZwiftRaceResultHeartRateData
+public sealed record ZwiftRaceResultHeartRateData
 {
     public int AvgHeartRate { get; init; }
     public bool HeartRateMonitor { get; init; }

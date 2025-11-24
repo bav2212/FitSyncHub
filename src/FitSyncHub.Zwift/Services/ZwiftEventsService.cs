@@ -57,7 +57,7 @@ public sealed class ZwiftEventsService
     }
 }
 
-public record ZwiftEntrantResponseModel
+public sealed record ZwiftEntrantResponseModel
 {
     public required long Id { get; set; }
     public required string FirstName { get; set; }

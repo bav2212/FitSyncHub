@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
+public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 {
     private readonly ZwiftGameInfoService _zwiftGameInfoService;
     private readonly ILogger<ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction> _logger;
@@ -130,13 +130,13 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
     }
 }
 
-public record ZwiftEventsToCompleteRouteAchievementsResponse
+public sealed record ZwiftEventsToCompleteRouteAchievementsResponse
 {
     public required string RouteName { get; init; }
     public required List<ZwiftEventsToCompleteRouteAchievementsEventItem> Events { get; init; }
 }
 
-public record ZwiftEventsToCompleteRouteAchievementsEventItem
+public sealed record ZwiftEventsToCompleteRouteAchievementsEventItem
 {
     public required DateTimeOffset EventStart { get; init; }
     public required string EventName { get; init; }

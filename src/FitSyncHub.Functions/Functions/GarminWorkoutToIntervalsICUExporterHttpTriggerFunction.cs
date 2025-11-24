@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
+public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 {
     private const string IntervalsIcuEventTagGarminConnect = "GarminConnect";
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
@@ -174,7 +174,7 @@ public class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         return existingDescriptionParts.SequenceEqual(existingIntervalsIcuEventStructure);
     }
 
-    private record IntervalsIcuMappingKey
+    private sealed record IntervalsIcuMappingKey
     {
         public required DateOnly Date { get; init; }
         public required string Title { get; init; }

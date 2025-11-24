@@ -3,7 +3,7 @@ using FitSyncHub.Common.Abstractions;
 
 namespace FitSyncHub.Strava.Models.Requests;
 
-public record StartUploadActivityRequest : IFormDataValue
+public sealed record StartUploadActivityRequest : IFormDataValue
 {
     public string? Name { get; init; }
     public string? Description { get; init; }

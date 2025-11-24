@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Auth.Models;
 
-public record GarminOAuth2Token
+public sealed record GarminOAuth2Token
 {
     public required string Scope { get; init; }
     public required string Jti { get; init; }

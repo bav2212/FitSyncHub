@@ -55,7 +55,7 @@ public sealed class StravaWebhookEventReceiverFunction
         };
     }
 
-    public record WebhookEventDataWebhookRequest
+    public sealed record WebhookEventDataWebhookRequest
     {
         [JsonPropertyName("object_type")]
         public required string ObjectType { get; init; }
@@ -80,7 +80,7 @@ public sealed class StravaWebhookEventReceiverFunction
     }
 }
 
-public record WebhookEventReceiverMultiResponse
+public sealed record WebhookEventReceiverMultiResponse
 {
     [CosmosDBOutput(
         databaseName: "fit-sync-hub",

@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Strava.Models.Responses.Activities;
 
-public record ActivityMap
+public sealed record ActivityMap
 {
     public string? Id { get; init; }
     public string? Polyline { get; init; }

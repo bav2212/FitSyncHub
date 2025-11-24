@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 
-public record ZwiftEventFeedRequest
+public sealed record ZwiftEventFeedRequest
 {
     public required DateTimeOffset From { get; set; }
     public required DateTimeOffset To { get; set; }

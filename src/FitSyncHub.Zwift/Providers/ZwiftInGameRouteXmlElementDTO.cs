@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace FitSyncHub.Zwift.Providers;
 
-public record ZwiftInGameRootXmlObject
+public sealed record ZwiftInGameRootXmlObject
 {
     public required ZwiftInGameRouteXmlElementDTO Route { get; init; }
     public required ZwiftInGameHomedataXmlElementDTO Homedata { get; init; }

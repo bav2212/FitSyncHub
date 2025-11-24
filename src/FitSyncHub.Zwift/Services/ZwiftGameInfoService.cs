@@ -140,7 +140,7 @@ public sealed class ZwiftGameInfoService
     }
 }
 
-public record MappedUncompletedAchievementsModel
+public sealed record MappedUncompletedAchievementsModel
 {
     public required Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> CyclingRouteAchievementsToRouteMapping { get; init; }
     public required Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> RunningRouteAchievementsToRouteMapping { get; init; }

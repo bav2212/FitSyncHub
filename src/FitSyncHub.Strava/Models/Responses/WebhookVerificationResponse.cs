@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Strava.Models.Responses;
 
-public record WebhookVerificationResponse
+public sealed record WebhookVerificationResponse
 {
     [JsonPropertyName("hub.challenge")]
     public required string HubChallenge { get; init; }

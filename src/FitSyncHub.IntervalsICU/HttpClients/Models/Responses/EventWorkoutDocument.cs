@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
-public record EventWorkoutDocument
+public sealed record EventWorkoutDocument
 {
     // can add many more properties if needed
     public required long Duration { get; init; }

@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.IntervalsICU.Models;
 
-public record WhatsOnZwiftToIntervalsIcuConvertFileInfo
+public sealed record WhatsOnZwiftToIntervalsIcuConvertFileInfo
 {
     public required string Name { get; init; }
     public required WhatsOnZwiftToIntervalsIcuWeek Week { get; init; }

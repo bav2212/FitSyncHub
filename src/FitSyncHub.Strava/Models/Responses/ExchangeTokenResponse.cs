@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Strava.Models.Responses;
 
-public record ExchangeTokenResponse
+public sealed record ExchangeTokenResponse
 {
     public required string TokenType { get; init; }
     public required int ExpiresAt { get; init; }
@@ -10,7 +10,7 @@ public record ExchangeTokenResponse
     public required Athlete Athlete { get; init; }
 }
 
-public record Athlete
+public sealed record Athlete
 {
     public required int Id { get; init; }
     public required string Username { get; init; }

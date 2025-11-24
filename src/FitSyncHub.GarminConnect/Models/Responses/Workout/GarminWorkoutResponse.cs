@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Models.Responses.Workout;
 
-public record GarminWorkoutResponse
+public sealed record GarminWorkoutResponse
 {
     public long? WorkoutId { get; init; }
     public long OwnerId { get; init; }

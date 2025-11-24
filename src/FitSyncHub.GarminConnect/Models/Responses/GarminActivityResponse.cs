@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Models.Responses;
 
-public record GarminActivityResponse
+public sealed record GarminActivityResponse
 {
     public long ActivityId { get; init; }
     public GarminActivityUUIDResponse? ActivityUUID { get; init; }
@@ -17,12 +17,12 @@ public record GarminActivityResponse
     public List<GarminActivitySplitSummaryResponse>? SplitSummaries { get; init; }
 }
 
-public record GarminActivityUUIDResponse
+public sealed record GarminActivityUUIDResponse
 {
     public string? Uuid { get; init; }
 }
 
-public record GarminActivityTypeResponse
+public sealed record GarminActivityTypeResponse
 {
     public int TypeId { get; init; }
     public string? TypeKey { get; init; }
@@ -32,20 +32,20 @@ public record GarminActivityTypeResponse
     public bool Trimmable { get; init; }
 }
 
-public record GarminActivityEventTypeResponse
+public sealed record GarminActivityEventTypeResponse
 {
     public int TypeId { get; init; }
     public string? TypeKey { get; init; }
     public int SortOrder { get; init; }
 }
 
-public record GarminActivityAccessControlRuleResponse
+public sealed record GarminActivityAccessControlRuleResponse
 {
     public int TypeId { get; init; }
     public string? TypeKey { get; init; }
 }
 
-public record GarminActivityTimeZoneUnitResponse
+public sealed record GarminActivityTimeZoneUnitResponse
 {
     public int UnitId { get; init; }
     public string? UnitKey { get; init; }
@@ -53,7 +53,7 @@ public record GarminActivityTimeZoneUnitResponse
     public string? TimeZone { get; init; }
 }
 
-public record GarminActivityMetadataResponse
+public sealed record GarminActivityMetadataResponse
 {
     public bool IsOriginal { get; init; }
     public long DeviceApplicationInstallationId { get; init; }
@@ -99,13 +99,13 @@ public record GarminActivityMetadataResponse
     public bool ElevationCorrected { get; init; }
 }
 
-public record GarminActivityFileFormatResponse
+public sealed record GarminActivityFileFormatResponse
 {
     public int FormatId { get; init; }
     public string? FormatKey { get; init; }
 }
 
-public record GarminActivityUserInfoResponse
+public sealed record GarminActivityUserInfoResponse
 {
     public long UserProfilePk { get; init; }
     public string? Displayname { get; init; }
@@ -116,7 +116,7 @@ public record GarminActivityUserInfoResponse
     public bool UserPro { get; init; }
 }
 
-public record GarminActivitySensorResponse
+public sealed record GarminActivitySensorResponse
 {
     public string? Manufacturer { get; init; }
     public long SerialNumber { get; init; }
@@ -129,14 +129,14 @@ public record GarminActivitySensorResponse
     public int? FitProductNumber { get; init; }
 }
 
-public record GarminActivityDeviceMetaDataResponse
+public sealed record GarminActivityDeviceMetaDataResponse
 {
     public string? DeviceId { get; init; }
     public int DeviceTypePk { get; init; }
     public long DeviceVersionPk { get; init; }
 }
 
-public record GarminActivitySummaryResponse
+public sealed record GarminActivitySummaryResponse
 {
     public DateTime StartTimeLocal { get; init; }
     public DateTime StartTimeGMT { get; init; }
@@ -186,14 +186,14 @@ public record GarminActivitySummaryResponse
     public int DifferenceBodyBattery { get; init; }
 }
 
-public record GarminActivityConnectIQMeasurementResponse
+public sealed record GarminActivityConnectIQMeasurementResponse
 {
     public string? AppID { get; init; }
     public int DeveloperFieldNumber { get; init; }
     public string? Value { get; init; }
 }
 
-public record GarminActivitySplitSummaryResponse
+public sealed record GarminActivitySplitSummaryResponse
 {
     public double Distance { get; init; }
     public double Duration { get; init; }

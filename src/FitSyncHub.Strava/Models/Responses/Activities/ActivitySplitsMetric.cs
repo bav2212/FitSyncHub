@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Strava.Models.Responses.Activities;
 
-public record ActivitySplitsMetric
+public sealed record ActivitySplitsMetric
 {
     public float? Distance { get; init; }
     public int? ElapsedTime { get; init; }

@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
-public record EventResponse
+public sealed record EventResponse
 {
     public required int Id { get; init; }
     public required DateTime StartDateLocal { get; init; }

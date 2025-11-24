@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Models.Responses.TrainingPlan;
 
-public record GarminTrainingPlanTaskWorkoutResponse
+public sealed record GarminTrainingPlanTaskWorkoutResponse
 {
     public required Guid WorkoutUuid { get; init; }
     public required GarminTrainingPlanSportTypeResponse SportType { get; init; }

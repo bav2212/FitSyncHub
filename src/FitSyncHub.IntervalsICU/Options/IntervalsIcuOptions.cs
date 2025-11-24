@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.IntervalsICU.Options;
 
-public record IntervalsIcuOptions
+public sealed record IntervalsIcuOptions
 {
     public const string Position = "IntervalsICU";
 

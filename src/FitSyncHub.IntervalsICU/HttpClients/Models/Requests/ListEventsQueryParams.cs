@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public record ListEventsQueryParams
+public sealed record ListEventsQueryParams
 {
     public ListEventsQueryParams(DateTime oldest, DateTime newest) : this(DateOnly.FromDateTime(oldest), DateOnly.FromDateTime(newest))
     { }

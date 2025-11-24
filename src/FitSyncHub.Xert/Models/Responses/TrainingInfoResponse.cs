@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Xert.Models.Responses;
 
-public record TrainingInfoResponse
+public sealed record TrainingInfoResponse
 {
     public required bool Success { get; init; }
     public required double Weight { get; init; }
@@ -15,7 +15,7 @@ public record TrainingInfoResponse
     public required WorkoutOfTheDay WorkoutOfTheDay { get; init; }
 }
 
-public record Signature
+public sealed record Signature
 {
     public required double Ltp { get; init; }
     public required double Ftp { get; init; }
@@ -23,7 +23,7 @@ public record Signature
     public required double Pp { get; init; }
 }
 
-public record TrainingLoad
+public sealed record TrainingLoad
 {
     public required double Low { get; init; }
     public required double High { get; init; }
@@ -31,7 +31,7 @@ public record TrainingLoad
     public required double Total { get; init; }
 }
 
-public record WorkoutOfTheDay
+public sealed record WorkoutOfTheDay
 {
     public required string Type { get; init; }
     public string? Name { get; init; }

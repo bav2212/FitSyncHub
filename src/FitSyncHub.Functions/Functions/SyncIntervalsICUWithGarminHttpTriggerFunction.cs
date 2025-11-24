@@ -17,7 +17,7 @@ using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class SyncIntervalsICUWithGarminHttpTriggerFunction
+public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
 {
     private readonly FitFileDecoder _decoder;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
@@ -353,9 +353,9 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
         return await _garminConnectHttpClient.GetActivity(activityId, cancellationToken);
     }
 
-    private record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, double Tss);
+    private sealed record IntervalsIcuActivityWithNewTss(ActivityResponse Activity, double Tss);
 
-    private record ActivitySummary
+    private sealed record ActivitySummary
     {
         public required string Name { get; init; }
         public required string? Description { get; init; }

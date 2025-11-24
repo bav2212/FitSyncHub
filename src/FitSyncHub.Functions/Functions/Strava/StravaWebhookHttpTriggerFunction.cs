@@ -50,7 +50,7 @@ public sealed class StravaWebhookHttpTriggerFunction
     }
 }
 
-public record WebhookVerificationResponse
+public sealed record WebhookVerificationResponse
 {
     [JsonPropertyName("hub.challenge")]
     public required string HubChallenge { get; init; }

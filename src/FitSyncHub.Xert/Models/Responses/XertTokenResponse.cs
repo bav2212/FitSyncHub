@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Xert.Models.Responses;
 
-public record XertTokenResponse
+public sealed record XertTokenResponse
 {
     public required string AccessToken { get; init; }
     public required int ExpiresIn { get; init; }

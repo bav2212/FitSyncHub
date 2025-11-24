@@ -70,7 +70,7 @@ public sealed class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
     }
 }
 
-public record IntervalICUPlanExporterRequest
+public sealed record IntervalICUPlanExporterRequest
 {
     public required string PlanUrl { get; init; }
     public required int FolderId { get; init; }

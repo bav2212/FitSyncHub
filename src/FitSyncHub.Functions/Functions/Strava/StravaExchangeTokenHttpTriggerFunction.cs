@@ -97,7 +97,7 @@ public sealed class StravaExchangeTokenHttpTriggerFunction
     }
 }
 
-public record ExchangeTokenMultiResponse
+public sealed record ExchangeTokenMultiResponse
 {
     [CosmosDBOutput(
         databaseName: "fit-sync-hub",

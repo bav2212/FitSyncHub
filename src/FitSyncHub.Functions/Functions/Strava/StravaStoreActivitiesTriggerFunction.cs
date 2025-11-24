@@ -44,7 +44,7 @@ public sealed class StravaStoreActivitiesTriggerFunction
     }
 }
 
-public record StoreStravaActivitiesRequest
+public sealed record StoreStravaActivitiesRequest
 {
     public required DateOnly Before { private get; init; }
     public required DateOnly After { private get; init; }

@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Common.UnitTests;
 
-public record ActivityInfo
+public sealed record ActivityInfo
 {
     public required int NormalizedPower { get; init; }
     public required int Tss { get; init; }

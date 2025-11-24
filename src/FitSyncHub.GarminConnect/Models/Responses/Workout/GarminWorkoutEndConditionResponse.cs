@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Models.Responses.Workout;
 
-public record GarminWorkoutEndConditionResponse
+public sealed record GarminWorkoutEndConditionResponse
 {
     public int ConditionTypeId { get; init; }
     public string ConditionTypeKey { get; init; } = default!;

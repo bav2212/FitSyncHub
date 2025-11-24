@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
-public record ActivityMessageResponse
+public sealed record ActivityMessageResponse
 {
     public required int Id { get; init; }
     public required string AthleteId { get; init; }

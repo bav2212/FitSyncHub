@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 
-public record ZwiftRacingRiderResponse
+public sealed record ZwiftRacingRiderResponse
 {
     public required int RiderId { get; init; }
     public required bool Male { get; init; }
@@ -8,7 +8,7 @@ public record ZwiftRacingRiderResponse
     public required List<ZwiftRacingHistoryEntry> History { get; init; }
 }
 
-public record ZwiftRacingPowerData
+public sealed record ZwiftRacingPowerData
 {
     public List<double>? Wkg5 { get; init; }
     public List<double>? Wkg15 { get; init; }
@@ -19,7 +19,7 @@ public record ZwiftRacingPowerData
     public List<double>? Wkg1200 { get; init; }
 }
 
-public record ZwiftRacingHistoryEntry
+public sealed record ZwiftRacingHistoryEntry
 {
     public string? Id { get; init; }
     public ZwiftRacingEventData? Event { get; init; }
@@ -64,7 +64,7 @@ public record ZwiftRacingHistoryEntry
     public int? PenTimeCut { get; init; }
 }
 
-public record ZwiftRacingEventData
+public sealed record ZwiftRacingEventData
 {
     public string? Id { get; init; }
     public long? Time { get; init; }
@@ -76,7 +76,7 @@ public record ZwiftRacingEventData
     public ZwiftRacingRouteData? Route { get; init; }
 }
 
-public record ZwiftRacingRouteData
+public sealed record ZwiftRacingRouteData
 {
     public string? RouteId { get; init; }
     public string? World { get; init; }
@@ -84,7 +84,7 @@ public record ZwiftRacingRouteData
     public string? Profile { get; init; }
 }
 
-public record ZwiftRacingHeartRate
+public sealed record ZwiftRacingHeartRate
 {
     public int? Avg { get; init; }
     public int? Max { get; init; }

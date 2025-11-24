@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public record WellnessRequest
+public sealed record WellnessRequest
 {
     public required string Id { get; init; }
     public float? Ctl { get; init; }
@@ -47,7 +47,7 @@ public record WellnessRequest
     public bool? Locked { get; init; }
 }
 
-public record WellnessSportInfoRequest
+public sealed record WellnessSportInfoRequest
 {
     public WellnessSportInfoType? Type { get; init; }
     public float? Eftp { get; init; }

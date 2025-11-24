@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Zwift.Providers.Abstractions;
 
-public record ZwiftDataWorldRoutePair
+public sealed record ZwiftDataWorldRoutePair
 {
     public required string WorldName { get; init; }
     public required ZwiftRouteModel Route { get; init; }

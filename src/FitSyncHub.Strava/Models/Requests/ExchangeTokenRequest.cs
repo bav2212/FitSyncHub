@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Strava.Models.Requests;
 
-public record ExchangeTokenRequest
+public sealed record ExchangeTokenRequest
 {
     public required string ClientId { get; init; }
     public required string ClientSecret { get; init; }

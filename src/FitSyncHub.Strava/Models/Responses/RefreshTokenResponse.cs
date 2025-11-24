@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Strava.Models.Responses;
 
-public record RefreshTokenResponse
+public sealed record RefreshTokenResponse
 {
     public required string TokenType { get; init; }
     public required int ExpiresAt { get; init; }

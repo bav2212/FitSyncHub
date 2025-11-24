@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public record ListActivitiesQueryParams
+public sealed record ListActivitiesQueryParams
 {
     public ListActivitiesQueryParams(DateTime oldest, DateTime newest)
     {

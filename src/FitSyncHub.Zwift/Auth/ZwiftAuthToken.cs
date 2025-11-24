@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Zwift.Auth;
 
-public record ZwiftAuthToken
+public sealed record ZwiftAuthToken
 {
     public required string AccessToken { get; init; }
     public required int ExpiresIn { get; init; }

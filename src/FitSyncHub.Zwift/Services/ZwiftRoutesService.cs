@@ -61,7 +61,7 @@ public sealed class ZwiftRoutesService
 }
 
 
-public record ZwiftDataRoutesInfoModel
+public sealed record ZwiftDataRoutesInfoModel
 {
     public required string Name { get; init; }
     public required string WorldName { get; init; }

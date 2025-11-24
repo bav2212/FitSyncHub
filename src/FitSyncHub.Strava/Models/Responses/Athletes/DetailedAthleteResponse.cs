@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Strava.Models.Responses.Athletes;
 
-public record DetailedAthleteResponse
+public sealed record DetailedAthleteResponse
 {
     public long Id { get; init; }
     public int ResourceState { get; init; }

@@ -14,7 +14,7 @@ using nietras.SeparatedValues;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class LactateSyncHttpTriggerFunction
+public sealed class LactateSyncHttpTriggerFunction
 {
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly IDistributedCacheService _distributedCacheService;
@@ -238,7 +238,7 @@ public class LactateSyncHttpTriggerFunction
         return result;
     }
 
-    private record LactateResult
+    private sealed record LactateResult
     {
         public required DateTime Time { get; init; }
         public required double Value { get; init; }

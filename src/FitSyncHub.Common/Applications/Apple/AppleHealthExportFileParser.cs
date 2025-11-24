@@ -48,7 +48,7 @@ public static class AppleHealthExportFileParser
     }
 }
 
-public record AppleHeartRateRecord
+public sealed record AppleHeartRateRecord
 {
     public required DateTime Time { get; init; }
     public required int HeartRate { get; init; }

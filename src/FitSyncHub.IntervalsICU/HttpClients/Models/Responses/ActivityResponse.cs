@@ -4,7 +4,7 @@ using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
-public record ActivityResponse
+public sealed record ActivityResponse
 {
     public required string Id { get; init; }
     public required DateTime StartDateLocal { get; init; }
@@ -215,7 +215,7 @@ public enum ActivityHrLoadType
     HeartRateStressScore,
 }
 
-public record ActivityGear
+public sealed record ActivityGear
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
@@ -223,7 +223,7 @@ public record ActivityGear
     public required bool? Primary { get; init; }
 }
 
-public record ActivityIgnorePart
+public sealed record ActivityIgnorePart
 {
     public required int? StartIndex { get; init; }
     public required int? EndIndex { get; init; }
@@ -232,13 +232,13 @@ public record ActivityIgnorePart
     public required bool? Hr { get; init; }
 }
 
-public record ActivityZoneTime
+public sealed record ActivityZoneTime
 {
     public required string Id { get; init; }
     public required int? Secs { get; init; }
 }
 
-public record ActivityAchievement
+public sealed record ActivityAchievement
 {
     public required string Id { get; init; }
     public required ActivityAchievementType Type { get; init; }
@@ -260,7 +260,7 @@ public enum ActivityAchievementType
     BestPace,
 }
 
-public record ActivityPoint
+public sealed record ActivityPoint
 {
     public required int? StartIndex { get; init; }
     public required int? EndIndex { get; init; }
@@ -268,7 +268,7 @@ public record ActivityPoint
     public required int? Value { get; init; }
 }
 
-public record ActivityHrr
+public sealed record ActivityHrr
 {
     public required int? StartIndex { get; init; }
     public required int? EndIndex { get; init; }
@@ -281,7 +281,7 @@ public record ActivityHrr
     public required int? HrrValue { get; init; }
 }
 
-public record ActivityAttachment
+public sealed record ActivityAttachment
 {
     public required string Id { get; init; }
     public required string Filename { get; init; }

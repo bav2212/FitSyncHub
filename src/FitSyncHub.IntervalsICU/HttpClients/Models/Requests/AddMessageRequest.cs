@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public record AddMessageRequest
+public sealed record AddMessageRequest
 {
     public required string Content { get; init; }
 }

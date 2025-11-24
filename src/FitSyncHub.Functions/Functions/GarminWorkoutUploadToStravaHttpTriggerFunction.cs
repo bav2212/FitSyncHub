@@ -16,7 +16,7 @@ using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
 
-public class GarminWorkoutUploadToStravaHttpTriggerFunction
+public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
 {
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
@@ -233,7 +233,7 @@ public class GarminWorkoutUploadToStravaHttpTriggerFunction
         return UploadResult.Succeed;
     }
 
-    private record UploadResult
+    private sealed record UploadResult
     {
         public bool Success { get; init; }
         public string Message { get; init; } = null!;

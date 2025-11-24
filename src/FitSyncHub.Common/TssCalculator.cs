@@ -63,14 +63,14 @@ public static class TssCalculator
         return Math.Pow(rollingAverages.Average(p => Math.Pow(p, 4)), 0.25);
     }
 
-    private record FitMessageRawPowerAndTime
+    private sealed record FitMessageRawPowerAndTime
     {
         public required DateTime Timestamp { get; init; }
         public required ushort Power { get; init; }
     }
 }
 
-public record CalculateTssResult
+public sealed record CalculateTssResult
 {
     public required double NormalizedPower { get; init; }
     public required double IntensityFactor { get; init; }

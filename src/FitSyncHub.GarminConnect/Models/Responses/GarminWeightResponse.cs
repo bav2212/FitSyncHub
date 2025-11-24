@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Models.Responses;
 
-public record GarminWeightResponse
+public sealed record GarminWeightResponse
 {
     public required string StartDate { get; init; }
     public required string EndDate { get; init; }
@@ -8,7 +8,7 @@ public record GarminWeightResponse
     public required TotalAverage TotalAverage { get; init; }
 }
 
-public record TotalAverage
+public sealed record TotalAverage
 {
     public required long From { get; init; }
     public required long Until { get; init; }
@@ -23,7 +23,7 @@ public record TotalAverage
     public float? MetabolicAge { get; init; }
 }
 
-public record DateWeightList
+public sealed record DateWeightList
 {
     public required long SamplePk { get; init; }
     public required long Date { get; init; }

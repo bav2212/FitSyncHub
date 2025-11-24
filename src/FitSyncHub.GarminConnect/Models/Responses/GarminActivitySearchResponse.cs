@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.GarminConnect.Models.Responses;
 
-public record GarminActivitySearchResponse
+public sealed record GarminActivitySearchResponse
 {
     public required long ActivityId { get; init; }
     public required string ActivityName { get; init; }
@@ -136,7 +136,7 @@ public record GarminActivitySearchResponse
     public required bool Parent { get; init; }
 }
 
-public record ActivityType
+public sealed record ActivityType
 {
     public required long TypeId { get; init; }
     public required string TypeKey { get; init; }
@@ -146,14 +146,14 @@ public record ActivityType
     public required bool Trimmable { get; init; }
 }
 
-public record EventType
+public sealed record EventType
 {
     public required long TypeId { get; init; }
     public required string TypeKey { get; init; }
     public required long SortOrder { get; init; }
 }
 
-public record Privacy
+public sealed record Privacy
 {
     public required long TypeId { get; init; }
     public required string TypeKey { get; init; }

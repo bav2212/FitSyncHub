@@ -249,7 +249,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         };
     }
 
-    private record UnpackedWADFilesStateItem
+    private sealed record UnpackedWADFilesStateItem
     {
         public required string FilePath { get; init; }
         public required string Hash { get; init; }

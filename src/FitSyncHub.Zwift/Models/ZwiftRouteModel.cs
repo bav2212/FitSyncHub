@@ -3,7 +3,7 @@ using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 
 namespace FitSyncHub.Zwift.Models;
 
-public record ZwiftRouteModel
+public sealed record ZwiftRouteModel
 {
     public required string Name { get; init; }
     public required long Id { get; init; }

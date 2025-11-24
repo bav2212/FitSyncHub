@@ -12,7 +12,7 @@ public abstract record GarminWorkoutStepBase
     public GarminWorkoutEndConditionResponse? EndCondition { get; init; }
     public double? EndConditionValue { get; init; }
 }
-public record GarminWorkoutExecutableStepResponse : GarminWorkoutStepBase
+public sealed record GarminWorkoutExecutableStepResponse : GarminWorkoutStepBase
 {
     public GarminWorkoutStepTargetTypeResponse? TargetType { get; init; }
     public double? TargetValueOne { get; init; }
@@ -21,7 +21,7 @@ public record GarminWorkoutExecutableStepResponse : GarminWorkoutStepBase
     public string? ExerciseName { get; init; }
 }
 
-public record GarminWorkoutRepeatGroupResponse : GarminWorkoutStepBase
+public sealed record GarminWorkoutRepeatGroupResponse : GarminWorkoutStepBase
 {
     public int NumberOfIterations { get; init; }
     public List<GarminWorkoutStepBase> WorkoutSteps { get; init; } = [];

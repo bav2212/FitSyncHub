@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 
-public record ZwiftEventSubgroupEntrantResponse
+public sealed record ZwiftEventSubgroupEntrantResponse
 {
     public required long Id { get; init; }
     public required string PublicId { get; init; }

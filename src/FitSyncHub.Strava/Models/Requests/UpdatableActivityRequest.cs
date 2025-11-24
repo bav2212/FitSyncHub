@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Strava.Models.Requests;
 
-public record UpdatableActivityRequest
+public sealed record UpdatableActivityRequest
 {
     public bool? Commute { get; init; }
     public bool? Trainer { get; init; }

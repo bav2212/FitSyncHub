@@ -3,7 +3,7 @@ using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public record ActivityUpdateRequest
+public sealed record ActivityUpdateRequest
 {
     public ActivitySubType? SubType { get; init; }
     public uint? IcuTrainingLoad { get; init; }
@@ -21,7 +21,7 @@ public record ActivityUpdateRequest
     #endregion Custom fields
 }
 
-public record GearUpdateRequest
+public sealed record GearUpdateRequest
 {
     public required string Id { get; init; }
 }

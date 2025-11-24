@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Strava.Options;
 
-public record StravaOptions
+public sealed record StravaOptions
 {
     public const string Position = "Strava";
 
@@ -9,7 +9,7 @@ public record StravaOptions
     public required long AthleteId { get; init; }
     public string? CityBikeGearId { get; init; }
 
-    public record StravaAuthOptions
+    public sealed record StravaAuthOptions
     {
         public required string ClientId { get; init; }
         public required string ClientSecret { get; init; }

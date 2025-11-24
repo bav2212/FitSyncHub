@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.Activities;
 
-public record ZwiftActivityOverview
+public sealed record ZwiftActivityOverview
 {
     public required long Id { get; init; }
     public required string Sport { get; init; }

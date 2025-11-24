@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 
-public record ZwiftEventResponse
+public sealed record ZwiftEventResponse
 {
     public required long Id { get; init; }
     public required int WorldId { get; init; }
@@ -14,14 +14,14 @@ public record ZwiftEventResponse
     public required ZwiftEvenSeriesResponse? EventSeries { get; init; }
 }
 
-public record ZwiftEventSubgroupResponse
+public sealed record ZwiftEventSubgroupResponse
 {
     public required int Id { get; init; }
     public required string? SubgroupLabel { get; init; }
     public required string[] RulesSet { get; init; }
 }
 
-public record ZwiftEvenSeriesResponse
+public sealed record ZwiftEvenSeriesResponse
 {
     public required int Id { get; init; }
     public required string Name { get; init; }
