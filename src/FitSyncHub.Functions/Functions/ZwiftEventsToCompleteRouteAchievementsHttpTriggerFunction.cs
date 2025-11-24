@@ -43,16 +43,13 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
             timezone = TimeZoneInfo.Utc;
         }
 
-        DateTimeOffset from;
-        DateTimeOffset to;
-
         string? fromQueryParameter = req.Query["from"];
-        from = DateOnly.TryParse(fromQueryParameter, out var fromDateOnly)
+        var from = DateOnly.TryParse(fromQueryParameter, out var fromDateOnly)
             ? new DateTimeOffset(new DateTime(fromDateOnly, TimeOnly.MinValue))
             : DateTimeOffset.UtcNow;
 
         string? toQueryParameter = req.Query["to"];
-        to = DateOnly.TryParse(toQueryParameter, out var toDateOnly)
+        var to = DateOnly.TryParse(toQueryParameter, out var toDateOnly)
             ? new DateTimeOffset(new DateTime(toDateOnly, TimeOnly.MaxValue))
             : from.AddDays(7);
 
@@ -64,8 +61,9 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
             return new BadRequestObjectResult("Date range should not exceed 7 days, set 'force'=true in query to proceed");
         }
 
-        var cyclingRouteToEventMapping = await _zwiftGameInfoService.GetUncompletedRouteToEventsMappingAchievements(
-            from, to, cancellationToken);
+        var cyclingRouteToEventMapping = await _zwiftGameInfoService
+            .GetUncompletedRouteToEventsMappingAchievements(from, to, cancellationToken);
+
         var result = Convert(cyclingRouteToEventMapping, timezone).ToList();
 
         return new OkObjectResult(result);
@@ -77,6 +75,12 @@ public class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
     {
         foreach (var (route, events) in cyclingRouteToEventMapping)
         {
+            // can ride non-public events anytime, do not need to list them
+            if (!route.PublicEventsOnly)
+            {
+                continue;
+            }
+
             yield return new ZwiftEventsToCompleteRouteAchievementsResponse
             {
                 RouteName = route.Name,

@@ -55,7 +55,6 @@ public partial class ZwiftHttpClient
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
             var page = JsonSerializer.Deserialize(content, ZwiftEventsGenerationContext.Default.ZwiftEventFeedResponse)!;
-
             if (page?.Data == null)
             {
                 break;
