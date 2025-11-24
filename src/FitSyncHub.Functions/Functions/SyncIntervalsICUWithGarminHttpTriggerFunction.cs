@@ -146,10 +146,10 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
             }
         }
 
-        static (int rpe, int feel) ConvertGarminValuesToIntervalsIcu(int garminRpe, int garminFeel)
+        static (uint rpe, uint feel) ConvertGarminValuesToIntervalsIcu(uint garminRpe, uint garminFeel)
         {
             var rpe = garminRpe / 10;
-            var feel = garminFeel switch
+            uint feel = garminFeel switch
             {
                 0 => 5,
                 25 => 4,
@@ -213,7 +213,7 @@ public class SyncIntervalsICUWithGarminHttpTriggerFunction
                 Gear = new GearUpdateRequest { Id = activity.Gear.Id },
                 Trainer = activity.Trainer,
                 SubType = GetSubType(raceActivity, activity),
-                IcuTrainingLoad = (int)Math.Round(newTss),
+                IcuTrainingLoad = (uint)Math.Round(newTss),
             };
             await _intervalsIcuHttpClient.UpdateActivity(activity.Id, updateRequest, cancellationToken);
         }

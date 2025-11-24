@@ -176,8 +176,8 @@ public record GarminActivitySummaryResponse
     public string? TrainingEffectLabel { get; init; }
     public double ActivityTrainingLoad { get; init; }
     public double MinActivityLapDuration { get; init; }
-    public int? DirectWorkoutFeel { get; init; }
-    public int? DirectWorkoutRpe { get; init; }
+    public uint? DirectWorkoutFeel { get; init; }
+    public uint? DirectWorkoutRpe { get; init; }
     public int DirectWorkoutComplianceScore { get; init; }
     public double BeginPotentialStamina { get; init; }
     public double EndPotentialStamina { get; init; }
