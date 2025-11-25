@@ -15,6 +15,21 @@ public sealed class ZwiftRacingHttpClient
         _httpClient = httpClient;
     }
 
+    public async Task<IReadOnlyCollection<ZwiftRacingEventResponse>> GetEvent(
+     long eventId,
+     CancellationToken cancellationToken = default)
+    {
+        var url = $"api/events/{eventId}";
+
+        var response = await _httpClient.GetAsync(url, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        return JsonSerializer.Deserialize(content,
+            ZwiftRacingGenerationContext.Default.IReadOnlyCollectionZwiftRacingEventResponse)!;
+    }
+
     public async Task<ZwiftRacingRiderResponse?> GetRiderHistory(
         long riderId,
         int? year = default,
