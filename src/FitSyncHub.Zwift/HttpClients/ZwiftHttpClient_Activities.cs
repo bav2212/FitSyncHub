@@ -22,7 +22,7 @@ public sealed partial class ZwiftHttpClient
 
         var url = QueryHelpers.AddQueryString($"api/profiles/{profileId}/activities", queryParams);
 
-        var response = await _httpClient.GetAsync(url, cancellationToken);
+        var response = await _httpClientJson.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -36,7 +36,7 @@ public sealed partial class ZwiftHttpClient
     {
         var url = $"api/profiles/{profileId}/activities/{id}";
 
-        var response = await _httpClient.GetAsync(url, cancellationToken);
+        var response = await _httpClientJson.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);

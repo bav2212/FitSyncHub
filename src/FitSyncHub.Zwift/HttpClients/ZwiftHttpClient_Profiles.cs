@@ -6,11 +6,9 @@ public sealed partial class ZwiftHttpClient
 {
     public async Task<PlayerProfile> GetProfileMe(CancellationToken cancellationToken)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "api/profiles/me");
-        request.Headers.Add("Accept-Encoding", "gzip, deflate");
-        request.Headers.Add("Accept", "application/x-protobuf-lite");
+        const string Url = "api/profiles/me";
 
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        var response = await _httpClientProto.GetAsync(Url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -20,11 +18,9 @@ public sealed partial class ZwiftHttpClient
 
     public async Task<PlayerProfile> GetProfile(long riderId, CancellationToken cancellationToken)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"api/profiles/{riderId}");
-        request.Headers.Add("Accept-Encoding", "gzip, deflate");
-        request.Headers.Add("Accept", "application/x-protobuf-lite");
+        var url = $"api/profiles/{riderId}";
 
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        var response = await _httpClientProto.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var stream = await response.Content.ReadAsStreamAsync(cancellationToken);

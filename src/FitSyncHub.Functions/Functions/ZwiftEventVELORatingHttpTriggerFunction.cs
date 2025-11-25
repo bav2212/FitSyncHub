@@ -65,9 +65,9 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
             var history = await _zwiftRacingHttpClient
                 .GetRiderHistory(rider.Id, year: year, cancellationToken: cancellationToken);
 
-            var maxVelo = history.History.Max(x => x.Rating);
-            var minVelo = history.History.Min(x => x.Rating);
-            var velo = history.History
+            var maxVelo = history?.History.Max(x => x.Rating);
+            var minVelo = history?.History.Min(x => x.Rating);
+            var velo = history?.History
                     .OrderByDescending(x => x.UpdatedAt)
                     .FirstOrDefault()?.Rating;
             var weigth = rider.WeightInGrams / 1000.0;
@@ -98,9 +98,14 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
     }
 
     private static double? GetWkgValue(
-        ZwiftRacingRiderResponse history,
+        ZwiftRacingRiderResponse? history,
         Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
     {
+        if (history == null)
+        {
+            return default;
+        }
+
         return history.History
             .Select(wkgSelector)
             .WhereNotNull()

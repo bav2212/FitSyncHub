@@ -15,7 +15,7 @@ public sealed class ZwiftRacingHttpClient
         _httpClient = httpClient;
     }
 
-    public async Task<ZwiftRacingRiderResponse> GetRiderHistory(
+    public async Task<ZwiftRacingRiderResponse?> GetRiderHistory(
         long riderId,
         int? year = default,
         CancellationToken cancellationToken = default)
@@ -33,6 +33,6 @@ public sealed class ZwiftRacingHttpClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return JsonSerializer.Deserialize(content,
-            ZwiftRacingGenerationContext.Default.ZwiftRacingRiderResponse)!;
+            ZwiftRacingGenerationContext.Default.ZwiftRacingRiderResponse);
     }
 }

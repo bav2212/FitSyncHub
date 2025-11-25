@@ -8,12 +8,14 @@ namespace FitSyncHub.Zwift.HttpClients;
 
 public sealed partial class ZwiftHttpClient
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClientJson;
+    private readonly HttpClient _httpClientProto;
     private readonly ILogger<ZwiftHttpClient> _logger;
 
-    public ZwiftHttpClient(HttpClient httpClient, ILogger<ZwiftHttpClient> logger)
+    public ZwiftHttpClient(IHttpClientFactory httpClientFactory, ILogger<ZwiftHttpClient> logger)
     {
-        _httpClient = httpClient;
+        _httpClientJson = httpClientFactory.CreateClient(Constants.ZwiftHttpClientJson);
+        _httpClientProto = httpClientFactory.CreateClient(Constants.ZwiftHttpClientProto);
         _logger = logger;
     }
 
@@ -21,7 +23,7 @@ public sealed partial class ZwiftHttpClient
     {
         const string Url = "achievement/loadPlayerAchievements";
 
-        var response = await _httpClient.GetAsync(Url, cancellationToken);
+        var response = await _httpClientProto.GetAsync(Url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -35,7 +37,7 @@ public sealed partial class ZwiftHttpClient
     {
         const string Url = "api/game_info";
 
-        var response = await _httpClient.GetAsync(Url, cancellationToken);
+        var response = await _httpClientJson.GetAsync(Url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);

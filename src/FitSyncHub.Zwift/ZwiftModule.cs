@@ -58,14 +58,7 @@ public static class ZwiftModule
             AddZwiftAuthResiliencePipeline(services);
 
             services.AddHttpClient<ZwiftHttpClientUnauthorized>();
-
-            services.AddTransient<ZwiftAuthDelegatingHandler>();
-            services.AddHttpClient<ZwiftHttpClient>(client => client.BaseAddress = new Uri("https://us-or-rly101.zwift.com"))
-                .AddHttpMessageHandler<ZwiftAuthDelegatingHandler>()
-                .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
-                {
-                    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
-                });
+            ConfigureZwiftHttpClient(services);
 
             services.AddTransient<ZwiftRacingAuthDelegatingHandler>();
             services.AddHttpClient<ZwiftRacingHttpClient>(client => client.BaseAddress = new Uri("https://www.zwiftracing.app"))
@@ -74,6 +67,39 @@ public static class ZwiftModule
             return services;
         }
     }
+
+    private static void ConfigureZwiftHttpClient(IServiceCollection services)
+    {
+        var uri = new Uri("https://us-or-rly101.zwift.com");
+
+        services.AddTransient<ZwiftAuthDelegatingHandler>();
+        services.AddHttpClient(Constants.ZwiftHttpClientJson, client =>
+            {
+                client.BaseAddress = uri;
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+            })
+            .AddHttpMessageHandler<ZwiftAuthDelegatingHandler>()
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            });
+
+        services.AddHttpClient(Constants.ZwiftHttpClientProto, client =>
+            {
+                client.BaseAddress = uri;
+                client.DefaultRequestHeaders.Add("Accept", "application/x-protobuf-lite");
+                client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+            })
+            .AddHttpMessageHandler<ZwiftAuthDelegatingHandler>()
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            });
+
+        services.AddSingleton<ZwiftHttpClient>();
+    }
+
     private static void AddZwiftAuthResiliencePipeline(IServiceCollection services)
     {
         const int RetryCount = 3;

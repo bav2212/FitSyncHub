@@ -10,7 +10,6 @@ namespace FitSyncHub.Zwift.HttpClients;
 
 public sealed partial class ZwiftHttpClient
 {
-
     public async Task<List<ZwiftEventResponse>> GetEventFeedFullRangeBuggy(
         ZwiftEventFeedRequest requestModel,
         CancellationToken cancellationToken)
@@ -49,7 +48,7 @@ public sealed partial class ZwiftHttpClient
 
             var requestUri = QueryHelpers.AddQueryString(BaseUrl, queryParams);
 
-            var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+            var response = await _httpClientJson.GetAsync(requestUri, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -104,7 +103,7 @@ public sealed partial class ZwiftHttpClient
             "https://www.zwift.com/uk/events/view/",
             "api/public/events/");
 
-        var response = await _httpClient.GetAsync(url, cancellationToken);
+        var response = await _httpClientJson.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -121,7 +120,7 @@ public sealed partial class ZwiftHttpClient
         {
             var url = $"api/race-results/entries?event_subgroup_id={eventSubgroupId}&limit={TakeCount}&start={entriesResult.Count}";
 
-            var response = await _httpClient.GetAsync(url, cancellationToken);
+            var response = await _httpClientJson.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -147,8 +146,7 @@ public sealed partial class ZwiftHttpClient
         const long Start = 0;
 
         var url = $"api/events/subgroups/entrants/{eventSubgroupId}?type={type}&participation={participation}&limit={TakeCount}&start={Start}";
-
-        var response = await _httpClient.GetAsync(url, cancellationToken);
+        var response = await _httpClientJson.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
