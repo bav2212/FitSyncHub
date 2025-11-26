@@ -136,7 +136,7 @@ public sealed class IntervalsICUChangeFTPHttpTriggerFunction
         return;
     }
 
-    private List<IntervalsIcuActivityWithNewTss> CalculateNewTssForActivities(
+    private static List<IntervalsIcuActivityWithNewTss> CalculateNewTssForActivities(
        IReadOnlyCollection<ActivityResponse> activities,
        uint ftp,
        FitMessages mergedFitMessages)
