@@ -11,7 +11,7 @@
         <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.0" />
         <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0" />
         <PackageReference Include="OAuth.DotNetCore" Version="3.0.1" />
-        <PackageReference Include="Scrutor" Version="6.1.0" />
+        <PackageReference Include="Scrutor" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
