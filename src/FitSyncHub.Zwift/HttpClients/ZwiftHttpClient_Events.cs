@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.RegularExpressions;
 using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.JsonSerializerContexts;
@@ -99,9 +100,18 @@ public sealed partial class ZwiftHttpClient
 
     public async Task<ZwiftEventResponse> GetEventFromZwfitEventViewUrl(string eventUrl, CancellationToken cancellationToken)
     {
-        var url = eventUrl.Replace(
-            "https://www.zwift.com/uk/events/view/",
-            "api/public/events/");
+        var match = ZwiftEventIdRegex().Match(eventUrl);
+        if (!match.Success)
+        {
+            throw new ArgumentException("Invalid Zwift event URL format.", nameof(eventUrl));
+        }
+
+        if (!long.TryParse(match.Groups[1].Value, out var zwiftEventId))
+        {
+            throw new ArgumentException("Invalid Zwift event ID in the URL.", nameof(eventUrl));
+        }
+
+        var url = $"api/public/events/{zwiftEventId}";
 
         var response = await _httpClientJson.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -154,4 +164,7 @@ public sealed partial class ZwiftHttpClient
         return JsonSerializer.Deserialize(content,
               ZwiftEventsGenerationContext.Default.IReadOnlyCollectionZwiftEventSubgroupEntrantResponse)!;
     }
+
+    [GeneratedRegex(@"events/view/(\d+)")]
+    private static partial Regex ZwiftEventIdRegex();
 }

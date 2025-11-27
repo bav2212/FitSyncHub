@@ -10,13 +10,13 @@ public sealed record ZwiftRacingRiderResponse
 
 public sealed record ZwiftRacingPowerData
 {
-    public List<double>? Wkg5 { get; init; }
-    public List<double>? Wkg15 { get; init; }
-    public List<double>? Wkg30 { get; init; }
-    public List<double>? Wkg60 { get; init; }
-    public List<double>? Wkg120 { get; init; }
-    public List<double>? Wkg300 { get; init; }
-    public List<double>? Wkg1200 { get; init; }
+    public List<double?>? Wkg5 { get; init; }
+    public List<double?>? Wkg15 { get; init; }
+    public List<double?>? Wkg30 { get; init; }
+    public List<double?>? Wkg60 { get; init; }
+    public List<double?>? Wkg120 { get; init; }
+    public List<double?>? Wkg300 { get; init; }
+    public List<double?>? Wkg1200 { get; init; }
 }
 
 public sealed record ZwiftRacingHistoryEntry

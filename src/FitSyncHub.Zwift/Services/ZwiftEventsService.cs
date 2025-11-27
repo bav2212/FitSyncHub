@@ -11,6 +11,36 @@ public sealed class ZwiftEventsService
         _zwiftHttpClient = zwiftHttpClient;
     }
 
+    public async Task<ZwiftPlayerCompetitionMetrics> GetCompetitionMetrics(
+        long id,
+        CancellationToken cancellationToken)
+    {
+        var response = await _zwiftHttpClient.GetProfileDetailed(id, cancellationToken);
+
+        var minor = response.Privacy is { } && response.Privacy.Minor;
+        var male = response.Male;
+
+        var (racingScore, category) = response.CompetitionMetrics switch
+        {
+            null => (null, null),
+            { } competitionMetrics =>
+            (
+                competitionMetrics.RacingScore,
+                minor || male ? competitionMetrics.Category : competitionMetrics.CategoryWomen
+            )
+        };
+
+        return new ZwiftPlayerCompetitionMetrics
+        {
+            Id = id,
+            FirstName = response.FirstName,
+            LastName = response.LastName,
+            Category = category,
+            RacingScore = racingScore,
+            Male = male,
+        };
+    }
+
     public async Task<IReadOnlyCollection<ZwiftEntrantResponseModel>> GetEntrants(
         string zwiftEventUrl,
         string subgroupLabel,
@@ -55,6 +85,16 @@ public sealed class ZwiftEventsService
                     WeightInGrams = profileMe.WeightInGrams
                 }];
     }
+}
+
+public sealed record ZwiftPlayerCompetitionMetrics
+{
+    public required long Id { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public required bool Male { get; set; }
+    public required string? Category { get; set; }
+    public required double? RacingScore { get; set; }
 }
 
 public sealed record ZwiftEntrantResponseModel
