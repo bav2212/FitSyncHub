@@ -45,7 +45,7 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
         }
 
         var entrants = await _zwiftEventsService
-            .GetEntrants(zwiftEventUrl, subcategory, includeMyself: true, cancellationToken: cancellationToken);
+            .GetEntrants(zwiftEventUrl, subcategory, includeMyself: true, cancellationToken);
 
         var result = await GetEntrantsVELO(entrants, cancellationToken);
         result = [.. result.OrderByDescending(x => x.MaxVELO)];
@@ -63,7 +63,7 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
         foreach (var rider in entrants)
         {
             var history = await _zwiftRacingHttpClient
-                .GetRiderHistory(rider.Id, year: year, cancellationToken: cancellationToken);
+                .GetRiderHistory(rider.Id, year: year, cancellationToken);
 
             var maxVelo = history?.History.Max(x => x.Rating);
             var minVelo = history?.History.Min(x => x.Rating);

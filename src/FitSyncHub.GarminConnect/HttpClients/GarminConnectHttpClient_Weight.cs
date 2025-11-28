@@ -9,7 +9,7 @@ namespace FitSyncHub.GarminConnect.HttpClients;
 public partial class GarminConnectHttpClient
 {
     public async Task<GarminWeightResponse> GetWeightDayView(DateOnly date,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var url = $"/weight-service/weight/dayview/{date:yyyy-MM-dd}";
 
@@ -23,7 +23,7 @@ public partial class GarminConnectHttpClient
 
     public async Task SetUserWeight(
         double weight,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var body = new GarminSetUserWeightRequest
         {

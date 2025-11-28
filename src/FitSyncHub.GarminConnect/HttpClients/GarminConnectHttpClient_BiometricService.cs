@@ -4,9 +4,14 @@ namespace FitSyncHub.GarminConnect.HttpClients;
 
 public partial class GarminConnectHttpClient
 {
+    public Task<int> GetCyclingFtp(CancellationToken cancellationToken)
+    {
+        return GetCyclingFtp(null, cancellationToken);
+    }
+
     public async Task<int> GetCyclingFtp(
-        DateOnly? date = default,
-        CancellationToken cancellationToken = default)
+        DateOnly? date,
+        CancellationToken cancellationToken)
     {
         date ??= DateOnly.FromDateTime(DateTime.UtcNow);
 

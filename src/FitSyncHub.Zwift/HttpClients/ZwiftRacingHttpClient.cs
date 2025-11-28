@@ -17,7 +17,7 @@ public sealed class ZwiftRacingHttpClient
 
     public async Task<IReadOnlyCollection<ZwiftRacingEventResponse>> GetEvent(
      long eventId,
-     CancellationToken cancellationToken = default)
+     CancellationToken cancellationToken)
     {
         var url = $"api/events/{eventId}";
 
@@ -30,10 +30,18 @@ public sealed class ZwiftRacingHttpClient
             ZwiftRacingGenerationContext.Default.IReadOnlyCollectionZwiftRacingEventResponse)!;
     }
 
+    public Task<ZwiftRacingRiderResponse?> GetRiderHistory(
+        long riderId,
+        CancellationToken cancellationToken)
+    {
+        return GetRiderHistory(riderId, default, cancellationToken);
+    }
+
+
     public async Task<ZwiftRacingRiderResponse?> GetRiderHistory(
         long riderId,
-        int? year = default,
-        CancellationToken cancellationToken = default)
+        int? year,
+        CancellationToken cancellationToken)
     {
         var queryParams = new Dictionary<string, StringValues>
         {

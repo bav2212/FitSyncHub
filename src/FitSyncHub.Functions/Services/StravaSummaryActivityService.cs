@@ -31,7 +31,7 @@ public sealed class StravaSummaryActivityService
         foreach (var activity in activities)
         {
             var dataModel = mapper.SummaryActivityResponseToDataModel(activity);
-            _ = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
+            _ = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken);
         }
 
         return activities.Count;
@@ -45,7 +45,7 @@ public sealed class StravaSummaryActivityService
         var mapper = new SummaryActivityMapper();
 
         var dataModel = mapper.ActivityResponseToSummaryDataModel(activity);
-        _ = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken: cancellationToken);
+        _ = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken);
     }
 
     public async Task DeleteSummaryActivity(
@@ -60,7 +60,7 @@ public sealed class StravaSummaryActivityService
         }
 
         _ = await _summaryActivityRepository
-            .DeleteItemAsync(existingActivitySummary, cancellationToken: cancellationToken);
+            .DeleteItemAsync(existingActivitySummary, cancellationToken);
     }
 
     private async Task<List<SummaryActivityModelResponse>> GetSummaryActivities(

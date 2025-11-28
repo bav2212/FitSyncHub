@@ -8,7 +8,7 @@ public partial class GarminConnectHttpClient
 {
     public async Task<GarminWorkoutResponse> GetWorkout(
         Guid id,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var url = $"workout-service/fbt-adaptive/{id}";
 

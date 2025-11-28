@@ -46,7 +46,7 @@ public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 
         _logger.LogInformation("Starting Garmin to Intervals.icu export function");
 
-        var ftp = await _garminConnectHttpClient.GetCyclingFtp(cancellationToken: cancellationToken);
+        var ftp = await _garminConnectHttpClient.GetCyclingFtp(cancellationToken);
         _logger.LogInformation("Retrieved FTP value from Garmin: {Ftp}", ftp);
 
         var trainingPlanId = await _garminConnectHttpClient.GetActiveTrainingPlanId(cancellationToken);

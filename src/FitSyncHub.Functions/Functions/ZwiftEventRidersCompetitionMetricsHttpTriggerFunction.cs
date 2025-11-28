@@ -35,7 +35,7 @@ public sealed class ZwiftEventRidersCompetitionMetricsHttpTriggerFunction
         }
 
         var entrants = await _zwiftEventsService
-            .GetEntrants(zwiftEventUrl, subcategory, includeMyself: true, cancellationToken: cancellationToken);
+            .GetEntrants(zwiftEventUrl, subcategory, includeMyself: true, cancellationToken);
 
         var result = await GetRidersCompetitionMetrics(entrants, cancellationToken);
         result = [.. result.OrderByDescending(x => x.RacingScore)];
@@ -51,7 +51,7 @@ public sealed class ZwiftEventRidersCompetitionMetricsHttpTriggerFunction
         foreach (var rider in entrants)
         {
             var competitionMetrics = await _zwiftEventsService
-                .GetCompetitionMetrics(rider.Id, cancellationToken: cancellationToken);
+                .GetCompetitionMetrics(rider.Id, cancellationToken);
 
             var weigth = rider.WeightInGrams / 1000.0;
             var height = rider.HeightInMillimeters / 1000.0;

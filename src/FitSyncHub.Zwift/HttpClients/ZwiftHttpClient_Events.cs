@@ -95,7 +95,9 @@ public sealed partial class ZwiftHttpClient
         return [.. results.Values];
     }
 
-    public async Task<ZwiftEventResponse> GetEventFromZwfitEventViewUrl(string eventUrl, CancellationToken cancellationToken)
+    public async Task<ZwiftEventResponse> GetEventFromZwfitEventViewUrl(
+        string eventUrl,
+        CancellationToken cancellationToken)
     {
         var match = ZwiftEventIdRegex().Match(eventUrl);
         if (!match.Success)
@@ -118,7 +120,9 @@ public sealed partial class ZwiftHttpClient
         return JsonSerializer.Deserialize(content, ZwiftEventsGenerationContext.Default.ZwiftEventResponse)!;
     }
 
-    public async Task<string> GetEventSubgroupResults(int eventSubgroupId, CancellationToken cancellationToken)
+    public async Task<string> GetEventSubgroupResults(
+        int eventSubgroupId,
+        CancellationToken cancellationToken)
     {
         List<JsonElement> entriesResult = [];
         const long TakeCount = 50;

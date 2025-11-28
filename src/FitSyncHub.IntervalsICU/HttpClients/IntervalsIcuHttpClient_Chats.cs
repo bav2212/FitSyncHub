@@ -10,7 +10,7 @@ public partial class IntervalsIcuHttpClient
 {
     public async Task<IReadOnlyCollection<ActivityMessageResponse>> ListAllMessages(
         string activityId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var requestUri = $"activity/{activityId}/messages";
 
@@ -23,7 +23,7 @@ public partial class IntervalsIcuHttpClient
     public async Task AddMessage(
         string activityId,
         AddMessageRequest model,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var requestUri = $"activity/{activityId}/messages";
 

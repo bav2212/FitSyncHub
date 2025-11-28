@@ -39,7 +39,7 @@ public class GarminWorkoutToIntervalsICUConverterHttpTriggerFunction
             date = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
         }
 
-        var ftp = await _garminConnectHttpClient.GetCyclingFtp(cancellationToken: cancellationToken);
+        var ftp = await _garminConnectHttpClient.GetCyclingFtp(cancellationToken);
 
         var trainingPlanId = await _garminConnectHttpClient.GetActiveTrainingPlanId(cancellationToken);
         var trainingPlan = await _garminConnectHttpClient.GetTrainingPlan(trainingPlanId, cancellationToken);

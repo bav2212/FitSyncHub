@@ -7,7 +7,7 @@ namespace FitSyncHub.GarminConnect.HttpClients;
 public partial class GarminConnectHttpClient
 {
     public async Task<long> GetActiveTrainingPlanId(
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         const string Url = "/trainingplan-service/trainingplan/plans?limit=10";
 
@@ -28,7 +28,7 @@ public partial class GarminConnectHttpClient
 
     public async Task<GarminTrainingPlanResponse> GetTrainingPlan(
         long planId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var url = $"/trainingplan-service/trainingplan/fbt-adaptive/{planId}";
 

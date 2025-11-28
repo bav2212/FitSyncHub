@@ -89,7 +89,7 @@ public partial class IntervalsIcuHttpClient
 
     public async Task DeleteEvent(
         DeleteEventRequest model,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var queryParams = new Dictionary<string, StringValues>()
         {

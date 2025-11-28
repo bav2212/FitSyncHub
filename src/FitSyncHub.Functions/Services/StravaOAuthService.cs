@@ -42,7 +42,7 @@ public sealed class StravaOAuthService : IStravaOAuthService
         persistedGrant.ExpiresAt = refreshTokenResponse.ExpiresAt;
         persistedGrant.TokenType = refreshTokenResponse.TokenType;
 
-        await _persistedGrantRepository.UpsertItemAsync(persistedGrant, cancellationToken: cancellationToken);
+        await _persistedGrantRepository.UpsertItemAsync(persistedGrant, cancellationToken);
 
         return new(persistedGrant.AccessToken);
     }

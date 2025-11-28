@@ -113,7 +113,7 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
             await _intervalsIcuHttpClient.UpdateActivity(activity.Id, new ActivityUpdateRequest
             {
                 SubType = subType
-            }, cancellationToken: cancellationToken);
+            }, cancellationToken);
         }
     }
 }

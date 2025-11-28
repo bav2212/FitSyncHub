@@ -2,7 +2,8 @@
 
 public partial class GarminConnectHttpClient
 {
-    public async Task<Dictionary<string, string>> GetExerciseTypesTranslations(CancellationToken cancellationToken = default)
+    public async Task<Dictionary<string, string>> GetExerciseTypesTranslations(
+        CancellationToken cancellationToken)
     {
         const string Url = "/web-translations/exercise_types/exercise_types.properties";
 

@@ -46,7 +46,7 @@ public sealed class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
         {
             var links = await _whatsOnZwiftScraper.ScrapeWorkoutPlanLinks(planUri, cancellationToken);
             var items = await ScrapeWorkoutsAndConvertToIntervalsIcu(links, cancellationToken)
-                .ToListAsync(cancellationToken: cancellationToken);
+                .ToListAsync(cancellationToken);
 
             await _intervalsIcuStorageService.Store(items, request.FolderId, cancellationToken);
             return new OkObjectResult("Stored plan");

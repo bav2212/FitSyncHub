@@ -41,11 +41,20 @@ public sealed class ZwiftEventsService
         };
     }
 
+    public Task<IReadOnlyCollection<ZwiftEntrantResponseModel>> GetEntrants(
+        string zwiftEventUrl,
+        string subgroupLabel,
+        CancellationToken cancellationToken)
+    {
+        return GetEntrants(zwiftEventUrl, subgroupLabel, includeMyself: false, cancellationToken);
+    }
+
+
     public async Task<IReadOnlyCollection<ZwiftEntrantResponseModel>> GetEntrants(
         string zwiftEventUrl,
         string subgroupLabel,
-        bool includeMyself = false,
-        CancellationToken cancellationToken = default)
+        bool includeMyself,
+        CancellationToken cancellationToken)
     {
         var zwiftEvent = await _zwiftHttpClient.GetEventFromZwfitEventViewUrl(zwiftEventUrl, cancellationToken);
         var eventSubgroupId = zwiftEvent.EventSubgroups

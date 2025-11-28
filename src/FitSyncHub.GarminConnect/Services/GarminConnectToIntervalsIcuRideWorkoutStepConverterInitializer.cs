@@ -28,7 +28,7 @@ internal class GarminConnectToIntervalsIcuRideWorkoutStepConverterInitializer
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             _logger.LogInformation("Fetching cycling FTP from Garmin Connect");
-            return await _garminConnectHttpClient.GetCyclingFtp(cancellationToken: cancellationToken);
+            return await _garminConnectHttpClient.GetCyclingFtp(cancellationToken);
         });
         return new GarminConnectToIntervalsIcuRideWorkoutStepConverter(ftp);
     }

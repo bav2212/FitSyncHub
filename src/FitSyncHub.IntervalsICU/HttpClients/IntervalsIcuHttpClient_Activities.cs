@@ -64,7 +64,7 @@ public partial class IntervalsIcuHttpClient
     public async Task<ActivityCreateResponse> CreateActivity(
         FileModel fileModel,
         CreateActivityRequest createActivityRequest,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var requestUri = $"{AthleteBaseUrl}/activities";
 

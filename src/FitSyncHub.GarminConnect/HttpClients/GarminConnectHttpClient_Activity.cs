@@ -10,7 +10,7 @@ public partial class GarminConnectHttpClient
 {
     public async Task<GarminActivityResponse> GetActivity(
         long activityId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var url = $"/activity-service/activity/{activityId}";
 
@@ -24,7 +24,7 @@ public partial class GarminConnectHttpClient
 
     public async Task<HttpResponseMessage> UpdateActivity(
         GarminActivityUpdateRequest model,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var url = $"/activity-service/activity/{model.ActivityId}";
 
@@ -38,7 +38,7 @@ public partial class GarminConnectHttpClient
 
     public async Task<Stream> DownloadActivityFile(
       long activityId,
-      CancellationToken cancellationToken = default)
+      CancellationToken cancellationToken)
     {
         var url = $"/download-service/files/activity/{activityId}";
 
