@@ -54,6 +54,7 @@ public sealed class ZwiftEventRidersCompetitionMetricsHttpTriggerFunction
                 .GetCompetitionMetrics(rider.Id, cancellationToken: cancellationToken);
 
             var weigth = rider.WeightInGrams / 1000.0;
+            var height = rider.HeightInMillimeters / 1000.0;
             var ftpPerKg = rider.Ftp / weigth;
 
             items.Add(new ZwiftEventRidersCompetitionMetricsResponseItem
@@ -64,6 +65,7 @@ public sealed class ZwiftEventRidersCompetitionMetricsHttpTriggerFunction
                 Gender = competitionMetrics.Male ? "male" : "female",
                 Age = rider.Age,
                 Weight = weigth,
+                Height = height,
                 FtpPerKg = ftpPerKg,
                 Category = competitionMetrics.Category,
                 RacingScore = competitionMetrics.RacingScore,
@@ -81,6 +83,7 @@ public sealed record ZwiftEventRidersCompetitionMetricsResponseItem
     public required string LastName { get; init; }
     public required uint Age { get; init; }
     public required double Weight { get; init; }
+    public required double Height { get; init; }
     public required double FtpPerKg { get; init; }
     public required string? Category { get; init; }
     public required double? RacingScore { get; init; }

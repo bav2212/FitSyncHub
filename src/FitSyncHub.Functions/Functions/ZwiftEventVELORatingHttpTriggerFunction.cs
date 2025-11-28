@@ -70,7 +70,10 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
             var velo = history?.History
                     .OrderByDescending(x => x.UpdatedAt)
                     .FirstOrDefault()?.Rating;
+
             var weigth = rider.WeightInGrams / 1000.0;
+            var height = rider.HeightInMillimeters / 1000.0;
+
             var ftpPerKg = rider.Ftp / weigth;
 
             items.Add(new ZwiftEventVELORatingResponseItem
@@ -80,6 +83,7 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
                 LastName = rider.LastName,
                 Age = rider.Age,
                 Weight = weigth,
+                Height = height,
                 FtpPerKg = ftpPerKg,
                 Best5Sec = GetWkgValue(history, x => x.Wkg5),
                 Best15Sec = GetWkgValue(history, x => x.Wkg15),
@@ -121,6 +125,7 @@ public sealed record ZwiftEventVELORatingResponseItem
     public required string LastName { get; init; }
     public required uint Age { get; init; }
     public required double Weight { get; init; }
+    public required double Height { get; init; }
     public required double? MaxVELO { get; init; }
     public required double? MinVELO { get; init; }
     public required double? VELO { get; init; }

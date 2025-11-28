@@ -24,8 +24,7 @@ public sealed partial class ZwiftHttpClient
         var pageLimit = requestModel.PageLimit;
         var limit = requestModel.Limit;
 
-        var ids = new HashSet<long>();
-        var results = new List<ZwiftEventResponse>();
+        var results = new Dictionary<long, ZwiftEventResponse>();
 
         var queryParams = new Dictionary<string, StringValues>
         {
@@ -54,7 +53,8 @@ public sealed partial class ZwiftHttpClient
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            var page = JsonSerializer.Deserialize(content, ZwiftEventsGenerationContext.Default.ZwiftEventFeedResponse)!;
+            var page = JsonSerializer.Deserialize(content,
+                ZwiftEventsGenerationContext.Default.ZwiftEventFeedResponse)!;
             if (page?.Data == null)
             {
                 break;
@@ -70,11 +70,7 @@ public sealed partial class ZwiftHttpClient
                     break;
                 }
 
-                if (!ids.Contains(ev.Id))
-                {
-                    results.Add(ev);
-                    ids.Add(ev.Id);
-                }
+                results.TryAdd(ev.Id, ev);
             }
 
             if (page.Data.Count == 0 || (page.Data.Count < limit))
@@ -96,7 +92,7 @@ public sealed partial class ZwiftHttpClient
             cursor = page.Cursor;
         }
 
-        return results;
+        return [.. results.Values];
     }
 
     public async Task<ZwiftEventResponse> GetEventFromZwfitEventViewUrl(string eventUrl, CancellationToken cancellationToken)
@@ -149,28 +145,53 @@ public sealed partial class ZwiftHttpClient
     public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEventSubgroupEntrants(
         int eventSubgroupId,
         string type = "all", // or 'leader', 'sweeper', 'favorite', 'following', 'other'
-        string participation = "registered", // or 'signed_up',
+        string participation = "signed_up", // or 'registered',
         CancellationToken cancellationToken = default)
     {
-        // see sauce source code how to handle pagination
         const long TakeCount = 100;
-        const long Start = 0;
+        const int MaxRequests = 10;
 
-        var url = QueryHelpers.AddQueryString($"api/events/subgroups/entrants/{eventSubgroupId}", new Dictionary<string, StringValues>
+        var pages = 0;
+        var done = false;
+
+        var results = new Dictionary<long, ZwiftEventSubgroupEntrantResponse>();
+
+        for (var start = 0; !done; start++, pages++)
         {
-            { "type", type },
-            { "participation", participation },
-            { "limit", TakeCount.ToString() },
-            { "start", Start.ToString() }
-        });
+            if (pages >= MaxRequests)
+            {
+                _logger.LogWarning("To much pages to iterate for event subgroup entrants. Stopping to avoid some block from Zwift");
+                break;
+            }
 
-        var response = await _httpClientJson.GetAsync(url, cancellationToken);
-        response.EnsureSuccessStatusCode();
+            var url = QueryHelpers.AddQueryString($"api/events/subgroups/entrants/{eventSubgroupId}", new Dictionary<string, StringValues>
+            {
+                { "type", type },
+                { "participation", participation },
+                { "start", start.ToString() },
+                { "limit", TakeCount.ToString() },
+            });
 
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            var response = await _httpClientJson.GetAsync(url, cancellationToken);
+            response.EnsureSuccessStatusCode();
 
-        return JsonSerializer.Deserialize(content,
-              ZwiftEventsGenerationContext.Default.IReadOnlyCollectionZwiftEventSubgroupEntrantResponse)!;
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            var page = JsonSerializer.Deserialize(content,
+                  ZwiftEventsGenerationContext.Default.IReadOnlyCollectionZwiftEventSubgroupEntrantResponse)!;
+
+            foreach (var item in page)
+            {
+                results.TryAdd(item.Id, item);
+            }
+
+            if (page.Count == 0 || (page.Count < TakeCount))
+            {
+                done = true;
+            }
+        }
+
+        return [.. results.Values];
     }
 
     [GeneratedRegex(@"events/view/(\d+)")]

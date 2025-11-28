@@ -61,7 +61,8 @@ public sealed class ZwiftEventsService
             LastName = e.LastName,
             Age = e.Age,
             Ftp = e.Ftp,
-            WeightInGrams = e.Weight
+            WeightInGrams = e.Weight,
+            HeightInMillimeters = e.Height,
         }).ToList();
 
         if (!includeMyself)
@@ -82,7 +83,8 @@ public sealed class ZwiftEventsService
                     LastName = profileMe.LastName,
                     Age = profileMe.Age,
                     Ftp = profileMe.Ftp,
-                    WeightInGrams = profileMe.WeightInGrams
+                    WeightInGrams = profileMe.WeightInGrams,
+                    HeightInMillimeters = profileMe.HeightInMillimeters,
                 }];
     }
 }
@@ -104,5 +106,6 @@ public sealed record ZwiftEntrantResponseModel
     public required string LastName { get; set; }
     public required uint Age { get; set; }
     public required uint WeightInGrams { get; set; }
+    public required uint HeightInMillimeters { get; set; }
     public required uint Ftp { get; set; }
 }

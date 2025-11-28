@@ -10,7 +10,7 @@ public sealed record ZwiftEventSubgroupEntrantResponse
     public required string EventCategory { get; init; }
     public required uint Age { get; init; }
     public required int BodyType { get; init; }
-    public required int Height { get; init; }   // in mm
+    public required uint Height { get; init; }   // in mm
     public required uint Weight { get; init; }   // in grams
     public required uint Ftp { get; init; }
     public required int AchievementLevel { get; init; }
