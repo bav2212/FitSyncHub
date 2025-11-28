@@ -19,7 +19,7 @@ public sealed partial class ZwiftHttpClient
         const int MaxRequests = 100;
 
         var from = requestModel.From;
-        // this field look buggy, maybe zwift api does not support to fiel
+        // this field look buggy, maybe zwift api does not support 'to' field (comment from me, not sauce)
         var to = requestModel.To;
         var pageLimit = requestModel.PageLimit;
         var limit = requestModel.Limit;
@@ -59,11 +59,12 @@ public sealed partial class ZwiftHttpClient
             {
                 break;
             }
+            pages++;
 
             foreach (var item in page.Data)
             {
                 var ev = item.Event;
-                if (ev.EventStart >= to)
+                if (ev.EventStart > to)
                 {
                     done = true;
                     break;
@@ -81,7 +82,7 @@ public sealed partial class ZwiftHttpClient
                 break;
             }
 
-            if (pageLimit.HasValue && ++pages >= pageLimit)
+            if (pageLimit.HasValue && pages >= pageLimit)
             {
                 break;
             }
@@ -147,15 +148,22 @@ public sealed partial class ZwiftHttpClient
 
     public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEventSubgroupEntrants(
         int eventSubgroupId,
-        string type = "all",
-        string participation = "signed_up",
+        string type = "all", // or 'leader', 'sweeper', 'favorite', 'following', 'other'
+        string participation = "registered", // or 'signed_up',
         CancellationToken cancellationToken = default)
     {
         // see sauce source code how to handle pagination
         const long TakeCount = 100;
         const long Start = 0;
 
-        var url = $"api/events/subgroups/entrants/{eventSubgroupId}?type={type}&participation={participation}&limit={TakeCount}&start={Start}";
+        var url = QueryHelpers.AddQueryString($"api/events/subgroups/entrants/{eventSubgroupId}", new Dictionary<string, StringValues>
+        {
+            { "type", type },
+            { "participation", participation },
+            { "limit", TakeCount.ToString() },
+            { "start", Start.ToString() }
+        });
+
         var response = await _httpClientJson.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
