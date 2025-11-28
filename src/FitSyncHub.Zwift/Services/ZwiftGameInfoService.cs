@@ -54,7 +54,7 @@ public sealed class ZwiftGameInfoService
         DateTimeOffset to,
         CancellationToken cancellationToken)
     {
-        var uncompletedCyclingRouteAchievementsWithMappingToRoute = await GetMappedUncompletedAchievements(cancellationToken);
+        var achievementsState = await GetAchievementsState(cancellationToken);
 
         var events = await _zwiftHttpClient.GetEventFeedFullRangeBuggy(new ZwiftEventFeedRequest
         {
@@ -62,9 +62,10 @@ public sealed class ZwiftGameInfoService
             To = to,
         }, cancellationToken);
 
-        var routesWithUncompletedAchievementsDictionary = uncompletedCyclingRouteAchievementsWithMappingToRoute
+        var routesWithUncompletedAchievementsDictionary = achievementsState
             .CyclingRouteAchievementsToRouteMapping
-            .Values
+            .Where(x => !x.Key.IsAchieved)
+            .Select(x => x.Value)
             .ToDictionary(x => x.Id, x => x);
 
         var eventsToRouteMapping = events
@@ -79,7 +80,7 @@ public sealed class ZwiftGameInfoService
             .ToDictionary(g => g.Key, g => g.Select(x => x.Event).ToList());
     }
 
-    public async Task<MappedUncompletedAchievementsModel> GetMappedUncompletedAchievements(
+    public async Task<MappedUncompletedAchievementsModel> GetAchievementsState(
         CancellationToken cancellationToken)
     {
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
@@ -98,14 +99,26 @@ public sealed class ZwiftGameInfoService
         {
             CyclingRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Cycling),
             RunningRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Running),
-            GeneralAchievements = [.. generalAchievements.Where(x => !userAchievements.Contains(x.Id))]
+            GeneralAchievements = [.. generalAchievements.Select(ConvertToZwiftGameInfoAchievementState)]
         };
 
-        Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport sport)
+        Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport sport)
         {
             return mappedRouteAchievementsToRoutes
-                .Where(x => x.Value.Sports.Contains(sport) && !userAchievements.Contains(x.Key.Id))
-                .ToDictionary(x => x.Key, x => x.Value);
+                .Where(x => x.Value.Sports.Contains(sport))
+                .ToDictionary(
+                    x => ConvertToZwiftGameInfoAchievementState(x.Key),
+                    x => x.Value
+                );
+        }
+
+        ZwiftGameInfoAchievementState ConvertToZwiftGameInfoAchievementState(ZwiftGameInfoAchievement achievement)
+        {
+            return new ZwiftGameInfoAchievementState
+            {
+                Achievement = achievement,
+                IsAchieved = userAchievements.Contains(achievement.Id)
+            };
         }
     }
 
@@ -140,9 +153,16 @@ public sealed class ZwiftGameInfoService
     }
 }
 
+public sealed record ZwiftGameInfoAchievementState
+{
+    public required ZwiftGameInfoAchievement Achievement { get; init; }
+    public required bool IsAchieved { get; init; }
+}
+
+
 public sealed record MappedUncompletedAchievementsModel
 {
-    public required Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> CyclingRouteAchievementsToRouteMapping { get; init; }
-    public required Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> RunningRouteAchievementsToRouteMapping { get; init; }
-    public required List<ZwiftGameInfoAchievement> GeneralAchievements { get; init; }
+    public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> CyclingRouteAchievementsToRouteMapping { get; init; }
+    public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> RunningRouteAchievementsToRouteMapping { get; init; }
+    public required List<ZwiftGameInfoAchievementState> GeneralAchievements { get; init; }
 }

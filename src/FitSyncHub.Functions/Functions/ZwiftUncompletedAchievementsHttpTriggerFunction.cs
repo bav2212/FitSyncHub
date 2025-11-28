@@ -23,33 +23,57 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
     {
         _ = req;
 
-        var uncompletedAchievements = await _zwiftGameInfoService.GetMappedUncompletedAchievements(cancellationToken);
+        var achievementsState = await _zwiftGameInfoService.GetAchievementsState(cancellationToken);
         var sb = new StringBuilder();
 
-        if (uncompletedAchievements.GeneralAchievements.Count != 0)
+        if (achievementsState.GeneralAchievements.Count != 0)
         {
             sb.AppendLine("General achievements:");
-            foreach (var uncompletedGeneralAchievement in uncompletedAchievements.GeneralAchievements)
+
+            var nonRunningGeneralAchievements = achievementsState.GeneralAchievements
+                .Where(x => !x.Achievement.ImageUrl.Contains("Run", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            sb.AppendLine($"Achieved (excluding running): {nonRunningGeneralAchievements.Count(x => x.IsAchieved)}/{nonRunningGeneralAchievements.Count}");
+
+            foreach (var generalAchievementState in nonRunningGeneralAchievements)
             {
-                if (uncompletedGeneralAchievement.ImageUrl.Contains("Run", StringComparison.OrdinalIgnoreCase))
+                if (generalAchievementState.IsAchieved)
                 {
                     continue;
                 }
 
-                sb.AppendLine($"- {uncompletedGeneralAchievement.Name}");
+                sb.AppendLine($"- {generalAchievementState.Achievement.Name}");
             }
             sb.AppendLine();
         }
 
-        if (uncompletedAchievements.CyclingRouteAchievementsToRouteMapping.Count != 0)
+        if (achievementsState.CyclingRouteAchievementsToRouteMapping.Count != 0)
         {
             sb.AppendLine("Cycling routes:");
-            var orderedRoutes = uncompletedAchievements.CyclingRouteAchievementsToRouteMapping.Values
+
+            var statsLookup = achievementsState.CyclingRouteAchievementsToRouteMapping
+                .GroupBy(x => new
+                {
+                    x.Value.PublicEventsOnly
+                })
+                .ToDictionary(x => x.Key.PublicEventsOnly, g => new
+                {
+                    IsAchievedCount = g.Count(x => x.Key.IsAchieved),
+                    Count = g.Count()
+                });
+
+            sb.AppendLine($"Achieved (public routes): {statsLookup[false].IsAchievedCount}/{statsLookup[false].Count}");
+            sb.AppendLine($"Achieved (eventOnly routes): {statsLookup[true].IsAchievedCount}/{statsLookup[true].Count}");
+
+            var uncompletedRoutesOrdered = achievementsState.CyclingRouteAchievementsToRouteMapping
+                .Where(x => !x.Key.IsAchieved)
+                .Select(x => x.Value)
                 .OrderBy(x => x.PublicEventsOnly)
                 .ThenBy(x => x.PublishedOn)
                 .ToList();
 
-            foreach (var route in orderedRoutes)
+            foreach (var route in uncompletedRoutesOrdered)
             {
                 var totalDistanceKm = Math.Round(route.TotalDistanceInMeters / 1000.0, 1);
                 var totalElevation = Math.Round(route.TotalAscentInMeters, 0);
