@@ -100,7 +100,7 @@ public sealed partial class ZwiftHttpClient
         string eventUrl,
         CancellationToken cancellationToken)
     {
-        var match = ZwiftEventIdRegex().Match(eventUrl);
+        var match = ZwiftEventViewUrlRegex().Match(eventUrl);
         if (!match.Success)
         {
             throw new ArgumentException("Invalid Zwift event URL format.", nameof(eventUrl));
@@ -111,7 +111,15 @@ public sealed partial class ZwiftHttpClient
             throw new ArgumentException("Invalid Zwift event ID in the URL.", nameof(eventUrl));
         }
 
-        var url = $"api/public/events/{zwiftEventId}";
+        var baseUrl = $"api/public/events/{zwiftEventId}";
+
+        var queryParamsString = match.Groups[2].Success
+             ? match.Groups[2].Value
+             : null;
+
+        var url = string.IsNullOrEmpty(queryParamsString)
+            ? baseUrl
+            : $"{baseUrl}?{queryParamsString}";
 
         var response = await _httpClientJson.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -212,6 +220,6 @@ public sealed partial class ZwiftHttpClient
         return [.. results.Values];
     }
 
-    [GeneratedRegex(@"events/view/(\d+)")]
-    private static partial Regex ZwiftEventIdRegex();
+    [GeneratedRegex(@"events/view/(\d+)(?:\?(.*))?")]
+    private static partial Regex ZwiftEventViewUrlRegex();
 }

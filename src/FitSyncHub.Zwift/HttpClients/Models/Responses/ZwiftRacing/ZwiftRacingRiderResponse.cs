@@ -61,7 +61,7 @@ public sealed record ZwiftRacingHistoryEntry
     public double? Rating { get; init; }
     public double? RatingBefore { get; init; }
     public int? PenTotal { get; init; }
-    public int? PenTimeCut { get; init; }
+    public double? PenTimeCut { get; init; }
 }
 
 public sealed record ZwiftRacingEventData
