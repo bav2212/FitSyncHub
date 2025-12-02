@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using FitSyncHub.GarminConnect.JsonSerializerContexts;
 using FitSyncHub.GarminConnect.Models.Responses.TrainingPlan;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
@@ -9,9 +11,13 @@ public partial class GarminConnectHttpClient
     public async Task<long> GetActiveTrainingPlanId(
         CancellationToken cancellationToken)
     {
-        const string Url = "/trainingplan-service/trainingplan/plans?limit=10";
+        var url = QueryHelpers.AddQueryString(
+            "/trainingplan-service/trainingplan/plans", new Dictionary<string, StringValues>
+        {
+            { "limit", "10" }
+        });
 
-        var response = await _httpClient.GetAsync(Url, cancellationToken);
+        var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
@@ -124,26 +125,39 @@ public sealed partial class ZwiftHttpClient
         int eventSubgroupId,
         CancellationToken cancellationToken)
     {
-        List<JsonElement> entriesResult = [];
+        const string EntriesPropertyName = "entries";
+
+        var entriesJsonArray = new JsonArray();
+        var jsonObject = new JsonObject()
+        {
+            [EntriesPropertyName] = entriesJsonArray
+        };
+
         const long TakeCount = 50;
 
         do
         {
-            var url = $"api/race-results/entries?event_subgroup_id={eventSubgroupId}&limit={TakeCount}&start={entriesResult.Count}";
+            var url = QueryHelpers.AddQueryString("api/race-results/entries", new Dictionary<string, StringValues>
+            {
+                { "event_subgroup_id", eventSubgroupId.ToString() },
+                { "start", entriesJsonArray.Count.ToString() },
+                { "limit", TakeCount.ToString() },
+            });
 
             var response = await _httpClientJson.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
             var jsonDocument = JsonDocument.Parse(content);
-            var entriesProperty = jsonDocument.RootElement.GetProperty("entries");
-            var entriesDocuments = entriesProperty.EnumerateArray();
-            entriesResult.AddRange(entriesDocuments);
+            var entriesProperty = jsonDocument.RootElement.GetProperty(EntriesPropertyName);
+            foreach (var entry in entriesProperty.EnumerateArray())
+            {
+                entriesJsonArray.Add(entry);
+            }
         }
-        while (entriesResult.Count > 0 && entriesResult.Count % TakeCount == 0);
+        while (entriesJsonArray.Count > 0 && entriesJsonArray.Count % TakeCount == 0);
 
-        var mergedJson = new { entries = entriesResult }; // Create an object with "entries" key
-        return JsonSerializer.Serialize(mergedJson, ZwiftEventsGenerationContext.Default.Options);
+        return jsonObject.ToJsonString(ZwiftEventsGenerationContext.Default.Options);
     }
 
     public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEventSubgroupEntrants(
