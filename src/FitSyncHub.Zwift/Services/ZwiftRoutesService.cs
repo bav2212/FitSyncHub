@@ -42,6 +42,7 @@ public sealed class ZwiftRoutesService
 
               return new ZwiftDataRoutesInfoModel
               {
+                  Id = route.Id,
                   Name = route.Name,
                   WorldName = pair.WorldName,
                   Distance = Math.Round(route.DistanceInMeters / 1000, 1),
@@ -63,6 +64,7 @@ public sealed class ZwiftRoutesService
 
 public sealed record ZwiftDataRoutesInfoModel
 {
+    public required long Id { get; init; }
     public required string Name { get; init; }
     public required string WorldName { get; init; }
     public required double Distance { get; init; }
