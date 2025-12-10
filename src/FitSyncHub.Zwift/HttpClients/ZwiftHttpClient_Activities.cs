@@ -32,7 +32,10 @@ public sealed partial class ZwiftHttpClient
     }
 
     // create ZwiftActivity sealed class if need this method
-    public async Task<ZwiftActivityOverview> GetActivity(long profileId, long id, CancellationToken cancellationToken)
+    public async Task<ZwiftActivityOverview> GetActivity(
+        long profileId,
+        long id,
+        CancellationToken cancellationToken)
     {
         var url = $"api/profiles/{profileId}/activities/{id}";
 
@@ -41,6 +44,7 @@ public sealed partial class ZwiftHttpClient
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return JsonSerializer.Deserialize(content, ZwiftActivitiesGenerationContext.Default.ZwiftActivityOverview)!;
+        return JsonSerializer.Deserialize(content,
+            ZwiftActivitiesGenerationContext.Default.ZwiftActivityOverview)!;
     }
 }

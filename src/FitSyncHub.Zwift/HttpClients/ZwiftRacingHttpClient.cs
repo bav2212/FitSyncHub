@@ -16,8 +16,8 @@ public sealed class ZwiftRacingHttpClient
     }
 
     public async Task<IReadOnlyCollection<ZwiftRacingEventResponse>> GetEvent(
-     long eventId,
-     CancellationToken cancellationToken)
+        long eventId,
+        CancellationToken cancellationToken)
     {
         var url = $"api/events/{eventId}";
 

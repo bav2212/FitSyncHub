@@ -37,6 +37,7 @@ public sealed class ZwiftGameInfoService
         {"RICHMOND UCI REVERSE", "RICHMOND 2015 WORLDS REVERSE"},
         {"CASTLE CRIT (RUNNING)", "CASTLE CRIT RUN"},
         {"TRIPLE TWISTS", "TRIPLE TWIST"},
+        {"PEAKY PAVE", "PEAKY PAVÉ"}
     };
 
     public ZwiftGameInfoService(
