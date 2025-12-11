@@ -2,6 +2,7 @@
 using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 using FitSyncHub.Zwift.JsonSerializerContexts;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Zwift.HttpClients;
@@ -9,10 +10,14 @@ namespace FitSyncHub.Zwift.HttpClients;
 public sealed class ZwiftRacingHttpClient
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<ZwiftRacingHttpClient> _logger;
 
-    public ZwiftRacingHttpClient(HttpClient httpClient)
+    public ZwiftRacingHttpClient(
+        HttpClient httpClient,
+        ILogger<ZwiftRacingHttpClient> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<IReadOnlyCollection<ZwiftRacingEventResponse>> GetEvent(
@@ -51,11 +56,28 @@ public sealed class ZwiftRacingHttpClient
         var url = QueryHelpers.AddQueryString($"api/riders/{riderId}/history", queryParams);
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return JsonSerializer.Deserialize(content,
-            ZwiftRacingGenerationContext.Default.ZwiftRacingRiderResponse);
+        if (response.IsSuccessStatusCode)
+        {
+            return JsonSerializer.Deserialize(content,
+                ZwiftRacingGenerationContext.Default.ZwiftRacingRiderResponse);
+        }
+
+        var jsonDocument = JsonDocument.Parse(content);
+        if (jsonDocument.RootElement.TryGetProperty("error", out var errorJsonValue))
+        {
+            var errorText = errorJsonValue.ToString();
+            if (errorText == "API responded with status 404")
+            {
+                return default;
+            }
+
+            _logger.LogWarning("Error from zwiftracing.app: {Error}", errorText);
+        }
+
+        response.EnsureSuccessStatusCode();
+        // it will not go here, but just to supress compiler error
+        return default;
     }
 }
