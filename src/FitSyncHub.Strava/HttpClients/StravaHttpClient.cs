@@ -41,9 +41,11 @@ public class StravaHttpClient : IStravaHttpClient
         var requestUri = QueryHelpers.AddQueryString("athlete", queryParams);
 
         var response = await _httpClient.PutAsync(requestUri, null, cancellationToken);
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        response.EnsureSuccessStatusCode();
 
-        return JsonSerializer.Deserialize(content, StravaHttpClientSerializerContext.Default.DetailedAthleteResponse)!;
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        return JsonSerializer.Deserialize(content,
+            StravaHttpClientSerializerContext.Default.DetailedAthleteResponse)!;
     }
 
     public async Task<List<SummaryActivityModelResponse>> GetActivities(
@@ -99,6 +101,7 @@ public class StravaHttpClient : IStravaHttpClient
         var requestUri = $"activities/{activityId}";
         var response = await _httpClient.PutAsJsonAsync(requestUri, model,
             StravaHttpClientSerializerContext.Default.UpdatableActivityRequest, cancellationToken);
+        response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
         return JsonSerializer.Deserialize(content, StravaHttpClientSerializerContext.Default.ActivityModelResponse)!;

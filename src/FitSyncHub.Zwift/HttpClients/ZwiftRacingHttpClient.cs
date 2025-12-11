@@ -42,7 +42,6 @@ public sealed class ZwiftRacingHttpClient
         return GetRiderHistory(riderId, default, cancellationToken);
     }
 
-
     public async Task<ZwiftRacingRiderResponse?> GetRiderHistory(
         long riderId,
         int? year,

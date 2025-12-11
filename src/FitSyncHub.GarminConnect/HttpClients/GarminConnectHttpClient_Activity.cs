@@ -33,7 +33,10 @@ public partial class GarminConnectHttpClient
         request.Content = JsonContent.Create(model,
             GarminConnectActivitySerializerContext.Default.GarminActivityUpdateRequest);
 
-        return await _httpClient.SendAsync(request, cancellationToken);
+        var response = await _httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        return response;
     }
 
     public async Task<Stream> DownloadActivityFile(

@@ -25,7 +25,8 @@ public partial class IntervalsIcuHttpClient
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
-        return JsonSerializer.Deserialize(content, IntervalsIcuCamelCaseSourceGenerationContext.Default.WellnessResponse)!;
+        return JsonSerializer.Deserialize(content,
+            IntervalsIcuCamelCaseSourceGenerationContext.Default.WellnessResponse)!;
     }
 
     public async Task<WellnessResponse> UpdateWellness(
@@ -36,8 +37,10 @@ public partial class IntervalsIcuHttpClient
 
         var jsonContent = JsonContent.Create(model, IntervalsIcuCamelCaseSourceGenerationContext.Default.WellnessRequest);
         var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);
+        response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
-        return JsonSerializer.Deserialize(content, IntervalsIcuCamelCaseSourceGenerationContext.Default.WellnessResponse)!;
+        return JsonSerializer.Deserialize(content,
+            IntervalsIcuCamelCaseSourceGenerationContext.Default.WellnessResponse)!;
     }
 }

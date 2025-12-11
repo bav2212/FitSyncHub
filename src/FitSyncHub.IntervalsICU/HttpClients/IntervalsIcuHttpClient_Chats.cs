@@ -15,6 +15,7 @@ public partial class IntervalsIcuHttpClient
         var requestUri = $"activity/{activityId}/messages";
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+        response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
         return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.IReadOnlyCollectionActivityMessageResponse)!;
