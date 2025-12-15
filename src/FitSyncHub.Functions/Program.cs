@@ -29,6 +29,8 @@ HashSet<string> functionsCalledByUser = [
     nameof(MacroNutrientsCalculatorHttpTriggerFunction),
     nameof(LactateSyncHttpTriggerFunction),
     nameof(XertWorkoutToIntervalsICUExporterHttpTriggerFunction),
+    nameof(ZwiftEventRidersCompetitionMetricsHttpTriggerFunction),
+    nameof(ZwiftEventVELORatingHttpTriggerFunction),
 ];
 
 var builder = FunctionsApplication.CreateBuilder(args);

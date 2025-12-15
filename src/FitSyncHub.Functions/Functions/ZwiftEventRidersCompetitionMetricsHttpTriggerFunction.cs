@@ -20,22 +20,21 @@ public sealed class ZwiftEventRidersCompetitionMetricsHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-event-competition-metrics")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        string? zwiftEventUrl = req.Query["eventUrl"];
+        string? eventUrl = req.Query["eventUrl"];
         string? subcategory = req.Query["subcategory"];
 
-        if (string.IsNullOrWhiteSpace(zwiftEventUrl)
-            || string.IsNullOrWhiteSpace(subcategory))
+        if (string.IsNullOrWhiteSpace(eventUrl))
         {
-            return new BadRequestObjectResult("wrong request");
+            return new BadRequestObjectResult($"Specify params: {nameof(eventUrl)}");
         }
 
-        if (!Uri.TryCreate(zwiftEventUrl, UriKind.Absolute, out _))
+        if (!Uri.TryCreate(eventUrl, UriKind.Absolute, out _))
         {
-            return new BadRequestObjectResult("wrong url");
+            return new BadRequestObjectResult($"Wrong '{nameof(eventUrl)}' url");
         }
 
         var entrants = await _zwiftEventsService
-            .GetEntrants(zwiftEventUrl, subcategory, includeMyself: true, cancellationToken);
+            .GetEntrants(eventUrl, subcategory, includeMyself: true, cancellationToken);
 
         var result = await GetRidersCompetitionMetrics(entrants, cancellationToken);
         result = [.. result.OrderByDescending(x => x.RacingScore)];

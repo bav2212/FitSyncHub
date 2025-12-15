@@ -43,22 +43,26 @@ public sealed class ZwiftEventsService
 
     public Task<IReadOnlyCollection<ZwiftEntrantResponseModel>> GetEntrants(
         string zwiftEventUrl,
-        string subgroupLabel,
+        string? subgroupLabel,
         CancellationToken cancellationToken)
     {
         return GetEntrants(zwiftEventUrl, subgroupLabel, includeMyself: false, cancellationToken);
     }
 
-
     public async Task<IReadOnlyCollection<ZwiftEntrantResponseModel>> GetEntrants(
         string zwiftEventUrl,
-        string subgroupLabel,
+        string? subgroupLabel,
         bool includeMyself,
         CancellationToken cancellationToken)
     {
         var zwiftEvent = await _zwiftHttpClient.GetEventFromZwfitEventViewUrl(zwiftEventUrl, cancellationToken);
-        var eventSubgroupId = zwiftEvent.EventSubgroups
-            .Single(x => x.SubgroupLabel == subgroupLabel).Id;
+
+        var eventSubgroupId = (string.IsNullOrWhiteSpace(subgroupLabel), zwiftEvent.EventSubgroups) switch
+        {
+            (true, { Length: 1 }) => zwiftEvent.EventSubgroups.Single().Id,
+            (false, { Length: >= 1 }) => zwiftEvent.EventSubgroups.Single(x => x.SubgroupLabel == subgroupLabel).Id,
+            _ => throw new InvalidDataException("Can not map subgroupLabel to eventSubgroup")
+        };
 
         var entrants = await _zwiftHttpClient
             .GetEventSubgroupEntrants(eventSubgroupId, cancellationToken: cancellationToken);
