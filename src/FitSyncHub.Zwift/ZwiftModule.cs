@@ -60,6 +60,8 @@ public static class ZwiftModule
             services.AddHttpClient<ZwiftHttpClientUnauthorized>();
             ConfigureZwiftHttpClient(services);
 
+            services.AddHttpClient<FlammeRougeRacingHttpClient>();
+
             services.AddTransient<ZwiftRacingAuthDelegatingHandler>();
             services.AddHttpClient<ZwiftRacingHttpClient>(client => client.BaseAddress = new Uri("https://www.zwiftracing.app"))
                 .AddHttpMessageHandler<ZwiftRacingAuthDelegatingHandler>();
