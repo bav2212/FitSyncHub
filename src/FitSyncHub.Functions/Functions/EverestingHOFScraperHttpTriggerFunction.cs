@@ -22,7 +22,6 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
     private readonly HashSet<string> _availableModalities =
         ["quarter", "full", "roam", "triple", "half", "10k", "double"];
 
-
     public EverestingHOFScraperHttpTriggerFunction(
         HttpClient httpClient,
         CosmosClient cosmosClient,
