@@ -116,27 +116,15 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
             ORDER BY c.date DESC
             """);
 
-        var feed = _everestingHOFContainer.GetItemQueryIterator<Newtonsoft.Json.Linq.JObject>(
+        var feed = _everestingHOFContainer.GetItemQueryIterator<ActivityItemProjection>(
             queryDefinition: query
         );
 
         while (feed.HasMoreResults)
         {
             var response = await feed.ReadNextAsync(cancellationToken);
-            if (response.Count > 1)
-            {
-                throw new Exception("Some unexpected count of items");
-            }
-
             var item = response.Single();
-
-            var date = item["date"];
-            if (date is null || date.Type != Newtonsoft.Json.Linq.JTokenType.String)
-            {
-                throw new Exception();
-            }
-
-            return DateTime.ParseExact(date.ToString(), "yyyy-MM-dd", null);
+            return item.Date;
         }
 
         throw new Exception("Can't get last synced date time");
@@ -153,9 +141,7 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        var scripts = doc
-            .DocumentNode
-            .SelectNodes("//script")
+        var scripts = doc.DocumentNode.SelectNodes("//script")
             ?? throw new Exception("No script tags found");
 
         foreach (var script in scripts)
@@ -215,7 +201,6 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         throw new InvalidOperationException("no json");
     }
 
-
     private static JsonElement GetActivitiesArray(JsonElement root) => root.GetProperty("activities");
     private static int GetCurrentPage(JsonElement root) => root.GetProperty("currentPage").GetInt32();
     private static int GetTotalPages(JsonElement root) => root.GetProperty("totalPages").GetInt32();
@@ -251,5 +236,10 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
 
         // Fire all requests in parallel
         await Task.WhenAll(tasks);
+    }
+
+    private record ActivityItemProjection
+    {
+        public DateTime Date { get; init; }
     }
 }
