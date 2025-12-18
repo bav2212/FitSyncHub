@@ -9,7 +9,6 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json.Linq;
 
 namespace FitSyncHub.Functions.Functions;
 
@@ -91,9 +90,11 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         return new OkObjectResult("Success");
     }
 
-    private static bool AllActiviesSynced(JsonDocument activitiesPortionJsonDocument, DateTime lastSyncedDateTime)
+    private static bool AllActiviesSynced(
+        JsonElement root,
+        DateTime lastSyncedDateTime)
     {
-        var activities = GetActivitiesArray(activitiesPortionJsonDocument);
+        var activities = GetActivitiesArray(root);
         HashSet<DateTime> dates = [];
 
         foreach (var activity in activities.EnumerateArray())
@@ -114,9 +115,9 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
             ORDER BY c.date DESC
             """);
 
-        var feed = _everestingHOFContainer.GetItemQueryIterator<JObject>(
-                    queryDefinition: query
-                );
+        var feed = _everestingHOFContainer.GetItemQueryIterator<Newtonsoft.Json.Linq.JObject>(
+            queryDefinition: query
+        );
 
         while (feed.HasMoreResults)
         {
@@ -129,7 +130,7 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
             var item = response.Single();
 
             var date = item["date"];
-            if (date is null || date.Type != JTokenType.String)
+            if (date is null || date.Type != Newtonsoft.Json.Linq.JTokenType.String)
             {
                 throw new Exception();
             }
@@ -140,7 +141,13 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         throw new Exception("Can't get last synced date time");
     }
 
-    private static JsonDocument ExtractActivitiesJson(string html)
+    private static JsonElement ExtractActivitiesJson(string html)
+    {
+        var scriptParts = GetScriptParts(html);
+        return ParseActivitiesJsonFromFullScript(scriptParts);
+    }
+
+    private static IEnumerable<string> GetScriptParts(string html)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
@@ -150,7 +157,6 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
             .SelectNodes("//script")
             ?? throw new Exception("No script tags found");
 
-        var sb = new StringBuilder();
         foreach (var script in scripts)
         {
             var text = script.InnerText;
@@ -169,48 +175,58 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
                 .Replace("\"])", "");
 
             text = Regex.Unescape(text);
-            sb.Append(text);
+            yield return text;
+        }
+    }
+
+    private static JsonElement ParseActivitiesJsonFromFullScript(IEnumerable<string> scripts)
+    {
+        const string StartPattern = "12:[\"$\",\"$L1c\",null,";
+        byte[]? data = default;
+
+        foreach (var script in scripts)
+        {
+            if (data is null)
+            {
+                var idx = script.IndexOf(StartPattern);
+                if (idx < 0)
+                {
+                    continue;
+                }
+
+                data = Encoding.UTF8.GetBytes(script[(idx + StartPattern.Length)..]);
+
+            }
+            else
+            {
+                data = [.. data, .. Encoding.UTF8.GetBytes(script)];
+            }
+
+            //isFinalBlock: false to avoid exception throwing
+            var reader = new Utf8JsonReader(data, isFinalBlock: false, new());
+            if (JsonDocument.TryParseValue(ref reader, out var document))
+            {
+                return document.RootElement;
+            }
+
+            // Not enough data yet — continue
         }
 
-        var fullScript = sb.ToString();
-
-        const string ActivitiesJsonStartPattern = "12:[\"$\",\"$L1c\",null,";
-        var activitiesJsonStartIndex = fullScript.IndexOf(ActivitiesJsonStartPattern);
-
-        var startFrom = activitiesJsonStartIndex + ActivitiesJsonStartPattern.Length;
-        // -2 to remove ']}'
-        var length = fullScript.Length - startFrom - 2;
-
-        var json = fullScript.Substring(startFrom, length);
-
-        return JsonDocument.Parse(json);
+        throw new InvalidOperationException("no json");
     }
 
-    private static JsonElement GetActivitiesArray(JsonDocument doc)
-    {
-        var root = doc.RootElement;
-        return root.GetProperty("activities");
-    }
 
-    private static int GetCurrentPage(JsonDocument doc)
-    {
-        var root = doc.RootElement;
-        return root.GetProperty("currentPage").GetInt32();
-    }
-
-    private static int GetTotalPages(JsonDocument doc)
-    {
-        var root = doc.RootElement;
-        return root.GetProperty("totalPages").GetInt32();
-    }
+    private static JsonElement GetActivitiesArray(JsonElement root) => root.GetProperty("activities");
+    private static int GetCurrentPage(JsonElement root) => root.GetProperty("currentPage").GetInt32();
+    private static int GetTotalPages(JsonElement root) => root.GetProperty("totalPages").GetInt32();
 
     private async Task StoreData(
-        JsonDocument doc,
+        JsonElement root,
         CancellationToken cancellationToken)
     {
-        var activities = GetActivitiesArray(doc);
+        var activities = GetActivitiesArray(root);
 
-        _logger.LogInformation("Page {CurrentPage} / {TotalPages}", GetCurrentPage(doc), GetTotalPages(doc));
+        _logger.LogInformation("Page {CurrentPage} / {TotalPages}", GetCurrentPage(root), GetTotalPages(root));
         _logger.LogInformation("Activities: {ActivitiesCount}", activities.GetArrayLength());
 
         var tasks = new List<Task>();
