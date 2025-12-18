@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Buffers;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -181,12 +182,12 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
 
     private static JsonElement ParseActivitiesJsonFromFullScript(IEnumerable<string> scripts)
     {
+        var writer = new ArrayBufferWriter<byte>();
         const string StartPattern = "12:[\"$\",\"$L1c\",null,";
-        byte[]? data = default;
 
         foreach (var script in scripts)
         {
-            if (data is null)
+            if (writer.WrittenCount == 0)
             {
                 var idx = script.IndexOf(StartPattern);
                 if (idx < 0)
@@ -194,16 +195,15 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
                     continue;
                 }
 
-                data = Encoding.UTF8.GetBytes(script[(idx + StartPattern.Length)..]);
-
+                writer.Write(Encoding.UTF8.GetBytes(script[(idx + StartPattern.Length)..]));
             }
             else
             {
-                data = [.. data, .. Encoding.UTF8.GetBytes(script)];
+                writer.Write(Encoding.UTF8.GetBytes(script));
             }
 
             //isFinalBlock: false to avoid exception throwing
-            var reader = new Utf8JsonReader(data, isFinalBlock: false, new());
+            var reader = new Utf8JsonReader(writer.WrittenSpan, isFinalBlock: false, new());
             if (JsonDocument.TryParseValue(ref reader, out var document))
             {
                 return document.RootElement;
