@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Http;
@@ -55,6 +56,7 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         {
             var url = QueryHelpers.AddQueryString(BaseUrl, new Dictionary<string, StringValues>
                 {
+                    {"order", "date_desc" },
                     {"page", page.ToString() },
                 });
 
@@ -96,16 +98,12 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         DateTime lastSyncedDateTime)
     {
         var activities = GetActivitiesArray(root);
-        HashSet<DateTime> dates = [];
+        var dtos = activities.EnumerateArray()
+            .Select(x => x.Deserialize<ActivityItemProjection>())
+            .ToList();
 
-        foreach (var activity in activities.EnumerateArray())
-        {
-            var date = activity.GetProperty("date");
-            var dateParsed = DateTime.ParseExact(date.ToString(), "yyyy-MM-dd", null);
-            dates.Add(dateParsed);
-        }
-
-        return dates.All(d => d < lastSyncedDateTime);
+        return dtos.Count != 0
+            && dtos.All(x => x is not null && x.Date != default && x.Date < lastSyncedDateTime);
     }
 
     private async Task<DateTime> GetLastSynchronizedDate(CancellationToken cancellationToken)
@@ -240,6 +238,7 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
 
     private record ActivityItemProjection
     {
+        [JsonPropertyName("date")]
         public DateTime Date { get; init; }
     }
 }
