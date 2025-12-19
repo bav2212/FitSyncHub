@@ -59,45 +59,63 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
         var year = DateTime.UtcNow.Year;
 
         List<ZwiftEventVELORatingResponseItem> items = [];
-        foreach (var rider in entrants)
+
+        foreach (var entrantsChunk in entrants.Chunk(5))
         {
-            var history = await _zwiftRacingHttpClient
-                .GetRiderHistory(rider.Id, year: year, cancellationToken);
-
-            var maxVelo = history?.History.Max(x => x.Rating);
-            var minVelo = history?.History.Min(x => x.Rating);
-            var velo = history?.History
-                    .OrderByDescending(x => x.UpdatedAt)
-                    .FirstOrDefault()?.Rating;
-
-            var weigth = rider.WeightInGrams / 1000.0;
-            var height = rider.HeightInMillimeters / 1000.0;
-
-            var ftpPerKg = rider.Ftp / weigth;
-
-            items.Add(new ZwiftEventVELORatingResponseItem
+            List<Task<ZwiftEventVELORatingResponseItem>> tasks = [];
+            foreach (var entrant in entrantsChunk)
             {
-                Id = rider.Id,
-                FirstName = rider.FirstName,
-                LastName = rider.LastName,
-                Age = rider.Age,
-                Weight = weigth,
-                Height = height,
-                FtpPerKg = ftpPerKg,
-                Best5Sec = GetWkgValue(history, x => x.Wkg5),
-                Best15Sec = GetWkgValue(history, x => x.Wkg15),
-                Best30Sec = GetWkgValue(history, x => x.Wkg30),
-                Best1Min = GetWkgValue(history, x => x.Wkg60),
-                Best2Min = GetWkgValue(history, x => x.Wkg120),
-                Best5Min = GetWkgValue(history, x => x.Wkg300),
-                Best20Min = GetWkgValue(history, x => x.Wkg1200),
-                MaxVELO = maxVelo,
-                MinVELO = minVelo,
-                VELO = velo,
-            });
+                tasks.Add(GetEntrantVELO(entrant, year, cancellationToken));
+            }
+
+            await foreach (var item in Task.WhenEach(tasks))
+            {
+                items.Add(await item);
+            }
         }
 
         return items;
+    }
+
+    private async Task<ZwiftEventVELORatingResponseItem> GetEntrantVELO(
+        ZwiftEntrantResponseModel rider,
+        int year,
+        CancellationToken cancellationToken)
+    {
+        var history = await _zwiftRacingHttpClient
+                        .GetRiderHistory(rider.Id, year: year, cancellationToken);
+
+        var maxVelo = history?.History.Max(x => x.Rating);
+        var minVelo = history?.History.Min(x => x.Rating);
+        var velo = history?.History
+                .OrderByDescending(x => x.UpdatedAt)
+                .FirstOrDefault()?.Rating;
+
+        var weigth = rider.WeightInGrams / 1000.0;
+        var height = rider.HeightInMillimeters / 1000.0;
+
+        var ftpPerKg = rider.Ftp / weigth;
+
+        return new ZwiftEventVELORatingResponseItem
+        {
+            Id = rider.Id,
+            FirstName = rider.FirstName,
+            LastName = rider.LastName,
+            Age = rider.Age,
+            Weight = weigth,
+            Height = height,
+            FtpPerKg = ftpPerKg,
+            Best5Sec = GetWkgValue(history, x => x.Wkg5),
+            Best15Sec = GetWkgValue(history, x => x.Wkg15),
+            Best30Sec = GetWkgValue(history, x => x.Wkg30),
+            Best1Min = GetWkgValue(history, x => x.Wkg60),
+            Best2Min = GetWkgValue(history, x => x.Wkg120),
+            Best5Min = GetWkgValue(history, x => x.Wkg300),
+            Best20Min = GetWkgValue(history, x => x.Wkg1200),
+            MaxVELO = maxVelo,
+            MinVELO = minVelo,
+            VELO = velo,
+        };
     }
 
     private static double? GetWkgValue(
