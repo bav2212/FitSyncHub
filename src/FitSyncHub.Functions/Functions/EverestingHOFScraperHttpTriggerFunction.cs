@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -45,7 +46,7 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
 
         // do not know how HOF works, add this delta to be sure that we synced all
         // maybe need to increase days
-        lastSyncedDateTime = lastSyncedDateTime.AddDays(-5);
+        lastSyncedDateTime = lastSyncedDateTime.AddDays(-60);
 
         const string BaseUrl = "https://hof.everesting.com/activities";
 
@@ -212,7 +213,7 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         _logger.LogInformation("Page {CurrentPage} / {TotalPages}", GetCurrentPage(root), GetTotalPages(root));
         _logger.LogInformation("Activities: {ActivitiesCount}", activities.GetArrayLength());
 
-        var tasks = new List<Task>();
+        var tasks = new List<Task<ResponseMessage>>();
         foreach (var activity in activities.EnumerateArray())
         {
             // Convert JsonElement → stream
@@ -232,8 +233,22 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
             );
         }
 
-        // Fire all requests in parallel
-        await Task.WhenAll(tasks);
+        await foreach (var task in Task.WhenEach(tasks))
+        {
+            var result = await task;
+            if (result.StatusCode == HttpStatusCode.OK)
+            {
+                _logger.LogInformation("Updated item successfully.");
+            }
+            else if (result.StatusCode == HttpStatusCode.Created)
+            {
+                _logger.LogInformation("Created item successfully.");
+            }
+            else
+            {
+                _logger.LogError("Failed to upsert item. Status code: {StatusCode}", result.StatusCode);
+            }
+        }
     }
 
     private record ActivityItemProjection
