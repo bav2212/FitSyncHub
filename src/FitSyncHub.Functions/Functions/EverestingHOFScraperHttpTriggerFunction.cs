@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using FitSyncHub.Common.Collections;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,16 +44,12 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "everesting-hof-scraper")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        var lastSyncedDateTime = await GetLastSynchronizedDate(cancellationToken);
-
-        // do not know how HOF works, add this delta to be sure that we synced all
-        // maybe need to increase days
-        lastSyncedDateTime = lastSyncedDateTime.AddDays(-60);
-
         const string BaseUrl = "https://hof.everesting.com/activities";
+        var lastSyncedDateTime = await GetLastSynchronizedDate(cancellationToken);
 
         var page = 1;
         int? totalPages = default;
+        var latestUpsertResults = new FixedSizeQueue<UpsertResult>(5 * 5);
 
         do
         {
@@ -73,12 +70,16 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
                     totalPages = GetTotalPages(activitiesPortionJsonDocument);
                 }
 
-                if (AllActiviesSynced(activitiesPortionJsonDocument, lastSyncedDateTime))
+                var upsertResults = await UpsertActivities(activitiesPortionJsonDocument, cancellationToken);
+                latestUpsertResults.Enqueue(upsertResults);
+
+                var allActiviesSynced = AllActiviesSynced(activitiesPortionJsonDocument, lastSyncedDateTime);
+                if (allActiviesSynced
+                    && latestUpsertResults.All(x => x.Error is null && x.Status == UpsertStatus.Updated)
+                    && latestUpsertResults.Count == latestUpsertResults.MaxSize)
                 {
                     break;
                 }
-
-                await StoreData(activitiesPortionJsonDocument, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -200,7 +201,7 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
     private static int GetCurrentPage(JsonElement root) => root.GetProperty("currentPage").GetInt32();
     private static int GetTotalPages(JsonElement root) => root.GetProperty("totalPages").GetInt32();
 
-    private async Task StoreData(
+    private async Task<List<UpsertResult>> UpsertActivities(
         JsonElement root,
         CancellationToken cancellationToken)
     {
@@ -229,27 +230,50 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
             );
         }
 
+        var result = new List<UpsertResult>();
+
         await foreach (var task in Task.WhenEach(tasks))
         {
-            var result = await task;
-            if (result.StatusCode == HttpStatusCode.OK)
+            UpsertResult upsertResult;
+
+            var response = await task;
+            if (response.StatusCode == HttpStatusCode.OK)
             {
                 _logger.LogInformation("Updated item successfully.");
+                upsertResult = new UpsertResult { Status = UpsertStatus.Updated };
             }
-            else if (result.StatusCode == HttpStatusCode.Created)
+            else if (response.StatusCode == HttpStatusCode.Created)
             {
                 _logger.LogInformation("Created item successfully.");
+                upsertResult = new UpsertResult { Status = UpsertStatus.Created };
             }
             else
             {
-                _logger.LogError("Failed to upsert item. Status code: {StatusCode}", result.StatusCode);
+                _logger.LogError("Failed to upsert item. Status code: {StatusCode}", response.StatusCode);
+                upsertResult = new UpsertResult { Error = response.ErrorMessage };
             }
+
+            result.Add(upsertResult);
         }
+
+        return result;
     }
 
     private record ActivityItemProjection
     {
         [JsonPropertyName("date")]
         public DateTime Date { get; init; }
+    }
+
+    private record UpsertResult
+    {
+        public UpsertStatus? Status { get; init; }
+        public string? Error { get; init; }
+    }
+
+    private enum UpsertStatus
+    {
+        Created,
+        Updated
     }
 }
