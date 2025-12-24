@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
@@ -109,15 +110,10 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
 
     private async Task<DateTime> GetLastSynchronizedDate(CancellationToken cancellationToken)
     {
-        var query = new QueryDefinition(
-            """
-            SELECT top 1 * FROM c
-            ORDER BY c.date DESC
-            """);
-
-        var feed = _everestingHOFContainer.GetItemQueryIterator<ActivityItemProjection>(
-            queryDefinition: query
-        );
+        var feed = _everestingHOFContainer.GetItemLinqQueryable<ActivityItemProjection>()
+            .OrderByDescending(x => x.Date)
+            .Take(1)
+            .ToFeedIterator();
 
         while (feed.HasMoreResults)
         {
