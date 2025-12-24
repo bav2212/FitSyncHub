@@ -7,10 +7,16 @@ namespace FitSyncHub.Functions.Mappers;
 [Mapper]
 internal sealed partial class SummaryActivityMapper
 {
-    [MapProperty(nameof(SummaryActivityModelResponse.Id), nameof(SummaryActivityData.id))]
+    [MapProperty(
+        nameof(SummaryActivityModelResponse.Id),
+        nameof(SummaryActivityData.Id),
+        SuppressNullMismatchDiagnostic = true)]
     public partial SummaryActivityData SummaryActivityResponseToDataModel(SummaryActivityModelResponse activity);
 
-    [MapProperty(nameof(ActivityModelResponse.Id), nameof(SummaryActivityData.id))]
+    [MapProperty(
+        nameof(ActivityModelResponse.Id),
+        nameof(SummaryActivityData.Id),
+        SuppressNullMismatchDiagnostic = true)]
     [MapperIgnoreSource(nameof(ActivityModelResponse.AvailableZones))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.AverageTemp))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.Calories))]
