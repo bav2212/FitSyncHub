@@ -78,7 +78,7 @@ public sealed class StravaExchangeTokenHttpTriggerFunction
 
         var persistedGrant = new PersistedGrant
         {
-            id = exchangeTokenResponse.Athlete.Id.ToString(),
+            Id = exchangeTokenResponse.Athlete.Id.ToString(),
             TokenType = exchangeTokenResponse.TokenType,
             ExpiresAt = exchangeTokenResponse.ExpiresAt,
             ExpiresIn = exchangeTokenResponse.ExpiresIn,

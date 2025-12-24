@@ -1,4 +1,5 @@
-﻿using FitSyncHub.Common;
+﻿using System.Text.Json;
+using FitSyncHub.Common;
 using FitSyncHub.Functions;
 using FitSyncHub.Functions.Functions;
 using FitSyncHub.Functions.Functions.IntervalsIcu;
@@ -47,7 +48,10 @@ builder.Configuration.AddUserSecrets<Program>();
 builder.Services
     .AddApplicationInsightsTelemetryWorkerService()
     .ConfigureFunctionsApplicationInsights()
-    .AddSingleton(_ => new CosmosClient(builder.Configuration["AzureWebJobsStorageConnectionString"]));
+    .AddSingleton(_ => new CosmosClient(builder.Configuration["AzureWebJobsStorageConnectionString"], new()
+    {
+        UseSystemTextJsonSerializerWithOptions = new JsonSerializerOptions()
+    }));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

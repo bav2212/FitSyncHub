@@ -1,8 +1,9 @@
-﻿namespace FitSyncHub.Functions.Data.Entities.Abstractions;
+﻿using System.Text.Json.Serialization;
+
+namespace FitSyncHub.Functions.Data.Entities.Abstractions;
 
 public abstract class DataModel
 {
-#pragma warning disable IDE1006 // Naming Styles
-    public required string id { get; set; }
-#pragma warning restore IDE1006 // Naming Styles
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
 }

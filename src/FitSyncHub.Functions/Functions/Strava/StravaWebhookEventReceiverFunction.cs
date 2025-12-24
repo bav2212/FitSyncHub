@@ -37,7 +37,7 @@ public sealed class StravaWebhookEventReceiverFunction
 
         var webhookEventData = new WebhookEventData
         {
-            id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid().ToString(),
             ObjectType = request.ObjectType,
             ObjectId = request.ObjectId,
             AspectType = request.AspectType,

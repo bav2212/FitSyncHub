@@ -32,10 +32,10 @@ public abstract class CosmosDbRepository<T> where T : DataModel
         T dataModel,
         CancellationToken cancellationToken)
     {
-        var partitionKey = new PartitionKey(dataModel.id);
+        var partitionKey = new PartitionKey(dataModel.Id);
 
         return Container.DeleteItemAsync<T>(
-            dataModel.id, partitionKey, cancellationToken: cancellationToken);
+            dataModel.Id, partitionKey, cancellationToken: cancellationToken);
     }
 
     public async Task<T?> Read(

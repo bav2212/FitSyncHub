@@ -1,4 +1,5 @@
-﻿using FitSyncHub.Functions.Data.Entities.Abstractions;
+﻿using System.Text.Json.Serialization;
+using FitSyncHub.Functions.Data.Entities.Abstractions;
 
 namespace FitSyncHub.Functions.Data.Entities;
 
@@ -13,8 +14,8 @@ public sealed class WebhookEventData : DataModel
     public required long EventTime { get; init; }
     public required DateTimeOffset CreatedOn { get; init; }
 
-    [Newtonsoft.Json.JsonIgnore]
+    [JsonIgnore]
     public long AthleteId => OwnerId;
-    [Newtonsoft.Json.JsonIgnore]
+    [JsonIgnore]
     public long ActivityId => ObjectId;
 }
