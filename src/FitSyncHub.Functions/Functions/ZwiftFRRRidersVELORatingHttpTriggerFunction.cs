@@ -4,6 +4,8 @@ using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Functions.Functions;
 
@@ -12,15 +14,18 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
     private readonly FlammeRougeRacingHttpClient _flammeRougeRacingHttpClient;
     private readonly ZwiftHttpClient _zwiftHttpClient;
     private readonly ZwiftRacingHttpClient _zwiftRacingHttpClient;
+    private readonly ILogger<ZwiftFRRRidersVELORatingHttpTriggerFunction> _logger;
 
     public ZwiftFRRRidersVELORatingHttpTriggerFunction(
         FlammeRougeRacingHttpClient flammeRougeRacingHttpClient,
         ZwiftHttpClient zwiftHttpClient,
-        ZwiftRacingHttpClient zwiftRacingHttpClient)
+        ZwiftRacingHttpClient zwiftRacingHttpClient,
+        ILogger<ZwiftFRRRidersVELORatingHttpTriggerFunction> logger)
     {
         _flammeRougeRacingHttpClient = flammeRougeRacingHttpClient;
         _zwiftHttpClient = zwiftHttpClient;
         _zwiftRacingHttpClient = zwiftRacingHttpClient;
+        _logger = logger;
     }
 
 #if DEBUG
@@ -30,31 +35,59 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-frr-tour-vELO-rating")] HttpRequest req,
         CancellationToken cancellationToken)
     {
+        var category = req.Query["category"];
         string? cookie = req.Query["cookie"];
-        string? category = req.Query["category"];
 
-        if (string.IsNullOrWhiteSpace(cookie)
-            || string.IsNullOrWhiteSpace(category))
+        if (string.IsNullOrWhiteSpace(category) || category.Count == 0)
         {
-            return new BadRequestObjectResult($"Specify params: {nameof(cookie)}, {nameof(category)}");
+            return new BadRequestObjectResult($"Specify params: {nameof(category)}");
         }
 
-        if (!Enum.TryParse<FlammeRougeRacingCategory>(category, ignoreCase: true, out var parsedFRRCategory))
+        if (string.IsNullOrWhiteSpace(cookie))
         {
-            return new BadRequestObjectResult("Cannot parse FRR category");
+            _logger.LogWarning("ZwiftRacing cookie is not specified, so will use only data from Zwift. Specify params: {Cookie}", nameof(cookie));
         }
 
-        var riders = await _flammeRougeRacingHttpClient
-            .GetTourRegisteredRiders(parsedFRRCategory, cancellationToken);
+        var tasksToGetRiders = ParseCategories(category)
+            .ToHashSet()
+            .Select(x => _flammeRougeRacingHttpClient.GetTourRegisteredRiders(x, cancellationToken))
+            .ToList();
 
-        var result = await GetRidersVELO(riders, cancellationToken);
-        result = [.. result.OrderByDescending(x => x.MaxVELO)];
+        List<long> riders = [];
+        await foreach (var taskToGetRiders in Task.WhenEach(tasksToGetRiders))
+        {
+            var ridersPortion = await taskToGetRiders;
+            riders.AddRange(ridersPortion);
+        }
+
+        var result =
+            await GetRidersVELO(riders, withVELO: !string.IsNullOrWhiteSpace(cookie), cancellationToken);
+
+        result = [.. result
+            .OrderByDescending(x => x.MaxVELO)
+            .ThenByDescending(x => x.FtpPerKg)
+        ];
 
         return new OkObjectResult(result);
     }
 
+    private IEnumerable<FlammeRougeRacingCategory> ParseCategories(StringValues category)
+    {
+        foreach (var categoryQueryParam in category)
+        {
+            if (!Enum.TryParse<FlammeRougeRacingCategory>(categoryQueryParam, ignoreCase: true, out var parsedFRRCategory))
+            {
+                _logger.LogError("Cannot parse FRR category {Category}", categoryQueryParam);
+                continue;
+            }
+
+            yield return parsedFRRCategory;
+        }
+    }
+
     private async Task<List<ZwiftEventVELORatingResponseItem>> GetRidersVELO(
         IReadOnlyCollection<long> riderIds,
+        bool withVELO,
         CancellationToken cancellationToken)
     {
         var year = DateTime.UtcNow.Year;
@@ -66,7 +99,7 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
             List<Task<ZwiftEventVELORatingResponseItem>> tasks = [];
             foreach (var riderId in riderIdsChunk)
             {
-                tasks.Add(GetRiderVELO(riderId, year, cancellationToken));
+                tasks.Add(GetRiderVELO(riderId, withVELO, year, cancellationToken));
             }
 
             await foreach (var item in Task.WhenEach(tasks))
@@ -80,11 +113,13 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
 
     private async Task<ZwiftEventVELORatingResponseItem> GetRiderVELO(
         long riderId,
+        bool withVELO,
         int year,
         CancellationToken cancellationToken)
     {
-        var historyTask = _zwiftRacingHttpClient
-                        .GetRiderHistory(riderId, year: year, cancellationToken);
+        var historyTask = withVELO
+            ? _zwiftRacingHttpClient.GetRiderHistory(riderId, year: year, cancellationToken)
+            : Task.FromResult(default(ZwiftRacingRiderResponse?));
         var riderTask = _zwiftHttpClient.GetProfile(riderId, cancellationToken);
 
         await Task.WhenAll(historyTask, riderTask);

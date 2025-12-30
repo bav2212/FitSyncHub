@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Common.Collections;
 
-public class FixedSizeQueue<T> : IEnumerable<T>, IReadOnlyCollection<T>, ICollection
+public class FixedSizeQueue<T> : IReadOnlyCollection<T>, ICollection
 {
     private readonly Queue<T> _queue;
 
