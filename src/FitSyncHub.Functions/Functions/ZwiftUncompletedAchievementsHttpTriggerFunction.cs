@@ -26,6 +26,9 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
         var achievementsState = await _zwiftGameInfoService.GetAchievementsState(cancellationToken);
         var sb = new StringBuilder();
 
+        sb.AppendLine($"Achievements level (xp): {achievementsState.AchievementLevel}");
+        sb.AppendLine();
+
         if (achievementsState.GeneralAchievements.Count != 0)
         {
             sb.AppendLine("General achievements:");

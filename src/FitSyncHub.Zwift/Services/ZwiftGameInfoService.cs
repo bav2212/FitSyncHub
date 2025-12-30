@@ -84,6 +84,7 @@ public sealed class ZwiftGameInfoService
     public async Task<MappedUncompletedAchievementsModel> GetAchievementsState(
         CancellationToken cancellationToken)
     {
+        var profileMe = await _zwiftHttpClient.GetProfileMe(cancellationToken);
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
         var isRouteAchievementsLookup = gameInfo.Achievements
             .ToLookup(x => x.ImageUrl.EndsWith("RouteComplete.png"));
@@ -98,6 +99,7 @@ public sealed class ZwiftGameInfoService
 
         return new MappedUncompletedAchievementsModel
         {
+            AchievementLevel = profileMe.AchievementLevel / 100,
             CyclingRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Cycling),
             RunningRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Running),
             GeneralAchievements = [.. generalAchievements.Select(ConvertToZwiftGameInfoAchievementState)]
@@ -166,4 +168,5 @@ public sealed record MappedUncompletedAchievementsModel
     public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> CyclingRouteAchievementsToRouteMapping { get; init; }
     public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> RunningRouteAchievementsToRouteMapping { get; init; }
     public required List<ZwiftGameInfoAchievementState> GeneralAchievements { get; init; }
+    public required uint AchievementLevel { get; init; }
 }
