@@ -14,7 +14,6 @@ public sealed record ZwiftRacingEventRiderResponse
     public ZwiftRacingEventRiderRace? Race { get; init; }
     //public ZwiftRacingPowerData? Power { get; init; }
     public ZwiftRacingEventRiderClub? Club { get; init; }
-
 }
 
 public sealed record ZwiftRacingEventRiderRace
