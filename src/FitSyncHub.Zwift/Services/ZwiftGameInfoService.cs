@@ -99,7 +99,7 @@ public sealed class ZwiftGameInfoService
 
         return new MappedUncompletedAchievementsModel
         {
-            AchievementLevel = profileMe.AchievementLevel / 100,
+            AchievementLevel = profileMe.AchievementLevel / 100.0,
             CyclingRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Cycling),
             RunningRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Running),
             GeneralAchievements = [.. generalAchievements.Select(ConvertToZwiftGameInfoAchievementState)]
@@ -168,5 +168,5 @@ public sealed record MappedUncompletedAchievementsModel
     public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> CyclingRouteAchievementsToRouteMapping { get; init; }
     public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> RunningRouteAchievementsToRouteMapping { get; init; }
     public required List<ZwiftGameInfoAchievementState> GeneralAchievements { get; init; }
-    public required uint AchievementLevel { get; init; }
+    public required double AchievementLevel { get; init; }
 }
