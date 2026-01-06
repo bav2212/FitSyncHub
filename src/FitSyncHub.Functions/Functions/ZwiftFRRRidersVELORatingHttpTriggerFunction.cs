@@ -37,16 +37,9 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
         CancellationToken cancellationToken)
     {
         var category = req.Query["category"];
-        string? cookie = req.Query["cookie"];
-
         if (string.IsNullOrWhiteSpace(category) || category.Count == 0)
         {
             return new BadRequestObjectResult($"Specify params: {nameof(category)}");
-        }
-
-        if (string.IsNullOrWhiteSpace(cookie))
-        {
-            _logger.LogWarning("ZwiftRacing cookie is not specified, so will use only data from Zwift. Specify params: {Cookie}", nameof(cookie));
         }
 
         var tasksToGetRiders = ParseCategories(category)
@@ -61,8 +54,7 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
             riders.AddRange(ridersPortion);
         }
 
-        var result =
-            await GetRidersVELO(riders, withVELO: !string.IsNullOrWhiteSpace(cookie), cancellationToken);
+        var result = await GetRidersVELO(riders, cancellationToken);
 
         result = [.. result
             .OrderByDescending(x => x.MaxVELO)
@@ -88,7 +80,6 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
 
     private async Task<List<ZwiftEventVELORatingResponseItem>> GetRidersVELO(
         IReadOnlyCollection<long> riderIds,
-        bool withVELO,
         CancellationToken cancellationToken)
     {
         var year = DateTime.UtcNow.Year;
@@ -100,7 +91,7 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
             List<Task<ZwiftEventVELORatingResponseItem>> tasks = [];
             foreach (var riderId in riderIdsChunk)
             {
-                tasks.Add(GetRiderVELO(riderId, withVELO, year, cancellationToken));
+                tasks.Add(GetRiderVELO(riderId, year, cancellationToken));
             }
 
             await foreach (var item in Task.WhenEach(tasks))
@@ -114,13 +105,10 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
 
     private async Task<ZwiftEventVELORatingResponseItem> GetRiderVELO(
         long riderId,
-        bool withVELO,
         int year,
         CancellationToken cancellationToken)
     {
-        var historyTask = withVELO
-            ? _zwiftRacingHttpClient.GetRiderHistory(riderId, year: year, cancellationToken)
-            : Task.FromResult(default(ZwiftRacingRiderResponse?));
+        var historyTask = _zwiftRacingHttpClient.GetRiderHistory(riderId, year: year, cancellationToken);
         var riderTask = _zwiftHttpClient.GetProfile(riderId, cancellationToken);
 
         await Task.WhenAll(historyTask, riderTask);

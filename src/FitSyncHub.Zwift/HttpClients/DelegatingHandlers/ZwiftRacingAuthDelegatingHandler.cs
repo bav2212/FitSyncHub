@@ -1,28 +1,47 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Net;
+using FitSyncHub.Common.Services;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
 
 public sealed class ZwiftRacingAuthDelegatingHandler : DelegatingHandler
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IDistributedCacheService _distributedCacheService;
 
-    public ZwiftRacingAuthDelegatingHandler(IHttpContextAccessor httpContextAccessor)
+    public ZwiftRacingAuthDelegatingHandler(
+        IDistributedCacheService distributedCacheService)
     {
-        _httpContextAccessor = httpContextAccessor;
+        _distributedCacheService = distributedCacheService;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var context = _httpContextAccessor.HttpContext;
-        var cookie = context?.Request.Query["cookie"].ToString();
-
-        if (!string.IsNullOrEmpty(cookie))
+        var zwiftRacingAuthCookie = await _distributedCacheService
+            .GetStringAsync(Constants.CacheKeys.ZwiftRacingAuthCookie, cancellationToken);
+        if (string.IsNullOrEmpty(zwiftRacingAuthCookie))
         {
-            request.Headers.Add("Cookie", cookie);
+            // Do not attempt the request if we don't have an auth cookie
+            throw CreateUnauthorizedAccessException();
         }
 
-        return await base.SendAsync(request, cancellationToken);
+        request.Headers.Add("Cookie", zwiftRacingAuthCookie);
+        var response = await base.SendAsync(request, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            await _distributedCacheService.RemoveAsync(
+                Constants.CacheKeys.ZwiftRacingAuthCookie,
+                cancellationToken);
+
+            throw CreateUnauthorizedAccessException();
+        }
+
+        return response;
+    }
+
+    private static UnauthorizedAccessException CreateUnauthorizedAccessException()
+    {
+        return new UnauthorizedAccessException("Zwift Racing authentication cookie is missing.");
     }
 }

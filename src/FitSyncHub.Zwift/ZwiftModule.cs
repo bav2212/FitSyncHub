@@ -59,6 +59,7 @@ public static class ZwiftModule
             services.AddHttpClient<ZwiftHttpClientUnauthorized>();
             ConfigureZwiftHttpClient(services);
 
+            services.AddScoped<ZwiftRacingService>();
             services.AddHttpClient<FlammeRougeRacingHttpClient>();
 
             services.AddTransient<ZwiftRacingAuthDelegatingHandler>();

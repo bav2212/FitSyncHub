@@ -54,7 +54,17 @@ public sealed class ZwiftRacingHttpClient
 
         var url = QueryHelpers.AddQueryString($"api/riders/{riderId}/history", queryParams);
 
-        var response = await _httpClient.GetAsync(url, cancellationToken);
+        HttpResponseMessage response;
+        try
+        {
+            response = await _httpClient.GetAsync(url, cancellationToken);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access when fetching rider history for riderId {RiderId}", riderId);
+            return default;
+        }
+
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (response.IsSuccessStatusCode)

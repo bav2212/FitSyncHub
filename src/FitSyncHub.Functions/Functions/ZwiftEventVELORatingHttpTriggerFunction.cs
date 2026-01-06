@@ -28,15 +28,8 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-event-vELO-rating")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        string? cookie = req.Query["cookie"];
         string? eventUrl = req.Query["eventUrl"];
         string? subcategory = req.Query["subcategory"];
-
-        if (string.IsNullOrWhiteSpace(cookie)
-            || string.IsNullOrWhiteSpace(eventUrl))
-        {
-            return new BadRequestObjectResult($"Specify params: {nameof(cookie)}, {nameof(eventUrl)}");
-        }
 
         if (!Uri.TryCreate(eventUrl, UriKind.Absolute, out _))
         {
@@ -83,7 +76,7 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
         CancellationToken cancellationToken)
     {
         var history = await _zwiftRacingHttpClient
-                        .GetRiderHistory(rider.Id, year: year, cancellationToken);
+                .GetRiderHistory(rider.Id, year: year, cancellationToken);
 
         var maxVelo = history?.History.Max(x => x.Rating);
         var minVelo = history?.History.Min(x => x.Rating);
