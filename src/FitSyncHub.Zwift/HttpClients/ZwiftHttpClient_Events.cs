@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using FitSyncHub.Zwift.HttpClients.Models.Requests.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
@@ -96,7 +95,7 @@ public sealed partial class ZwiftHttpClient
         return [.. results.Values];
     }
 
-    public async Task<ZwiftEventResponse> GetEventFromZwfitEventViewUrl(
+    public async Task<ZwiftEventResponse> GetEvent(
         string eventUrl,
         CancellationToken cancellationToken)
     {
@@ -129,18 +128,11 @@ public sealed partial class ZwiftHttpClient
         return JsonSerializer.Deserialize(content, ZwiftEventsGenerationContext.Default.ZwiftEventResponse)!;
     }
 
-    public async Task<string> GetEventSubgroupResults(
+    public async Task<ZwiftRaceResultResponse> GetEventSubgroupResults(
         int eventSubgroupId,
         CancellationToken cancellationToken)
     {
-        const string EntriesPropertyName = "entries";
-
-        var entriesJsonArray = new JsonArray();
-        var jsonObject = new JsonObject()
-        {
-            [EntriesPropertyName] = entriesJsonArray
-        };
-
+        List<ZwiftRaceResultEntryResponse> acc = [];
         const long TakeCount = 50;
 
         do
@@ -148,7 +140,7 @@ public sealed partial class ZwiftHttpClient
             var url = QueryHelpers.AddQueryString("api/race-results/entries", new Dictionary<string, StringValues>
             {
                 { "event_subgroup_id", eventSubgroupId.ToString() },
-                { "start", entriesJsonArray.Count.ToString() },
+                { "start", acc.Count.ToString() },
                 { "limit", TakeCount.ToString() },
             });
 
@@ -156,16 +148,14 @@ public sealed partial class ZwiftHttpClient
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            var jsonDocument = JsonDocument.Parse(content);
-            var entriesProperty = jsonDocument.RootElement.GetProperty(EntriesPropertyName);
-            foreach (var entry in entriesProperty.EnumerateArray())
-            {
-                entriesJsonArray.Add(entry);
-            }
-        }
-        while (entriesJsonArray.Count > 0 && entriesJsonArray.Count % TakeCount == 0);
+            var resultsPortion = JsonSerializer
+                .Deserialize(content, ZwiftEventsGenerationContext.Default.ZwiftRaceResultResponse);
 
-        return jsonObject.ToJsonString(ZwiftEventsGenerationContext.Default.Options);
+            acc.AddRange(resultsPortion!.Entries);
+        }
+        while (acc.Count > 0 && acc.Count % TakeCount == 0);
+
+        return new ZwiftRaceResultResponse { Entries = acc };
     }
 
     public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEventSubgroupEntrants(

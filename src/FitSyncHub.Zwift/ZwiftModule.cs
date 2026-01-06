@@ -45,7 +45,6 @@ public static class ZwiftModule
 
             services.AddScoped<ZwiftEventsService>();
             services.AddScoped<ZwiftPowerService>();
-            services.AddScoped<ZwiftResultsAnalyzerService>();
             services.AddScoped<ZwiftGameInfoService>();
             services.AddScoped<ZwiftRoutesService>();
 

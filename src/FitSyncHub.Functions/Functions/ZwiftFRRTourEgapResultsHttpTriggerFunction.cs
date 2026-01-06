@@ -1,0 +1,48 @@
+﻿using FitSyncHub.Zwift.HttpClients;
+using FitSyncHub.Zwift.Models.FRR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
+
+namespace FitSyncHub.Functions.Functions;
+
+public sealed class ZwiftFRRTourEGapResultsHttpTriggerFunction
+{
+    private readonly FlammeRougeRacingHttpClient _flammeRougeRacingHttpClient;
+    private readonly ILogger<ZwiftFRRTourEGapResultsHttpTriggerFunction> _logger;
+
+    public ZwiftFRRTourEGapResultsHttpTriggerFunction(
+        FlammeRougeRacingHttpClient flammeRougeRacingHttpClient,
+        ILogger<ZwiftFRRTourEGapResultsHttpTriggerFunction> logger)
+    {
+        _flammeRougeRacingHttpClient = flammeRougeRacingHttpClient;
+        _logger = logger;
+    }
+
+#if DEBUG
+    [Function(nameof(ZwiftFRRTourEGapResultsHttpTriggerFunction))]
+#endif
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-frr-tour-egap-results")] HttpRequest req,
+        CancellationToken cancellationToken)
+    {
+        var category = req.Query["category"];
+        if (string.IsNullOrWhiteSpace(category) ||
+            !Enum.TryParse<FlammeRougeRacingCategory>(category, ignoreCase: true, out var parsedFRRCategory))
+        {
+            return new BadRequestObjectResult($"Specify params: {nameof(category)}");
+        }
+
+        var stage = req.Query["stage"];
+        if (!int.TryParse(stage, out var parserStageNumber) || parserStageNumber <= 0)
+        {
+            return new BadRequestObjectResult($"Specify correct stage number param: {nameof(stage)}");
+        }
+
+        var result =
+            await _flammeRougeRacingHttpClient.GetStageEGap(parsedFRRCategory, parserStageNumber, cancellationToken);
+
+        return new OkObjectResult(result);
+    }
+}

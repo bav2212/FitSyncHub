@@ -55,7 +55,7 @@ public sealed class ZwiftEventsService
         bool includeMyself,
         CancellationToken cancellationToken)
     {
-        var zwiftEvent = await _zwiftHttpClient.GetEventFromZwfitEventViewUrl(zwiftEventUrl, cancellationToken);
+        var zwiftEvent = await _zwiftHttpClient.GetEvent(zwiftEventUrl, cancellationToken);
 
         var eventSubgroupId = (string.IsNullOrWhiteSpace(subgroupLabel), zwiftEvent.EventSubgroups) switch
         {

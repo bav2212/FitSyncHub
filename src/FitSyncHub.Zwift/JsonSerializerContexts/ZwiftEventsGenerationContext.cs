@@ -8,7 +8,7 @@ namespace FitSyncHub.Zwift.JsonSerializerContexts;
     Converters = [typeof(DateTimeWithoutColonOffsetJsonConverter)]
 )]
 [JsonSerializable(typeof(ZwiftEventFeedResponse))]
+[JsonSerializable(typeof(ZwiftRaceResultResponse))]
 [JsonSerializable(typeof(IReadOnlyCollection<ZwiftEventResponse>))]
-[JsonSerializable(typeof(IReadOnlyCollection<ZwiftRaceResultResponse>))]
 [JsonSerializable(typeof(IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>))]
 internal sealed partial class ZwiftEventsGenerationContext : JsonSerializerContext;
