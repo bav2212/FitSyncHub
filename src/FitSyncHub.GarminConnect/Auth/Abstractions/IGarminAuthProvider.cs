@@ -4,5 +4,5 @@ namespace FitSyncHub.GarminConnect.Auth.Abstractions;
 
 public interface IGarminAuthProvider
 {
-    Task<GarminAuthenticationResult?> GetAuthResult(CancellationToken cancellationToken);
+    Task<GarminAuthenticationModel?> GetAuthResult(CancellationToken cancellationToken);
 }

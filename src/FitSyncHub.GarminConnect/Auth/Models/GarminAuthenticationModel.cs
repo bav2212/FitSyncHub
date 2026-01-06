@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.GarminConnect.Auth.Models;
 
-public sealed record GarminAuthenticationResult
+public sealed record GarminAuthenticationModel
 
 {
     public required GarminOAuth1Token OAuthToken1 { get; init; }

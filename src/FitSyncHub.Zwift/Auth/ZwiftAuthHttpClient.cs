@@ -23,7 +23,7 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
         _logger = logger;
     }
 
-    public async Task<ZwiftAuthToken> Authenticate(CancellationToken cancellationToken)
+    public async Task<ZwiftAuthTokenModel> Authenticate(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting authentication process...");
 
@@ -42,14 +42,15 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var token = JsonSerializer.Deserialize(content, ZwiftAuthGenerationContext.Default.ZwiftAuthToken)!;
+        var token = JsonSerializer.Deserialize(
+            content, ZwiftAuthGenerationContext.Default.ZwiftAuthTokenModel)!;
         _logger.LogInformation("OAuth2 token: {AccessToken}", token.AccessToken);
 
         _logger.LogInformation("Authentication process completed.");
         return token;
     }
 
-    public async Task<ZwiftAuthToken> RefreshToken(ZwiftAuthToken token, CancellationToken cancellationToken)
+    public async Task<ZwiftAuthTokenModel> RefreshToken(ZwiftAuthTokenModel token, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting token refresh with refresh token: {Token}", token.RefreshToken);
 
@@ -66,7 +67,8 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var newToken = JsonSerializer.Deserialize(content, ZwiftAuthGenerationContext.Default.ZwiftAuthToken)!;
+        var newToken = JsonSerializer.Deserialize(
+            content, ZwiftAuthGenerationContext.Default.ZwiftAuthTokenModel)!;
         _logger.LogInformation("OAuth2 token: {AccessToken}", newToken.AccessToken);
 
         _logger.LogInformation("Refresh process completed.");

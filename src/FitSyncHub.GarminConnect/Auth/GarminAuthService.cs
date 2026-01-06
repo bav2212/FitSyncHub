@@ -14,9 +14,6 @@ internal class GarminAuthService : IGarminAuthService,
     IGarminAuthProvider,
     IGarminAuthCacheInvalidator
 {
-    private readonly string _authenticationCacheKey = "garmin-oauth2-token";
-    private readonly string _mfaClientStateCacheKey = "garmin-oauth2-mfa-client-state";
-
     private readonly IDistributedCacheService _distributedCacheService;
     private readonly GarminSsoHttpClient _ssoHttpClient;
     private readonly GarminOAuthHttpClient _oAuthHttpClient;
@@ -51,7 +48,7 @@ internal class GarminAuthService : IGarminAuthService,
         catch (GarminConnectNeedsMfaException ex)
         {
             await _distributedCacheService.SetValueAsync(
-                _mfaClientStateCacheKey,
+                Common.Constants.CacheKeys.GarminMfaClientState,
                 ex.ClientState,
                 GarminConnectOAuthSerializerContext.Default.GarminNeedsMfaClientState,
                 new DistributedCacheEntryOptions
@@ -63,10 +60,10 @@ internal class GarminAuthService : IGarminAuthService,
         }
     }
 
-    public async Task<GarminAuthenticationResult> ResumeLogin(string mfaCode, CancellationToken cancellationToken)
+    public async Task<GarminAuthenticationModel> ResumeLogin(string mfaCode, CancellationToken cancellationToken)
     {
         var cachedMfaClientState = await _distributedCacheService.GetValueAsync(
-            _mfaClientStateCacheKey,
+            Common.Constants.CacheKeys.GarminMfaClientState,
             GarminConnectOAuthSerializerContext.Default.GarminNeedsMfaClientState,
             cancellationToken)
             ?? throw new InvalidDataException("no mfa client state cached");
@@ -80,7 +77,7 @@ internal class GarminAuthService : IGarminAuthService,
         return authResult;
     }
 
-    public async Task<GarminAuthenticationResult> ExchangeToken(GarminOAuth1Token oAuth1Token, CancellationToken cancellationToken)
+    public async Task<GarminAuthenticationModel> ExchangeToken(GarminOAuth1Token oAuth1Token, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting token exchange with token: {Token}, secret: {Secret}",
             oAuth1Token.Token, oAuth1Token.TokenSecret);
@@ -91,7 +88,7 @@ internal class GarminAuthService : IGarminAuthService,
         var token = await _oAuthHttpClient.Exchange(oAuth1Token, consumerCredentials, cancellationToken);
         _logger.LogInformation("Exchanged OAuth2 token: {AccessToken}", token.AccessToken);
 
-        var authResult = new GarminAuthenticationResult
+        var authResult = new GarminAuthenticationModel
         {
             OAuthToken1 = oAuth1Token,
             OAuthToken2 = token,
@@ -102,30 +99,34 @@ internal class GarminAuthService : IGarminAuthService,
         return authResult;
     }
 
-    public async Task<GarminAuthenticationResult?> GetAuthResult(CancellationToken cancellationToken)
+    public async Task<GarminAuthenticationModel?> GetAuthResult(CancellationToken cancellationToken)
     {
         return await _distributedCacheService.GetValueAsync(
-           _authenticationCacheKey,
-           GarminConnectOAuthSerializerContext.Default.GarminAuthenticationResult,
+           Common.Constants.CacheKeys.GarminAuthenticationTokenModel,
+           GarminConnectOAuthSerializerContext.Default.GarminAuthenticationModel,
            cancellationToken);
     }
 
     public async Task Invalidate(CancellationToken cancellationToken)
     {
-        await _distributedCacheService.RemoveAsync(_authenticationCacheKey, cancellationToken);
-        await _distributedCacheService.RemoveAsync(_mfaClientStateCacheKey, cancellationToken);
-    }
-
-    private async Task CacheAuthResult(GarminAuthenticationResult auth, CancellationToken cancellationToken)
-    {
-        await _distributedCacheService.SetValueAsync(
-            _authenticationCacheKey,
-            auth,
-            GarminConnectOAuthSerializerContext.Default.GarminAuthenticationResult,
+        await _distributedCacheService.RemoveAsync(
+            Common.Constants.CacheKeys.GarminAuthenticationTokenModel,
+            cancellationToken);
+        await _distributedCacheService.RemoveAsync(
+            Common.Constants.CacheKeys.GarminMfaClientState,
             cancellationToken);
     }
 
-    private async Task<GarminAuthenticationResult> CompleteLogin(string ticket, CancellationToken cancellationToken)
+    private async Task CacheAuthResult(GarminAuthenticationModel auth, CancellationToken cancellationToken)
+    {
+        await _distributedCacheService.SetValueAsync(
+            Common.Constants.CacheKeys.GarminAuthenticationTokenModel,
+            auth,
+            GarminConnectOAuthSerializerContext.Default.GarminAuthenticationModel,
+            cancellationToken);
+    }
+
+    private async Task<GarminAuthenticationModel> CompleteLogin(string ticket, CancellationToken cancellationToken)
     {
         var consumerCredentials = await _consumerCredentialsProvider.GetConsumerCredentials(cancellationToken);
 
@@ -136,7 +137,7 @@ internal class GarminAuthService : IGarminAuthService,
         _logger.LogInformation("OAuth2 token: {AccessToken}", oauth2.AccessToken);
 
         _logger.LogInformation("Authentication process completed.");
-        return new GarminAuthenticationResult
+        return new GarminAuthenticationModel
         {
             OAuthToken1 = oauth1,
             OAuthToken2 = oauth2,

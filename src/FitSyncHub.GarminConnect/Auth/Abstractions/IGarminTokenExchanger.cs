@@ -4,5 +4,5 @@ namespace FitSyncHub.GarminConnect.Auth.Abstractions;
 
 public interface IGarminTokenExchanger
 {
-    Task<GarminAuthenticationResult> ExchangeToken(GarminOAuth1Token oAuth1Token, CancellationToken cancellationToken);
+    Task<GarminAuthenticationModel> ExchangeToken(GarminOAuth1Token oAuth1Token, CancellationToken cancellationToken);
 }

@@ -15,7 +15,7 @@ public class ZwiftRacingService
     public async Task SetCookie(string cookie, CancellationToken cancellationToken)
     {
         await _distributedCacheService.SetStringAsync(
-             Constants.CacheKeys.ZwiftRacingAuthCookie,
+             Common.Constants.CacheKeys.ZwiftRacingAuthCookie,
              cookie,
              cancellationToken);
     }

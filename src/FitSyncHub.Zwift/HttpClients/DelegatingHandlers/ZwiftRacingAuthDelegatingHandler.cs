@@ -19,7 +19,7 @@ public sealed class ZwiftRacingAuthDelegatingHandler : DelegatingHandler
         CancellationToken cancellationToken)
     {
         var zwiftRacingAuthCookie = await _distributedCacheService
-            .GetStringAsync(Constants.CacheKeys.ZwiftRacingAuthCookie, cancellationToken);
+            .GetStringAsync(Common.Constants.CacheKeys.ZwiftRacingAuthCookie, cancellationToken);
         if (string.IsNullOrEmpty(zwiftRacingAuthCookie))
         {
             // Do not attempt the request if we don't have an auth cookie
@@ -31,7 +31,7 @@ public sealed class ZwiftRacingAuthDelegatingHandler : DelegatingHandler
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             await _distributedCacheService.RemoveAsync(
-                Constants.CacheKeys.ZwiftRacingAuthCookie,
+                Common.Constants.CacheKeys.ZwiftRacingAuthCookie,
                 cancellationToken);
 
             throw CreateUnauthorizedAccessException();

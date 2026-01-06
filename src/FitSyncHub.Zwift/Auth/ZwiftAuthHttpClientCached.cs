@@ -8,8 +8,6 @@ namespace FitSyncHub.Zwift.Auth;
 
 internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAuthCacheInvalidator
 {
-    private readonly string _authenticationCacheKey = "zwift-auth";
-
     private readonly IDistributedCacheService _distributedCacheService;
     private readonly IZwiftAuthenticator _zwiftAuthenticator;
     private readonly IZwiftTokenRefresher _zwiftTokenRefresher;
@@ -27,11 +25,11 @@ internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAut
         _logger = logger;
     }
 
-    public async Task<ZwiftAuthToken> Authenticate(CancellationToken cancellationToken)
+    public async Task<ZwiftAuthTokenModel> Authenticate(CancellationToken cancellationToken)
     {
         var cachedResult = await _distributedCacheService.GetValueAsync(
-            _authenticationCacheKey,
-            ZwiftAuthGenerationContext.Default.ZwiftAuthToken,
+            Common.Constants.CacheKeys.ZwiftAuthTokenModel,
+            ZwiftAuthGenerationContext.Default.ZwiftAuthTokenModel,
             cancellationToken);
         if (cachedResult != null && IsTokenValid(cachedResult.AccessToken))
         {
@@ -39,7 +37,7 @@ internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAut
             return cachedResult;
         }
 
-        ZwiftAuthToken authenticationResult;
+        ZwiftAuthTokenModel authenticationResult;
         if (cachedResult is not null && IsTokenValid(cachedResult.RefreshToken))
         {
             authenticationResult = await _zwiftTokenRefresher.RefreshToken(cachedResult, cancellationToken);
@@ -50,9 +48,9 @@ internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAut
         }
 
         await _distributedCacheService.SetValueAsync(
-            _authenticationCacheKey,
+            Common.Constants.CacheKeys.ZwiftAuthTokenModel,
             authenticationResult,
-            ZwiftAuthGenerationContext.Default.ZwiftAuthToken,
+            ZwiftAuthGenerationContext.Default.ZwiftAuthTokenModel,
             cancellationToken);
         _logger.LogInformation("Cached authentication result");
         return authenticationResult;
@@ -69,6 +67,8 @@ internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAut
 
     public async Task Invalidate(CancellationToken cancellationToken)
     {
-        await _distributedCacheService.RemoveAsync(_authenticationCacheKey, cancellationToken);
+        await _distributedCacheService.RemoveAsync(
+            Common.Constants.CacheKeys.ZwiftAuthTokenModel,
+            cancellationToken);
     }
 }

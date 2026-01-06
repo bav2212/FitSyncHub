@@ -2,5 +2,5 @@
 
 public interface IZwiftAuthenticator
 {
-    Task<ZwiftAuthToken> Authenticate(CancellationToken cancellationToken);
+    Task<ZwiftAuthTokenModel> Authenticate(CancellationToken cancellationToken);
 }

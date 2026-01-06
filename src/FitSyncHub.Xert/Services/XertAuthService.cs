@@ -8,8 +8,6 @@ namespace FitSyncHub.Xert.Services;
 
 internal class XertAuthService : IXertAuthService
 {
-    private readonly string _authenticationCacheKey = "xert-oauth2-token";
-
     private readonly IDistributedCacheService _distributedCacheService;
     private readonly IXertAuthHttpClient _xertAuthHttpClient;
 
@@ -68,7 +66,7 @@ internal class XertAuthService : IXertAuthService
     private async Task CacheTokenModel(TokenModel tokenModel, CancellationToken cancellationToken)
     {
         await _distributedCacheService.SetValueAsync(
-           _authenticationCacheKey,
+           Common.Constants.CacheKeys.XertOauth2TokenModel,
            tokenModel,
            XertSerializerContext.Default.TokenModel,
            cancellationToken);
@@ -77,8 +75,8 @@ internal class XertAuthService : IXertAuthService
     public async Task<TokenModel?> GetCachedTokenModel(CancellationToken cancellationToken)
     {
         return await _distributedCacheService.GetValueAsync(
-           _authenticationCacheKey,
-           XertSerializerContext.Default.TokenModel,
-           cancellationToken);
+            Common.Constants.CacheKeys.XertOauth2TokenModel,
+            XertSerializerContext.Default.TokenModel,
+            cancellationToken);
     }
 }

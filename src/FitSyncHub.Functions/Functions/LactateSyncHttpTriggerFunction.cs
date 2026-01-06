@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using FitSyncHub.Common;
 using FitSyncHub.Common.Extensions;
 using FitSyncHub.Common.Services;
 using FitSyncHub.IntervalsICU.HttpClients;
@@ -45,10 +46,8 @@ public sealed class LactateSyncHttpTriggerFunction
             return new BadRequestObjectResult($"Invalid content type: {req.ContentType}, should be csv file");
         }
 
-        const string CacheKey = "lactate-last-synced-data";
-
         var lastSyncDate = await _distributedCacheService.GetValueAsync(
-            CacheKey,
+            Constants.CacheKeys.LactateLastSyncedDate,
             _dateTimeJsonTypeInfo,
             cancellationToken);
 
@@ -85,7 +84,7 @@ public sealed class LactateSyncHttpTriggerFunction
         var lastSyncedLactateResultTime = mappedLactateResultsToActivities.SelectMany(x => x.Value).Max(x => x.Time);
 
         await _distributedCacheService.SetValueAsync(
-            CacheKey,
+            Constants.CacheKeys.LactateLastSyncedDate,
             lastSyncedLactateResultTime,
             _dateTimeJsonTypeInfo,
             cancellationToken

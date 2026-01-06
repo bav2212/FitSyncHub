@@ -2,5 +2,5 @@
 
 public interface IZwiftTokenRefresher
 {
-    Task<ZwiftAuthToken> RefreshToken(ZwiftAuthToken token, CancellationToken cancellationToken);
+    Task<ZwiftAuthTokenModel> RefreshToken(ZwiftAuthTokenModel token, CancellationToken cancellationToken);
 }
