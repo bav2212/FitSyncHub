@@ -9,7 +9,8 @@ namespace FitSyncHub.Zwift.HttpClients;
 
 public class FlammeRougeRacingHttpClient
 {
-    private readonly HttpClient _httpClient;
+    private const string TableDataUrl = "https://flammerougeracing.com/wp-admin/admin-ajax.php";
+
     private const int TableIdTourRegistered = 105;
     private const int TableIdTourResultsGC = 142;
 
@@ -19,6 +20,7 @@ public class FlammeRougeRacingHttpClient
         { TableIdTourResultsGC, "https://flammerougeracing.com/tour-results-gc" },
     };
 
+    private readonly HttpClient _httpClient;
     public FlammeRougeRacingHttpClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
@@ -26,10 +28,9 @@ public class FlammeRougeRacingHttpClient
 
     public async Task<List<long>> GetTourRegisteredRiders(FlammeRougeRacingCategory flammeRougeRacingCategory, CancellationToken cancellationToken)
     {
-        const string BaseUrl = "https://flammerougeracing.com/wp-admin/admin-ajax.php";
         const int TableId = TableIdTourRegistered;
 
-        var url = QueryHelpers.AddQueryString(BaseUrl, new Dictionary<string, StringValues>
+        var url = QueryHelpers.AddQueryString(TableDataUrl, new Dictionary<string, StringValues>
         {
             {"action", "get_wdtable"},
             {"table_id", TableId.ToString() },
@@ -105,10 +106,9 @@ public class FlammeRougeRacingHttpClient
         int stageNumber,
         CancellationToken cancellationToken)
     {
-        const string BaseUrl = "https://flammerougeracing.com/wp-admin/admin-ajax.php";
         const int TableId = TableIdTourResultsGC;
 
-        var url = QueryHelpers.AddQueryString(BaseUrl, new Dictionary<string, StringValues>
+        var url = QueryHelpers.AddQueryString(TableDataUrl, new Dictionary<string, StringValues>
         {
             {"action", "get_wdtable"},
             {"table_id", TableId.ToString() },
