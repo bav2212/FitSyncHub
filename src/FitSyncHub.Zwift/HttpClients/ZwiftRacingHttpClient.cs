@@ -32,7 +32,7 @@ public sealed class ZwiftRacingHttpClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return JsonSerializer.Deserialize(content,
-            ZwiftRacingGenerationContext.Default.IReadOnlyCollectionZwiftRacingEventResponse)!;
+            ZwiftHttpClientRacingGenerationContext.Default.IReadOnlyCollectionZwiftRacingEventResponse)!;
     }
 
     public Task<ZwiftRacingRiderResponse?> GetRiderHistory(
@@ -70,7 +70,7 @@ public sealed class ZwiftRacingHttpClient
         if (response.IsSuccessStatusCode)
         {
             return JsonSerializer.Deserialize(content,
-                ZwiftRacingGenerationContext.Default.ZwiftRacingRiderResponse);
+                ZwiftHttpClientRacingGenerationContext.Default.ZwiftRacingRiderResponse);
         }
 
         var jsonDocument = JsonDocument.Parse(content);

@@ -54,7 +54,7 @@ public sealed partial class ZwiftHttpClient
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
             var page = JsonSerializer.Deserialize(content,
-                ZwiftEventsGenerationContext.Default.ZwiftEventFeedResponse)!;
+                ZwiftHttpClientEventsGenerationContext.Default.ZwiftEventFeedResponse)!;
             if (page?.Data == null)
             {
                 break;
@@ -125,7 +125,7 @@ public sealed partial class ZwiftHttpClient
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return JsonSerializer.Deserialize(content, ZwiftEventsGenerationContext.Default.ZwiftEventResponse)!;
+        return JsonSerializer.Deserialize(content, ZwiftHttpClientEventsGenerationContext.Default.ZwiftEventResponse)!;
     }
 
     public async Task<ZwiftRaceResultResponse> GetEventSubgroupResults(
@@ -149,7 +149,7 @@ public sealed partial class ZwiftHttpClient
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
             var resultsPortion = JsonSerializer
-                .Deserialize(content, ZwiftEventsGenerationContext.Default.ZwiftRaceResultResponse);
+                .Deserialize(content, ZwiftHttpClientEventsGenerationContext.Default.ZwiftRaceResultResponse);
 
             acc.AddRange(resultsPortion!.Entries);
         }
@@ -194,7 +194,7 @@ public sealed partial class ZwiftHttpClient
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
             var page = JsonSerializer.Deserialize(content,
-                  ZwiftEventsGenerationContext.Default.IReadOnlyCollectionZwiftEventSubgroupEntrantResponse)!;
+                  ZwiftHttpClientEventsGenerationContext.Default.IReadOnlyCollectionZwiftEventSubgroupEntrantResponse)!;
 
             foreach (var item in page)
             {

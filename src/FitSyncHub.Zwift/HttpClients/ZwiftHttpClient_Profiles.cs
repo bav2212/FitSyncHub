@@ -44,7 +44,7 @@ public sealed partial class ZwiftHttpClient
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
         return JsonSerializer.Deserialize(content,
-            ZwiftProfilesGenerationContext.Default.ZwiftPlayerProfileResponse)!;
+            ZwiftHttpClientProfilesGenerationContext.Default.ZwiftPlayerProfileResponse)!;
     }
 
     public async Task<PlayerProfiles> GetProfiles(

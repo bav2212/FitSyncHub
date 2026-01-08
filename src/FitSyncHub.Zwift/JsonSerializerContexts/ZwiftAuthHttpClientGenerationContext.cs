@@ -5,4 +5,4 @@ namespace FitSyncHub.Zwift.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 [JsonSerializable(typeof(ZwiftAuthTokenModel))]
-internal sealed partial class ZwiftAuthGenerationContext : JsonSerializerContext;
+internal sealed partial class ZwiftAuthHttpClientGenerationContext : JsonSerializerContext;

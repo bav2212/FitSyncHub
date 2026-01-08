@@ -1,4 +1,4 @@
-﻿using FitSyncHub.Zwift.HttpClients;
+﻿using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.Models.FRR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,11 +9,11 @@ namespace FitSyncHub.Functions.Functions;
 
 public sealed class ZwiftFRRTourEGapResultsHttpTriggerFunction
 {
-    private readonly FlammeRougeRacingHttpClient _flammeRougeRacingHttpClient;
+    private readonly IFlammeRougeRacingHttpClient _flammeRougeRacingHttpClient;
     private readonly ILogger<ZwiftFRRTourEGapResultsHttpTriggerFunction> _logger;
 
     public ZwiftFRRTourEGapResultsHttpTriggerFunction(
-        FlammeRougeRacingHttpClient flammeRougeRacingHttpClient,
+        IFlammeRougeRacingHttpClient flammeRougeRacingHttpClient,
         ILogger<ZwiftFRRTourEGapResultsHttpTriggerFunction> logger)
     {
         _flammeRougeRacingHttpClient = flammeRougeRacingHttpClient;

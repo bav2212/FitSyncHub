@@ -11,4 +11,4 @@ namespace FitSyncHub.Zwift.JsonSerializerContexts;
 [JsonSerializable(typeof(ZwiftRaceResultResponse))]
 [JsonSerializable(typeof(IReadOnlyCollection<ZwiftEventResponse>))]
 [JsonSerializable(typeof(IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>))]
-internal sealed partial class ZwiftEventsGenerationContext : JsonSerializerContext;
+internal sealed partial class ZwiftHttpClientEventsGenerationContext : JsonSerializerContext;

@@ -28,7 +28,7 @@ public sealed partial class ZwiftHttpClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return JsonSerializer.Deserialize(content,
-            ZwiftActivitiesGenerationContext.Default.IReadOnlyCollectionZwiftActivityOverview)!;
+            ZwiftHttpClientActivitiesGenerationContext.Default.IReadOnlyCollectionZwiftActivityOverview)!;
     }
 
     // create ZwiftActivity sealed class if need this method
@@ -45,6 +45,6 @@ public sealed partial class ZwiftHttpClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return JsonSerializer.Deserialize(content,
-            ZwiftActivitiesGenerationContext.Default.ZwiftActivityOverview)!;
+            ZwiftHttpClientActivitiesGenerationContext.Default.ZwiftActivityOverview)!;
     }
 }

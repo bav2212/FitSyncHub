@@ -29,7 +29,7 @@ internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAut
     {
         var cachedResult = await _distributedCacheService.GetValueAsync(
             Common.Constants.CacheKeys.ZwiftAuthTokenModel,
-            ZwiftAuthGenerationContext.Default.ZwiftAuthTokenModel,
+            ZwiftAuthHttpClientGenerationContext.Default.ZwiftAuthTokenModel,
             cancellationToken);
         if (cachedResult != null && IsTokenValid(cachedResult.AccessToken))
         {
@@ -50,7 +50,7 @@ internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAut
         await _distributedCacheService.SetValueAsync(
             Common.Constants.CacheKeys.ZwiftAuthTokenModel,
             authenticationResult,
-            ZwiftAuthGenerationContext.Default.ZwiftAuthTokenModel,
+            ZwiftAuthHttpClientGenerationContext.Default.ZwiftAuthTokenModel,
             cancellationToken);
         _logger.LogInformation("Cached authentication result");
         return authenticationResult;

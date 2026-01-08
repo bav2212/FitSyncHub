@@ -43,6 +43,6 @@ public sealed partial class ZwiftHttpClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return JsonSerializer.Deserialize(content,
-            ZwiftGameInfoGenerationContext.Default.ZwiftGameInfoResponse)!;
+            ZwiftHttpClientGameInfoGenerationContext.Default.ZwiftGameInfoResponse)!;
     }
 }

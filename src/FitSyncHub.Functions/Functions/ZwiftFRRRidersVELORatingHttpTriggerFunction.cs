@@ -1,5 +1,6 @@
 ﻿using FitSyncHub.Common.Extensions;
 using FitSyncHub.Zwift.HttpClients;
+using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 using FitSyncHub.Zwift.Models.FRR;
 using Microsoft.AspNetCore.Http;
@@ -12,13 +13,13 @@ namespace FitSyncHub.Functions.Functions;
 
 public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
 {
-    private readonly FlammeRougeRacingHttpClient _flammeRougeRacingHttpClient;
+    private readonly IFlammeRougeRacingHttpClient _flammeRougeRacingHttpClient;
     private readonly ZwiftHttpClient _zwiftHttpClient;
     private readonly ZwiftRacingHttpClient _zwiftRacingHttpClient;
     private readonly ILogger<ZwiftFRRRidersVELORatingHttpTriggerFunction> _logger;
 
     public ZwiftFRRRidersVELORatingHttpTriggerFunction(
-        FlammeRougeRacingHttpClient flammeRougeRacingHttpClient,
+        IFlammeRougeRacingHttpClient flammeRougeRacingHttpClient,
         ZwiftHttpClient zwiftHttpClient,
         ZwiftRacingHttpClient zwiftRacingHttpClient,
         ILogger<ZwiftFRRRidersVELORatingHttpTriggerFunction> logger)

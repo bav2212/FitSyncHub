@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text.Json;
+using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.Models.FRR;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
-public class FlammeRougeRacingHttpClient
+internal class FlammeRougeRacingHttpClient : IFlammeRougeRacingHttpClient
 {
     private const string TableDataUrl = "https://flammerougeracing.com/wp-admin/admin-ajax.php";
 
