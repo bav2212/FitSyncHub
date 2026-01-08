@@ -1,4 +1,6 @@
-﻿namespace FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
+﻿using System.Text.Json.Serialization;
+
+namespace FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 
 public sealed record ZwiftEventResponse
 {
@@ -12,6 +14,10 @@ public sealed record ZwiftEventResponse
     public required double? DistanceInMeters { get; init; }
     public required ZwiftEventSubgroupResponse[] EventSubgroups { get; init; }
     public required ZwiftEvenSeriesResponse? EventSeries { get; init; }
+    public required string[] RulesSet { get; init; }
+
+    [JsonIgnore]
+    public bool IsITT => RulesSet.Contains("NO_DRAFTING");
 }
 
 public sealed record ZwiftEventSubgroupResponse

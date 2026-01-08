@@ -51,21 +51,43 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
             riders.AddRange(ridersPortion);
         }
 
-        var ridersTaskResult = await GetRacesResults(riders, request.Urls, cancellationToken);
+        var racesResults = await GetRacesResults([.. riders], request.Urls, cancellationToken);
 
-        var result = ridersTaskResult
-            .Select(x => new
+        var isITT = racesResults.All(x => x.Key.Event.IsITT);
+        var bestTimeOverAll = racesResults
+            .SelectMany(x => x.Value)
+            .Min(x => x.ActivityData.DurationInMilliseconds);
+
+        var result = racesResults
+            .Where(kv => kv.Value.Count > 0)
+            .SelectMany(kv =>
             {
-                RiderId = x.ProfileId,
-                FullName = $"{x.ProfileData.FirstName} {x.ProfileData.LastName}",
-                Duration = TimeSpan.FromMilliseconds(x.ActivityData.DurationInMilliseconds),
-                CritivalPower = x.CriticalP,
-                AvgPower = x.SensorData.AvgWatts,
-                AvgPowerPerKg = x.SensorData.AvgWatts / (x.ProfileData.WeightInGrams / 1000.0),
-            })
-            .OrderBy(x => x.Duration)
-            .ToList();
+                var raceResults = kv.Value;
 
+                var bestTime = isITT
+                    ? bestTimeOverAll
+                    : raceResults.Min(x => x.ActivityData.DurationInMilliseconds);
+
+                var bestTimeSpan = TimeSpan.FromMilliseconds(bestTime);
+
+                return raceResults.Select(x =>
+                {
+                    var duration = TimeSpan.FromMilliseconds(x.ActivityData.DurationInMilliseconds);
+
+                    return new
+                    {
+                        RiderId = x.ProfileId,
+                        FullName = $"{x.ProfileData.FirstName} {x.ProfileData.LastName}",
+                        Duration = duration,
+                        CritivalPower = x.CriticalP,
+                        AvgPower = x.SensorData.AvgWatts,
+                        AvgPowerPerKg = x.SensorData.AvgWatts / (x.ProfileData.WeightInGrams / 1000.0),
+                        EGap = duration - bestTimeSpan,
+                    };
+                });
+            })
+            .OrderBy(x => x.EGap)
+            .ToList();
 
         return new OkObjectResult(result);
     }
@@ -84,13 +106,12 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
         }
     }
 
-    private async Task<List<ZwiftRaceResultEntryResponse>> GetRacesResults(
-        List<long> riders,
-        string[] urls,
+    private async Task<Dictionary<ZwiftEventEventSubgroupKey, List<ZwiftRaceResultEntryResponse>>> GetRacesResults(
+        HashSet<long> riders,
+        HashSet<string> urls,
         CancellationToken cancellationToken)
     {
-        var ridersSet = riders.ToHashSet();
-        List<ZwiftRaceResultEntryResponse> acc = [];
+        Dictionary<ZwiftEventEventSubgroupKey, List<ZwiftRaceResultEntryResponse>> result = [];
 
         foreach (var url in urls)
         {
@@ -108,22 +129,41 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
                 // early exit if no results
                 if (subgroupResults.Entries.Count == 0)
                 {
-                    return acc;
+                    return result;
                 }
 
                 var resultsPortion = subgroupResults.Entries
-                    .Where(x => ridersSet.Contains(x.ProfileId))
+                    .Where(x => riders.Contains(x.ProfileId))
                     .ToList();
 
-                acc.AddRange(resultsPortion);
+                if (resultsPortion.Count == 0)
+                {
+                    continue;
+                }
+
+                var key = new ZwiftEventEventSubgroupKey
+                {
+                    Event = @event,
+                    Subgroup = zwiftEventSubgroup,
+                    SubgroupResults = subgroupResults
+                };
+
+                result.Add(key, resultsPortion);
             }
         }
 
-        return acc;
+        return result;
+    }
+
+    private record ZwiftEventEventSubgroupKey
+    {
+        public required ZwiftEventResponse Event { get; init; }
+        public required ZwiftEventSubgroupResponse Subgroup { get; init; }
+        public required ZwiftRaceResultResponse SubgroupResults { get; init; }
     }
 }
 
 public sealed record ZwiftFRRTourStageResultsRequest
 {
-    public required string[] Urls { get; init; }
+    public required HashSet<string> Urls { get; init; }
 }
