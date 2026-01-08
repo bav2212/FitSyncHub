@@ -34,7 +34,7 @@ internal class FlammeRougeRacingHttpClientCached : IFlammeRougeRacingHttpClient
         var result = await _flammeRougeRacingHttpClient.GetTourRegisteredRiders(flammeRougeRacingCategory, cancellationToken);
         await _distributedCacheService.SetValueAsync(cacheKey, result, jsonTypeInfo, new()
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(3)
         }, cancellationToken);
         return result;
     }
