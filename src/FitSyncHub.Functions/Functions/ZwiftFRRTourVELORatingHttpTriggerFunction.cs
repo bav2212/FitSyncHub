@@ -1,4 +1,5 @@
-﻿using FitSyncHub.Common.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
+using FitSyncHub.Common.Extensions;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
@@ -11,18 +12,18 @@ using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Functions.Functions;
 
-public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
+public sealed class ZwiftFRRTourVELORatingHttpTriggerFunction
 {
     private readonly IFlammeRougeRacingHttpClient _flammeRougeRacingHttpClient;
     private readonly ZwiftHttpClient _zwiftHttpClient;
     private readonly ZwiftRacingHttpClient _zwiftRacingHttpClient;
-    private readonly ILogger<ZwiftFRRRidersVELORatingHttpTriggerFunction> _logger;
+    private readonly ILogger<ZwiftFRRTourVELORatingHttpTriggerFunction> _logger;
 
-    public ZwiftFRRRidersVELORatingHttpTriggerFunction(
+    public ZwiftFRRTourVELORatingHttpTriggerFunction(
         IFlammeRougeRacingHttpClient flammeRougeRacingHttpClient,
         ZwiftHttpClient zwiftHttpClient,
         ZwiftRacingHttpClient zwiftRacingHttpClient,
-        ILogger<ZwiftFRRRidersVELORatingHttpTriggerFunction> logger)
+        ILogger<ZwiftFRRTourVELORatingHttpTriggerFunction> logger)
     {
         _flammeRougeRacingHttpClient = flammeRougeRacingHttpClient;
         _zwiftHttpClient = zwiftHttpClient;
@@ -31,13 +32,15 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
     }
 
 #if DEBUG
-    [Function(nameof(ZwiftFRRRidersVELORatingHttpTriggerFunction))]
+    [Function(nameof(ZwiftFRRTourVELORatingHttpTriggerFunction))]
 #endif
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-frr-tour-vELO-rating")] HttpRequest req,
         CancellationToken cancellationToken)
     {
         var category = req.Query["category"];
+        var eventUrlQueryParam = req.Query["eventUrl"];
+
         if (string.IsNullOrWhiteSpace(category) || category.Count == 0)
         {
             return new BadRequestObjectResult($"Specify params: {nameof(category)}");
@@ -55,6 +58,20 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
             riders.AddRange(ridersPortion);
         }
 
+        if (ShouldFilterRiders(eventUrlQueryParam, out var eventUrl))
+        {
+            var @event = await _zwiftHttpClient.GetEvent(eventUrl.ToString(), cancellationToken);
+
+            HashSet<long> entrantIds = [];
+            foreach (var subgroup in @event.EventSubgroups)
+            {
+                var entrants = await _zwiftHttpClient.GetEventSubgroupEntrants(subgroup.Id, cancellationToken: cancellationToken);
+                entrantIds.UnionWith(entrants.Select(x => x.Id));
+            }
+
+            riders = [.. riders.Where(entrantIds.Contains)];
+        }
+
         var result = await GetRidersVELO(riders, cancellationToken);
 
         result = [.. result
@@ -65,14 +82,31 @@ public sealed class ZwiftFRRRidersVELORatingHttpTriggerFunction
         return new OkObjectResult(result);
     }
 
-    private IEnumerable<FlammeRougeRacingCategory> ParseCategories(StringValues category)
+    private bool ShouldFilterRiders(StringValues eventUrl, [NotNullWhen(true)] out Uri? parsedUrl)
+    {
+        if (string.IsNullOrWhiteSpace(eventUrl))
+        {
+            parsedUrl = default;
+            return false;
+        }
+
+        // should be valid if specified
+        if (!Uri.TryCreate(eventUrl, UriKind.Absolute, out parsedUrl))
+        {
+            _logger.LogError("Wrong '{EventUrl}' url", eventUrl!);
+            return false;
+        }
+
+        return true;
+    }
+
+    private static IEnumerable<FlammeRougeRacingCategory> ParseCategories(StringValues category)
     {
         foreach (var categoryQueryParam in category)
         {
             if (!Enum.TryParse<FlammeRougeRacingCategory>(categoryQueryParam, ignoreCase: true, out var parsedFRRCategory))
             {
-                _logger.LogError("Cannot parse FRR category {Category}", categoryQueryParam);
-                continue;
+                throw new ArgumentOutOfRangeException(nameof(category), "Cannot parse FRR category {Category}", categoryQueryParam);
             }
 
             yield return parsedFRRCategory;
