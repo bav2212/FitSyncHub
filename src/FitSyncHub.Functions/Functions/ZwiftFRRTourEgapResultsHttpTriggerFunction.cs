@@ -24,7 +24,7 @@ public sealed class ZwiftFRRTourEGapResultsHttpTriggerFunction
     [Function(nameof(ZwiftFRRTourEGapResultsHttpTriggerFunction))]
 #endif
     public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-frr-tour-egap-results")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "zwift-frr-tour-results")] HttpRequest req,
         CancellationToken cancellationToken)
     {
         var category = req.Query["category"];
@@ -40,9 +40,44 @@ public sealed class ZwiftFRRTourEGapResultsHttpTriggerFunction
             return new BadRequestObjectResult($"Specify correct stage number param: {nameof(stage)}");
         }
 
-        var result =
-            await _flammeRougeRacingHttpClient.GetStageEGap(parsedFRRCategory, parserStageNumber, cancellationToken);
+        var type = req.Query["type"];
+        if (string.IsNullOrWhiteSpace(type) ||
+            !Enum.TryParse<FlammeRougeRacingTourResultType>(type, ignoreCase: true, out var parsedResultsType))
+        {
+            var availableValues = string.Join(", ", Enum.GetNames<FlammeRougeRacingTourResultType>()
+                .Select(x => x.ToLowerInvariant()));
 
-        return new OkObjectResult(result);
+            return new BadRequestObjectResult($"Specify params: {nameof(type)}. Available values: {availableValues}");
+        }
+
+        if (parsedResultsType == FlammeRougeRacingTourResultType.GC)
+        {
+            var eGapResult = await _flammeRougeRacingHttpClient.GetYellowJerseyStandings(
+                parsedFRRCategory, parserStageNumber, cancellationToken);
+            return new OkObjectResult(eGapResult);
+        }
+
+        if (parsedResultsType == FlammeRougeRacingTourResultType.PolkaDot)
+        {
+            var eGapResult = await _flammeRougeRacingHttpClient.GetPolkaDotStandings(
+                    parsedFRRCategory, parserStageNumber, cancellationToken);
+            return new OkObjectResult(eGapResult);
+        }
+
+        if (parsedResultsType == FlammeRougeRacingTourResultType.Green)
+        {
+            var eGapResult = await _flammeRougeRacingHttpClient.GetGreenJerseyStandings(
+                parsedFRRCategory, parserStageNumber, cancellationToken);
+            return new OkObjectResult(eGapResult);
+        }
+
+        throw new NotImplementedException();
     }
+}
+
+public enum FlammeRougeRacingTourResultType
+{
+    GC,
+    PolkaDot,
+    Green
 }

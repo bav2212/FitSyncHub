@@ -39,11 +39,30 @@ internal class FlammeRougeRacingHttpClientCached : IFlammeRougeRacingHttpClient
         return result;
     }
 
-    public Task<List<FlammeRougeRacingEGapResultModel>> GetStageEGap(
+    public Task<List<FlammeRougeRacingEGapResultModel>> GetYellowJerseyStandings(
         FlammeRougeRacingCategory flammeRougeRacingCategory,
         int stageNumber,
         CancellationToken cancellationToken)
     {
-        return _flammeRougeRacingHttpClient.GetStageEGap(flammeRougeRacingCategory, stageNumber, cancellationToken);
+        return _flammeRougeRacingHttpClient
+            .GetYellowJerseyStandings(flammeRougeRacingCategory, stageNumber, cancellationToken);
+    }
+
+    public Task<List<FlammeRougeRacingPointsResultModel>> GetPolkaDotStandings(
+        FlammeRougeRacingCategory flammeRougeRacingCategory,
+        int stageNumber,
+        CancellationToken cancellationToken)
+    {
+        return _flammeRougeRacingHttpClient
+            .GetPolkaDotStandings(flammeRougeRacingCategory, stageNumber, cancellationToken);
+    }
+
+    public Task<List<FlammeRougeRacingPointsResultModel>> GetGreenJerseyStandings(
+        FlammeRougeRacingCategory flammeRougeRacingCategory,
+        int stageNumber,
+        CancellationToken cancellationToken)
+    {
+        return _flammeRougeRacingHttpClient
+            .GetGreenJerseyStandings(flammeRougeRacingCategory, stageNumber, cancellationToken);
     }
 }

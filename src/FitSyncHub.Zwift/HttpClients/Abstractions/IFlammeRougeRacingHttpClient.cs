@@ -8,7 +8,17 @@ public interface IFlammeRougeRacingHttpClient
         FlammeRougeRacingCategory flammeRougeRacingCategory,
         CancellationToken cancellationToken);
 
-    Task<List<FlammeRougeRacingEGapResultModel>> GetStageEGap(
+    Task<List<FlammeRougeRacingEGapResultModel>> GetYellowJerseyStandings(
+        FlammeRougeRacingCategory flammeRougeRacingCategory,
+        int stageNumber,
+        CancellationToken cancellationToken);
+
+    Task<List<FlammeRougeRacingPointsResultModel>> GetPolkaDotStandings(
+        FlammeRougeRacingCategory flammeRougeRacingCategory,
+        int stageNumber,
+        CancellationToken cancellationToken);
+
+    Task<List<FlammeRougeRacingPointsResultModel>> GetGreenJerseyStandings(
         FlammeRougeRacingCategory flammeRougeRacingCategory,
         int stageNumber,
         CancellationToken cancellationToken);
