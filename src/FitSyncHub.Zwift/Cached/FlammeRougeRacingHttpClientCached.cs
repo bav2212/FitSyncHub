@@ -48,13 +48,13 @@ internal class FlammeRougeRacingHttpClientCached : IFlammeRougeRacingHttpClient
             .GetYellowJerseyStandings(flammeRougeRacingCategory, stageNumber, cancellationToken);
     }
 
-    public Task<List<FlammeRougeRacingPointsResultModel>> GetPolkaDotStandings(
+    public Task<List<FlammeRougeRacingPointsResultModel>> GetPolkaJerseyStandings(
         FlammeRougeRacingCategory flammeRougeRacingCategory,
         int stageNumber,
         CancellationToken cancellationToken)
     {
         return _flammeRougeRacingHttpClient
-            .GetPolkaDotStandings(flammeRougeRacingCategory, stageNumber, cancellationToken);
+            .GetPolkaJerseyStandings(flammeRougeRacingCategory, stageNumber, cancellationToken);
     }
 
     public Task<List<FlammeRougeRacingPointsResultModel>> GetGreenJerseyStandings(

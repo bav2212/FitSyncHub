@@ -50,34 +50,22 @@ public sealed class ZwiftFRRTourEGapResultsHttpTriggerFunction
             return new BadRequestObjectResult($"Specify params: {nameof(type)}. Available values: {availableValues}");
         }
 
-        if (parsedResultsType == FlammeRougeRacingTourResultType.GC)
+        return parsedResultsType switch
         {
-            var eGapResult = await _flammeRougeRacingHttpClient.GetYellowJerseyStandings(
-                parsedFRRCategory, parserStageNumber, cancellationToken);
-            return new OkObjectResult(eGapResult);
-        }
-
-        if (parsedResultsType == FlammeRougeRacingTourResultType.PolkaDot)
-        {
-            var eGapResult = await _flammeRougeRacingHttpClient.GetPolkaDotStandings(
-                    parsedFRRCategory, parserStageNumber, cancellationToken);
-            return new OkObjectResult(eGapResult);
-        }
-
-        if (parsedResultsType == FlammeRougeRacingTourResultType.Green)
-        {
-            var eGapResult = await _flammeRougeRacingHttpClient.GetGreenJerseyStandings(
-                parsedFRRCategory, parserStageNumber, cancellationToken);
-            return new OkObjectResult(eGapResult);
-        }
-
-        throw new NotImplementedException();
+            FlammeRougeRacingTourResultType.GC => new OkObjectResult(await _flammeRougeRacingHttpClient
+                .GetYellowJerseyStandings(parsedFRRCategory, parserStageNumber, cancellationToken)),
+            FlammeRougeRacingTourResultType.Polka => new OkObjectResult(await _flammeRougeRacingHttpClient
+                .GetPolkaJerseyStandings(parsedFRRCategory, parserStageNumber, cancellationToken)),
+            FlammeRougeRacingTourResultType.Green => new OkObjectResult(await _flammeRougeRacingHttpClient
+                .GetGreenJerseyStandings(parsedFRRCategory, parserStageNumber, cancellationToken)),
+            _ => throw new NotImplementedException(),
+        };
     }
 }
 
 public enum FlammeRougeRacingTourResultType
 {
     GC,
-    PolkaDot,
+    Polka,
     Green
 }

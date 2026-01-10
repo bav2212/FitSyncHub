@@ -15,15 +15,15 @@ internal class FlammeRougeRacingHttpClient : IFlammeRougeRacingHttpClient
 
     private const int TableIdTourRegistered = 105;
     private const int TableIdTourResultsGC = 142;
-    private const int TableIdTourResultsPolkaDot = 143;
-    private const int TableIdTourResultsGreenJersey = 144;
+    private const int TableIdTourResultsPolka = 143;
+    private const int TableIdTourResultsGreen = 144;
 
     private readonly Dictionary<int, string> _wdtNonceMapping = new()
     {
         { TableIdTourRegistered, "https://flammerougeracing.com/tour-registered"  },
         { TableIdTourResultsGC, "https://flammerougeracing.com/tour-results-gc" },
-        { TableIdTourResultsPolkaDot, "https://flammerougeracing.com/tour-results-polka" },
-        { TableIdTourResultsGreenJersey, "https://flammerougeracing.com/tour-results-green" },
+        { TableIdTourResultsPolka, "https://flammerougeracing.com/tour-results-polka" },
+        { TableIdTourResultsGreen, "https://flammerougeracing.com/tour-results-green" },
     };
 
     private readonly HttpClient _httpClient;
@@ -241,7 +241,7 @@ internal class FlammeRougeRacingHttpClient : IFlammeRougeRacingHttpClient
         return result;
     }
 
-    public async Task<List<FlammeRougeRacingPointsResultModel>> GetPolkaDotStandings(
+    public async Task<List<FlammeRougeRacingPointsResultModel>> GetPolkaJerseyStandings(
         FlammeRougeRacingCategory flammeRougeRacingCategory,
         int stageNumber,
         CancellationToken cancellationToken)
@@ -366,7 +366,7 @@ internal class FlammeRougeRacingHttpClient : IFlammeRougeRacingHttpClient
         };
 
         var result = new List<FlammeRougeRacingPointsResultModel>();
-        await foreach (var riderData in PullRiderData(TableIdTourResultsPolkaDot, formData, cancellationToken))
+        await foreach (var riderData in PullRiderData(TableIdTourResultsPolka, formData, cancellationToken))
         {
             var riderDataArray = riderData.EnumerateArray().ToArray();
 
@@ -508,7 +508,7 @@ internal class FlammeRougeRacingHttpClient : IFlammeRougeRacingHttpClient
         };
 
         var result = new List<FlammeRougeRacingPointsResultModel>();
-        await foreach (var riderData in PullRiderData(TableIdTourResultsGreenJersey, formData, cancellationToken))
+        await foreach (var riderData in PullRiderData(TableIdTourResultsGreen, formData, cancellationToken))
         {
             var riderDataArray = riderData.EnumerateArray().ToArray();
 

@@ -13,7 +13,7 @@ public interface IFlammeRougeRacingHttpClient
         int stageNumber,
         CancellationToken cancellationToken);
 
-    Task<List<FlammeRougeRacingPointsResultModel>> GetPolkaDotStandings(
+    Task<List<FlammeRougeRacingPointsResultModel>> GetPolkaJerseyStandings(
         FlammeRougeRacingCategory flammeRougeRacingCategory,
         int stageNumber,
         CancellationToken cancellationToken);
