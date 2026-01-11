@@ -151,9 +151,14 @@ public sealed partial class ZwiftHttpClient
             var resultsPortion = JsonSerializer
                 .Deserialize(content, ZwiftHttpClientEventsGenerationContext.Default.ZwiftRaceResultResponse);
 
-            acc.AddRange(resultsPortion!.Entries);
+            if (resultsPortion!.Entries.Count == 0)
+            {
+                break;
+            }
+
+            acc.AddRange(resultsPortion.Entries);
         }
-        while (acc.Count > 0 && acc.Count % TakeCount == 0);
+        while (acc.Count % TakeCount == 0);
 
         return new ZwiftRaceResultResponse { Entries = acc };
     }
