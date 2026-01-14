@@ -18,5 +18,8 @@ public sealed record EventResponse
     public long? Joules { get; init; }
     [JsonPropertyName("workout_doc")]
     public required EventWorkoutDocument WorkoutDocument { get; init; }
+
+    [JsonIgnore]
+    public bool IsRide => Type.Equals("Ride");
 }
 

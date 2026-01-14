@@ -69,7 +69,7 @@ public sealed class IntervalsICUChangeFTPHttpTriggerFunction
         var activities = activitiesPortion
             // skip strava activities
             .WhereNotNull()
-            .Where(x => x.Type.Contains("Ride"))
+            .Where(x => x.IsRide)
             .ToList();
 
         if (!activities.Any(x => x.StartDateLocal.Date == oldest))

@@ -46,7 +46,7 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
             var activities = activitiesPortion
                 // skip strava activities
                 .WhereNotNull()
-                .Where(x => x.Type.Contains("Ride"))
+                .Where(x => x.IsRide)
                 .ToList();
 
             await Implementation(activities, cancellationToken);

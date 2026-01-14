@@ -179,6 +179,9 @@ public sealed record ActivityResponse
 
     [JsonIgnore]
     public DateTime EndTimeLocal => StartDateLocal.AddSeconds(ElapsedTime);
+
+    [JsonIgnore]
+    public bool IsRide => Type.Contains("Ride");
 }
 
 [JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ActivityGapModel>))]

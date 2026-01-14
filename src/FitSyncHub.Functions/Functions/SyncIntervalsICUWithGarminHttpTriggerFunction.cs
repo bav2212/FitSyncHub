@@ -97,7 +97,7 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
             if (pairedEvent is null)
             {
                 var events = await _intervalsIcuHttpClient.ListEvents(new(date, date), cancellationToken);
-                pairedEvent = events.SingleOrDefault(x => x.Type.Contains("Ride"));
+                pairedEvent = events.SingleOrDefault(x => x.IsRide);
             }
 
             activitySummary
@@ -170,7 +170,7 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
         return [.. activities
             // skip strava activities
             .WhereNotNull()
-            .Where(x => x.Type.Contains("Ride"))];
+            .Where(x => x.IsRide)];
     }
 
     private async Task<ActivitySummary> UpdateActivitiesWithNewTssAndReturnSummary(
