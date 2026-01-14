@@ -3,6 +3,7 @@ using FitSyncHub.Common;
 using FitSyncHub.Functions;
 using FitSyncHub.Functions.Functions;
 using FitSyncHub.Functions.Functions.IntervalsIcu;
+using FitSyncHub.Functions.Functions.Zwift;
 using FitSyncHub.Functions.Middlewares;
 using FitSyncHub.Functions.Repositories;
 using FitSyncHub.Functions.Services;

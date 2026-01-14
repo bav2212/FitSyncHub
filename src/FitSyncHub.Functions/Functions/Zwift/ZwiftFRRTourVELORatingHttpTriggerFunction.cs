@@ -10,7 +10,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.Zwift;
 
 public sealed class ZwiftFRRTourVELORatingHttpTriggerFunction
 {
