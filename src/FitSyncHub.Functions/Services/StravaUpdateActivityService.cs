@@ -83,30 +83,25 @@ public sealed class StravaUpdateActivityService
 
     private static bool IsWarmup(ActivityModelResponse activity)
     {
-        var warmupKeywords = new[]
-        {
-            "warmup", "warm-up", "warm"
-        };
-
-        var isWarmupName = activity.Name.Split([' '], StringSplitOptions.TrimEntries)
-            .Intersect(warmupKeywords, StringComparer.InvariantCultureIgnoreCase)
-            .Any();
-
-        return isWarmupName;
+        return ContainsSubstringIgnoreCase(activity.Name, ["warmup", "warm-up", "warm up"]);
     }
 
     private static bool IsCooldown(ActivityModelResponse activity)
     {
-        var warmupKeywords = new[]
+        return ContainsSubstringIgnoreCase(activity.Name, ["cooldown", "cool-down", "cool down"]);
+    }
+
+    private static bool ContainsSubstringIgnoreCase(string @string, params List<string> keywords)
+    {
+        foreach (var keyword in keywords)
         {
-            "cooldown", "cool-down"
-        };
+            if (@string.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return true;
+            }
+        }
 
-        var isCooldownName = activity.Name.Split([' '], StringSplitOptions.TrimEntries)
-            .Intersect(warmupKeywords, StringComparer.InvariantCultureIgnoreCase)
-            .Any();
-
-        return isCooldownName;
+        return false;
     }
 
     private async Task HideActivityFromHome(
