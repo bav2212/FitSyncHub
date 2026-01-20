@@ -214,7 +214,7 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         foreach (var activity in activities.EnumerateArray())
         {
             // Convert JsonElement → stream
-            await using var stream = new MemoryStream();
+            var stream = new MemoryStream(); //do not dispose, will be disposed after SDK read
             await using (var writer = new Utf8JsonWriter(stream))
             {
                 activity.WriteTo(writer);
@@ -222,12 +222,29 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
 
             stream.Position = 0;
 
-            // Upsert in bulk
-            tasks.Add(_everestingHOFContainer.UpsertItemStreamAsync(
-                stream,
-                new PartitionKey(activity.GetProperty("id").GetString()),
-                cancellationToken: cancellationToken)
-            );
+            var id = activity.GetProperty("id").GetString()!;
+
+            // Upsert in bulk — SDK may read/clone the stream asynchronously, so do not dispose it here
+            tasks.Add(TaskToUpsertItemAndCloseStream(stream, id, cancellationToken));
+
+            async Task<ResponseMessage> TaskToUpsertItemAndCloseStream(MemoryStream stream, string id, CancellationToken cancellationToken)
+            {
+                try
+                {
+                    return await _everestingHOFContainer.UpsertItemStreamAsync(
+                        stream,
+                        new PartitionKey(id),
+                        cancellationToken: cancellationToken);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+                finally
+                {
+                    await stream.DisposeAsync();
+                }
+            }
         }
 
         var result = new List<UpsertResult>();
