@@ -170,7 +170,8 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
         return [.. activities
             // skip strava activities
             .WhereNotNull()
-            .Where(x => x.IsRide)];
+            .Where(x => x.IsRide)
+            .OrderBy(x => x.StartDateLocal)];
     }
 
     private async Task<ActivitySummary> UpdateActivitiesWithNewTssAndReturnSummary(
