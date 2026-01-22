@@ -44,20 +44,34 @@ public static class TssCalculator
         };
     }
 
-    private static double CalculateNormalizedPower(List<ushort> powerValuesRaw)
+    private static double CalculateNormalizedPower(List<ushort> powerValues)
     {
-        var powerValues = powerValuesRaw.ConvertAll(x => (double)x);
-
-        if (powerValues.Count < 30)
+        const int WindowSize = 30;
+        if (powerValues.Count < WindowSize)
         {
             // If too few data points, fallback to average
-            return powerValues.Average();
+            return powerValues.Average(x => (short)x);
         }
 
         List<double> rollingAverages = [];
-        for (var i = 0; i <= powerValues.Count - 30; i++)
+        // short should be enough, power values are usually within 0-2000 range
+        double sum = 0;
+
+        // Initial window
+        for (var i = 0; i < WindowSize; i++)
         {
-            rollingAverages.Add(powerValues.Skip(i).Take(30).Average());
+            sum += (short)powerValues[i];
+        }
+
+        rollingAverages.Add(sum / WindowSize);
+
+        // Slide the window
+        for (var i = WindowSize; i < powerValues.Count; i++)
+        {
+            sum -= (short)powerValues[i - WindowSize];  // remove old element
+            sum += (short)powerValues[i];               // add new element
+
+            rollingAverages.Add((double)sum / WindowSize);
         }
 
         return Math.Pow(rollingAverages.Average(p => Math.Pow(p, 4)), 0.25);
