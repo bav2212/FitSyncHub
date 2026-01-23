@@ -55,7 +55,7 @@ public static class TssCalculator
 
         List<double> rollingAverages = [];
         // short should be enough, power values are usually within 0-2000 range
-        double sum = 0;
+        short sum = 0;
 
         // Initial window
         for (var i = 0; i < WindowSize; i++)
