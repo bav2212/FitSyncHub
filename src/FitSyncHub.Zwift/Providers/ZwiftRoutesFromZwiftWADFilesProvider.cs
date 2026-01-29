@@ -47,6 +47,15 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         {"The Pretzel", "Watopia Pretzel"},
     };
 
+    private static readonly HashSet<string> s_knownMissingHomedataRoutes = [
+        "Zwift Bambino Fondo 2022",
+        "Zwift Medio Fondo 2022",
+        "Zwift Gran Fondo 2022",
+        "France Classic Fondo",
+        "2022 Cycling Esports World Championships Route",
+        "InnsbruckConti",
+    ];
+
     private readonly ZwiftWadDecoder _zwiftWadDecoder;
     private readonly ILogger<ZwiftRoutesFromZwiftWADFilesProvider> _logger;
     private readonly string _unpackedWADFilesDirectory;
@@ -190,11 +199,21 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
                 }
             }
 
-            if (routeXmlDTO == null || homedataXmlDTO == null)
+            if (routeXmlDTO == null)
             {
-                _logger.LogWarning("Skipping route file {FilePath} due to missing route or homedata, route: {Route}",
+                throw new InvalidDataException($"Route XML element not found in file {filePath}");
+            }
+
+            if (homedataXmlDTO == null)
+            {
+                if (!s_knownMissingHomedataRoutes.Contains(routeXmlDTO.Name))
+                {
+                    throw new InvalidDataException($"Homedata XML element not found in file {filePath}");
+                }
+
+                _logger.LogInformation("Skipping route file {FilePath} due to known missing homedata, route: {Route}",
                     filePath,
-                    routeXmlDTO?.Name);
+                    routeXmlDTO.Name);
                 continue;
             }
 
