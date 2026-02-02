@@ -101,7 +101,7 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
             }
 
             activitySummary
-                = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
+            = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
         }
 
         var garminActivity = await UpdateGarminSummaryWithIntervalsData(date, activitySummary, cancellationToken);
@@ -348,7 +348,16 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
         };
 
         _logger.LogInformation("Updating garmin activity with Id = {Id}", activityId);
-        await _garminConnectHttpClient.UpdateActivity(updateModel, cancellationToken);
+        try
+        {
+            await _garminConnectHttpClient.UpdateActivity(updateModel, cancellationToken);
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Failed to update garmin activity with Id = {Id}", activityId);
+            throw new InvalidDataException($"Can not update garmin activity");
+        }
+
         _logger.LogInformation("Updated garmin activity with Id = {Id}", activityId);
 
         return await _garminConnectHttpClient.GetActivity(activityId, cancellationToken);
