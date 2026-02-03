@@ -355,7 +355,7 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
         catch (Exception)
         {
             _logger.LogError("Failed to update garmin activity with Id = {Id}", activityId);
-            throw new InvalidDataException($"Can not update garmin activity");
+            throw new InvalidDataException("Can not update garmin activity");
         }
 
         _logger.LogInformation("Updated garmin activity with Id = {Id}", activityId);
