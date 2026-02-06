@@ -48,7 +48,9 @@ builder.Configuration.AddUserSecrets<Program>();
 
 builder.Services
     .AddApplicationInsightsTelemetryWorkerService()
-    .ConfigureFunctionsApplicationInsights()
+    .ConfigureFunctionsApplicationInsights();
+
+builder.Services
     .AddSingleton(_ => new CosmosClient(builder.Configuration["AzureWebJobsStorageConnectionString"], new()
     {
         UseSystemTextJsonSerializerWithOptions = new JsonSerializerOptions()
