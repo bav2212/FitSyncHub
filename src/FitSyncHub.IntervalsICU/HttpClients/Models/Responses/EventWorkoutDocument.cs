@@ -6,9 +6,9 @@ public sealed record EventWorkoutDocument
 {
     // can add many more properties if needed
     public required long Duration { get; init; }
-    public required float AverageWatts { get; init; }
+    public float? AverageWatts { get; init; }
 
     [JsonIgnore]
-    public float WorkCalculated => AverageWatts * Duration;
+    public float? WorkCalculated => AverageWatts * Duration;
 }
 

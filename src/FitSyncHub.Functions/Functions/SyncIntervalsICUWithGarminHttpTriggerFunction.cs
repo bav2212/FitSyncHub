@@ -101,7 +101,7 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
             }
 
             activitySummary
-            = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
+                = await UpdateActivitiesWithNewTssAndReturnSummary(activities, pairedEvent, cancellationToken);
         }
 
         var garminActivity = await UpdateGarminSummaryWithIntervalsData(date, activitySummary, cancellationToken);

@@ -99,9 +99,9 @@ public sealed class MacroNutrientsCalculatorHttpTriggerFunction
                 continue;
             }
 
-            if (plannedEvent.WorkoutDocument?.WorkCalculated is not null)
+            if (plannedEvent.WorkoutDocument?.WorkCalculated is { })
             {
-                plannedCalories += plannedEvent.WorkoutDocument.WorkCalculated;
+                plannedCalories += plannedEvent.WorkoutDocument.WorkCalculated.Value;
                 continue;
             }
         }
