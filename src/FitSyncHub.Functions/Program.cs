@@ -87,7 +87,6 @@ builder.Logging.Services.Configure<LoggerFilterOptions>(options =>
     // Log levels can also be configured using host.json. For more information, see https://learn.microsoft.com/en-us/azure/azure-monitor/app/worker-service#ilogger-logs
     var toRemove = options.Rules.FirstOrDefault(rule => rule.ProviderName
         == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
-
     if (toRemove is not null)
     {
         options.Rules.Remove(toRemove);
