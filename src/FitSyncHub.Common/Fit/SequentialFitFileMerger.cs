@@ -1,4 +1,5 @@
-﻿using Dynastream.Fit;
+﻿using System.Numerics;
+using Dynastream.Fit;
 
 namespace FitSyncHub.Common.Fit;
 
@@ -60,40 +61,44 @@ public sealed class SequentialFitFileMerger : FitMessages
 
     private void SetSessionMessages()
     {
-        var session = new SessionMesg();
+        var acc = new SessionMesg();
 
         foreach (var fitMessages in _fitMessagesList)
         {
             foreach (var sessionMsg in fitMessages.SessionMesgs)
             {
                 // cause should take smallest value
-                if (session.GetStartTime() is not { })
+                if (acc.GetStartTime() is not { })
                 {
-                    session.SetStartTime(sessionMsg.GetStartTime());
+                    acc.SetStartTime(sessionMsg.GetStartTime());
                 }
 
-                session.SetTimestamp(sessionMsg.GetTimestamp());
-                session.SetSport(sessionMsg.GetSport());
+                acc.SetTimestamp(sessionMsg.GetTimestamp());
+                acc.SetSport(sessionMsg.GetSport());
 
-                session.SetTotalElapsedTime(
-                    session.GetTotalElapsedTime().GetValueOrDefault() +
-                    sessionMsg.GetTotalElapsedTime().GetValueOrDefault());
+                acc.SetTotalElapsedTime(MergeFieldValueWith(func => func.GetTotalElapsedTime()));
+                acc.SetTotalTimerTime(MergeFieldValueWith(func => func.GetTotalTimerTime()));
+                acc.SetTotalDistance(MergeFieldValueWith(func => func.GetTotalDistance()));
+                acc.SetTotalAscent(MergeFieldValueWith(func => func.GetTotalAscent()));
+                acc.SetMetabolicCalories(MergeFieldValueWith(func => func.GetMetabolicCalories()));
 
-                session.SetTotalTimerTime(
-                    session.GetTotalTimerTime().GetValueOrDefault() +
-                    sessionMsg.GetTotalTimerTime().GetValueOrDefault());
+                T? MergeFieldValueWith<T>(Func<SessionMesg, T?> func) where T : struct, INumber<T>
+                {
+                    var value1 = func(acc);
+                    var value2 = func(sessionMsg);
 
-                session.SetTotalDistance(
-                    session.GetTotalDistance().GetValueOrDefault() +
-                    sessionMsg.GetTotalDistance().GetValueOrDefault());
-
-                var totalAscent = session.GetTotalAscent().GetValueOrDefault() +
-                    sessionMsg.GetTotalAscent().GetValueOrDefault();
-                session.SetTotalAscent((ushort)totalAscent);
+                    return (value1, value2) switch
+                    {
+                        (null, null) => null,
+                        (null, _) => value2,
+                        (_, null) => value1,
+                        (var v1, var v2) => v1 + v2
+                    };
+                }
             }
         }
 
-        sessionMesgs.Add(session);
+        sessionMesgs.Add(acc);
     }
 
     private void SetFileIdMessages()

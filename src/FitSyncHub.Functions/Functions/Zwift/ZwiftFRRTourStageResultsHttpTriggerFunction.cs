@@ -114,24 +114,34 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
     {
         Dictionary<ZwiftEventEventSubgroupKey, List<ZwiftRaceResultEntryResponse>> result = [];
 
-        foreach (var url in urls)
-        {
-            var @event = await _zwiftHttpClient.GetEvent(url, cancellationToken);
-            if (@event == null)
-            {
-                continue;
-            }
+        List<ZwiftEventResponse> events = [];
 
+        var chunks = urls
+            .Distinct()
+            .Select(x => _zwiftHttpClient.GetEvent(x, cancellationToken))
+            .Chunk(5)
+            .ToList();
+
+        foreach (var chunk in chunks)
+        {
+            await foreach (var taskToGetEvent in Task.WhenEach(chunk))
+            {
+                var @event = await taskToGetEvent;
+                if (@event != null)
+                {
+                    events.Add(@event);
+                }
+            }
+        }
+
+        events = [.. events.OrderBy(x => x.EventStart)];
+
+        foreach (var @event in events)
+        {
             foreach (var zwiftEventSubgroup in @event.EventSubgroups)
             {
                 var subgroupResults = await _zwiftHttpClient
                     .GetEventSubgroupResults(zwiftEventSubgroup.Id, cancellationToken);
-
-                // early exit if no results
-                if (subgroupResults.Entries.Count == 0)
-                {
-                    return result;
-                }
 
                 var resultsPortion = subgroupResults.Entries
                     .Where(x => riders.Contains(x.ProfileId))
@@ -146,10 +156,14 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
                 {
                     Event = @event,
                     Subgroup = zwiftEventSubgroup,
-                    SubgroupResults = subgroupResults
                 };
 
                 result.Add(key, resultsPortion);
+            }
+
+            if (!result.Keys.Any(x => x.Event == @event))
+            {
+                break;
             }
         }
 
@@ -160,7 +174,6 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
     {
         public required ZwiftEventResponse Event { get; init; }
         public required ZwiftEventSubgroupResponse Subgroup { get; init; }
-        public required ZwiftRaceResultResponse SubgroupResults { get; init; }
     }
 }
 
