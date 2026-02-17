@@ -134,14 +134,29 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
             }
         }
 
-        events = [.. events.OrderBy(x => x.EventStart)];
+        events = [.. events
+            .Where(x => x.EventStart <= DateTime.UtcNow)
+            .OrderBy(x => x.EventStart)
+        ];
 
         foreach (var @event in events)
         {
-            foreach (var zwiftEventSubgroup in @event.EventSubgroups)
+            var tasksToGetEventSubgroupResults = @event.EventSubgroups
+                .Select(async zwiftEventSubgroup =>
+                {
+                    var subgroupResults = await _zwiftHttpClient.GetEventSubgroupResults(zwiftEventSubgroup.Id, cancellationToken);
+                    return new
+                    {
+                        zwiftEventSubgroup,
+                        subgroupResults
+                    };
+                });
+
+            await foreach (var task in Task.WhenEach(tasksToGetEventSubgroupResults))
             {
-                var subgroupResults = await _zwiftHttpClient
-                    .GetEventSubgroupResults(zwiftEventSubgroup.Id, cancellationToken);
+                var taskResult = await task;
+                var zwiftEventSubgroup = taskResult.zwiftEventSubgroup;
+                var subgroupResults = taskResult.subgroupResults;
 
                 var resultsPortion = subgroupResults.Entries
                     .Where(x => riders.Contains(x.ProfileId))
@@ -159,11 +174,6 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
                 };
 
                 result.Add(key, resultsPortion);
-            }
-
-            if (!result.Keys.Any(x => x.Event == @event))
-            {
-                break;
             }
         }
 
