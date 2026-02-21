@@ -28,10 +28,15 @@ public class YoutubeRedirectToLiveChatHttpTriggerFunction
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var videoId = await _youTubeLiveService.GetLiveVideoId();
-        videoId ??= await _youTubeLiveService.GetUpcomingVideoId();
+        if (videoId is null)
+        {
+            _logger.LogInformation("No live video found, checking for upcoming videos.");
+        }
 
+        videoId ??= await _youTubeLiveService.GetUpcomingVideoId();
         if (videoId == null)
         {
+            _logger.LogInformation("No upcoming video found for the specified channel.");
             return new NotFoundObjectResult("No live or upcoming video found for the specified channel.");
         }
 
