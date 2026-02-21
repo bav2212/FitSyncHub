@@ -34,6 +34,7 @@ HashSet<string> functionsCalledByUser = [
     nameof(XertWorkoutToIntervalsICUExporterHttpTriggerFunction),
     nameof(ZwiftEventRidersCompetitionMetricsHttpTriggerFunction),
     nameof(ZwiftEventVELORatingHttpTriggerFunction),
+    nameof(YoutubeRedirectToLiveChatHttpTriggerFunction),
 ];
 
 var builder = FunctionsApplication.CreateBuilder(args);
