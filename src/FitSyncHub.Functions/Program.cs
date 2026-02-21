@@ -11,6 +11,7 @@ using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
 using FitSyncHub.Xert;
+using FitSyncHub.Youtube;
 using FitSyncHub.Zwift;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Cosmos;
@@ -64,6 +65,7 @@ builder.Services.ConfigureStravaModule<StravaOAuthService>();
 builder.Services.ConfigureIntervalsIcuModule();
 builder.Services.ConfigureGarminConnectModule("GarminConnect:Credentials");
 builder.Services.ConfigureZwiftModule("Zwift:Credentials");
+builder.Services.ConfigureYoutubeModule("Youtube");
 builder.Services.ConfigureXertModule("Xert");
 
 builder.Services.AddCosmosCache(cacheOptions =>
