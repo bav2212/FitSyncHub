@@ -15,26 +15,26 @@ public class YouTubeLiveService
         _channelId = options.Value.ChannelId;
     }
 
-    public async Task<string?> GetUpcomingVideoId()
+    public async Task<string?> GetUpcomingVideoId(CancellationToken cancellationToken)
     {
         var searchRequest = _youtubeService.Search.List("snippet");
         searchRequest.ChannelId = _channelId;
         searchRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Upcoming;
         searchRequest.Type = "video";
 
-        var searchResponse = await searchRequest.ExecuteAsync();
+        var searchResponse = await searchRequest.ExecuteAsync(cancellationToken);
 
         return searchResponse.Items.FirstOrDefault()?.Id.VideoId;
     }
 
-    public async Task<string?> GetLiveVideoId()
+    public async Task<string?> GetLiveVideoId(CancellationToken cancellationToken)
     {
         var searchRequest = _youtubeService.Search.List("snippet");
         searchRequest.ChannelId = _channelId;
         searchRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Live;
         searchRequest.Type = "video";
 
-        var searchResponse = await searchRequest.ExecuteAsync();
+        var searchResponse = await searchRequest.ExecuteAsync(cancellationToken);
 
         return searchResponse.Items.FirstOrDefault()?.Id.VideoId;
     }
