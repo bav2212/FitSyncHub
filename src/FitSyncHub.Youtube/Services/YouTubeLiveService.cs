@@ -15,26 +15,35 @@ public class YouTubeLiveService
         _channelId = options.Value.ChannelId;
     }
 
-    public async Task<string?> GetUpcomingVideoId(CancellationToken cancellationToken)
+    public async Task<string?> GetNextUpcomingVideoId(CancellationToken cancellationToken)
     {
-        var searchRequest = _youtubeService.Search.List("snippet");
-        searchRequest.ChannelId = _channelId;
-        searchRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Upcoming;
-        searchRequest.Type = "video";
+        var searchListRequest = _youtubeService.Search.List("snippet");
+        searchListRequest.ChannelId = _channelId;
+        searchListRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Upcoming;
+        searchListRequest.Type = "video";
 
-        var searchResponse = await searchRequest.ExecuteAsync(cancellationToken);
+        var searchResponse = await searchListRequest.ExecuteAsync(cancellationToken);
 
-        return searchResponse.Items.FirstOrDefault()?.Id.VideoId;
+        var upcomingVideoIds = searchResponse.Items.Select(item => item.Id.VideoId).ToHashSet();
+        var videosListRequest = _youtubeService.Videos.List("liveStreamingDetails");
+        videosListRequest.Id = new Google.Apis.Util.Repeatable<string>(upcomingVideoIds);
+
+        var videosListResponse = await videosListRequest.ExecuteAsync(cancellationToken);
+
+        return videosListResponse.Items
+            .OrderBy(x => x.LiveStreamingDetails.ScheduledStartTimeDateTimeOffset)
+            .Select(x => x.Id)
+            .FirstOrDefault();
     }
 
     public async Task<string?> GetLiveVideoId(CancellationToken cancellationToken)
     {
-        var searchRequest = _youtubeService.Search.List("snippet");
-        searchRequest.ChannelId = _channelId;
-        searchRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Live;
-        searchRequest.Type = "video";
+        var searchListRequest = _youtubeService.Search.List("snippet");
+        searchListRequest.ChannelId = _channelId;
+        searchListRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Live;
+        searchListRequest.Type = "video";
 
-        var searchResponse = await searchRequest.ExecuteAsync(cancellationToken);
+        var searchResponse = await searchListRequest.ExecuteAsync(cancellationToken);
 
         return searchResponse.Items.FirstOrDefault()?.Id.VideoId;
     }

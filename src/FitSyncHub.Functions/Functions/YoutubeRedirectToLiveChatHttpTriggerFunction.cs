@@ -33,7 +33,7 @@ public class YoutubeRedirectToLiveChatHttpTriggerFunction
             _logger.LogInformation("No live video found, checking for upcoming videos.");
         }
 
-        videoId ??= await _youTubeLiveService.GetUpcomingVideoId(cancellationToken);
+        videoId ??= await _youTubeLiveService.GetNextUpcomingVideoId(cancellationToken);
         if (videoId == null)
         {
             _logger.LogInformation("No upcoming video found for the specified channel.");
