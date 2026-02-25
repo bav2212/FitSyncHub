@@ -1,50 +1,56 @@
-﻿using FitSyncHub.Youtube.Options;
-using Google.Apis.YouTube.v3;
-using Microsoft.Extensions.Options;
+﻿using Google.Apis.YouTube.v3;
+using Google.Apis.YouTube.v3.Data;
 
 namespace FitSyncHub.Youtube.Services;
 
 public class YouTubeLiveService
 {
     private readonly YouTubeService _youtubeService;
-    private readonly string _channelId;
 
-    public YouTubeLiveService(YouTubeService youTubeService, IOptions<YoutubeOptions> options)
+    public YouTubeLiveService(YouTubeService youTubeService)
     {
         _youtubeService = youTubeService;
-        _channelId = options.Value.ChannelId;
     }
 
     public async Task<string?> GetNextUpcomingVideoId(CancellationToken cancellationToken)
     {
-        var searchListRequest = _youtubeService.Search.List("snippet");
-        searchListRequest.ChannelId = _channelId;
-        searchListRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Upcoming;
-        searchListRequest.Type = "video";
+        var liveBroadcastsRequest = _youtubeService.LiveBroadcasts.List("snippet");
+        liveBroadcastsRequest.BroadcastStatus = LiveBroadcastsResource.ListRequest.BroadcastStatusEnum.Upcoming;
 
-        var searchResponse = await searchListRequest.ExecuteAsync(cancellationToken);
+        var response = await GetAllPagesAsync(liveBroadcastsRequest, cancellationToken);
 
-        var upcomingVideoIds = searchResponse.Items.Select(item => item.Id.VideoId).ToHashSet();
-        var videosListRequest = _youtubeService.Videos.List("liveStreamingDetails");
-        videosListRequest.Id = new Google.Apis.Util.Repeatable<string>(upcomingVideoIds);
-
-        var videosListResponse = await videosListRequest.ExecuteAsync(cancellationToken);
-
-        return videosListResponse.Items
-            .OrderBy(x => x.LiveStreamingDetails.ScheduledStartTimeDateTimeOffset)
+        return response
+            .OrderBy(x => x.Snippet.ScheduledStartTimeDateTimeOffset)
             .Select(x => x.Id)
             .FirstOrDefault();
     }
 
     public async Task<string?> GetLiveVideoId(CancellationToken cancellationToken)
     {
-        var searchListRequest = _youtubeService.Search.List("snippet");
-        searchListRequest.ChannelId = _channelId;
-        searchListRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Live;
-        searchListRequest.Type = "video";
+        var liveBroadcastsRequest = _youtubeService.LiveBroadcasts.List("snippet");
+        liveBroadcastsRequest.BroadcastStatus = LiveBroadcastsResource.ListRequest.BroadcastStatusEnum.Active;
 
-        var searchResponse = await searchListRequest.ExecuteAsync(cancellationToken);
+        var response = await GetAllPagesAsync(liveBroadcastsRequest, cancellationToken);
 
-        return searchResponse.Items.FirstOrDefault()?.Id.VideoId;
+        return response.Select(x => x.Id).SingleOrDefault();
+    }
+
+    private static async Task<List<LiveBroadcast>> GetAllPagesAsync(
+        LiveBroadcastsResource.ListRequest liveBroadcastsRequest, CancellationToken cancellationToken)
+    {
+        string? nextPageToken = null;
+        List<LiveBroadcast> result = [];
+
+        do
+        {
+            liveBroadcastsRequest.PageToken = nextPageToken;
+
+            var response = await liveBroadcastsRequest.ExecuteAsync(cancellationToken);
+            result.AddRange(response.Items);
+
+            nextPageToken = response.NextPageToken;
+        } while (!string.IsNullOrEmpty(nextPageToken));
+
+        return result;
     }
 }
