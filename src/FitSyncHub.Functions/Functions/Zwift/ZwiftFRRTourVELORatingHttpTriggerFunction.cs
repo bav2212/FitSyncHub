@@ -93,7 +93,8 @@ public sealed class ZwiftFRRTourVELORatingHttpTriggerFunction
         // should be valid if specified
         if (!Uri.TryCreate(eventUrl, UriKind.Absolute, out parsedUrl))
         {
-            _logger.LogError("Wrong '{EventUrl}' url", eventUrl!);
+            var sanitizedEventUrl = eventUrl.ToString().Replace("\r", string.Empty).Replace("\n", string.Empty);
+            _logger.LogError("Wrong '{EventUrl}' url", sanitizedEventUrl);
             return false;
         }
 
