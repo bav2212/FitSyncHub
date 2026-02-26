@@ -1,4 +1,5 @@
-﻿using FitSyncHub.Zwift.HttpClients;
+﻿using FitSyncHub.Common.Helpers;
+using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.Models.FRR;
@@ -99,7 +100,7 @@ public sealed class ZwiftFRRTourStageResultsHttpTriggerFunction
         {
             if (!Enum.TryParse<FlammeRougeRacingCategory>(categoryQueryParam, ignoreCase: true, out var parsedFRRCategory))
             {
-                _logger.LogError("Cannot parse FRR category {Category}", categoryQueryParam);
+                _logger.LogError("Cannot parse FRR category {Category}", StringHelper.Sanitize(categoryQueryParam));
                 continue;
             }
 
