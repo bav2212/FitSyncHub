@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using FitSyncHub.Common.Helpers;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Services;
@@ -29,7 +30,7 @@ public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
     {
         string? timezoneQueryParameter = req.Query["timezone"];
 
-        _logger.LogInformation("Timezone request query parameter: {QueryParam}", timezoneQueryParameter);
+        _logger.LogInformation("Timezone request query parameter: {QueryParam}", StringHelper.Sanitize(timezoneQueryParameter));
 
         TimeZoneInfo timezone;
         if (timezoneQueryParameter is { } && TimeZoneInfo.TryFindSystemTimeZoneById(timezoneQueryParameter, out var parsedTimeZone))

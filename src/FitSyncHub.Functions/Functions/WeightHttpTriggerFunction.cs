@@ -1,4 +1,5 @@
-﻿using FitSyncHub.GarminConnect.HttpClients;
+﻿using FitSyncHub.Common.Helpers;
+using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.Strava.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +47,7 @@ public class WeightHttpTriggerFunction
             return new BadRequestObjectResult("Weight should be in kg's");
         }
 
-        _logger.LogInformation("Weight is {weight} kg", weight);
+        _logger.LogInformation("Weight is {weight} kg", StringHelper.Sanitize(weight));
 
         try
         {

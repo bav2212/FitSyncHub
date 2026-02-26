@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using FitSyncHub.Common.Extensions;
+using FitSyncHub.Common.Helpers;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
@@ -93,8 +94,7 @@ public sealed class ZwiftFRRTourVELORatingHttpTriggerFunction
         // should be valid if specified
         if (!Uri.TryCreate(eventUrl, UriKind.Absolute, out parsedUrl))
         {
-            var sanitizedEventUrl = eventUrl.ToString().Replace("\r", string.Empty).Replace("\n", string.Empty);
-            _logger.LogError("Wrong '{EventUrl}' url", sanitizedEventUrl);
+            _logger.LogError("Wrong '{EventUrl}' url", StringHelper.Sanitize(eventUrl));
             return false;
         }
 
