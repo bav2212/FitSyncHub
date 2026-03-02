@@ -1,25 +1,26 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using FitSyncHub.Common.Abstractions;
 using FitSyncHub.Common.Exceptions;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Strava.Models.Requests;
 using FitSyncHub.Strava.Models.Responses;
+using FitSyncHub.Strava.Options;
+using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Strava.HttpClients;
 
 public class StravaOAuthHttpClient : IStravaOAuthHttpClient
 {
     private readonly HttpClient _httpClient;
-    private readonly IStravaApplicationOptionsProvider _stravaApplicationOptionsProvider;
+    private readonly StravaOptions.StravaAuthOptions _authOptions;
 
     public StravaOAuthHttpClient(
         HttpClient httpClient,
-        IStravaApplicationOptionsProvider stravaApplicationOptionsProvider)
+        IOptions<StravaOptions> options)
     {
         _httpClient = httpClient;
-        _stravaApplicationOptionsProvider = stravaApplicationOptionsProvider;
+        _authOptions = options.Value.Auth;
     }
 
     public async Task<ExchangeTokenResponse> ExchangeTokenAsync(
@@ -28,8 +29,8 @@ public class StravaOAuthHttpClient : IStravaOAuthHttpClient
     {
         var request = new ExchangeTokenRequest
         {
-            ClientId = _stravaApplicationOptionsProvider.ClientId,
-            ClientSecret = _stravaApplicationOptionsProvider.ClientSecret,
+            ClientId = _authOptions.ClientId,
+            ClientSecret = _authOptions.ClientSecret,
             Code = code,
             GrantType = "authorization_code"
         };
@@ -49,8 +50,8 @@ public class StravaOAuthHttpClient : IStravaOAuthHttpClient
     {
         var request = new RefreshTokenRequest
         {
-            ClientId = _stravaApplicationOptionsProvider.ClientId,
-            ClientSecret = _stravaApplicationOptionsProvider.ClientSecret,
+            ClientId = _authOptions.ClientId,
+            ClientSecret = _authOptions.ClientSecret,
             GrantType = "refresh_token",
             RefreshToken = refreshToken
         };

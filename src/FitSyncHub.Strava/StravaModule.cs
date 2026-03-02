@@ -6,6 +6,7 @@ using FitSyncHub.Strava.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
 
@@ -15,21 +16,21 @@ public static class StravaModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureStravaModule<TStravaOAuthService>(IConfigurationSection configurationSection)
-            where TStravaOAuthService : class, IStravaOAuthService
-
+        public IServiceCollection ConfigureStravaModule(IConfigurationSection configurationSection)
         {
-            return services.ConfigureStravaModule<TStravaOAuthService>(options => configurationSection.Bind(options));
+            return services.ConfigureStravaModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection ConfigureStravaModule<TStravaOAuthService>(Action<StravaOptions> options)
-            where TStravaOAuthService : class, IStravaOAuthService
+        public IServiceCollection ConfigureStravaModule(Action<StravaOptions> options)
         {
             services.Configure(options);
 
-            services.AddTransient<IStravaOAuthService, TStravaOAuthService>();
-            services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client
-                => client.BaseAddress = new Uri("http://www.strava.com"));
+            services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>((sp, client)
+                =>
+            {
+                var stravaOptions = sp.GetRequiredService<IOptions<StravaOptions>>().Value;
+                client.BaseAddress = new Uri(stravaOptions.BaseAddress);
+            });
 
             AddStravaUploadActivityResiliencePipeline(services);
 

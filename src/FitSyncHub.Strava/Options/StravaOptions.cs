@@ -6,6 +6,7 @@ public sealed record StravaOptions
     public required string WebhookVerifyToken { get; set; }
     public required long AthleteId { get; set; }
     public string? CityBikeGearId { get; set; }
+    public string BaseAddress { get; set; } = "http://www.strava.com";
 
     public sealed record StravaAuthOptions
     {

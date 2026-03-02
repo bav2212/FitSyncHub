@@ -9,6 +9,7 @@ using FitSyncHub.Functions.Services;
 using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
+using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Xert;
 using FitSyncHub.Youtube;
 using FitSyncHub.Zwift;
@@ -62,7 +63,9 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 
 builder.Services.ConfigureCommonModule();
-builder.Services.ConfigureStravaModule<StravaOAuthService>(builder.Configuration.GetSection("Strava"));
+builder.Services.ConfigureStravaModule(builder.Configuration.GetSection("Strava"))
+    .AddTransient<IStravaOAuthService, StravaOAuthService>();
+
 builder.Services.ConfigureIntervalsIcuModule(builder.Configuration.GetSection("IntervalsICU"));
 builder.Services.ConfigureGarminConnectModule(builder.Configuration.GetSection("GarminConnect:Credentials"));
 builder.Services.ConfigureZwiftModule(builder.Configuration.GetSection("Zwift:Credentials"));
