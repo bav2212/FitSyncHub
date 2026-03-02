@@ -27,7 +27,7 @@
   </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="protobuf\profile.proto" />
+        <Protobuf Include="protobuf\zwift.proto" />
     </ItemGroup>
 
     <ItemGroup>

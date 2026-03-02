@@ -2,7 +2,9 @@
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.JsonSerializerContexts;
 using FitSyncHub.Zwift.Protobuf;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.Zwift.HttpClients;
 
@@ -44,5 +46,55 @@ public sealed partial class ZwiftHttpClient
 
         return JsonSerializer.Deserialize(content,
             ZwiftHttpClientGameInfoGenerationContext.Default.ZwiftGameInfoResponse)!;
+    }
+
+    public async Task<List<PayloadSegmentResult>> GetSegmentResults(
+        long playerId,
+        int worldId,
+        long segmentId,
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken)
+    {
+        if (to <= from)
+        {
+            throw new ArgumentException($"'{nameof(to)}' should be greater than or equal to '{nameof(from)}'");
+        }
+
+        var baseQueryParams = new Dictionary<string, StringValues>
+        {
+            { "world_id", worldId.ToString() },
+            { "player_id", playerId.ToString() },
+            { "segment_id", segmentId.ToString() },
+        };
+
+        List<PayloadSegmentResult> results = [];
+
+        do
+        {
+            var fromQueryParam = to.AddMonths(-3) > from ? to.AddMonths(-3) : from;
+
+            var queryParams = new Dictionary<string, StringValues>(baseQueryParams)
+            {
+                { "from", fromQueryParam.ToString("yyyy-MM-ddTHH:mm:ssZ")  },
+                { "to", to.ToString("yyyy-MM-ddTHH:mm:ssZ") }
+            };
+
+            var url = QueryHelpers.AddQueryString("api/segment-results", queryParams);
+
+            var response = await _httpClientProto.GetAsync(url, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+            var segmentResults = SegmentResults.Parser.ParseFrom(stream);
+
+            results.AddRange(segmentResults.Results);
+
+            to = to.AddMonths(-3);
+        }
+        while (to >= from);
+
+        return results;
     }
 }

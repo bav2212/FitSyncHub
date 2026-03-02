@@ -96,8 +96,8 @@ public sealed class ZwiftEventsService
                     LastName = profileMe.LastName,
                     Age = profileMe.Age,
                     Ftp = profileMe.Ftp,
-                    WeightInGrams = profileMe.WeightInGrams,
-                    HeightInMillimeters = profileMe.HeightInMillimeters,
+                    WeightInGrams = profileMe.Weight,
+                    HeightInMillimeters = profileMe.Height,
                 }];
     }
 }

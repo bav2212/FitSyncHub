@@ -158,8 +158,8 @@ public sealed class ZwiftFRRTourVELORatingHttpTriggerFunction
                 .OrderByDescending(x => x.UpdatedAt)
                 .FirstOrDefault()?.Rating;
 
-        var weigth = rider.WeightInGrams / 1000.0;
-        var height = rider.HeightInMillimeters / 1000.0;
+        var weigth = rider.Weight / 1000.0;
+        var height = rider.Height / 1000.0;
 
         var ftpPerKg = rider.Ftp / weigth;
 
