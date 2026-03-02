@@ -15,11 +15,14 @@ public static class YoutubeModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureYoutubeModule(string youtubeOptionsPath)
+        public IServiceCollection ConfigureYoutubeModule(IConfigurationSection configurationSection)
         {
-            services.AddOptions<YoutubeOptions>()
-                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(youtubeOptionsPath).Bind(settings))
-                .ValidateOnStart();
+            return services.ConfigureYoutubeModule(options => configurationSection.Bind(options));
+        }
+
+        public IServiceCollection ConfigureYoutubeModule(Action<YoutubeOptions> options)
+        {
+            services.Configure(options);
 
             services.AddScoped(sp =>
             {

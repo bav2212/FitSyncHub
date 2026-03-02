@@ -21,13 +21,14 @@ public static class ZwiftModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureZwiftModule(string zwiftAuthOptionsPath)
+        public IServiceCollection ConfigureZwiftModule(IConfigurationSection configurationSection)
         {
-            services.AddOptions<ZwiftAuthOptions>()
-                .Configure<IConfiguration>((settings, configuration) => configuration
-                    .GetSection(zwiftAuthOptionsPath)
-                    .Bind(settings))
-                .ValidateOnStart();
+            return services.ConfigureZwiftModule(options => configurationSection.Bind(options));
+        }
+
+        public IServiceCollection ConfigureZwiftModule(Action<ZwiftAuthOptions> options)
+        {
+            services.Configure(options);
 
             var env = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT");
             var zwiftRoutesInfoFromWADFiles = Environment.GetEnvironmentVariable("ZWIFT_ROUTES_INFO_FROM_WAD_FILES");

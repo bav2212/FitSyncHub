@@ -1,7 +1,11 @@
-﻿namespace FitSyncHub.Zwift.Options;
+﻿using Microsoft.Extensions.Options;
 
-public sealed record ZwiftAuthOptions
+namespace FitSyncHub.Zwift.Options;
+
+public sealed record ZwiftAuthOptions : IOptions<ZwiftAuthOptions>
 {
-    public required string Username { get; init; }
-    public required string Password { get; init; }
+    public required string Username { get; set; }
+    public required string Password { get; set; }
+
+    ZwiftAuthOptions IOptions<ZwiftAuthOptions>.Value => this;
 }

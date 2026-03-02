@@ -15,14 +15,19 @@ public static class GarminConnectModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureGarminConnectModule(string garminAuthOptionsPath)
+        public IServiceCollection ConfigureGarminConnectModule(IConfigurationSection configurationSection)
+        {
+            return services.ConfigureGarminConnectModule(options => configurationSection.Bind(options));
+        }
+
+        public IServiceCollection ConfigureGarminConnectModule(Action<GarminConnectAuthOptions> options)
         {
             services.AddScoped<GarminConnectToIntervalsIcuRideWorkoutStepConverterInitializer>();
             services.AddScoped<GarminConnectToIntervalsIcuStrengthWorkoutStepConverterInitializer>();
             services.AddScoped(ConverterInitializerImplementationFactory);
             services.AddScoped<GarminConnectToInternalWorkoutConverterService>();
 
-            ConfigureAuth(services, garminAuthOptionsPath);
+            ConfigureAuth(services, options);
 
             services.AddTransient<GarminConnectAuthenticationDelegatingHandler>();
             services.AddHttpClient<GarminConnectHttpClient>(client => client.BaseAddress = new Uri("https://connect.garmin.com"))
@@ -36,11 +41,9 @@ public static class GarminConnectModule
         }
     }
 
-    private static void ConfigureAuth(IServiceCollection services, string garminAuthOptionsPath)
+    private static void ConfigureAuth(IServiceCollection services, Action<GarminConnectAuthOptions> options)
     {
-        services.AddOptions<GarminConnectAuthOptions>()
-          .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(garminAuthOptionsPath).Bind(settings))
-          .ValidateOnStart();
+        services.Configure(options);
 
         services.AddScoped<GarminSsoHttpClient>();
         services.AddScoped<GarminSsoCookieContainer>(); // Scoped if per user/session, or Singleton if shared app-wide

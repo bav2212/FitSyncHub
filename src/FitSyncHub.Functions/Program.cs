@@ -61,13 +61,15 @@ builder.Services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+
 builder.Services.ConfigureCommonModule<StravaApplicationOptionsProvider>();
-builder.Services.ConfigureStravaModule<StravaOAuthService>();
-builder.Services.ConfigureIntervalsIcuModule();
-builder.Services.ConfigureGarminConnectModule("GarminConnect:Credentials");
-builder.Services.ConfigureZwiftModule("Zwift:Credentials");
-builder.Services.ConfigureYoutubeModule("Youtube");
-builder.Services.ConfigureXertModule("Xert");
+builder.Services.ConfigureStravaModule<StravaOAuthService>(builder.Configuration.GetSection("Strava"));
+builder.Services.ConfigureIntervalsIcuModule(builder.Configuration.GetSection("IntervalsICU"));
+builder.Services.ConfigureGarminConnectModule(builder.Configuration.GetSection("GarminConnect:Credentials"));
+builder.Services.ConfigureZwiftModule(builder.Configuration.GetSection("Zwift:Credentials"));
+builder.Services.ConfigureYoutubeModule(builder.Configuration.GetSection("Youtube"));
+builder.Services.ConfigureXertModule(builder.Configuration.GetSection("Xert"));
+
 
 builder.Services.AddCosmosCache(cacheOptions =>
 {

@@ -1,8 +1,12 @@
-﻿namespace FitSyncHub.Youtube.Options;
+﻿using Microsoft.Extensions.Options;
 
-public sealed record YoutubeOptions
+namespace FitSyncHub.Youtube.Options;
+
+public sealed record YoutubeOptions : IOptions<YoutubeOptions>
 {
-    public required string ClientId { get; init; }
-    public required string ClientSecret { get; init; }
-    public required string RefreshToken { get; init; }
+    public required string ClientId { get; set; }
+    public required string ClientSecret { get; set; }
+    public required string RefreshToken { get; set; }
+
+    YoutubeOptions IOptions<YoutubeOptions>.Value => this;
 }

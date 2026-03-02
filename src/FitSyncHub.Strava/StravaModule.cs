@@ -15,11 +15,18 @@ public static class StravaModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureStravaModule<TStravaOAuthService>()
+
+        public IServiceCollection ConfigureStravaModule<TStravaOAuthService>(IConfigurationSection configurationSection)
+            where TStravaOAuthService : class, IStravaOAuthService
+
+        {
+            return services.ConfigureStravaModule<TStravaOAuthService>(options => configurationSection.Bind(options));
+        }
+
+        public IServiceCollection ConfigureStravaModule<TStravaOAuthService>(Action<StravaOptions> options)
             where TStravaOAuthService : class, IStravaOAuthService
         {
-            services.AddOptions<StravaOptions>().Configure<IConfiguration>((settings, configuration)
-                => configuration.GetSection(StravaOptions.Position).Bind(settings));
+            services.Configure(options);
 
             services.AddTransient<IStravaOAuthService, TStravaOAuthService>();
             services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>(client
@@ -28,9 +35,9 @@ public static class StravaModule
             AddStravaUploadActivityResiliencePipeline(services);
 
             services.AddTransient<StravaAuthenticationDelegatingHandler>();
-            services.AddHttpClient<IStravaHttpClient, StravaHttpClient>(client
-                => client.BaseAddress = new Uri("https://www.strava.com/api/v3/"))
-            .AddHttpMessageHandler<StravaAuthenticationDelegatingHandler>();
+            services
+                .AddHttpClient<IStravaHttpClient, StravaHttpClient>(client => client.BaseAddress = new Uri("https://www.strava.com/api/v3/"))
+                .AddHttpMessageHandler<StravaAuthenticationDelegatingHandler>();
 
             return services;
         }

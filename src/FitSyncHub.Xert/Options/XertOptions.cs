@@ -1,12 +1,16 @@
-﻿namespace FitSyncHub.Xert.Options;
+﻿using Microsoft.Extensions.Options;
 
-public sealed record XertOptions
+namespace FitSyncHub.Xert.Options;
+
+public sealed record XertOptions : IOptions<XertOptions>
 {
-    public required XertAuthOptions Credentials { get; init; }
+    public required XertAuthOptions Credentials { get; set; }
 
     public sealed record XertAuthOptions
     {
-        public required string Username { get; init; }
-        public required string Password { get; init; }
+        public required string Username { get; set; }
+        public required string Password { get; set; }
     }
+
+    XertOptions IOptions<XertOptions>.Value => this;
 }

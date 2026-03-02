@@ -1,7 +1,11 @@
-﻿namespace FitSyncHub.GarminConnect.Options;
+﻿using Microsoft.Extensions.Options;
 
-public sealed record GarminConnectAuthOptions
+namespace FitSyncHub.GarminConnect.Options;
+
+public sealed record GarminConnectAuthOptions : IOptions<GarminConnectAuthOptions>
 {
-    public required string Username { get; init; }
-    public required string Password { get; init; }
+    public required string Username { get; set; }
+    public required string Password { get; set; }
+
+    GarminConnectAuthOptions IOptions<GarminConnectAuthOptions>.Value => this;
 }

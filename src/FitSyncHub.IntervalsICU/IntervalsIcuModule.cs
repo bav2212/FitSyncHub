@@ -14,10 +14,15 @@ public static class IntervalsIcuModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureIntervalsIcuModule()
+        public IServiceCollection ConfigureIntervalsIcuModule(IConfigurationSection configurationSection)
         {
-            services.AddOptions<IntervalsIcuOptions>().Configure<IConfiguration>((settings, configuration)
-                => configuration.GetSection(IntervalsIcuOptions.Position).Bind(settings));
+            return services.ConfigureIntervalsIcuModule(options => configurationSection.Bind(options));
+        }
+
+
+        public IServiceCollection ConfigureIntervalsIcuModule(Action<IntervalsIcuOptions> options)
+        {
+            services.Configure(options);
 
             services.AddScoped<IntervalsIcuStorageService>();
             services.AddScoped<IntervalsIcuDeletePlanService>();

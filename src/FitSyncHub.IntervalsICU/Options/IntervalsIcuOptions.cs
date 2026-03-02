@@ -1,9 +1,11 @@
-﻿namespace FitSyncHub.IntervalsICU.Options;
+﻿using Microsoft.Extensions.Options;
 
-public sealed record IntervalsIcuOptions
+namespace FitSyncHub.IntervalsICU.Options;
+
+public sealed record IntervalsIcuOptions : IOptions<IntervalsIcuOptions>
 {
-    public const string Position = "IntervalsICU";
+    public required string ApiKey { get; set; }
+    public required string AthleteId { get; set; }
 
-    public required string ApiKey { get; init; }
-    public required string AthleteId { get; init; }
+    IntervalsIcuOptions IOptions<IntervalsIcuOptions>.Value => this;
 }

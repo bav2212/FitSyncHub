@@ -12,11 +12,14 @@ public static class XertModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureXertModule(string xertOptionsPath)
+        public IServiceCollection ConfigureXertModule(IConfigurationSection configurationSection)
         {
-            services.AddOptions<XertOptions>()
-                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(xertOptionsPath).Bind(settings))
-                .ValidateOnStart();
+            return services.ConfigureXertModule(options => configurationSection.Bind(options));
+        }
+
+        public IServiceCollection ConfigureXertModule(Action<XertOptions> options)
+        {
+            services.Configure(options);
 
             services.AddHttpClient<IXertAuthHttpClient, XertAuthHttpClient>(client
                 => client.BaseAddress = new Uri("https://www.xertonline.com"));
