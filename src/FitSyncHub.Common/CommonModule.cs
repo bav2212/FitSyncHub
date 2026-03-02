@@ -1,5 +1,4 @@
-﻿using FitSyncHub.Common.Abstractions;
-using FitSyncHub.Common.Fit;
+﻿using FitSyncHub.Common.Fit;
 using FitSyncHub.Common.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,11 +8,8 @@ public static class CommonModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureCommonModule<TStravaApplicationOptionsProvider>()
-            where TStravaApplicationOptionsProvider : class, IStravaApplicationOptionsProvider
+        public IServiceCollection ConfigureCommonModule()
         {
-            services.AddScoped<IStravaApplicationOptionsProvider, TStravaApplicationOptionsProvider>();
-
             services.AddScoped<FitFileDecoder>();
             services.AddScoped<FitFileEncoder>();
 

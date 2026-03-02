@@ -15,7 +15,6 @@ public static class StravaModule
 {
     extension(IServiceCollection services)
     {
-
         public IServiceCollection ConfigureStravaModule<TStravaOAuthService>(IConfigurationSection configurationSection)
             where TStravaOAuthService : class, IStravaOAuthService
 
