@@ -1,4 +1,5 @@
 ﻿using Dynastream.Fit;
+using FitSyncHub.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Common.Fit;
@@ -43,7 +44,7 @@ public sealed class FitFileDecoder
     {
         // Attempt to open .FIT file
         using var fitSource = new FileStream(fileName, FileMode.Open);
-        _logger.LogInformation("Opening {FileName}", fileName);
+        _logger.LogInformation("Opening {FileName}", StringHelper.Sanitize(fileName));
 
         return Decode(fitSource);
     }
