@@ -72,7 +72,9 @@ public sealed partial class ZwiftHttpClient
 
         do
         {
-            var fromQueryParam = to.AddMonths(-3) > from ? to.AddMonths(-3) : from;
+            var fromQueryParam = GetMaxFromApiDate(to) > from
+                ? GetMaxFromApiDate(to)
+                : from;
 
             var queryParams = new Dictionary<string, StringValues>(baseQueryParams)
             {
@@ -86,15 +88,16 @@ public sealed partial class ZwiftHttpClient
             response.EnsureSuccessStatusCode();
 
             await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-
             var segmentResults = SegmentResults.Parser.ParseFrom(stream);
 
             results.AddRange(segmentResults.Results);
 
-            to = to.AddMonths(-3);
+            to = GetMaxFromApiDate(to);
         }
         while (to >= from);
 
         return results;
+
+        static DateTime GetMaxFromApiDate(DateTime date) => date.AddDays(-100);
     }
 }
