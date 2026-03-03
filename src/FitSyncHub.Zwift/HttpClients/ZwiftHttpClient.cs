@@ -50,7 +50,6 @@ public sealed partial class ZwiftHttpClient
 
     public async Task<List<PayloadSegmentResult>> GetSegmentResults(
         long playerId,
-        int worldId,
         long segmentId,
         DateTime from,
         DateTime to,
@@ -63,22 +62,48 @@ public sealed partial class ZwiftHttpClient
 
         var baseQueryParams = new Dictionary<string, StringValues>
         {
-            { "world_id", worldId.ToString() },
+            { "world_id", "1" }, // mislabeled realm
             { "player_id", playerId.ToString() },
             { "segment_id", segmentId.ToString() },
         };
 
-        List<PayloadSegmentResult> results = [];
-
-        do
+        List<(DateTime from, DateTime to)> dateRanges = [];
+        while (true)
         {
-            var fromQueryParam = GetMaxFromApiDate(to) > from
-                ? GetMaxFromApiDate(to)
-                : from;
+            var initFrom = GetMaxFromApiDate(to);
+            if (initFrom < from)
+            {
+                dateRanges.Add((from, to));
+                break;
+            }
 
+            dateRanges.Add((initFrom, to));
+            to = GetMaxFromApiDate(to);
+        }
+
+        List<PayloadSegmentResult> results = [];
+        foreach (var dateRangeChunk in dateRanges.Chunk(5))
+        {
+            var tasks = dateRangeChunk
+                .Select(x => InitializeTask(x.from, x.to))
+                .ToList();
+
+            await foreach (var task in Task.WhenEach(tasks))
+            {
+                var segmentResults = await task;
+                results.AddRange(segmentResults);
+            }
+        }
+
+        // need to reorder cause task results can come in any order
+        return [.. results.OrderBy(x => x.WorldTime)];
+
+
+        async Task<List<PayloadSegmentResult>> InitializeTask(DateTime from, DateTime to)
+        {
             var queryParams = new Dictionary<string, StringValues>(baseQueryParams)
             {
-                { "from", fromQueryParam.ToString("yyyy-MM-ddTHH:mm:ssZ")  },
+                { "from", from.ToString("yyyy-MM-ddTHH:mm:ssZ")  },
                 { "to", to.ToString("yyyy-MM-ddTHH:mm:ssZ") }
             };
 
@@ -90,13 +115,8 @@ public sealed partial class ZwiftHttpClient
             await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var segmentResults = SegmentResults.Parser.ParseFrom(stream);
 
-            results.AddRange(segmentResults.Results);
-
-            to = GetMaxFromApiDate(to);
+            return [.. segmentResults.Results];
         }
-        while (to >= from);
-
-        return results;
 
         static DateTime GetMaxFromApiDate(DateTime date) => date.AddDays(-100);
     }
