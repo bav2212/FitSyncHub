@@ -60,26 +60,27 @@ public sealed partial class ZwiftHttpClient
             throw new ArgumentException($"'{nameof(to)}' should be greater than or equal to '{nameof(from)}'");
         }
 
-        var baseQueryParams = new Dictionary<string, StringValues>
-        {
-            { "world_id", "1" }, // mislabeled realm
-            { "player_id", playerId.ToString() },
-            { "segment_id", segmentId.ToString() },
-        };
-
         List<(DateTime from, DateTime to)> dateRanges = [];
         while (true)
         {
-            var initFrom = GetMaxFromApiDate(to);
-            if (initFrom < from)
+            // 100 days is max delta for api 
+            var maxSupportedByApiFromValue = to.AddDays(-100);
+            if (maxSupportedByApiFromValue < from)
             {
                 dateRanges.Add((from, to));
                 break;
             }
 
-            dateRanges.Add((initFrom, to));
-            to = GetMaxFromApiDate(to);
+            dateRanges.Add((maxSupportedByApiFromValue, to));
+            to = maxSupportedByApiFromValue;
         }
+
+        var baseQueryParams = new Dictionary<string, StringValues>
+        {
+            { "world_id", "1" }, // mislabeled realm (from sauce code)
+            { "player_id", playerId.ToString() },
+            { "segment_id", segmentId.ToString() },
+        };
 
         List<PayloadSegmentResult> results = [];
         foreach (var dateRangeChunk in dateRanges.Chunk(5))
@@ -97,7 +98,6 @@ public sealed partial class ZwiftHttpClient
 
         // need to reorder cause task results can come in any order
         return [.. results.OrderBy(x => x.WorldTime)];
-
 
         async Task<List<PayloadSegmentResult>> InitializeTask(DateTime from, DateTime to)
         {
@@ -117,7 +117,5 @@ public sealed partial class ZwiftHttpClient
 
             return [.. segmentResults.Results];
         }
-
-        static DateTime GetMaxFromApiDate(DateTime date) => date.AddDays(-100);
     }
 }
