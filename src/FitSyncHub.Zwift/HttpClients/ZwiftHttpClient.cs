@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using FitSyncHub.Common.Models;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.JsonSerializerContexts;
 using FitSyncHub.Zwift.Protobuf;
@@ -55,38 +56,14 @@ public sealed partial class ZwiftHttpClient
         DateTime to,
         CancellationToken cancellationToken)
     {
-        if (to <= from)
-        {
-            throw new ArgumentException($"'{nameof(to)}' should be greater than or equal to '{nameof(from)}'");
-        }
-
-        List<(DateTime from, DateTime to)> dateRanges = [];
-        while (true)
-        {
-            // 100 days is max delta for api 
-            var maxSupportedByApiFromValue = to.AddDays(-100);
-            if (maxSupportedByApiFromValue < from)
-            {
-                dateRanges.Add((from, to));
-                break;
-            }
-
-            dateRanges.Add((maxSupportedByApiFromValue, to));
-            to = maxSupportedByApiFromValue;
-        }
-
-        var baseQueryParams = new Dictionary<string, StringValues>
-        {
-            { "world_id", "1" }, // mislabeled realm (from sauce code)
-            { "player_id", playerId.ToString() },
-            { "segment_id", segmentId.ToString() },
-        };
+        // -100 is max zwift api can handle
+        var dateRanges = DateRange.GetDateRanges(from, to, TimeSpan.FromDays(-100));
 
         List<PayloadSegmentResult> results = [];
         foreach (var dateRangeChunk in dateRanges.Chunk(5))
         {
             var tasks = dateRangeChunk
-                .Select(x => InitializeTask(x.from, x.to))
+                .Select(InitializeTask)
                 .ToList();
 
             await foreach (var task in Task.WhenEach(tasks))
@@ -99,12 +76,15 @@ public sealed partial class ZwiftHttpClient
         // need to reorder cause task results can come in any order
         return [.. results.OrderBy(x => x.WorldTime)];
 
-        async Task<List<PayloadSegmentResult>> InitializeTask(DateTime from, DateTime to)
+        async Task<List<PayloadSegmentResult>> InitializeTask(DateRange dateRange)
         {
-            var queryParams = new Dictionary<string, StringValues>(baseQueryParams)
+            var queryParams = new Dictionary<string, StringValues>()
             {
-                { "from", from.ToString("yyyy-MM-ddTHH:mm:ssZ")  },
-                { "to", to.ToString("yyyy-MM-ddTHH:mm:ssZ") }
+                { "world_id", "1" }, // mislabeled realm (from sauce code)
+                { "player_id", playerId.ToString() },
+                { "segment_id", segmentId.ToString() },
+                { "from", dateRange.From.ToString("yyyy-MM-ddTHH:mm:ssZ")  },
+                { "to", dateRange.To.ToString("yyyy-MM-ddTHH:mm:ssZ") }
             };
 
             var url = QueryHelpers.AddQueryString("api/segment-results", queryParams);
