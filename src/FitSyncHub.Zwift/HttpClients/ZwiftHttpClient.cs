@@ -63,7 +63,7 @@ public sealed partial class ZwiftHttpClient
         foreach (var dateRangeChunk in dateRanges.Chunk(5))
         {
             var tasks = dateRangeChunk
-                .Select(InitializeTask)
+                .Select(GetSegmentResultsForDateRangeAsync)
                 .ToList();
 
             await foreach (var task in Task.WhenEach(tasks))
@@ -76,7 +76,7 @@ public sealed partial class ZwiftHttpClient
         // need to reorder cause task results can come in any order
         return [.. results.OrderBy(x => x.WorldTime)];
 
-        async Task<List<PayloadSegmentResult>> InitializeTask(DateRange dateRange)
+        async Task<List<PayloadSegmentResult>> GetSegmentResultsForDateRangeAsync(DateRange dateRange)
         {
             var queryParams = new Dictionary<string, StringValues>()
             {
