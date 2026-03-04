@@ -15,12 +15,12 @@ public static class GarminConnectModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureGarminConnectModule(IConfigurationSection configurationSection)
+        public IServiceCollection AddGarminConnectModule(IConfigurationSection configurationSection)
         {
-            return services.ConfigureGarminConnectModule(options => configurationSection.Bind(options));
+            return services.AddGarminConnectModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection ConfigureGarminConnectModule(Action<GarminConnectAuthOptions> options)
+        public IServiceCollection AddGarminConnectModule(Action<GarminConnectAuthOptions> options)
         {
             services.AddScoped<GarminConnectToIntervalsIcuRideWorkoutStepConverterInitializer>();
             services.AddScoped<GarminConnectToIntervalsIcuStrengthWorkoutStepConverterInitializer>();

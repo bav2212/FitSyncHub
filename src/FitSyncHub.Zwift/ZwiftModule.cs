@@ -21,12 +21,12 @@ public static class ZwiftModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureZwiftModule(IConfigurationSection configurationSection)
+        public IServiceCollection AddZwiftModule(IConfigurationSection configurationSection)
         {
-            return services.ConfigureZwiftModule(options => configurationSection.Bind(options));
+            return services.AddZwiftModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection ConfigureZwiftModule(Action<ZwiftAuthOptions> options)
+        public IServiceCollection AddZwiftModule(Action<ZwiftAuthOptions> options)
         {
             services.Configure(options);
 

@@ -62,16 +62,15 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 
-builder.Services.ConfigureCommonModule();
-builder.Services.ConfigureStravaModule(builder.Configuration.GetSection("Strava"))
+builder.Services.AddCommonModule();
+builder.Services.AddStravaModule(builder.Configuration.GetSection("Strava"))
     .AddTransient<IStravaOAuthService, StravaOAuthService>();
 
-builder.Services.ConfigureIntervalsIcuModule(builder.Configuration.GetSection("IntervalsICU"));
-builder.Services.ConfigureGarminConnectModule(builder.Configuration.GetSection("GarminConnect:Credentials"));
-builder.Services.ConfigureZwiftModule(builder.Configuration.GetSection("Zwift:Credentials"));
-builder.Services.ConfigureYoutubeModule(builder.Configuration.GetSection("Youtube"));
-builder.Services.ConfigureXertModule(builder.Configuration.GetSection("Xert"));
-
+builder.Services.AddIntervalsIcuModule(builder.Configuration.GetSection("IntervalsICU"));
+builder.Services.AddGarminConnectModule(builder.Configuration.GetSection("GarminConnect:Credentials"));
+builder.Services.AddZwiftModule(builder.Configuration.GetSection("Zwift:Credentials"));
+builder.Services.AddYoutubeModule(builder.Configuration.GetSection("Youtube"));
+builder.Services.AddXertModule(builder.Configuration.GetSection("Xert"));
 
 builder.Services.AddCosmosCache(cacheOptions =>
 {

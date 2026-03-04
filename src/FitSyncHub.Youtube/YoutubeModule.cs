@@ -15,12 +15,12 @@ public static class YoutubeModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureYoutubeModule(IConfigurationSection configurationSection)
+        public IServiceCollection AddYoutubeModule(IConfigurationSection configurationSection)
         {
-            return services.ConfigureYoutubeModule(options => configurationSection.Bind(options));
+            return services.AddYoutubeModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection ConfigureYoutubeModule(Action<YoutubeOptions> options)
+        public IServiceCollection AddYoutubeModule(Action<YoutubeOptions> options)
         {
             services.Configure(options);
 

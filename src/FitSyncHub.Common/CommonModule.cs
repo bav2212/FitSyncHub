@@ -8,7 +8,7 @@ public static class CommonModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureCommonModule()
+        public IServiceCollection AddCommonModule()
         {
             services.AddScoped<FitFileDecoder>();
             services.AddScoped<FitFileEncoder>();

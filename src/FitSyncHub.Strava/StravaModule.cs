@@ -16,12 +16,12 @@ public static class StravaModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureStravaModule(IConfigurationSection configurationSection)
+        public IServiceCollection AddStravaModule(IConfigurationSection configurationSection)
         {
-            return services.ConfigureStravaModule(options => configurationSection.Bind(options));
+            return services.AddStravaModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection ConfigureStravaModule(Action<StravaOptions> options)
+        public IServiceCollection AddStravaModule(Action<StravaOptions> options)
         {
             services.Configure(options);
 

@@ -12,12 +12,12 @@ public static class XertModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureXertModule(IConfigurationSection configurationSection)
+        public IServiceCollection AddXertModule(IConfigurationSection configurationSection)
         {
-            return services.ConfigureXertModule(options => configurationSection.Bind(options));
+            return services.AddXertModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection ConfigureXertModule(Action<XertOptions> options)
+        public IServiceCollection AddXertModule(Action<XertOptions> options)
         {
             services.Configure(options);
 

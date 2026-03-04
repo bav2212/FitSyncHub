@@ -14,13 +14,12 @@ public static class IntervalsIcuModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection ConfigureIntervalsIcuModule(IConfigurationSection configurationSection)
+        public IServiceCollection AddIntervalsIcuModule(IConfigurationSection configurationSection)
         {
-            return services.ConfigureIntervalsIcuModule(options => configurationSection.Bind(options));
+            return services.AddIntervalsIcuModule(options => configurationSection.Bind(options));
         }
 
-
-        public IServiceCollection ConfigureIntervalsIcuModule(Action<IntervalsIcuOptions> options)
+        public IServiceCollection AddIntervalsIcuModule(Action<IntervalsIcuOptions> options)
         {
             services.Configure(options);
 
