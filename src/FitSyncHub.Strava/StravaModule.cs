@@ -3,6 +3,7 @@ using FitSyncHub.Strava.DelegatingHandlers;
 using FitSyncHub.Strava.HttpClients;
 using FitSyncHub.Strava.Models.Responses;
 using FitSyncHub.Strava.Options;
+using FitSyncHub.Strava.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -31,20 +32,24 @@ public static class StravaModule
 
             var builder = new StravaModuleBuilder(services);
 
-            services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>((sp, client)
-                =>
-            {
-                var stravaOptions = sp.GetRequiredService<IOptions<StravaOptions>>().Value;
-                client.BaseAddress = new Uri(stravaOptions.BaseAddress);
-            });
+            services
+                .AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>((sp, client) =>
+                {
+                    var stravaOptions = sp.GetRequiredService<IOptions<StravaOptions>>().Value;
+                    client.BaseAddress = new Uri(stravaOptions.BaseAddress);
+                });
 
             AddStravaUploadActivityResiliencePipeline(services);
 
+            services.AddTransient<StravaOAuthTokenService>();
             services.AddTransient<StravaAuthenticationDelegatingHandler>();
             services
-                .AddHttpClient<IStravaHttpClient, StravaHttpClient>(client => client.BaseAddress = new Uri("https://www.strava.com/api/v3/"))
+                .AddHttpClient<IStravaHttpClient, StravaHttpClient>((sp, client) =>
+                {
+                    var stravaOptions = sp.GetRequiredService<IOptions<StravaOptions>>().Value;
+                    client.BaseAddress = new Uri(stravaOptions.ApiAddress);
+                })
                 .AddHttpMessageHandler<StravaAuthenticationDelegatingHandler>();
-
 
             return builder;
         }

@@ -16,9 +16,12 @@ public class CosmosDbStravaOAuthTokenStore : IStravaOAuthTokenStore
         _mapper = new StravaPersistedGrantMapper();
     }
 
-    public Task<StravaOAuthTokenModel> Create(StravaOAuthTokenModel stravaOAuthToken, CancellationToken cancellationToken)
+    public async Task<StravaOAuthTokenModel> Create(StravaOAuthTokenModel stravaOAuthToken, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var persistedGrant = _mapper.StravaOAuthTokenToPersistedGrant(stravaOAuthToken);
+
+        var createResult = await _persistedGrantRepository.CreateItemAsync(persistedGrant, cancellationToken);
+        return _mapper.PersistedGrantToStravaOAuthToken(createResult.Resource);
     }
 
     public async Task<StravaOAuthTokenModel> Get(long athleteId, CancellationToken cancellationToken)

@@ -7,6 +7,7 @@ public sealed record StravaOptions
     public required long AthleteId { get; set; }
     public string? CityBikeGearId { get; set; }
     public string BaseAddress { get; set; } = "http://www.strava.com";
+    public string ApiAddress { get; set; } = "https://www.strava.com/api/v3/";
 
     public sealed record StravaAuthOptions
     {
