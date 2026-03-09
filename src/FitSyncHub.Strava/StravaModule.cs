@@ -16,14 +16,20 @@ public static class StravaModule
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddStravaModule(IConfigurationSection configurationSection)
+        public StravaModuleBuilder AddStravaModule(IConfigurationSection configurationSection)
         {
             return services.AddStravaModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection AddStravaModule(Action<StravaOptions> options)
+        public StravaModuleBuilder AddStravaModule(Action<StravaOptions> options)
         {
-            services.Configure(options);
+            services
+                .AddOptions<StravaOptions>()
+                .Configure(options)
+                .Validate(_ => services.Any(s => s.ServiceType == typeof(IStravaOAuthTokenStore)))
+                .ValidateOnStart();
+
+            var builder = new StravaModuleBuilder(services);
 
             services.AddHttpClient<IStravaOAuthHttpClient, StravaOAuthHttpClient>((sp, client)
                 =>
@@ -39,7 +45,8 @@ public static class StravaModule
                 .AddHttpClient<IStravaHttpClient, StravaHttpClient>(client => client.BaseAddress = new Uri("https://www.strava.com/api/v3/"))
                 .AddHttpMessageHandler<StravaAuthenticationDelegatingHandler>();
 
-            return services;
+
+            return builder;
         }
     }
 

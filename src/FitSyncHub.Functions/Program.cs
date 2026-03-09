@@ -10,11 +10,9 @@ using FitSyncHub.Functions.Services;
 using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
-using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Xert;
 using FitSyncHub.Youtube;
 using FitSyncHub.Zwift;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.Functions.Worker;
@@ -60,12 +58,10 @@ builder.Services
     }));
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
 
 builder.Services.AddCommonModule();
 builder.Services.AddStravaModule(builder.Configuration.GetSection("Strava"))
-    .AddScoped<IStravaOAuthTokenStore, CosmosDbStravaOAuthTokenStore>();
+    .AddTokenStore<CosmosDbStravaOAuthTokenStore>();
 
 builder.Services.AddIntervalsIcuModule(builder.Configuration.GetSection("IntervalsICU"));
 builder.Services.AddGarminConnectModule(builder.Configuration.GetSection("GarminConnect:Credentials"));
