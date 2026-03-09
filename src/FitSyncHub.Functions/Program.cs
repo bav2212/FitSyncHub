@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using FitSyncHub.Common;
+using FitSyncHub.Functions;
 using FitSyncHub.Functions.Functions;
 using FitSyncHub.Functions.Functions.IntervalsIcu;
 using FitSyncHub.Functions.Functions.Zwift;
@@ -64,7 +65,7 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddCommonModule();
 builder.Services.AddStravaModule(builder.Configuration.GetSection("Strava"))
-    .AddTransient<IStravaOAuthService, StravaOAuthService>();
+    .AddScoped<IStravaOAuthTokenStore, CosmosDbStravaOAuthTokenStore>();
 
 builder.Services.AddIntervalsIcuModule(builder.Configuration.GetSection("IntervalsICU"));
 builder.Services.AddGarminConnectModule(builder.Configuration.GetSection("GarminConnect:Credentials"));

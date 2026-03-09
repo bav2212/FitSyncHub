@@ -39,6 +39,15 @@ public abstract class CosmosDbRepository<T> where T : DataModel
     }
 
     public async Task<T?> Read(
+      string id,
+      CancellationToken cancellationToken)
+    {
+        return await Container.ReadItemAsync<T>(id,
+             new PartitionKey(id),
+             cancellationToken: cancellationToken);
+    }
+
+    public async Task<T?> Read(
        Expression<Func<T, bool>> whereExpression,
        CancellationToken cancellationToken)
     {
