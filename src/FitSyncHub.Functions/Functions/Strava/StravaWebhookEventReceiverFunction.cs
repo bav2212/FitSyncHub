@@ -20,7 +20,7 @@ public sealed class StravaWebhookEventReceiverFunction
     }
 
     [Function(nameof(StravaWebhookEventReceiverFunction))]
-    public WebhookEventReceiverMultiResponse Run(
+    public StravaWebhookEventReceiverMultiResponse Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "strava/webhook")] HttpRequest req,
         [FromBody] WebhookEventDataWebhookRequest request)
     {
@@ -28,7 +28,7 @@ public sealed class StravaWebhookEventReceiverFunction
 
         if (request.OwnerId != _athleteId)
         {
-            return new WebhookEventReceiverMultiResponse
+            return new StravaWebhookEventReceiverMultiResponse
             {
                 Document = default,
                 Result = new BadRequestResult()
@@ -48,7 +48,7 @@ public sealed class StravaWebhookEventReceiverFunction
             CreatedOn = DateTimeOffset.UtcNow,
         };
 
-        return new WebhookEventReceiverMultiResponse
+        return new StravaWebhookEventReceiverMultiResponse
         {
             Document = webhookEventData,
             Result = new OkResult()
@@ -80,11 +80,11 @@ public sealed class StravaWebhookEventReceiverFunction
     }
 }
 
-public sealed record WebhookEventReceiverMultiResponse
+public sealed record StravaWebhookEventReceiverMultiResponse
 {
     [CosmosDBOutput(
         databaseName: "fit-sync-hub",
-        containerName: "WebhookEvent",
+        containerName: "StravaWebhookEvent",
         Connection = "AzureWebJobsStorageConnectionString",
         CreateIfNotExists = true,
         PartitionKey = "/id")]
