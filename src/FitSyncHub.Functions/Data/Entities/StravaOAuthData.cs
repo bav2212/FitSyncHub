@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.Functions.Data.Entities;
 
-public sealed class PersistedGrant : DataModel
+public sealed class StravaOAuthData : DataModel
 {
     public required string TokenType { get; set; }
     public required long ExpiresAt { get; set; }

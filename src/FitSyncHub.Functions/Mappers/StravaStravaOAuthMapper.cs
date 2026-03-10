@@ -5,18 +5,18 @@ using Riok.Mapperly.Abstractions;
 namespace FitSyncHub.Functions.Mappers;
 
 [Mapper]
-internal sealed partial class StravaPersistedGrantMapper
+internal sealed partial class StravaStravaOAuthMapper
 {
     [MapProperty(
         nameof(StravaOAuthTokenModel.AthleteId),
-        nameof(PersistedGrant.Id),
+        nameof(StravaOAuthData.Id),
         Use = nameof(MapId))]
-    public partial PersistedGrant StravaOAuthTokenToPersistedGrant(StravaOAuthTokenModel oAuthTokenModel);
+    public partial StravaOAuthData StravaOAuthTokenToDataModel(StravaOAuthTokenModel oAuthTokenModel);
 
     // set Default = false to not use it for all long => string conversions
     [UserMapping(Default = false)]
     public static string MapId(long athleteId) => athleteId.ToString();
 
-    [MapperIgnoreSource(nameof(PersistedGrant.Id))]
-    public partial StravaOAuthTokenModel PersistedGrantToStravaOAuthToken(PersistedGrant persistedGrant);
+    [MapperIgnoreSource(nameof(StravaOAuthData.Id))]
+    public partial StravaOAuthTokenModel DataModelToStravaOAuthToken(StravaOAuthData dataModel);
 }

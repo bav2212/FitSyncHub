@@ -9,14 +9,16 @@ namespace FitSyncHub.Functions.Services;
 public sealed class StravaSummaryActivityService
 {
     private readonly IStravaHttpClient _stravaHttpClient;
-    private readonly SummaryActivityRepository _summaryActivityRepository;
+    private readonly StravaSummaryActivityRepository _summaryActivityRepository;
+    private readonly StravaSummaryActivityMapper _mapper;
 
     public StravaSummaryActivityService(
         IStravaHttpClient stravaHttpClient,
-        SummaryActivityRepository summaryActivityRepository)
+        StravaSummaryActivityRepository summaryActivityRepository)
     {
         _stravaHttpClient = stravaHttpClient;
         _summaryActivityRepository = summaryActivityRepository;
+        _mapper = new StravaSummaryActivityMapper();
     }
 
     public async Task<int> StoreSummaryActivities(
@@ -26,11 +28,9 @@ public sealed class StravaSummaryActivityService
     {
         var activities = await GetSummaryActivities(before, after, cancellationToken);
 
-        var mapper = new SummaryActivityMapper();
-
         foreach (var activity in activities)
         {
-            var dataModel = mapper.SummaryActivityResponseToDataModel(activity);
+            var dataModel = _mapper.SummaryActivityResponseToDataModel(activity);
             _ = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken);
         }
 
@@ -42,9 +42,8 @@ public sealed class StravaSummaryActivityService
        CancellationToken cancellationToken)
     {
         var activity = await _stravaHttpClient.GetActivity(activityId, cancellationToken);
-        var mapper = new SummaryActivityMapper();
 
-        var dataModel = mapper.ActivityResponseToSummaryDataModel(activity);
+        var dataModel = _mapper.ActivityResponseToSummaryDataModel(activity);
         _ = await _summaryActivityRepository.UpsertItemAsync(dataModel, cancellationToken);
     }
 

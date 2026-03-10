@@ -5,17 +5,17 @@ using Riok.Mapperly.Abstractions;
 namespace FitSyncHub.Functions.Mappers;
 
 [Mapper]
-internal sealed partial class SummaryActivityMapper
+internal sealed partial class StravaSummaryActivityMapper
 {
     [MapProperty(
         nameof(SummaryActivityModelResponse.Id),
-        nameof(SummaryActivityData.Id),
+        nameof(StravaSummaryActivityData.Id),
         SuppressNullMismatchDiagnostic = true)]
-    public partial SummaryActivityData SummaryActivityResponseToDataModel(SummaryActivityModelResponse activity);
+    public partial StravaSummaryActivityData SummaryActivityResponseToDataModel(SummaryActivityModelResponse activity);
 
     [MapProperty(
         nameof(ActivityModelResponse.Id),
-        nameof(SummaryActivityData.Id),
+        nameof(StravaSummaryActivityData.Id),
         SuppressNullMismatchDiagnostic = true)]
     [MapperIgnoreSource(nameof(ActivityModelResponse.AvailableZones))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.AverageTemp))]
@@ -38,7 +38,7 @@ internal sealed partial class SummaryActivityMapper
     [MapperIgnoreSource(nameof(ActivityModelResponse.SplitsStandard))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.StatsVisibility))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.UploadIdStr))]
-    [MapperIgnoreTarget(nameof(SummaryActivityData.AverageHeartrate))]
-    [MapperIgnoreTarget(nameof(SummaryActivityData.MaxHeartrate))]
-    public partial SummaryActivityData ActivityResponseToSummaryDataModel(ActivityModelResponse activity);
+    [MapperIgnoreTarget(nameof(StravaSummaryActivityData.AverageHeartrate))]
+    [MapperIgnoreTarget(nameof(StravaSummaryActivityData.MaxHeartrate))]
+    public partial StravaSummaryActivityData ActivityResponseToSummaryDataModel(ActivityModelResponse activity);
 }

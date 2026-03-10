@@ -3,7 +3,7 @@ using FitSyncHub.Functions.Data.Entities.Abstractions;
 
 namespace FitSyncHub.Functions.Data.Entities;
 
-public sealed class WebhookEventData : DataModel
+public sealed class StravaWebhookEventData : DataModel
 {
     public required string ObjectType { get; init; }
     public required long ObjectId { get; init; }

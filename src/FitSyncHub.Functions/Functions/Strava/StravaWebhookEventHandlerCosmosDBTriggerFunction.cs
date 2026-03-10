@@ -30,7 +30,7 @@ public sealed class StravaWebhookEventHandlerCosmosDBTriggerFunction
             containerName: "WebhookEvent",
             Connection = "AzureWebJobsStorageConnectionString",
             LeaseContainerName = "leases",
-            CreateLeaseContainerIfNotExists = true)] IReadOnlyList<WebhookEventData> input,
+            CreateLeaseContainerIfNotExists = true)] IReadOnlyList<StravaWebhookEventData> input,
         CancellationToken cancellationToken)
     {
         if (input == null || input.Count == 0)
@@ -47,7 +47,7 @@ public sealed class StravaWebhookEventHandlerCosmosDBTriggerFunction
         }
     }
 
-    private async Task HandleWebhookEventData(WebhookEventData webhookEventData,
+    private async Task HandleWebhookEventData(StravaWebhookEventData webhookEventData,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Document for activity Id: {ActivityId}", webhookEventData.ActivityId);

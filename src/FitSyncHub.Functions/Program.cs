@@ -77,8 +77,8 @@ builder.Services.AddCosmosCache(cacheOptions =>
     cacheOptions.CreateIfNotExists = true;
 });
 
-builder.Services.AddTransient<PersistedGrantRepository>();
-builder.Services.AddTransient<SummaryActivityRepository>();
+builder.Services.AddTransient<StravaStravaOAuthDataRepository>();
+builder.Services.AddTransient<StravaSummaryActivityRepository>();
 
 builder.Services.AddTransient<GarminHealthDataService>();
 builder.Services.AddTransient<StravaSummaryActivityService>();

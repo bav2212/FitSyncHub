@@ -1,12 +1,11 @@
 ﻿using FitSyncHub.Functions.Data.Entities.Abstractions;
-using FitSyncHub.Strava.Models.Responses.Activities;
 
 namespace FitSyncHub.Functions.Data.Entities;
 
-public sealed class SummaryActivityData : DataModel
+public sealed class StravaSummaryActivityData : DataModel
 {
     public int? ResourceState { get; init; }
-    public ActivityAthlete? Athlete { get; init; }
+    public StravaSummaryActivityAthlete? Athlete { get; init; }
     public required string Name { get; init; }
     public float? Distance { get; init; }
     public int? MovingTime { get; init; }
@@ -30,7 +29,7 @@ public sealed class SummaryActivityData : DataModel
     public int? CommentCount { get; init; }
     public int? AthleteCount { get; init; }
     public int? PhotoCount { get; init; }
-    public ActivityMap? Map { get; init; }
+    public StravaSummaryActivityMap? Map { get; init; }
     public bool Trainer { get; init; }
     public bool Commute { get; init; }
     public bool? Manual { get; init; }
@@ -53,4 +52,18 @@ public sealed class SummaryActivityData : DataModel
     public int? TotalPhotoCount { get; init; }
     public bool? HasKudoed { get; init; }
     public float? SufferScore { get; init; }
+}
+
+public sealed record StravaSummaryActivityAthlete
+{
+    public int? Id { get; init; }
+    public int? ResourceState { get; init; }
+}
+
+public sealed record StravaSummaryActivityMap
+{
+    public string? Id { get; init; }
+    public string? Polyline { get; init; }
+    public int? ResourceState { get; init; }
+    public string? SummaryPolyline { get; init; }
 }

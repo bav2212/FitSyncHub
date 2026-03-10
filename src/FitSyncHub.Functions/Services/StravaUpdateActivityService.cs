@@ -27,7 +27,7 @@ public sealed class StravaUpdateActivityService
     }
 
     public async Task UpdateActivity(
-        WebhookEventData webhookEventData,
+        StravaWebhookEventData webhookEventData,
         CancellationToken cancellationToken)
     {
         var activityId = webhookEventData.ActivityId;

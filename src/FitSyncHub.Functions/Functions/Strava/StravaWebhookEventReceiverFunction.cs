@@ -35,7 +35,7 @@ public sealed class StravaWebhookEventReceiverFunction
             };
         }
 
-        var webhookEventData = new WebhookEventData
+        var webhookEventData = new StravaWebhookEventData
         {
             Id = Guid.NewGuid().ToString(),
             ObjectType = request.ObjectType,
@@ -88,7 +88,7 @@ public sealed record WebhookEventReceiverMultiResponse
         Connection = "AzureWebJobsStorageConnectionString",
         CreateIfNotExists = true,
         PartitionKey = "/id")]
-    public required WebhookEventData? Document { get; init; }
+    public required StravaWebhookEventData? Document { get; init; }
     [HttpResult]
     public required IActionResult Result { get; init; }
 }
