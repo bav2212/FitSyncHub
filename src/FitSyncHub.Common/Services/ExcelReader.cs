@@ -34,16 +34,27 @@ public sealed class ExcelReader
     {
         var table = new DataTable();
         using var spreadSheetDocument = SpreadsheetDocument.Open(fileName, false);
-        var workbookPart = spreadSheetDocument.WorkbookPart!;
+        var workbookPart = spreadSheetDocument.WorkbookPart
+            ?? throw new InvalidDataException($"{nameof(spreadSheetDocument.WorkbookPart)} should not be null");
         var worksheetPart = GetWorksheetPart(workbookPart, sheetName);
-        var sheetData = worksheetPart.Worksheet.Elements<SheetData>().First();
-        var hyperlinks = worksheetPart.RootElement!.Descendants<Hyperlinks>().First().Cast<Hyperlink>().ToArray();
-        var hyperlinkRelationships = worksheetPart.HyperlinkRelationships.ToArray();
 
-        if (sheetData.Elements<Row>().ToArray() is not [var headerRow, .. var rows])
+        var sheetData = worksheetPart.Worksheet?.Elements<SheetData>().First();
+        if (sheetData is null || sheetData.Elements<Row>().ToArray() is not [var headerRow, .. var rows])
         {
-            throw new InvalidOperationException();
+            throw new InvalidDataException($"{nameof(sheetData)} should not be null");
         }
+
+        var hyperlinks = worksheetPart.RootElement?.Descendants<Hyperlinks>()
+            .First()
+            .ToList()
+            .Cast<Hyperlink>()
+            .ToArray();
+        if (hyperlinks is null)
+        {
+            throw new InvalidDataException($"{nameof(hyperlinks)} should not be null");
+        }
+
+        var hyperlinkRelationships = worksheetPart.HyperlinkRelationships.ToArray();
 
         var columns = CreateDataColumns(spreadSheetDocument, headerRow).ToArray();
         table.Columns.AddRange(columns);
@@ -125,7 +136,7 @@ public sealed class ExcelReader
             return workbookPart.WorksheetParts.First();
         }
 
-        var sheet = workbookPart.Workbook.Sheets!.Elements<Sheet>()
+        var sheet = workbookPart.Workbook?.Sheets?.Elements<Sheet>()
             .FirstOrDefault(s => s.Name == sheetName)
             ?? throw new InvalidOperationException($"Sheet with name ${sheetName} not found");
 
@@ -143,7 +154,7 @@ public sealed class ExcelReader
 
         var value = cell.CellValue.InnerXml;
         return cell.DataType != null && cell.DataType.Value == CellValues.SharedString
-            ? document.WorkbookPart!.SharedStringTablePart!.SharedStringTable.ChildElements[int.Parse(value)].InnerText
+            ? document.WorkbookPart?.SharedStringTablePart?.SharedStringTable?.ChildElements[int.Parse(value)].InnerText
             : value;
     }
 }
