@@ -7,7 +7,7 @@ namespace FitSyncHub.Functions.Repositories;
 public sealed class StravaStravaOAuthDataRepository : CosmosDbRepository<StravaOAuthData>
 {
     public StravaStravaOAuthDataRepository(CosmosClient cosmosClient)
-        : base(cosmosClient.GetDatabase("fit-sync-hub").GetContainer("StravaOAuthData"))
+        : base(cosmosClient.GetDatabase(Constants.CosmosDb.DatabaseName).GetContainer(Constants.CosmosDb.Containers.StravaOAuthData))
     {
     }
 }

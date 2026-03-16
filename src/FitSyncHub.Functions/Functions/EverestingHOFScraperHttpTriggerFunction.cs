@@ -32,7 +32,8 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         ILogger<EverestingHOFScraperHttpTriggerFunction> logger)
     {
         _httpClient = httpClient;
-        _everestingHOFContainer = cosmosClient.GetDatabase("fit-sync-hub").GetContainer("EverestingHOF");
+        _everestingHOFContainer = cosmosClient.GetDatabase(Constants.CosmosDb.DatabaseName)
+            .GetContainer(Constants.CosmosDb.Containers.EverestingHOF);
 
         _logger = logger;
     }

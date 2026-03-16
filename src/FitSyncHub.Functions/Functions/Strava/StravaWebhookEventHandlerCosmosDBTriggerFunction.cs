@@ -26,10 +26,10 @@ public sealed class StravaWebhookEventHandlerCosmosDBTriggerFunction
 #endif
     public async Task Run(
         [CosmosDBTrigger(
-            databaseName: "fit-sync-hub",
-            containerName: "StravaWebhookEvent",
-            Connection = "AzureWebJobsStorageConnectionString",
-            LeaseContainerName = "leases",
+            databaseName: Constants.CosmosDb.DatabaseName,
+            containerName: Constants.CosmosDb.Containers.StravaWebhookEvent,
+            Connection = Constants.CosmosDb.ConnectionString,
+            LeaseContainerName = Constants.CosmosDb.LeaseContainerName,
             CreateLeaseContainerIfNotExists = true)] IReadOnlyList<StravaWebhookEventData> input,
         CancellationToken cancellationToken)
     {

@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
-using FitSyncHub.Common;
 using FitSyncHub.Common.Extensions;
 using FitSyncHub.Common.Services;
 using FitSyncHub.IntervalsICU.HttpClients;
@@ -47,7 +46,7 @@ public sealed class LactateSyncHttpTriggerFunction
         }
 
         var lastSyncDate = await _distributedCacheService.GetValueAsync(
-            Constants.CacheKeys.LactateLastSyncedDate,
+            Common.Constants.CacheKeys.LactateLastSyncedDate,
             _dateTimeJsonTypeInfo,
             cancellationToken);
 
@@ -84,7 +83,7 @@ public sealed class LactateSyncHttpTriggerFunction
         var lastSyncedLactateResultTime = mappedLactateResultsToActivities.SelectMany(x => x.Value).Max(x => x.Time);
 
         await _distributedCacheService.SetValueAsync(
-            Constants.CacheKeys.LactateLastSyncedDate,
+            Common.Constants.CacheKeys.LactateLastSyncedDate,
             lastSyncedLactateResultTime,
             _dateTimeJsonTypeInfo,
             cancellationToken
@@ -160,12 +159,8 @@ public sealed class LactateSyncHttpTriggerFunction
                     // If lactate result is not found in any activity, try to find it in the next 10 minutes of the activity
                     lactateResultActivity = intervalsIcuActivities
                         .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal
-                            && lactateResult.Time <= x.EndTimeLocal.AddMinutes(10));
-
-                    if (lactateResultActivity == null)
-                    {
-                        throw new InvalidDataException("Could not map all lactate results to activities");
-                    }
+                            && lactateResult.Time <= x.EndTimeLocal.AddMinutes(10))
+                        ?? throw new InvalidDataException("Could not map all lactate results to activities");
                 }
 
                 if (result.TryGetValue(lactateResultActivity, out var lactateResultsInActivity))

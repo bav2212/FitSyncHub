@@ -63,7 +63,7 @@ builder.Services
     .UseAzureMonitorExporter();
 
 builder.Services
-    .AddSingleton(_ => new CosmosClient(builder.Configuration["AzureWebJobsStorageConnectionString"], new()
+    .AddSingleton(_ => new CosmosClient(builder.Configuration[FitSyncHub.Functions.Constants.CosmosDb.ConnectionString], new()
     {
         UseSystemTextJsonSerializerWithOptions = new JsonSerializerOptions()
     }));
@@ -82,9 +82,9 @@ builder.Services.AddXertModule(builder.Configuration.GetSection("Xert"));
 
 builder.Services.AddCosmosCache(cacheOptions =>
 {
-    cacheOptions.DatabaseName = "fit-sync-hub";
-    cacheOptions.ContainerName = "DistributedCache";
-    cacheOptions.ClientBuilder = new CosmosClientBuilder(builder.Configuration["AzureWebJobsStorageConnectionString"]);
+    cacheOptions.DatabaseName = FitSyncHub.Functions.Constants.CosmosDb.DatabaseName;
+    cacheOptions.ContainerName = FitSyncHub.Functions.Constants.CosmosDb.Containers.DistributedCache;
+    cacheOptions.ClientBuilder = new CosmosClientBuilder(builder.Configuration[FitSyncHub.Functions.Constants.CosmosDb.ConnectionString]);
     cacheOptions.CreateIfNotExists = true;
 });
 

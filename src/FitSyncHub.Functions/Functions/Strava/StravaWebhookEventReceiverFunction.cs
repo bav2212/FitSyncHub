@@ -83,9 +83,9 @@ public sealed class StravaWebhookEventReceiverFunction
 public sealed record StravaWebhookEventReceiverMultiResponse
 {
     [CosmosDBOutput(
-        databaseName: "fit-sync-hub",
-        containerName: "StravaWebhookEvent",
-        Connection = "AzureWebJobsStorageConnectionString",
+        databaseName: Constants.CosmosDb.DatabaseName,
+        containerName: Constants.CosmosDb.Containers.StravaWebhookEvent,
+        Connection = Constants.CosmosDb.ConnectionString,
         CreateIfNotExists = true,
         PartitionKey = "/id")]
     public required StravaWebhookEventData? Document { get; init; }

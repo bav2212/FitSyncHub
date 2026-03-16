@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using FitSyncHub.Functions.Data.Entities;
-using FitSyncHub.Strava;
 using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Strava.Models.Requests;
 using FitSyncHub.Strava.Models.Responses.Activities;
@@ -40,21 +39,21 @@ public sealed class StravaUpdateActivityService
             _logger.LogInformation("Activity: {Activity}", JsonSerializer.Serialize(activity));
         }
 
-        if (activity.Type == Constants.StravaActivityType.Walk)
+        if (activity.Type == Strava.Constants.StravaActivityType.Walk)
         {
             await HideActivityFromHome(activityId, cancellationToken);
             return;
         }
 
         // temp hide workouts
-        if (activity.Type == Constants.StravaActivityType.Workout)
+        if (activity.Type == Strava.Constants.StravaActivityType.Workout)
         {
             await HideActivityFromHome(activityId, cancellationToken);
             return;
         }
 
-        var isOutdoorRide = activity.Type == Constants.StravaActivityType.Ride
-            && activity.DeviceName != Constants.WahooSYSTMDeviceName;
+        var isOutdoorRide = activity.Type == Strava.Constants.StravaActivityType.Ride
+            && activity.DeviceName != Strava.Constants.WahooSYSTMDeviceName;
         if (isOutdoorRide)
         {
             await CorrectGearIfNeed(activityId, activity, cancellationToken);
@@ -62,7 +61,7 @@ public sealed class StravaUpdateActivityService
         }
 
         // temp hide virtual rides
-        var isVirtualRide = activity.Type == Constants.StravaActivityType.VirtualRide;
+        var isVirtualRide = activity.Type == Strava.Constants.StravaActivityType.VirtualRide;
         if (isVirtualRide)
         {
             // do not want to spam home feed with warmups/cooldowns

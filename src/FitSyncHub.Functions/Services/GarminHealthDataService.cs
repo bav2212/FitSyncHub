@@ -1,5 +1,4 @@
-﻿using FitSyncHub.Common;
-using FitSyncHub.Common.Services;
+﻿using FitSyncHub.Common.Services;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.JsonSerializerContexts;
 using FitSyncHub.GarminConnect.Models.Responses;
@@ -32,7 +31,7 @@ public sealed class GarminHealthDataService
 
         var garminWeightResponse = await _garminConnectHttpClient.GetWeightDayView(today, cancellationToken);
         var previousGarminWeightResponse = await _distributedCacheService.GetValueAsync(
-            Constants.CacheKeys.GarminLastWeightResponse,
+            Common.Constants.CacheKeys.GarminLastWeightResponse,
             GarminConnectWeightSerializerContext.Default.GarminWeightResponse,
             cancellationToken);
         if (previousGarminWeightResponse != null
@@ -48,7 +47,7 @@ public sealed class GarminHealthDataService
         }
 
         await _distributedCacheService.SetValueAsync(
-            Constants.CacheKeys.GarminLastWeightResponse,
+            Common.Constants.CacheKeys.GarminLastWeightResponse,
             garminWeightResponse,
             GarminConnectWeightSerializerContext.Default.GarminWeightResponse,
             cancellationToken);
