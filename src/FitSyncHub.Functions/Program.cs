@@ -22,6 +22,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
 
 HashSet<string> functionsCalledByUser = [
     nameof(WeightHttpTriggerFunction),
@@ -47,6 +48,14 @@ builder.UseMiddleware<HttpContextAccessorMiddleware>();
 builder.UseMiddleware<LogBadRequestMiddleware>();
 
 builder.Configuration.AddUserSecrets<Program>();
+
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        logging.AddConsoleExporter();
+    }
+});
 
 builder.Services
     .AddOpenTelemetry()
