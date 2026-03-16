@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Azure.Monitor.OpenTelemetry.Exporter;
 using FitSyncHub.Common;
 using FitSyncHub.Functions;
 using FitSyncHub.Functions.Functions;
@@ -15,8 +16,8 @@ using FitSyncHub.Youtube;
 using FitSyncHub.Zwift;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
-using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
+using Microsoft.Azure.Functions.Worker.OpenTelemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -48,8 +49,9 @@ builder.UseMiddleware<LogBadRequestMiddleware>();
 builder.Configuration.AddUserSecrets<Program>();
 
 builder.Services
-    .AddApplicationInsightsTelemetryWorkerService()
-    .ConfigureFunctionsApplicationInsights();
+    .AddOpenTelemetry()
+    .UseFunctionsWorkerDefaults()
+    .UseAzureMonitorExporter();
 
 builder.Services
     .AddSingleton(_ => new CosmosClient(builder.Configuration["AzureWebJobsStorageConnectionString"], new()
@@ -83,18 +85,6 @@ builder.Services.AddTransient<StravaSummaryActivityRepository>();
 builder.Services.AddTransient<GarminHealthDataService>();
 builder.Services.AddTransient<StravaSummaryActivityService>();
 builder.Services.AddTransient<StravaUpdateActivityService>();
-
-builder.Logging.Services.Configure<LoggerFilterOptions>(options =>
-{
-    // The Application Insights SDK adds a default logging filter that instructs ILogger to capture only Warning and more severe logs. Application Insights requires an explicit override.
-    // Log levels can also be configured using host.json. For more information, see https://learn.microsoft.com/en-us/azure/azure-monitor/app/worker-service#ilogger-logs
-    var toRemove = options.Rules.FirstOrDefault(rule => rule.ProviderName
-        == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
-    if (toRemove is not null)
-    {
-        options.Rules.Remove(toRemove);
-    }
-});
 
 var host = builder.Build();
 await host.RunAsync();
