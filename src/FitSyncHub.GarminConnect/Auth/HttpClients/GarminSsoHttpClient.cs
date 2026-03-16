@@ -65,10 +65,14 @@ internal sealed partial class GarminSsoHttpClient
         _logger.LogInformation("Cookies retrieved");
 
         var csrf = await RequestCsrfToken(cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("CSRF token retrieved: {Csrf}", csrf);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var ticket = await GetOAuthTicket(csrf, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("OAuth1 ticket: {Ticket}", ticket);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         return ticket;
     }

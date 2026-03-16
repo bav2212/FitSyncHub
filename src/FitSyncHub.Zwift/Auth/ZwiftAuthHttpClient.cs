@@ -44,7 +44,9 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
 
         var token = JsonSerializer.Deserialize(
             content, ZwiftAuthHttpClientGenerationContext.Default.ZwiftAuthTokenModel)!;
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("OAuth2 token: {AccessToken}", token.AccessToken);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         _logger.LogInformation("Authentication process completed.");
         return token;
@@ -52,7 +54,9 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
 
     public async Task<ZwiftAuthTokenModel> RefreshToken(ZwiftAuthTokenModel token, CancellationToken cancellationToken)
     {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Starting token refresh with refresh token: {Token}", token.RefreshToken);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         const string Url = "/auth/realms/zwift/tokens/access/codes";
         var formParamets = new Dictionary<string, string>
@@ -69,7 +73,9 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
 
         var newToken = JsonSerializer.Deserialize(
             content, ZwiftAuthHttpClientGenerationContext.Default.ZwiftAuthTokenModel)!;
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("OAuth2 token: {AccessToken}", newToken.AccessToken);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         _logger.LogInformation("Refresh process completed.");
         return newToken;

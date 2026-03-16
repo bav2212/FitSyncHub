@@ -2,21 +2,17 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions.Strava;
 
 public sealed class StravaExchangeTokenHttpTriggerFunction
 {
     private readonly StravaOAuthTokenService _stravaOAuthTokenService;
-    private readonly ILogger<StravaExchangeTokenHttpTriggerFunction> _logger;
 
     public StravaExchangeTokenHttpTriggerFunction(
-        StravaOAuthTokenService stravaOAuthTokenService,
-        ILogger<StravaExchangeTokenHttpTriggerFunction> logger)
+        StravaOAuthTokenService stravaOAuthTokenService)
     {
         _stravaOAuthTokenService = stravaOAuthTokenService;
-        _logger = logger;
     }
 
     [Function(nameof(StravaExchangeTokenHttpTriggerFunction))]
@@ -24,8 +20,6 @@ public sealed class StravaExchangeTokenHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "strava/exchange_token")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Started executing function {Function}", nameof(StravaExchangeTokenHttpTriggerFunction));
-
         string? code = req.Query["code"];
         string? scope = req.Query["scope"];
 

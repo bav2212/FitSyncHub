@@ -35,8 +35,10 @@ public sealed class StravaUpdateActivityService
         var activity = await _stravaHttpClient.GetActivity(activityId, cancellationToken);
 
         // temp
-        var activityJson = JsonSerializer.Serialize(activity);
-        _logger.LogInformation("Activity: {Activity}", activityJson);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Activity: {Activity}", JsonSerializer.Serialize(activity));
+        }
 
         if (activity.Type == Constants.StravaActivityType.Walk)
         {
@@ -75,10 +77,12 @@ public sealed class StravaUpdateActivityService
             return;
         }
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Skip updating activity with name: {Name}, id: {Id}. Type: {Type}",
             activity.Name,
             activity.Id,
             activity.Type);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
     }
 
     private static bool IsWarmup(ActivityModelResponse activity)
@@ -132,8 +136,10 @@ public sealed class StravaUpdateActivityService
 
         if (activity.DeviceWatts == true)
         {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             // do not need to update, cause activity was recorded with powermeter (Bike = Boardman)
             _logger.LogInformation("Do not need to update gear, cause ride {RideId} was recorded with powermeter", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             return;
         }
 
@@ -143,7 +149,9 @@ public sealed class StravaUpdateActivityService
             return;
         }
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Update gear for ride {RideId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
         var updateModel = new UpdatableActivityRequest
         {
             GearId = _cityBikeGearId

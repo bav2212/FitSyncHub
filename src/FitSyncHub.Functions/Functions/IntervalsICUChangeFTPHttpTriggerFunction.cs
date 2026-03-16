@@ -109,13 +109,21 @@ public sealed class IntervalsICUChangeFTPHttpTriggerFunction
         Dictionary<string, FitMessages> activityFitMessages = [];
         foreach (var activity in activities)
         {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Downloading fit file for activity {ActivityId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             var memoryStream = await _intervalsIcuHttpClient.DownloadOriginalActivityFitFile(activity.Id, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Downloaded fit file for activity {ActivityId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Start decoding fit file for activity {ActivityId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             var fitMessages = _decoder.Decode(memoryStream);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Finished decoding fit file for activity {ActivityId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             activityFitMessages.Add(activity.Id, fitMessages);
         }
 

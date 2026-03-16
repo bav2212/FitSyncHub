@@ -47,13 +47,19 @@ public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         _logger.LogInformation("Starting Garmin to Intervals.icu export function");
 
         var ftp = await _garminConnectHttpClient.GetCyclingFtp(cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Retrieved FTP value from Garmin: {Ftp}", ftp);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var trainingPlanId = await _garminConnectHttpClient.GetActiveTrainingPlanId(cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Retrieved active training plan ID: {TrainingPlanId}", trainingPlanId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var trainingPlan = await _garminConnectHttpClient.GetTrainingPlan(trainingPlanId, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Retrieved training plan {TrainingPlan}", trainingPlan);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var garminTrainingPlanTaskList = trainingPlan.TaskList
             .Where(x => x.TaskWorkout.SportType != null && x.TaskWorkout.AdaptiveCoachingWorkoutStatus == "NOT_COMPLETE"
@@ -61,7 +67,9 @@ public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
                 && (date == default || x.CalendarDate == date))
             .ToList();
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Found {Count} incomplete tasks in training plan", garminTrainingPlanTaskList.Count);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         if (garminTrainingPlanTaskList.Count == 0)
         {
@@ -72,10 +80,14 @@ public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 
         var firstDay = garminTrainingPlanTaskListDates[0];
         var lastDay = garminTrainingPlanTaskListDates[^1];
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Last calendar day among tasks {LastDay}", lastDay);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(firstDay, lastDay), cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var intervalsIcuEventsMapping = intervalsIcuEvents
             .Where(x => x.Tags?.Contains(IntervalsIcuEventTagGarminConnect) == true && x.PairedActivityId == null)
@@ -88,10 +100,14 @@ public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
         foreach (var workout in garminTrainingPlanTaskList)
         {
             var workoutId = workout.TaskWorkout.WorkoutUuid;
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Processing workout {WorkoutId}", workoutId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
             var workoutResponse = await _garminConnectHttpClient.GetWorkout(workoutId, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Retrieved Garmin workout details: {workoutId}", workoutId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
             var internalWorkoutStructure = await _converterService.Convert(workoutResponse, cancellationToken);
             var intervalsIcuWorkoutText = new IntervalsIcuWorkoutBuilder()
@@ -117,12 +133,16 @@ public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 
                 if (existingIntervalsIcuEvent.Description is { } && HasSameGeneratedContent(intervalsIcuEventStructure, existingIntervalsIcuEvent.Description))
                 {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
                     _logger.LogInformation("No changes needed for existing event {ExistingIntervalsIcuEventId}", existingIntervalsIcuEvent.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
                     continue;
                 }
                 else
                 {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
                     _logger.LogInformation("Updating existing event by deletion: {existingIntervalsIcuEventId}", existingIntervalsIcuEvent.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
                     await _intervalsIcuHttpClient.DeleteEvent(new(existingIntervalsIcuEvent.Id), cancellationToken);
                 }
             }
@@ -145,21 +165,27 @@ public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
                 Type = eventType
             };
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Creating new Intervals.icu event: {CreateRequest}", createRequest);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             await _intervalsIcuHttpClient.CreateEvent(createRequest, cancellationToken);
         }
 
         // Delete all events that are not paired with an activity
         foreach (var (key, @event) in intervalsIcuEventsMapping)
         {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Deleting unpaired event {EventId} for date {Date} and title {Title}", @event.Id, key.Date, key.Title);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             await _intervalsIcuHttpClient.DeleteEvent(new(@event.Id), cancellationToken);
         }
 
         _logger.LogInformation("Export function completed successfully");
 
         intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(firstDay, lastDay), cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var intervalsIcuFutureGarminEventsOverview = IntervalsIcuResponseOverviewHelper.ToStringOverview(intervalsIcuEvents);
 

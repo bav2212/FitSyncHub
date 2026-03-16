@@ -79,14 +79,20 @@ internal class GarminAuthService : IGarminAuthService,
 
     public async Task<GarminAuthenticationModel> ExchangeToken(GarminOAuth1Token oAuth1Token, CancellationToken cancellationToken)
     {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Starting token exchange with token: {Token}, secret: {Secret}",
-            oAuth1Token.Token, oAuth1Token.TokenSecret);
+                oAuth1Token.Token, oAuth1Token.TokenSecret);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var consumerCredentials = await _consumerCredentialsProvider.GetConsumerCredentials(cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Consumer Key for exchange: {ConsumerKey}", consumerCredentials.ConsumerKey);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var token = await _oAuthHttpClient.Exchange(oAuth1Token, consumerCredentials, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Exchanged OAuth2 token: {AccessToken}", token.AccessToken);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var authResult = new GarminAuthenticationModel
         {
@@ -131,10 +137,14 @@ internal class GarminAuthService : IGarminAuthService,
         var consumerCredentials = await _consumerCredentialsProvider.GetConsumerCredentials(cancellationToken);
 
         var oauth1 = await _oAuthHttpClient.GetOAuth1Token(ticket, consumerCredentials, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("OAuth1 token: {Token}, secret: {Secret}", oauth1.Token, oauth1.TokenSecret);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var oauth2 = await _oAuthHttpClient.Exchange(oauth1, consumerCredentials, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("OAuth2 token: {AccessToken}", oauth2.AccessToken);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         _logger.LogInformation("Authentication process completed.");
         return new GarminAuthenticationModel

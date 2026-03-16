@@ -21,11 +21,16 @@ public sealed class ExcelReader
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        _logger.LogInformation("Started reading file: {filePath}", filePath);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Started reading file: {FilePath}", filePath);
+        }
 
         var result = ReadImplementation(filePath, sheetName);
-
-        _logger.LogInformation("Finished reading file: {filePath}, elapsed {ElapsedMilliseconds} milliseconds", filePath, stopwatch.ElapsedMilliseconds);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Finished reading file: {FilePath}, elapsed {ElapsedMilliseconds} milliseconds", filePath, stopwatch.ElapsedMilliseconds);
+        }
 
         return result;
     }

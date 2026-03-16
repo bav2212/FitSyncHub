@@ -31,7 +31,9 @@ public class IntervalsIcuStorageService(
         var response = await httpClient.CreateWorkouts(createWorkoutRequestModelList, cancellationToken);
 
         response.EnsureSuccessStatusCode();
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         logger.LogInformation("Stored {ItemsCount} at intervals.icu folder {FolderId}", items.Count, intervalsIcuFolderId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
     }
 
     private static IEnumerable<WorkoutCreateRequest> CreateCreateWorkoutRequestModels(

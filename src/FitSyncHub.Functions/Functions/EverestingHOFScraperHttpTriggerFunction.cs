@@ -207,8 +207,11 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
     {
         var activities = GetActivitiesArray(root);
 
-        _logger.LogInformation("Page {CurrentPage} / {TotalPages}", GetCurrentPage(root), GetTotalPages(root));
-        _logger.LogInformation("Activities: {ActivitiesCount}", activities.GetArrayLength());
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Page {CurrentPage} / {TotalPages}", GetCurrentPage(root), GetTotalPages(root));
+            _logger.LogInformation("Activities: {ActivitiesCount}", activities.GetArrayLength());
+        }
 
         var tasks = new List<Task<ResponseMessage>>();
         foreach (var activity in activities.EnumerateArray())

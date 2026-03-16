@@ -30,12 +30,12 @@ public sealed class FitFileDecoder
         }
         catch (FitException ex)
         {
-            _logger.LogError("A FitException occurred when trying to decode the FIT file. Message: {Message}", ex.Message);
+            _logger.LogError(ex, "A FitException occurred when trying to decode the FIT file");
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError("Exception occurred when trying to decode the FIT file. Message: {Message}", ex.Message);
+            _logger.LogError(ex, "Exception occurred when trying to decode the FIT file");
             throw;
         }
     }
@@ -44,7 +44,10 @@ public sealed class FitFileDecoder
     {
         // Attempt to open .FIT file
         using var fitSource = new FileStream(fileName, FileMode.Open);
-        _logger.LogInformation("Opening {FileName}", StringHelper.Sanitize(fileName));
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Opening {FileName}", StringHelper.Sanitize(fileName));
+        }
 
         return Decode(fitSource);
     }
@@ -71,12 +74,12 @@ public sealed class FitFileDecoder
     //    }
     //    catch (FitException ex)
     //    {
-    //        _logger.LogError(ex, "A FitException occurred when trying to decode the FIT file. Message: {Message}", ex.Message);
+    //        _logger.LogError(ex, "A FitException occurred when trying to decode the FIT file");
     //        throw;
     //    }
     //    catch (Exception ex)
     //    {
-    //        _logger.LogError(ex, "Exception occurred when trying to decode the FIT file. Message: {Message}", ex.Message);
+    //        _logger.LogError(ex, "Exception occurred when trying to decode the FIT file");
     //        throw;
     //    }
     //}

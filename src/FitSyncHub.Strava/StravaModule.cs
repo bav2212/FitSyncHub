@@ -79,11 +79,13 @@ public static class StravaModule
                         var logger = loggerFactory.CreateLogger("StravaUploadActivityResiliencePipeline");
 
                         var uploadResponse = args.Outcome.Result!;
+#pragma warning disable CA1873 // Avoid potentially expensive logging
                         logger.LogInformation("Upload status: {Status}, Error: {Error}, retry {RetryCount} after {Timespan}",
                                                 uploadResponse.Status,
                                                 uploadResponse.Error,
                                                 args.AttemptNumber,
                                                 args.RetryDelay);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
                         return ValueTask.CompletedTask;
                     }
                 });

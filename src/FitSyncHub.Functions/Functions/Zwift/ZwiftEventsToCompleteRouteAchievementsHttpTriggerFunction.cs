@@ -30,12 +30,17 @@ public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
     {
         string? timezoneQueryParameter = req.Query["timezone"];
 
-        _logger.LogInformation("Timezone request query parameter: {QueryParam}", StringHelper.Sanitize(timezoneQueryParameter));
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Timezone request query parameter: {QueryParam}", StringHelper.Sanitize(timezoneQueryParameter));
+        }
 
         TimeZoneInfo timezone;
         if (timezoneQueryParameter is { } && TimeZoneInfo.TryFindSystemTimeZoneById(timezoneQueryParameter, out var parsedTimeZone))
         {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Using timezone: {TimeZone}", parsedTimeZone);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             timezone = parsedTimeZone;
         }
         else

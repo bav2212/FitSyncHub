@@ -54,7 +54,9 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
         _logger.LogInformation("Downloaded workout zwo from Xert");
 
         var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(today, today), cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Retrieved {Count} existing Intervals.icu events", intervalsIcuEvents.Count);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var intervalsIcuEventsMapping = intervalsIcuEvents
             .Where(x => x.Tags?.Contains(IntervalsIcuEventTagXert) == true && x.PairedActivityId == null)

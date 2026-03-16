@@ -47,7 +47,10 @@ public class WeightHttpTriggerFunction
             return new BadRequestObjectResult("Weight should be in kg's");
         }
 
-        _logger.LogInformation("Weight is {weight} kg", StringHelper.Sanitize(weight));
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Weight is {weight} kg", StringHelper.Sanitize(weight));
+        }
 
         try
         {

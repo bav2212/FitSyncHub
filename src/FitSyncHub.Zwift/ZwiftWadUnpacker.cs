@@ -69,7 +69,9 @@ public sealed class ZwiftWadDecoder
         var nameBytes = new byte[0x60];
         inFile.ReadExactly(nameBytes);
         var name = Encoding.ASCII.GetString(nameBytes).TrimEnd('\0');
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogDebug("Decoding Wad File: {Name}", name);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         inFile.Seek(0x90, SeekOrigin.Current);
 
@@ -113,7 +115,9 @@ public sealed class ZwiftWadDecoder
 
             var nameBuf = reader.ReadBytes(0x60);
             var name = Encoding.ASCII.GetString(nameBuf).TrimEnd('\0');
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogDebug("Extracting {Name}", name);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
             reader.ReadUInt32(); // skip first int
             var size = reader.ReadUInt32();

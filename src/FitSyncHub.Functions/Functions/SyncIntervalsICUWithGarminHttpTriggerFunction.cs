@@ -71,7 +71,9 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
         }
 
         var activities = await GetRideActivities(date, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Received {ActivitiesCount} activities", activities.Count);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         if (activities.Count != count)
         {
@@ -182,13 +184,21 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
         Dictionary<string, FitMessages> activityFitMessages = [];
         foreach (var activity in activities)
         {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Downloading fit file for activity {ActivityId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             var memoryStream = await _intervalsIcuHttpClient.DownloadOriginalActivityFitFile(activity.Id, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Downloaded fit file for activity {ActivityId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Start decoding fit file for activity {ActivityId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             var fitMessages = _decoder.Decode(memoryStream);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Finished decoding fit file for activity {ActivityId}", activity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
             activityFitMessages.Add(activity.Id, fitMessages);
         }
 
@@ -244,7 +254,10 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
         _logger.LogInformation("Get linked paired event");
         var pairedEvent = await _intervalsIcuHttpClient.GetEvent(pairedEventId, cancellationToken);
 
-        _logger.LogInformation("Unlinking paired event {EventId} from activity {ActivityId}", pairedEvent, activityWithLinkedPairedEvent.Id);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+        _logger.LogInformation("Unlinking paired event {EventId} from activity {ActivityId}",
+            pairedEvent, activityWithLinkedPairedEvent.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
         await _intervalsIcuHttpClient.UnlinkPairedWorkout(activityWithLinkedPairedEvent.Id, cancellationToken);
 
         return pairedEvent;
@@ -318,7 +331,9 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
             new DateTime(date, TimeOnly.MaxValue),
             "cycling",
             cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Got {Count} activities from Garmin", garminActivities.Count);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
         if (garminActivities.Count != 1)
         {
             throw new InvalidDataException($"Skip syncing with Garmin, cause activities count = {garminActivities.Count}");
@@ -347,7 +362,9 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
             }
         };
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Updating garmin activity with Id = {Id}", activityId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
         try
         {
             await _garminConnectHttpClient.UpdateActivity(updateModel, cancellationToken);
@@ -358,7 +375,9 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
             throw new InvalidDataException("Can not update garmin activity");
         }
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Updated garmin activity with Id = {Id}", activityId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         return await _garminConnectHttpClient.GetActivity(activityId, cancellationToken);
     }

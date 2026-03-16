@@ -85,7 +85,9 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
 
         if (intervalsIcuEvents.Count != count)
         {
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Found {ActivitiesCount} intervals.icu events, but specified {ParsedCount} in request", intervalsIcuEvents.Count, count);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
         }
 
         var tuples = garminWorkoutActivities.Select((garminWorkoutActivity, index) =>
@@ -99,10 +101,14 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
         {
             var garminActivityId = garminWorkoutActivity.ActivityId;
             var garminActivityName = garminWorkoutActivity.ActivityName;
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Processing activity {ActivityId} with name {ActivityName}", garminActivityId, garminActivityName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
             var activityFileStream = await _garminConnectHttpClient.DownloadActivityFile(garminActivityId, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Downloaded activity file {ActivityId}", garminActivityId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
             await using var zip = new ZipArchive(activityFileStream, ZipArchiveMode.Read);
             if (zip.Entries.Count != 1)
@@ -122,7 +128,9 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
                 Name = zipEntry.Name,
                 Bytes = memoryStream.ToArray(),
             };
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             _logger.LogInformation("Read {Size} bytes from file {EntryName}", memoryStream.Length, zipEntry.Name);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
             // prefer to use intervals.icu event name, because user can rename garmin activity to something like "Treadmill" or "Elliptical"
             // but intervals.icu can be null if it was not planned
@@ -170,15 +178,21 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
             ExternalId = activityId.ToString(),
         };
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Uploading activity {ActivityId} with name {ActivityName} to Strava", activityId, activityName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
         var uploadStartResponse = await _stravaHttpClient.UploadStart(uploadFileModel, uploadModel, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Upload started with id {UploadId}", uploadStartResponse.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         var uploadResponse = await _stravaHttpClient.GetUpload(uploadStartResponse.Id, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Upload to strava completed with status: {Status}, Error: {Error}, ActivityId: {ActivityId}",
             uploadResponse.Status,
             uploadResponse.Error,
             uploadResponse.ActivityId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         if (uploadResponse.Error is not null)
         {
@@ -229,7 +243,10 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
             ExternalId = activityId.ToString(),
         }, cancellationToken);
 
-        _logger.LogInformation("Activity {ActivityId} uploaded to intervals.icu with id {IntervalsIcuActivityId}", activityId, intervalsIcuCreatedActivity.Id);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+        _logger.LogInformation("Activity {ActivityId} uploaded to intervals.icu with id {IntervalsIcuActivityId}",
+            activityId, intervalsIcuCreatedActivity.Id);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
         return UploadResult.Succeed;
     }
 

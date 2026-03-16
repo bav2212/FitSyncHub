@@ -211,9 +211,11 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
                     throw new InvalidDataException($"Homedata XML element not found in file {filePath}");
                 }
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
                 _logger.LogInformation("Skipping route file {FilePath} due to known missing homedata, route: {Route}",
                     filePath,
                     routeXmlDTO.Name);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
                 continue;
             }
 

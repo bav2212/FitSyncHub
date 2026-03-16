@@ -18,7 +18,9 @@ public class IntervalsIcuDeletePlanService(
         foreach (var workoutId in ids)
         {
             await httpClient.DeleteWorkout(workoutId, cancellationToken);
+#pragma warning disable CA1873 // Avoid potentially expensive logging
             logger.LogInformation("Deleted workout with id {WorkoutId} from intervals.icu folder {FolderId}", workoutId, intervalsIcuFolderId);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
         }
     }
 
