@@ -86,17 +86,5 @@ builder.Services.AddTransient<GarminHealthDataService>();
 builder.Services.AddTransient<StravaSummaryActivityService>();
 builder.Services.AddTransient<StravaUpdateActivityService>();
 
-builder.Logging.Services.Configure<LoggerFilterOptions>(options =>
-{
-    // The Application Insights SDK adds a default logging filter that instructs ILogger to capture only Warning and more severe logs. Application Insights requires an explicit override.
-    // Log levels can also be configured using host.json. For more information, see https://learn.microsoft.com/en-us/azure/azure-monitor/app/worker-service#ilogger-logs
-    var toRemove = options.Rules.FirstOrDefault(rule => rule.ProviderName
-        == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
-    if (toRemove is not null)
-    {
-        options.Rules.Remove(toRemove);
-    }
-});
-
 var host = builder.Build();
 await host.RunAsync();
