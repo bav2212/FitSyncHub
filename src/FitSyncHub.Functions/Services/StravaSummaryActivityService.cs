@@ -50,8 +50,7 @@ public sealed class StravaSummaryActivityService
        long activityId,
        CancellationToken cancellationToken)
     {
-        var existingActivitySummary = await _summaryActivityRepository
-            .Read(x => x.Id == activityId.ToString(), cancellationToken);
+        var existingActivitySummary = await _summaryActivityRepository.Read(activityId.ToString(), cancellationToken);
         if (existingActivitySummary is null)
         {
             return;

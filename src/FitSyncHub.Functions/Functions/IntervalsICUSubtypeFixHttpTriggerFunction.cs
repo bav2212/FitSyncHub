@@ -66,41 +66,29 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
 
         foreach (var (date, activitiesForDate) in activityGroups)
         {
-            HashSet<DateTime> knownDateToSkipCauseMuptipleRaces = [
-                // 4 tiny races
-                new DateTime(2025, 8, 23),
-                // twoo races
-                new DateTime(2024, 12, 22)
-            ];
+            List<ActivityResponse> warmupActivities = [];
+            List<ActivityResponse> cooldownActivities = [];
+            // very rare, but can have more than one
+            List<ActivityResponse> raceActivities = [];
 
-            if (knownDateToSkipCauseMuptipleRaces.Contains(date))
+            foreach (var activity in activitiesForDate.OrderBy(x => x.StartDateLocal))
             {
-                // skip known bad data
-                continue;
+                if (activity.SubType == ActivitySubType.Race)
+                {
+                    raceActivities.Add(activity);
+                    continue;
+                }
+
+                var listToPutActivityIn = raceActivities.Count == 0 ? warmupActivities : cooldownActivities;
+                listToPutActivityIn.Add(activity);
             }
 
-            if (!(activitiesForDate.SingleOrDefault(x => x.SubType == ActivitySubType.Race) is { } raceActivity))
-            {
-                continue;
-            }
-
-            var warmupActivities = activitiesForDate
-                .Where(x => x.StartDateLocal < raceActivity.StartDateLocal
-                    && x != raceActivity
-                    && x.SubType != ActivitySubType.Warmup)
-                .ToList();
-            await UpdateActivitiesSubtype(warmupActivities, ActivitySubType.Warmup, cancellationToken);
-
-            var cooldownActivities = activitiesForDate
-                .Where(x => x.StartDateLocal > raceActivity.StartDateLocal
-                    && x != raceActivity
-                    && x.SubType != ActivitySubType.Cooldown)
-                .ToList();
-            await UpdateActivitiesSubtype(cooldownActivities, ActivitySubType.Cooldown, cancellationToken);
+            await UpdateActivitiesSubtypeIfNeed(warmupActivities, ActivitySubType.Warmup, cancellationToken);
+            await UpdateActivitiesSubtypeIfNeed(cooldownActivities, ActivitySubType.Cooldown, cancellationToken);
         }
     }
 
-    private async Task UpdateActivitiesSubtype(
+    private async Task UpdateActivitiesSubtypeIfNeed(
         List<ActivityResponse> activities, ActivitySubType subType, CancellationToken cancellationToken)
     {
         if (activities.Count == 0)
@@ -110,6 +98,11 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
 
         foreach (var activity in activities)
         {
+            if (activity.SubType == subType)
+            {
+                continue;
+            }
+
             await _intervalsIcuHttpClient.UpdateActivity(activity.Id, new ActivityUpdateRequest
             {
                 SubType = subType
