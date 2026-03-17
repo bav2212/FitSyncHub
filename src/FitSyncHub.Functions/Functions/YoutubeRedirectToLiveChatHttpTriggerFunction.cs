@@ -10,7 +10,7 @@ namespace FitSyncHub.Functions.Functions;
 public class YoutubeRedirectToLiveChatHttpTriggerFunction
 {
     private readonly YouTubeLiveService _youTubeLiveService;
-    readonly ILogger<YoutubeRedirectToLiveChatHttpTriggerFunction> _logger;
+    private readonly ILogger<YoutubeRedirectToLiveChatHttpTriggerFunction> _logger;
 
     public YoutubeRedirectToLiveChatHttpTriggerFunction(
         YouTubeLiveService youTubeLiveService,
