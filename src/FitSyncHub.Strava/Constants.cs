@@ -2,12 +2,14 @@
 
 public static class Constants
 {
+    // Wahoo SYSTM is a popular indoor training app, and activities recorded on it should not be categorized as outdoor rides.
     public const string WahooSYSTMDeviceName = "Wahoo SYSTM";
+    // Zwift is another popular indoor training app, and activities recorded on it should not be categorized as outdoor rides.
     public const string ZwiftDeviceName = "Zwift";
 
-    public static class Api
+    internal static class Api
     {
-        public const int AthleteActivitiesPerPage = 30;
+        public const int AthleteActivitiesMaxPerPage = 30;
         public const int AthleteActivitiesFirstPage = 1;
     }
 

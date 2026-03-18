@@ -1,6 +1,7 @@
 ﻿using FitSyncHub.Functions.Mappers;
 using FitSyncHub.Functions.Repositories;
 using FitSyncHub.Strava.Abstractions;
+using FitSyncHub.Strava.Models.Requests;
 using FitSyncHub.Strava.Models.Responses.Activities;
 
 namespace FitSyncHub.Functions.Services;
@@ -67,15 +68,26 @@ public sealed class StravaSummaryActivityService
     {
         var result = new List<SummaryActivityModelResponse>();
 
-        const int PerPage = Strava.Constants.Api.AthleteActivitiesPerPage;
-        var hasValuesToIterate = true;
-
-        for (var page = Strava.Constants.Api.AthleteActivitiesFirstPage; hasValuesToIterate; page++)
+        var requestModel = new GetActivitiesRequest
         {
-            var portion = await _stravaHttpClient.GetActivities(before, after, page, PerPage, cancellationToken);
+            Before = before,
+            After = after,
+        };
+
+        while (true)
+        {
+            var portion = await _stravaHttpClient.GetActivities(requestModel, cancellationToken);
             result.AddRange(portion);
 
-            hasValuesToIterate = portion.Count == PerPage;
+            if (portion.Count == 0 || portion.Count != requestModel.PerPage)
+            {
+                break;
+            }
+
+            requestModel = requestModel with
+            {
+                Page = requestModel.Page + 1
+            };
         }
 
         return result;

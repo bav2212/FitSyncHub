@@ -13,10 +13,7 @@ public interface IStravaHttpClient
         CancellationToken cancellationToken);
 
     Task<List<SummaryActivityModelResponse>> GetActivities(
-        long before,
-        long after,
-        int page,
-        int perPage,
+        GetActivitiesRequest model,
         CancellationToken cancellationToken);
 
     Task<ActivityModelResponse> GetActivity(

@@ -49,18 +49,25 @@ public class StravaHttpClient : IStravaHttpClient
     }
 
     public async Task<List<SummaryActivityModelResponse>> GetActivities(
-        long before,
-        long after,
-        int page,
-        int perPage,
+        GetActivitiesRequest model,
         CancellationToken cancellationToken)
     {
+        if (model.Page < Constants.Api.AthleteActivitiesFirstPage)
+        {
+            throw new ArgumentOutOfRangeException(nameof(model), $"page cannot be less than {Constants.Api.AthleteActivitiesFirstPage}");
+        }
+
+        if (model.PerPage > Constants.Api.AthleteActivitiesMaxPerPage)
+        {
+            throw new ArgumentOutOfRangeException(nameof(model), $"perPage cannot be greater than {Constants.Api.AthleteActivitiesMaxPerPage}");
+        }
+
         var queryParams = new Dictionary<string, StringValues>()
         {
-            { "before", before.ToString() },
-            { "after", after.ToString() },
-            { "page",  page.ToString() },
-            { "per_page",  perPage.ToString() }
+            { "before", model.Before.ToString() },
+            { "after", model.After.ToString() },
+            { "page",  model.Page.ToString() },
+            { "per_page",  model.PerPage.ToString() }
         };
 
         var requestUri = QueryHelpers.AddQueryString("athlete/activities", queryParams);
