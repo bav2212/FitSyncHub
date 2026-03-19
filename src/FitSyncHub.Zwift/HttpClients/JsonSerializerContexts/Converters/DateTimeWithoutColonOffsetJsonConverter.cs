@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace FitSyncHub.Zwift.JsonSerializerContexts.Converters;
+namespace FitSyncHub.Zwift.HttpClients.JsonSerializerContexts.Converters;
 
 public sealed class DateTimeWithoutColonOffsetJsonConverter : JsonConverter<DateTime>
 {

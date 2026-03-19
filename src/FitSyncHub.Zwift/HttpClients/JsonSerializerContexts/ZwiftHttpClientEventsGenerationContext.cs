@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
+using FitSyncHub.Zwift.HttpClients.JsonSerializerContexts.Converters;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
-using FitSyncHub.Zwift.JsonSerializerContexts.Converters;
 
 namespace FitSyncHub.Zwift.JsonSerializerContexts;
 

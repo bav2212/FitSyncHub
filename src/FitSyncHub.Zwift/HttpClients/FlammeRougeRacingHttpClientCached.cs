@@ -3,7 +3,7 @@ using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.JsonSerializerContexts;
 using FitSyncHub.Zwift.Models.FRR;
 
-namespace FitSyncHub.Zwift.Cached;
+namespace FitSyncHub.Zwift.HttpClients;
 
 internal class FlammeRougeRacingHttpClientCached : IFlammeRougeRacingHttpClient
 {

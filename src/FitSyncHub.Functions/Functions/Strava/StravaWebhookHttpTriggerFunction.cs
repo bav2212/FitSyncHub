@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using FitSyncHub.Strava.Models.Responses;
 using FitSyncHub.Strava.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -48,10 +48,4 @@ public sealed class StravaWebhookHttpTriggerFunction
             HubChallenge = challenge
         });
     }
-}
-
-public sealed record WebhookVerificationResponse
-{
-    [JsonPropertyName("hub.challenge")]
-    public required string HubChallenge { get; init; }
 }

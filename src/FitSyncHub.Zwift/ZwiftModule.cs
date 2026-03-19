@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using FitSyncHub.Zwift.Auth;
 using FitSyncHub.Zwift.Auth.Abstractions;
-using FitSyncHub.Zwift.Cached;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
@@ -47,7 +46,6 @@ public static class ZwiftModule
             services.AddScoped<ZwiftWadDecoder>();
 
             services.AddScoped<ZwiftEventsService>();
-            services.AddScoped<ZwiftPowerService>();
             services.AddScoped<ZwiftGameInfoService>();
             services.AddScoped<ZwiftRoutesService>();
 
