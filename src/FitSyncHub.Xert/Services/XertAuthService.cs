@@ -1,8 +1,8 @@
 ﻿using FitSyncHub.Common.Services;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Xert.Abstractions;
+using FitSyncHub.Xert.HttpClients.Models.Responses;
 using FitSyncHub.Xert.Models;
-using FitSyncHub.Xert.Models.Responses;
 
 namespace FitSyncHub.Xert.Services;
 

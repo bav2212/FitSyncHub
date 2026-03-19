@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Xert.Abstractions;
-using FitSyncHub.Xert.Models.Responses;
+using FitSyncHub.Xert.HttpClients.Models.Responses;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
 

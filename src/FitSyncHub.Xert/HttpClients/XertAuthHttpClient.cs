@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Xert.Abstractions;
-using FitSyncHub.Xert.Models.Responses;
+using FitSyncHub.Xert.HttpClients.Models.Responses;
 using FitSyncHub.Xert.Options;
 using Microsoft.Extensions.Options;
 

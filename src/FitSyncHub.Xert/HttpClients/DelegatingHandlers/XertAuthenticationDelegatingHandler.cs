@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using FitSyncHub.Xert.Abstractions;
 
-namespace FitSyncHub.Xert.DelegatingHandlers;
+namespace FitSyncHub.Xert.HttpClients.DelegatingHandlers;
 
 public class XertAuthenticationDelegatingHandler : DelegatingHandler
 {

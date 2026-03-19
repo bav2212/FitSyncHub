@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FitSyncHub.Xert.Models.Responses;
+namespace FitSyncHub.Xert.HttpClients.Models.Responses;
 
 public sealed record TrainingInfoResponse
 {

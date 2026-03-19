@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using FitSyncHub.Xert.Models.Responses;
+using FitSyncHub.Xert.HttpClients.Models.Responses;
 
 namespace FitSyncHub.Functions.JsonSerializerContexts;
 

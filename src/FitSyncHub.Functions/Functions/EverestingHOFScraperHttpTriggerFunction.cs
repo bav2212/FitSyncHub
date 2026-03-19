@@ -34,8 +34,9 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         _httpClient = httpClient;
         _everestingHOFContainer = cosmosClient.GetDatabase(Constants.CosmosDb.DatabaseName)
             .GetContainer(Constants.CosmosDb.Containers.EverestingHOF);
-
         _logger = logger;
+
+        _ = _availableModalities;
     }
 
 #if DEBUG

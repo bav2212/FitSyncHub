@@ -151,17 +151,7 @@ public sealed class LactateSyncHttpTriggerFunction
 
             foreach (var lactateResult in lactateResults)
             {
-                var lactateResultActivity = intervalsIcuActivities
-                    .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndTimeLocal);
-                if (lactateResultActivity == null)
-                {
-                    // If lactate result is not found in any activity, try to find it in the next 10 minutes of the activity
-                    lactateResultActivity = intervalsIcuActivities
-                        .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal
-                            && lactateResult.Time <= x.EndTimeLocal.AddMinutes(10))
-                        ?? throw new InvalidDataException("Could not map all lactate results to activities");
-                }
-
+                var lactateResultActivity = FindActivityForLactateResult(intervalsIcuActivities, lactateResult);
                 if (result.TryGetValue(lactateResultActivity, out var lactateResultsInActivity))
                 {
                     lactateResultsInActivity.Add(lactateResult);
@@ -174,6 +164,22 @@ public sealed class LactateSyncHttpTriggerFunction
         }
 
         return result;
+    }
+
+    private static ActivityResponse FindActivityForLactateResult(
+        List<ActivityResponse> intervalsIcuActivities, LactateResult lactateResult)
+    {
+        var lactateResultActivity = intervalsIcuActivities
+            .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndTimeLocal);
+        if (lactateResultActivity is not null)
+        {
+            return lactateResultActivity;
+        }
+
+        // If lactate result is not found in any activity, try to find it in the next 10 minutes of the activity
+        return intervalsIcuActivities
+            .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndTimeLocal.AddMinutes(10))
+            ?? throw new InvalidDataException("Could not map all lactate results to activities");
     }
 
     private async Task<List<ActivityResponse>> FetchActivities(DateTime oldestDate, DateTime newestDate, CancellationToken cancellation)

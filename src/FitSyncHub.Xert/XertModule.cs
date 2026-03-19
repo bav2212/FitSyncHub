@@ -1,6 +1,6 @@
 ﻿using FitSyncHub.Xert.Abstractions;
-using FitSyncHub.Xert.DelegatingHandlers;
 using FitSyncHub.Xert.HttpClients;
+using FitSyncHub.Xert.HttpClients.DelegatingHandlers;
 using FitSyncHub.Xert.Options;
 using FitSyncHub.Xert.Services;
 using Microsoft.Extensions.Configuration;
