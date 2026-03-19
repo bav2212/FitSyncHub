@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using FitSyncHub.Strava.Services;
 
-namespace FitSyncHub.Strava.DelegatingHandlers;
+namespace FitSyncHub.Strava.HttpClients.DelegatingHandlers;
 
 public class StravaAuthenticationDelegatingHandler : DelegatingHandler
 {

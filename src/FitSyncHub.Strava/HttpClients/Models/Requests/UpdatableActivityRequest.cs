@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.Strava.Models.Requests;
+﻿namespace FitSyncHub.Strava.HttpClients.Models.Requests;
 
 public sealed record UpdatableActivityRequest
 {

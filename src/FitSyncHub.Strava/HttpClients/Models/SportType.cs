@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FitSyncHub.Strava.Models;
+namespace FitSyncHub.Strava.HttpClients.Models;
 
 [JsonConverter(typeof(JsonStringEnumConverter<SportType>))]
 public enum SportType

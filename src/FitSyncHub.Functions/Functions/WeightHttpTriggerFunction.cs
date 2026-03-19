@@ -55,7 +55,7 @@ public class WeightHttpTriggerFunction
         try
         {
             _logger.LogInformation("Updating athlete weight on strava");
-            await _stravaHttpClient.UpdateAthlete(parsedWeight, cancellationToken);
+            await _stravaHttpClient.UpdateAthlete(new() { Weight = parsedWeight }, cancellationToken);
             _logger.LogInformation("Updated athlete weight on strava");
 
             _logger.LogInformation("Updating athlete weight on garmin connect");

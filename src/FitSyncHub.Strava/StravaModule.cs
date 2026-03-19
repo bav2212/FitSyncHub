@@ -1,7 +1,7 @@
 ﻿using FitSyncHub.Strava.Abstractions;
-using FitSyncHub.Strava.DelegatingHandlers;
 using FitSyncHub.Strava.HttpClients;
-using FitSyncHub.Strava.Models.Responses;
+using FitSyncHub.Strava.HttpClients.DelegatingHandlers;
+using FitSyncHub.Strava.HttpClients.Models.Responses;
 using FitSyncHub.Strava.Options;
 using FitSyncHub.Strava.Services;
 using Microsoft.Extensions.Configuration;

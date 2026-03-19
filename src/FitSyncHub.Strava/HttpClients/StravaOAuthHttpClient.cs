@@ -3,8 +3,8 @@ using System.Net.Http.Json;
 using FitSyncHub.Common.Exceptions;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Strava.Abstractions;
-using FitSyncHub.Strava.Models.Requests;
-using FitSyncHub.Strava.Models.Responses;
+using FitSyncHub.Strava.HttpClients.Models.Requests;
+using FitSyncHub.Strava.HttpClients.Models.Responses;
 using FitSyncHub.Strava.Options;
 using Microsoft.Extensions.Options;
 

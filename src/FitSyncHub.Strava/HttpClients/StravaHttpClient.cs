@@ -4,10 +4,11 @@ using FitSyncHub.Common.Helpers;
 using FitSyncHub.Common.Models;
 using FitSyncHub.Functions.JsonSerializerContexts;
 using FitSyncHub.Strava.Abstractions;
+using FitSyncHub.Strava.HttpClients.Models.Requests;
+using FitSyncHub.Strava.HttpClients.Models.Responses;
+using FitSyncHub.Strava.HttpClients.Models.Responses.Activities;
+using FitSyncHub.Strava.HttpClients.Models.Responses.Athletes;
 using FitSyncHub.Strava.Models.Requests;
-using FitSyncHub.Strava.Models.Responses;
-using FitSyncHub.Strava.Models.Responses.Activities;
-using FitSyncHub.Strava.Models.Responses.Athletes;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
@@ -30,12 +31,12 @@ public class StravaHttpClient : IStravaHttpClient
     }
 
     public async Task<DetailedAthleteResponse> UpdateAthlete(
-        float weight,
+        UpdateAthleteRequest model,
         CancellationToken cancellationToken)
     {
         var queryParams = new Dictionary<string, StringValues>()
         {
-            { "weight", weight.ToString() },
+            { "weight", model.Weight.ToString() },
         };
 
         var requestUri = QueryHelpers.AddQueryString("athlete", queryParams);

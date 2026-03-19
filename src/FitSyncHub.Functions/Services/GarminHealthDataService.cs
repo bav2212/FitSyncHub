@@ -79,6 +79,6 @@ public sealed class GarminHealthDataService
 #pragma warning disable CA1873 // Avoid potentially expensive logging
         _logger.LogInformation("Updating weight: {Value}", weightInKgs);
 #pragma warning restore CA1873 // Avoid potentially expensive logging
-        await _stravaHttpClient.UpdateAthlete(weightInKgs, cancellationToken);
+        await _stravaHttpClient.UpdateAthlete(new() { Weight = weightInKgs }, cancellationToken);
     }
 }

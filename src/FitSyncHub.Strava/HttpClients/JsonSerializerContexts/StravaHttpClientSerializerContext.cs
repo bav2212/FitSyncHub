@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
-using FitSyncHub.Strava.Models.Requests;
-using FitSyncHub.Strava.Models.Responses;
-using FitSyncHub.Strava.Models.Responses.Activities;
-using FitSyncHub.Strava.Models.Responses.Athletes;
+using FitSyncHub.Strava.HttpClients.Models.Requests;
+using FitSyncHub.Strava.HttpClients.Models.Responses;
+using FitSyncHub.Strava.HttpClients.Models.Responses.Activities;
+using FitSyncHub.Strava.HttpClients.Models.Responses.Athletes;
 
 namespace FitSyncHub.Functions.JsonSerializerContexts;
 

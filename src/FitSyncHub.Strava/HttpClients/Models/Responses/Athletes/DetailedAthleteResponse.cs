@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FitSyncHub.Strava.Models.Responses.Athletes;
+namespace FitSyncHub.Strava.HttpClients.Models.Responses.Athletes;
 
 public sealed record DetailedAthleteResponse
 {

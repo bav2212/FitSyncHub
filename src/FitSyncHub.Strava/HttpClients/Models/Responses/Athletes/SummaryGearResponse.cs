@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.Strava.Models.Responses.Athletes;
+﻿namespace FitSyncHub.Strava.HttpClients.Models.Responses.Athletes;
 
 public sealed record SummaryGearResponse
 {

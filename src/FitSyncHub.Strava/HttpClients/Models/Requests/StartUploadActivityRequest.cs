@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using FitSyncHub.Common.Abstractions;
 
-namespace FitSyncHub.Strava.Models.Requests;
+namespace FitSyncHub.Strava.HttpClients.Models.Requests;
 
 public sealed record StartUploadActivityRequest : IFormDataValue
 {

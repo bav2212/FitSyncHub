@@ -1,4 +1,4 @@
-﻿using FitSyncHub.Strava.Models.Responses;
+﻿using FitSyncHub.Strava.HttpClients.Models.Responses;
 
 namespace FitSyncHub.Strava.Abstractions;
 

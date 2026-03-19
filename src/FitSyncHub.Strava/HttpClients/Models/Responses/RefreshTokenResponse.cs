@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.Strava.Models.Responses;
+﻿namespace FitSyncHub.Strava.HttpClients.Models.Responses;
 
 public sealed record RefreshTokenResponse
 {

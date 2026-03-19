@@ -1,4 +1,4 @@
-﻿namespace FitSyncHub.Strava.Models.Responses.Activities;
+﻿namespace FitSyncHub.Strava.HttpClients.Models.Responses.Activities;
 
 public sealed record ActivityAthlete
 {

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FitSyncHub.Strava.Models.Responses.Activities;
+namespace FitSyncHub.Strava.HttpClients.Models.Responses.Activities;
 
 public sealed record SummaryActivityModelResponse
 {

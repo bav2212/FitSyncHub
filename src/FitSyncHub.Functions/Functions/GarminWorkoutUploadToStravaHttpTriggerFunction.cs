@@ -7,7 +7,7 @@ using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using FitSyncHub.Strava.Abstractions;
-using FitSyncHub.Strava.Models.Requests;
+using FitSyncHub.Strava.HttpClients.Models.Requests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;

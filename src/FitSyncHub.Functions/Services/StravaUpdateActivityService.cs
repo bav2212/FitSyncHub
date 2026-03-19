@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Strava.Abstractions;
-using FitSyncHub.Strava.Models.Requests;
-using FitSyncHub.Strava.Models.Responses.Activities;
+using FitSyncHub.Strava.HttpClients.Models.Requests;
+using FitSyncHub.Strava.HttpClients.Models.Responses.Activities;
 using FitSyncHub.Strava.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
