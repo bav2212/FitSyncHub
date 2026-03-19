@@ -25,6 +25,8 @@ public class YoutubeRedirectToLiveChatHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "youtube-live-chat")] HttpRequest req,
         CancellationToken cancellationToken)
     {
+        _ = req;
+
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var videoId = await _youTubeLiveService.GetLiveVideoId(cancellationToken);

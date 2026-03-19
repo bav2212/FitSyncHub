@@ -30,6 +30,8 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "intervals-icu-subtype-fix")] HttpRequest req,
         CancellationToken cancellationToken)
     {
+        _ = req;
+
         _logger.LogInformation("C# HTTP trigger function processed a request.");
         const int Limit = 100;
         // do not change, just need some old date for api. Limit will handle paging

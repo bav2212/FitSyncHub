@@ -153,7 +153,6 @@ public sealed class LactateSyncHttpTriggerFunction
             {
                 var lactateResultActivity = intervalsIcuActivities
                     .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndTimeLocal);
-
                 if (lactateResultActivity == null)
                 {
                     // If lactate result is not found in any activity, try to find it in the next 10 minutes of the activity

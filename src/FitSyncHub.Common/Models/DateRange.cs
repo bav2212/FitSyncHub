@@ -18,17 +18,22 @@ public sealed record DateRange(DateTime From, DateTime To)
             throw new ArgumentException($"'{nameof(to)}' should be greater than or equal to '{nameof(from)}'");
         }
 
-        while (true)
-        {
-            var fromRangeValue = to + rangeBy;
-            if (fromRangeValue < from)
-            {
-                yield return new DateRange(from, to);
-                yield break;
-            }
+        return GetDataRangeIterator();
 
-            yield return new DateRange(fromRangeValue, to);
-            to = fromRangeValue;
+        IEnumerable<DateRange> GetDataRangeIterator()
+        {
+            while (true)
+            {
+                var fromRangeValue = to + rangeBy;
+                if (fromRangeValue < from)
+                {
+                    yield return new DateRange(from, to);
+                    yield break;
+                }
+
+                yield return new DateRange(fromRangeValue, to);
+                to = fromRangeValue;
+            }
         }
     }
 }

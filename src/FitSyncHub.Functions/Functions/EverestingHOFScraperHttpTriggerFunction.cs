@@ -45,6 +45,8 @@ public sealed class EverestingHOFScraperHttpTriggerFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "everesting-hof-scraper")] HttpRequest req,
         CancellationToken cancellationToken)
     {
+        _ = req;
+
         const string BaseUrl = "https://hof.everesting.com/activities";
         var lastSyncedDateTime = await GetLastSynchronizedDate(cancellationToken);
 
