@@ -11,7 +11,6 @@ using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
 
-[Obsolete("Run when intervals.icu fix issue with subtypes and remove after it")]
 public class IntervalsICUSubtypeFixHttpTriggerFunction
 {
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
@@ -25,7 +24,9 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
         _logger = logger;
     }
 
+#if !DEBUG
     [Function(nameof(IntervalsICUSubtypeFixHttpTriggerFunction))]
+#endif
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "intervals-icu-subtype-fix")] HttpRequest req,
         CancellationToken cancellationToken)
