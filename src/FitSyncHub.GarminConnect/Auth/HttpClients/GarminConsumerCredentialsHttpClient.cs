@@ -17,8 +17,9 @@ internal sealed class GarminConsumerCredentialsHttpClient : IGarminConsumerCrede
     public async Task<GarminConsumerCredentials> GetConsumerCredentials(CancellationToken cancellationToken)
     {
         var response = await _httpClient.GetAsync("oauth_consumer.json", cancellationToken);
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        response.EnsureSuccessStatusCode();
 
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
         return JsonSerializer.Deserialize(content, GarminConnectOAuthSerializerContext.Default.GarminConsumerCredentials)
             ?? throw new InvalidOperationException("Failed to deserialize ConsumerCredentials from Garmin response.");
     }
