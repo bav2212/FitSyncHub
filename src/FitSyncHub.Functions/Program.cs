@@ -22,6 +22,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 HashSet<string> functionsCalledByUser = [
     nameof(WeightHttpTriggerFunction),
@@ -57,6 +60,14 @@ if (builder.Environment.IsDevelopment())
 builder.Services
     .AddOpenTelemetry()
     .UseFunctionsWorkerDefaults()
+    .WithTracing(tracing =>
+    {
+        tracing.AddHttpClientInstrumentation();    // Trace outgoing HTTP calls
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics.AddHttpClientInstrumentation();     //
+    })
     .UseAzureMonitorExporter();
 
 builder.Services
