@@ -102,17 +102,9 @@ internal sealed class GarminOAuthHttpClient
 
         httpRequestMessage.Content = new FormUrlEncodedContent(formContentDict);
         var response = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);
-
-#pragma warning disable CA1873 // Avoid potentially expensive logging
-        _logger.LogInformation("Response status code: {StatusCode}", response.StatusCode);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
+        response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-#pragma warning disable CA1873 // Avoid potentially expensive logging
-        // temp to check why this doesn't work on production, can remove after debugging
-        _logger.LogInformation("Content: {content}", content);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
 
         return JsonSerializer.Deserialize(content, GarminConnectOAuthSerializerContext.Default.GarminOAuth2Token)
             ?? throw new InvalidOperationException("Failed to deserialize OAuth2Token from Garmin response.");
