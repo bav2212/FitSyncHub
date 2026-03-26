@@ -162,7 +162,6 @@ public sealed record ZwiftGameInfoAchievementState
     public required bool IsAchieved { get; init; }
 }
 
-
 public sealed record MappedUncompletedAchievementsModel
 {
     public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> CyclingRouteAchievementsToRouteMapping { get; init; }

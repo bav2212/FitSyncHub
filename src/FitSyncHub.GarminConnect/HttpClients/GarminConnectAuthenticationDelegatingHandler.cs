@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using FitSyncHub.GarminConnect.Auth.Abstractions;
 using FitSyncHub.GarminConnect.Auth.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
@@ -11,15 +12,19 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
     private readonly IGarminAuthProvider _garminAuthProvider;
     private readonly IGarminTokenExchanger _garminTokenExchanger;
     private readonly IGarminAuthCacheInvalidator _garminAuthCacheInvalidator;
+    private readonly bool _forceExchangeToken;
 
     public GarminConnectAuthenticationDelegatingHandler(
         IGarminAuthProvider garminAuthProvider,
         IGarminTokenExchanger garminTokenExchanger,
-        IGarminAuthCacheInvalidator garminAuthCacheInvalidator)
+        IGarminAuthCacheInvalidator garminAuthCacheInvalidator,
+        IHttpContextAccessor httpContextAccessor)
     {
         _garminAuthProvider = garminAuthProvider;
         _garminTokenExchanger = garminTokenExchanger;
         _garminAuthCacheInvalidator = garminAuthCacheInvalidator;
+
+        _forceExchangeToken = httpContextAccessor.HttpContext?.Request.Query.ContainsKey("force-token-exchange") == true;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(
@@ -49,7 +54,7 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
         var authResult = await _garminAuthProvider.GetAuthResult(ct) ?? throw new GarminNotLoggedInException();
         var oauth2Token = authResult.OAuthToken2;
 
-        if (IsTokenValid(oauth2Token.AccessToken))
+        if (IsTokenValid(oauth2Token.AccessToken) && !_forceExchangeToken)
         {
             return oauth2Token;
         }

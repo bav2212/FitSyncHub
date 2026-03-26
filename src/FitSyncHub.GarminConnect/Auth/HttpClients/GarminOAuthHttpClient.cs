@@ -4,6 +4,7 @@ using FitSyncHub.GarminConnect.Auth.Exceptions;
 using FitSyncHub.GarminConnect.Auth.Models;
 using FitSyncHub.GarminConnect.JsonSerializerContexts;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using OAuth;
 
@@ -12,10 +13,13 @@ namespace FitSyncHub.GarminConnect.Auth.HttpClients;
 internal sealed class GarminOAuthHttpClient
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<GarminOAuthHttpClient> _logger;
 
-    public GarminOAuthHttpClient(HttpClient httpClient)
+    public GarminOAuthHttpClient(HttpClient httpClient,
+        ILogger<GarminOAuthHttpClient> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<GarminOAuth1Token> GetOAuth1Token(string ticket, GarminConsumerCredentials credentials,
@@ -99,7 +103,17 @@ internal sealed class GarminOAuthHttpClient
         httpRequestMessage.Content = new FormUrlEncodedContent(formContentDict);
         var response = await _httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+        _logger.LogInformation("Response status code: {StatusCode}", response.StatusCode);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
+
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+        // temp to check why this doesn't work on production, can remove after debugging
+        _logger.LogInformation("Content: {content}", content);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
+
         return JsonSerializer.Deserialize(content, GarminConnectOAuthSerializerContext.Default.GarminOAuth2Token)
             ?? throw new InvalidOperationException("Failed to deserialize OAuth2Token from Garmin response.");
     }
