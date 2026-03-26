@@ -21,7 +21,7 @@ public class GarminSyncWeightTimerTriggerFunction
     //#if !DEBUG
     //    [Function(nameof(GarminSyncWeightTimerTriggerFunction))]
     //#endif
-    public async Task RunMorning(
+    public async Task Run(
         // run every day at 19 utc to avoid garmin api limits
         [TimerTrigger("0 0 19 * * *")] TimerInfo timer,
 
