@@ -15,6 +15,9 @@ public sealed class StravaUpdateActivityService
     private readonly string? _cityBikeGearId;
     private readonly ILogger<StravaUpdateActivityService> _logger;
 
+    // change it to false if want to show all virtual rides, but want to hide warmups/cooldowns anyway 
+    private readonly bool _shouldHideAllVirtualRides = true;
+
     public StravaUpdateActivityService(
         IStravaHttpClient stravaHttpClient,
         IOptions<StravaOptions> options,
@@ -71,9 +74,11 @@ public sealed class StravaUpdateActivityService
                 return;
             }
 
-            // stop hiding virtual rides for autumn/winter. Uncomment next line if need to hide again
-            //await HideActivityFromHome(activityId, cancellationToken);
-            return;
+            if (_shouldHideAllVirtualRides)
+            {
+                await HideActivityFromHome(activityId, cancellationToken);
+                return;
+            }
         }
 
 #pragma warning disable CA1873 // Avoid potentially expensive logging
