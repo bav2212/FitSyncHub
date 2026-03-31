@@ -3,6 +3,7 @@ using FitSyncHub.Zwift.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FitSyncHub.Functions.Functions.Zwift;
 
@@ -33,13 +34,18 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
         {
             sb.AppendLine("General achievements:");
 
-            var nonRunningGeneralAchievements = achievementsState.GeneralAchievements
-                .Where(x => !x.Achievement.ImageUrl.Contains("Run", StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            var generalAchievements = achievementsState.GeneralAchievements;
 
-            sb.AppendLine($"Achieved (excluding running): {nonRunningGeneralAchievements.Count(x => x.IsAchieved)}/{nonRunningGeneralAchievements.Count}");
+            // Exclude running achievements
+            generalAchievements = [.. achievementsState.GeneralAchievements
+                .Where(x => !x.Achievement.ImageUrl.Contains("Run", StringComparison.OrdinalIgnoreCase))];
 
-            foreach (var generalAchievementState in nonRunningGeneralAchievements)
+            // Exclude achievements that are not possible to achieve anymore
+            generalAchievements = [.. generalAchievements.Where(x => x.Achievement.Id is < 347 or > 471)];
+
+            sb.AppendLine($"Achieved (excluding running and not possible to achieve anymore): {generalAchievements.Count(x => x.IsAchieved)}/{generalAchievements.Count}");
+
+            foreach (var generalAchievementState in generalAchievements)
             {
                 if (generalAchievementState.IsAchieved)
                 {
