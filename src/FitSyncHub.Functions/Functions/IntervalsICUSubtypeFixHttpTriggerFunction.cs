@@ -24,7 +24,7 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
         _logger = logger;
     }
 
-#if !DEBUG
+#if DEBUG
     [Function(nameof(IntervalsICUSubtypeFixHttpTriggerFunction))]
 #endif
     public async Task<IActionResult> Run(
@@ -64,17 +64,14 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
 
     private async Task Implementation(List<ActivityResponse> activities, CancellationToken cancellationToken)
     {
-        var activityGroups = activities
-            .GroupBy(x => x.StartDate.Date).ToDictionary(x => x.Key, x => x.ToList());
-
-        foreach (var (date, activitiesForDate) in activityGroups)
+        foreach (var consecutiveActivities in GroupConsecutiveActivities(activities))
         {
             List<ActivityResponse> warmupActivities = [];
             List<ActivityResponse> cooldownActivities = [];
             // very rare, but can have more than one
             List<ActivityResponse> raceActivities = [];
 
-            foreach (var activity in activitiesForDate.OrderBy(x => x.StartDateLocal))
+            foreach (var activity in consecutiveActivities)
             {
                 if (activity.SubType == ActivitySubType.Race)
                 {
@@ -86,9 +83,50 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
                 listToPutActivityIn.Add(activity);
             }
 
+            if (raceActivities.Count == 0)
+            {
+                // should not update anything. No race = no warmup/cooldown
+                continue;
+            }
+
             await UpdateActivitiesSubtypeIfNeed(warmupActivities, ActivitySubType.Warmup, cancellationToken);
             await UpdateActivitiesSubtypeIfNeed(cooldownActivities, ActivitySubType.Cooldown, cancellationToken);
         }
+    }
+
+    private static List<List<ActivityResponse>> GroupConsecutiveActivities(List<ActivityResponse> activities)
+    {
+        return [.. activities
+           .OrderBy(a => a.StartDateLocal)
+           .GroupBy(a => a.StartDateLocal.Date)
+           .SelectMany(dayGroup =>
+           {
+               var result = new List<List<ActivityResponse>>();
+               List<ActivityResponse>? currentGroup = null;
+
+               foreach (var activity in dayGroup.OrderBy(a => a.StartDateLocal))
+               {
+                   if (currentGroup == null)
+                   {
+                       currentGroup = [activity];
+                       result.Add(currentGroup);
+                       continue;
+                   }
+
+                   var lastActivity = currentGroup[^1];
+                   var gap = activity.EndTimeLocal - lastActivity.StartDateLocal;
+
+                   if (gap.TotalHours > 2)
+                   {
+                       currentGroup = [];
+                       result.Add(currentGroup);
+                   }
+
+                   currentGroup.Add(activity);
+               }
+
+               return result;
+           })];
     }
 
     private async Task UpdateActivitiesSubtypeIfNeed(
