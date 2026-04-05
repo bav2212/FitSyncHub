@@ -78,6 +78,7 @@ internal sealed class GarminOAuthHttpClient
         };
     }
 
+    [Obsolete("Should stop using it, cause garmin protecting this with Cloudflare and 429 status code returns")]
     public async Task<GarminOAuth2Token> Exchange(
         GarminOAuth1Token oAuth1Token,
         GarminConsumerCredentials credentials,

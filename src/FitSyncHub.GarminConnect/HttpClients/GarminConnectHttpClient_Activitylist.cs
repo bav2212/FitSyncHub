@@ -10,6 +10,13 @@ public partial class GarminConnectHttpClient
 {
     public async Task<IReadOnlyCollection<GarminActivitySearchResponse>> GetActivitiesByDate(DateTime startDate,
         DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        return await GetActivitiesByDate(startDate, endDate, string.Empty, cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<GarminActivitySearchResponse>> GetActivitiesByDate(DateTime startDate,
+        DateTime endDate,
         string activityType,
         CancellationToken cancellationToken)
     {

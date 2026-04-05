@@ -72,8 +72,11 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
         var garminWorkoutActivities = await _garminConnectHttpClient.GetActivitiesByDate(
             new DateTime(date, TimeOnly.MinValue),
             new DateTime(date, TimeOnly.MaxValue),
-            "fitness_equipment",
             cancellationToken);
+
+        garminWorkoutActivities = [
+            .. garminWorkoutActivities.Where(x => !x.ActivityType.TypeKey.Contains("cycling"))
+        ];
 
         if (garminWorkoutActivities.Count != count)
         {
