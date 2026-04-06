@@ -47,15 +47,6 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         {"The Pretzel", "Watopia Pretzel"},
     };
 
-    private static readonly HashSet<string> s_knownMissingHomedataRoutes = [
-        "Zwift Bambino Fondo 2022",
-        "Zwift Medio Fondo 2022",
-        "Zwift Gran Fondo 2022",
-        "France Classic Fondo",
-        "2022 Cycling Esports World Championships Route",
-        "InnsbruckConti",
-    ];
-
     private readonly ZwiftWadDecoder _zwiftWadDecoder;
     private readonly ILogger<ZwiftRoutesFromZwiftWADFilesProvider> _logger;
     private readonly string _unpackedWADFilesDirectory;
@@ -204,21 +195,6 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
                 throw new InvalidDataException($"Route XML element not found in file {filePath}");
             }
 
-            if (homedataXmlDTO == null)
-            {
-                if (!s_knownMissingHomedataRoutes.Contains(routeXmlDTO.Name))
-                {
-                    throw new InvalidDataException($"Homedata XML element not found in file {filePath}");
-                }
-
-#pragma warning disable CA1873 // Avoid potentially expensive logging
-                _logger.LogInformation("Skipping route file {FilePath} due to known missing homedata, route: {Route}",
-                    filePath,
-                    routeXmlDTO.Name);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
-                continue;
-            }
-
             var zwiftInGameRoot = new ZwiftInGameRootXmlObject { Route = routeXmlDTO, Homedata = homedataXmlDTO };
 
             yield return new ZwiftDataWorldRoutePair()
@@ -238,7 +214,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             ? mappedName
             : route.Name;
 
-        var publishedOn = !string.IsNullOrWhiteSpace(homedata.PublishedOn)
+        var publishedOn = !string.IsNullOrWhiteSpace(homedata?.PublishedOn)
             ? DateOnly.ParseExact(homedata.PublishedOn, "yyyy-MM-dd")
             : default(DateOnly?);
 
@@ -255,9 +231,9 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             LeadinAscentInMeters = route.LeadInAscentInMeters,
             LeadinDistanceInMeters = route.LeadInDistanceInMeters,
             BlockedForMeetups = route.BlockedForMeetups,
-            Xp = homedata.Xp,
-            Duration = homedata.Duration,
-            Difficulty = homedata.Difficulty,
+            Xp = homedata?.Xp ?? 0,
+            Duration = homedata?.Duration ?? 0,
+            Difficulty = homedata?.Difficulty ?? 0,
             Sports = route.SportType switch
             {
                 -1 or 0 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running, ZwiftGameInfoSport.Rowing],

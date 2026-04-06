@@ -6,7 +6,7 @@ namespace FitSyncHub.Zwift.Providers;
 public sealed record ZwiftInGameRootXmlObject
 {
     public required ZwiftInGameRouteXmlElementDTO Route { get; init; }
-    public required ZwiftInGameHomedataXmlElementDTO Homedata { get; init; }
+    public required ZwiftInGameHomedataXmlElementDTO? Homedata { get; init; }
 }
 
 [XmlRoot(ElementName = "homedata")]
