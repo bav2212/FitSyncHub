@@ -22,7 +22,7 @@ public sealed partial class ZwiftHttpClient
         _logger = logger;
     }
 
-    public async Task<List<int>> GetAchievements(CancellationToken cancellationToken)
+    public async Task<List<int>> GetPlayerAchievements(CancellationToken cancellationToken)
     {
         const string Url = "achievement/loadPlayerAchievements";
 

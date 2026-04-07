@@ -93,7 +93,7 @@ public sealed class ZwiftGameInfoService
         var generalAchievements = isRouteAchievementsLookup[false];
 
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
-        var userAchievements = (await _zwiftHttpClient.GetAchievements(cancellationToken)).ToHashSet();
+        var userAchievements = (await _zwiftHttpClient.GetPlayerAchievements(cancellationToken)).ToHashSet();
 
         var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes([.. routeAchievements], routes);
 
