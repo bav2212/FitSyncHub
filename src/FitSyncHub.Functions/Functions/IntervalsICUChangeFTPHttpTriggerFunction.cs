@@ -29,7 +29,7 @@ public sealed class IntervalsICUChangeFTPHttpTriggerFunction
         _logger = logger;
     }
 
-#if !DEBUG
+#if DEBUG
     [Function(nameof(IntervalsICUChangeFTPHttpTriggerFunction))]
 #endif
     public async Task<IActionResult> Run(
