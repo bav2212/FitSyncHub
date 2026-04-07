@@ -14,32 +14,6 @@ public sealed class ZwiftGameInfoService
     private readonly IZwiftRoutesProvider _zwiftRoutesProvider;
     private readonly ILogger<ZwiftGameInfoService> _logger;
 
-    // from https://github.com/zoffline/zwift-offline/blob/master/scripts/get_game_dictionary.py
-    private readonly Dictionary<string, string> _routeExceptions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        {"2018 UCI WORLDS SHORT LAP", "2018 WORLDS SHORT LAP"},
-        {"2015 UCI WORLDS COURSE", "RICHMOND UCI WORLDS"},
-        {"HILLY ROUTE", "WATOPIA HILLY ROUTE"},
-        {"2019 UCI WORLDS HARROGATE CIRCUIT", "2019 WORLDS HARROGATE CIRCUIT"},
-        {"THE PRETZEL", "WATOPIA PRETZEL"},
-        {"MOUNTAIN ROUTE", "WATOPIA MOUNTAIN ROUTE"},
-        {"MOUNTAIN 8", "WATOPIA MOUNTAIN 8"},
-        {"FIGURE 8", "WATOPIA FIGURE 8"},
-        {"FIGURE 8 REVERSE", "WATOPIA FIGURE 8 REVERSE"},
-        {"FLAT ROUTE", "WATOPIA FLAT ROUTE"},
-        {"THE PRL HALF", "LONDON PRL HALF"},
-        {"THE PRL FULL", "LONDON PRL FULL"},
-        {"CASSE PATTES", "CASSE-PATTES"},
-        {"TIRE BOUCHON", "TIRE-BOUCHON"},
-        {"HANDFUL OF GRAVEL (CYCLING)", "HANDFUL OF GRAVEL"},
-        {"HANDFUL OF GRAVEL (RUNNING)", "HANDFUL OF GRAVEL RUN"},
-        {"WATOPIAS WAISTBAND", "WATOPIA'S WAISTBAND"},
-        {"RICHMOND UCI REVERSE", "RICHMOND 2015 WORLDS REVERSE"},
-        {"CASTLE CRIT (RUNNING)", "CASTLE CRIT RUN"},
-        {"TRIPLE TWISTS", "TRIPLE TWIST"},
-        {"PEAKY PAVE", "PEAKY PAVÉ"}
-    };
-
     public ZwiftGameInfoService(
         ZwiftHttpClient zwiftHttpClient,
         IZwiftRoutesProvider zwiftRoutesProvider,
@@ -55,19 +29,26 @@ public sealed class ZwiftGameInfoService
         DateTimeOffset to,
         CancellationToken cancellationToken)
     {
-        var achievementsState = await GetAchievementsState(cancellationToken);
+        var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
+
+        var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements);
+
+        var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
+        var userAchievements = (await _zwiftHttpClient.GetPlayerAchievements(cancellationToken)).ToHashSet();
+
+        var routesWithUncompletedAchievementsDictionary = zwiftAchievementsResolver
+            .MapRoutesToRouteAchievements(routes)
+            // filter only cycling routes
+            .Where(x => x.Key.Sports.Contains(ZwiftGameInfoSport.Cycling)
+                && x.Value is not null && !userAchievements.Contains(x.Value.Id))
+            .Select(x => x.Key)
+            .ToDictionary(x => x.Id, x => x);
 
         var events = await _zwiftHttpClient.GetEventFeedFullRangeBuggy(new ZwiftEventFeedRequest
         {
             From = from,
             To = to,
         }, cancellationToken);
-
-        var routesWithUncompletedAchievementsDictionary = achievementsState
-            .CyclingRouteAchievementsToRouteMapping
-            .Where(x => !x.Key.IsAchieved)
-            .Select(x => x.Value)
-            .ToDictionary(x => x.Id, x => x);
 
         var eventsToRouteMapping = events
             .Join(routesWithUncompletedAchievementsDictionary,
@@ -86,23 +67,20 @@ public sealed class ZwiftGameInfoService
     {
         var profileMe = await _zwiftHttpClient.GetProfileMe(cancellationToken);
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
-        var isRouteAchievementsLookup = gameInfo.Achievements
-            .ToLookup(x => x.ImageUrl.EndsWith("RouteComplete.png"));
 
-        var routeAchievements = isRouteAchievementsLookup[true];
-        var generalAchievements = isRouteAchievementsLookup[false];
+        var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements);
 
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
         var userAchievements = (await _zwiftHttpClient.GetPlayerAchievements(cancellationToken)).ToHashSet();
 
-        var mappedRouteAchievementsToRoutes = MapRouteAchievementsToRoutes([.. routeAchievements], routes);
+        var mappedRouteAchievementsToRoutes = zwiftAchievementsResolver.MapRouteAchievementsToRoutes(routes);
 
         return new MappedUncompletedAchievementsModel
         {
             AchievementLevel = profileMe.AchievementLevel / 100.0,
             CyclingRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Cycling),
             RunningRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Running),
-            GeneralAchievements = [.. generalAchievements.Select(ConvertToZwiftGameInfoAchievementState)]
+            GeneralAchievements = [.. zwiftAchievementsResolver.GeneralAchievements.Select(ConvertToZwiftGameInfoAchievementState)]
         };
 
         Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport sport)
@@ -123,36 +101,6 @@ public sealed class ZwiftGameInfoService
                 IsAchieved = userAchievements.Contains(achievement.Id)
             };
         }
-    }
-
-    private Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> MapRouteAchievementsToRoutes(
-        List<ZwiftGameInfoAchievement> routeAchievements,
-        List<ZwiftDataWorldRoutePair> routes)
-    {
-        var result = new Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel>();
-
-        var routesDictionary = routes
-            .Select(x => x.Route)
-            .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var routeAchievement in routeAchievements)
-        {
-            if (routesDictionary.TryGetValue(routeAchievement.Name, out var value))
-            {
-                result[routeAchievement] = value;
-                continue;
-            }
-
-            if (_routeExceptions.TryGetValue(routeAchievement.Name, out var routeException))
-            {
-                result[routeAchievement] = routesDictionary[routeException];
-                continue;
-            }
-
-            _logger.LogWarning("Cannot map achievement '{Name}' to any route.", routeAchievement.Name);
-        }
-
-        return result;
     }
 }
 
