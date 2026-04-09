@@ -75,7 +75,7 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
             cancellationToken);
 
         garminWorkoutActivities = [
-            .. garminWorkoutActivities.Where(x => !x.ActivityType.TypeKey.Contains("cycling"))
+            .. garminWorkoutActivities.Where(x => !x.ActivityType.TypeKey.Contains("cycling", StringComparison.InvariantCultureIgnoreCase))
         ];
 
         if (garminWorkoutActivities.Count != count)
@@ -84,14 +84,9 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
         }
 
         var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(date, date) { Category = [EventCategory.Workout] }, cancellationToken);
-        intervalsIcuEvents = [.. intervalsIcuEvents.Where(x => x.Type == "WeightTraining")];
-
-        if (intervalsIcuEvents.Count != count)
-        {
-#pragma warning disable CA1873 // Avoid potentially expensive logging
-            _logger.LogInformation("Found {ActivitiesCount} intervals.icu events, but specified {ParsedCount} in request", intervalsIcuEvents.Count, count);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
-        }
+        intervalsIcuEvents = [..
+            intervalsIcuEvents.Where(x => !x.Type.Contains("cycling", StringComparison.InvariantCultureIgnoreCase))
+        ];
 
         var tuples = garminWorkoutActivities.Select((garminWorkoutActivity, index) =>
         {

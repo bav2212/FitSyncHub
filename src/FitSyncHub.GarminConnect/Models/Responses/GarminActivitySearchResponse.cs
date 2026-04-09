@@ -24,13 +24,14 @@ public sealed record GarminActivitySearchResponse
     public double? StartLatitude { get; init; }
     public double? StartLongitude { get; init; }
     public required bool HasPolyline { get; init; }
+    public required bool HasImages { get; init; }
     public required long OwnerId { get; init; }
     public required string OwnerDisplayName { get; init; }
     public required string OwnerFullName { get; init; }
     public required string OwnerProfileImageUrlSmall { get; init; }
     public required string OwnerProfileImageUrlMedium { get; init; }
     public required string OwnerProfileImageUrlLarge { get; init; }
-    public required double Calories { get; init; }
+    public double? Calories { get; init; }
     // BMR (Basal Metabolic Rate) calories
     public double? BmrCalories { get; init; }
     public required double AverageHR { get; init; }
@@ -64,6 +65,7 @@ public sealed record GarminActivitySearchResponse
     public required long DeviceId { get; init; }
     public double? MinElevation { get; init; }
     public double? MaxElevation { get; init; }
+    public double? AvgElevation { get; init; }
     public required string Manufacturer { get; init; }
     public string? LocationName { get; init; }
     public required long LapCount { get; init; }
