@@ -53,8 +53,7 @@ public sealed class ZwiftSegmentResultsHttpTriggerFunction
             var profileMe = await _zwiftHttpClient.GetProfileMe(cancellationToken);
             profileId = profileMe.Id;
         }
-
-        if (!long.TryParse(profileIdQueryParam, out profileId) || profileId <= 0)
+        else if (!long.TryParse(profileIdQueryParam, out profileId) && profileId <= 0)
         {
             return new BadRequestObjectResult("profileId is not valid long number");
         }
