@@ -30,7 +30,9 @@ public static class GarminConnectModule
             ConfigureAuth(services, options);
 
             services.AddTransient<GarminConnectAuthenticationDelegatingHandler>();
-            services.AddHttpClient<GarminConnectHttpClient>(client => client.BaseAddress = new Uri("https://connect.garmin.com"))
+            services.AddHttpClient<GarminConnectHttpClient>(client =>
+                    client.BaseAddress = new Uri("https://connectapi.garmin.com")
+                )
                 .AddHttpMessageHandler<GarminConnectAuthenticationDelegatingHandler>()
                 .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
                 {
@@ -45,39 +47,11 @@ public static class GarminConnectModule
     {
         services.Configure(options);
 
-        services.AddScoped<GarminSsoHttpClient>();
-        services.AddScoped<GarminSsoCookieContainer>(); // Scoped if per user/session, or Singleton if shared app-wide
-
-        services.AddHttpClient("GarminSSOClient", client =>
-            {
-                client.BaseAddress = new Uri("https://sso.garmin.com/sso");
-
-                client.DefaultRequestHeaders.Add("User-Agent", "GCM-iOS-5.7.2.1");
-                client.DefaultRequestHeaders.Add("origin", "https://sso.garmin.com");
-            })
-            .ConfigurePrimaryHttpMessageHandler(sp =>
-            {
-                return new HttpClientHandler
-                {
-                    CookieContainer = sp.GetRequiredService<GarminSsoCookieContainer>(),
-                    UseCookies = true,
-                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-                };
-            });
-
-        services.AddHttpClient<GarminOAuthHttpClient>(client =>
-        {
-            client.BaseAddress = new Uri("https://connectapi.garmin.com/oauth-service/oauth");
-
-            client.DefaultRequestHeaders.Add("User-Agent", "com.garmin.android.apps.connectmobile");
-        });
-
-        services.AddHttpClient<IGarminConsumerCredentialsProvider, GarminConsumerCredentialsHttpClient>(
-            client => client.BaseAddress = new Uri("https://thegarth.s3.amazonaws.com"));
-        services.Decorate<IGarminConsumerCredentialsProvider, GarminConsumerCredentialsProviderCached>();
+        services.AddHttpClient<GarminSsoHttpClient>();
+        services.AddHttpClient<GarminDiHttpClient>();
 
         services.AddScoped<IGarminAuthService, GarminAuthService>();
-        services.AddScoped<IGarminTokenExchanger, GarminAuthService>();
+        services.AddScoped<IGarminTokenRefresher, GarminAuthService>();
         services.AddScoped<IGarminAuthProvider, GarminAuthService>();
         services.AddScoped<IGarminAuthCacheInvalidator, GarminAuthService>();
     }

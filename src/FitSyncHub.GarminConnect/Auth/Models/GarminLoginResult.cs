@@ -2,6 +2,6 @@
 
 public sealed record GarminLoginResult
 {
-    public GarminAuthenticationModel? AuthenticationResult { get; set; }
+    public GarminDiTokenModel? DiTokenModel { get; set; }
     public bool MfaRequired { get; set; }
 }

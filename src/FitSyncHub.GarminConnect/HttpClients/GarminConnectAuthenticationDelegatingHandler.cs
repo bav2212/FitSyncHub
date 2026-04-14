@@ -2,23 +2,22 @@
 using System.Net;
 using System.Net.Http.Headers;
 using FitSyncHub.GarminConnect.Auth.Abstractions;
-using FitSyncHub.GarminConnect.Auth.Models;
 
 namespace FitSyncHub.GarminConnect.HttpClients;
 
 public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 {
     private readonly IGarminAuthProvider _garminAuthProvider;
-    private readonly IGarminTokenExchanger _garminTokenExchanger;
+    private readonly IGarminTokenRefresher _garminTokenRefresher;
     private readonly IGarminAuthCacheInvalidator _garminAuthCacheInvalidator;
 
     public GarminConnectAuthenticationDelegatingHandler(
         IGarminAuthProvider garminAuthProvider,
-        IGarminTokenExchanger garminTokenExchanger,
+        IGarminTokenRefresher garminTokenRefresher,
         IGarminAuthCacheInvalidator garminAuthCacheInvalidator)
     {
         _garminAuthProvider = garminAuthProvider;
-        _garminTokenExchanger = garminTokenExchanger;
+        _garminTokenRefresher = garminTokenRefresher;
         _garminAuthCacheInvalidator = garminAuthCacheInvalidator;
     }
 
@@ -26,12 +25,9 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var oauth2Token = await GetToken(cancellationToken);
+        var token = await GetToken(cancellationToken);
 
-        request.Headers.Remove("di-backend");
-
-        request.Headers.Authorization = new AuthenticationHeaderValue(oauth2Token.TokenType, oauth2Token.AccessToken);
-        request.Headers.Add("di-backend", "connectapi.garmin.com");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var response = await base.SendAsync(request, cancellationToken);
         if (response.StatusCode != HttpStatusCode.Unauthorized)
@@ -44,26 +40,25 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
         throw new GarminNotLoggedInException();
     }
 
-    private async Task<GarminOAuth2Token> GetToken(CancellationToken ct)
+    private async Task<string> GetToken(CancellationToken ct)
     {
         var authResult = await _garminAuthProvider.GetAuthResult(ct) ?? throw new GarminNotLoggedInException();
-        var oauth2Token = authResult.OAuthToken2;
 
-        if (IsTokenValid(oauth2Token.AccessToken))
+        if (!TokenExpiresSoon(authResult.DiToken))
         {
-            return oauth2Token;
+            return authResult.DiToken;
         }
 
-        authResult = await _garminTokenExchanger.ExchangeToken(authResult.OAuthToken1, ct);
-        return authResult.OAuthToken2;
+        authResult = await _garminTokenRefresher.Refresh(authResult, ct);
+        return authResult.DiToken;
     }
 
-    private static bool IsTokenValid(string jwtToken)
+    private static bool TokenExpiresSoon(string jwtToken)
     {
         var handler = new JwtSecurityTokenHandler();
         var jwtSecurityToken = handler.ReadJwtToken(jwtToken);
 
         var expiryDate = jwtSecurityToken.ValidTo;
-        return expiryDate > DateTime.UtcNow;
+        return DateTime.UtcNow > expiryDate.AddMinutes(-5);
     }
 }
