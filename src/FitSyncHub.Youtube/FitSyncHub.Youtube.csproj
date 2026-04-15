@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.73.0.4099" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.6" />
   </ItemGroup>
 
   <ItemGroup>
