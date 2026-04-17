@@ -23,6 +23,7 @@ internal sealed class GarminSsoHttpClient
 
     public async Task<string> Login(CancellationToken cancellationToken)
     {
+        //use to implement login https://github.com/cyberjunky/python-garminconnect
         throw new NotImplementedException();
     }
 
@@ -30,6 +31,7 @@ internal sealed class GarminSsoHttpClient
        GarminNeedsMfaClientState needMfaState,
        CancellationToken cancellationToken)
     {
+        //use to implement login https://github.com/cyberjunky/python-garminconnect
         throw new NotImplementedException();
     }
 }

@@ -116,6 +116,7 @@ internal class GarminAuthService : IGarminAuthService,
 
     private async Task<GarminDiTokenModel> CompleteLogin(string ticket, CancellationToken cancellationToken)
     {
+        //use to implement login https://github.com/cyberjunky/python-garminconnect
         throw new NotImplementedException();
     }
 }
