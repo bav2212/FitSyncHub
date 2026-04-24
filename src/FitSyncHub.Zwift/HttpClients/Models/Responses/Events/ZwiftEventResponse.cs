@@ -8,6 +8,7 @@ public sealed record ZwiftEventResponse
     public required int WorldId { get; init; }
     public required string Name { get; init; }
     public required long RouteId { get; init; }
+    public required long? BikeHash { get; init; }
     public required DateTime EventStart { get; init; }
     public required int? Laps { get; init; }
     public required double DurationInSeconds { get; init; }

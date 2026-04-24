@@ -62,6 +62,44 @@ public sealed class ZwiftGameInfoService
             .ToDictionary(g => g.Key, g => g.Select(x => x.Event).ToList());
     }
 
+    public async Task<List<ZwiftEventWithPreselectedBikeTuple>> GetZwiftEventsWithPreselectedBike(
+        DateTimeOffset from,
+        DateTimeOffset to,
+        CancellationToken cancellationToken)
+    {
+        var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
+        var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
+
+        var bikeFramesDictionary = gameInfo.BikeFrames.ToDictionary(x => x.Id, x => x);
+        var routesDictionary = routes.ToDictionary(x => x.Route.Id, x => x);
+
+        var events = await _zwiftHttpClient.GetEventFeedFullRangeBuggy(new ZwiftEventFeedRequest
+        {
+            From = from,
+            To = to,
+        }, cancellationToken);
+
+        List<ZwiftEventWithPreselectedBikeTuple> result = [];
+        foreach (var @event in events)
+        {
+            var bikeFrame = @event.BikeHash is not null && bikeFramesDictionary.TryGetValue(@event.BikeHash.Value, out var value1)
+                ? value1
+                : null;
+
+            var routeInfo = routesDictionary[@event.RouteId];
+
+            result.Add(new()
+            {
+                Event = @event,
+                BikeFrame = bikeFrame,
+                Route = routeInfo.Route,
+            });
+        }
+
+        return result;
+    }
+
+
     public async Task<MappedUncompletedAchievementsModel> GetAchievementsState(
         CancellationToken cancellationToken)
     {
@@ -116,4 +154,11 @@ public sealed record MappedUncompletedAchievementsModel
     public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> RunningRouteAchievementsToRouteMapping { get; init; }
     public required List<ZwiftGameInfoAchievementState> GeneralAchievements { get; init; }
     public required double AchievementLevel { get; init; }
+}
+
+public sealed record ZwiftEventWithPreselectedBikeTuple
+{
+    public required ZwiftEventResponse Event { get; init; }
+    public required ZwiftGameInfoBikeFrame? BikeFrame { get; init; }
+    public required ZwiftRouteModel Route { get; init; }
 }
