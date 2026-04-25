@@ -99,7 +99,6 @@ public sealed class ZwiftGameInfoService
         return result;
     }
 
-
     public async Task<MappedUncompletedAchievementsModel> GetAchievementsState(
         CancellationToken cancellationToken)
     {

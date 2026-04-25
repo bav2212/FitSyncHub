@@ -129,7 +129,7 @@ public sealed partial class ZwiftHttpClient
     }
 
     public async Task<ZwiftRaceResultResponse> GetEventSubgroupResults(
-        int eventSubgroupId,
+        long eventSubgroupId,
         CancellationToken cancellationToken)
     {
         List<ZwiftRaceResultEntryResponse> acc = [];
@@ -164,7 +164,7 @@ public sealed partial class ZwiftHttpClient
     }
 
     public async Task<IReadOnlyCollection<ZwiftEventSubgroupEntrantResponse>> GetEventSubgroupEntrants(
-        int eventSubgroupId,
+        long eventSubgroupId,
         string type = "all", // or 'leader', 'sweeper', 'favorite', 'following', 'other'
         string participation = "signed_up", // or 'registered',
         CancellationToken cancellationToken = default)
