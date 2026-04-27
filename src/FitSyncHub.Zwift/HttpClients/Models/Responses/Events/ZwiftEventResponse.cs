@@ -12,7 +12,7 @@ public sealed record ZwiftEventResponse
     public required string? ShortDescription { get; init; }
     public required string ImageUrl { get; init; }
     public required int RulesId { get; init; }
-    public required int MapId { get; init; }
+    public required int? MapId { get; init; }
     public required long RouteId { get; init; }
     public required string? RouteUrl { get; init; }
     public required long? JerseyHash { get; init; }
