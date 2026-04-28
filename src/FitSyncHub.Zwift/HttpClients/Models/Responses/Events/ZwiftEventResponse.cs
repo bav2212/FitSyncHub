@@ -97,7 +97,7 @@ public sealed record ZwiftEventSubgroupResponse
     public required DateTime LineUpEnd { get; init; }
     public required DateTime EventSubgroupStart { get; init; }
     public required int DurationInSeconds { get; init; }
-    public required int Laps { get; init; }
+    public required int? Laps { get; init; }
     public required double DistanceInMeters { get; init; }
     public required bool SignedUp { get; init; }
     public required int SignupStatus { get; init; }
