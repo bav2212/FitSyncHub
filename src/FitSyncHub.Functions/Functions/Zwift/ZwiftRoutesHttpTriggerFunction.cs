@@ -24,7 +24,7 @@ public class ZwiftRoutesHttpTriggerFunction
 
         var routes = await _zwiftRoutesService.GetRoutesInfo(cancellationToken);
         var orderdRoutes = routes
-             .OrderBy(x => x.PublishedOn)
+             .OrderBy(x => x.Name)
              .ToList();
 
         return new OkObjectResult(orderdRoutes);
