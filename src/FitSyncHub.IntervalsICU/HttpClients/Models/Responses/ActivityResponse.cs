@@ -175,6 +175,9 @@ public sealed record ActivityResponse
     #region Custom fields
     [JsonPropertyName("Lactate")]
     public double? Lactate { get; init; }
+
+    [JsonPropertyName("HSIh")]
+    public double? HeatLoad { get; init; }
     #endregion Custom fields
 
     [JsonIgnore]
