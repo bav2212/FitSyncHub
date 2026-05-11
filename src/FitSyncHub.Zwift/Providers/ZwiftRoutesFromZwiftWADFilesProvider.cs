@@ -104,18 +104,18 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
 
         //inspired by https://github.com/zoffline/zwift-offline/blob/master/scripts/get_start_lines.py#L29
         // do it inside 'if block' cause service is singleton and _unpackedWADFilesDirectory will be the same during application run
-        foreach (var file in Directory.EnumerateFiles(_zwiftWorldsPath,
+        foreach (var filePath in Directory.EnumerateFiles(_zwiftWorldsPath,
             "data_1.wad", new EnumerationOptions() { RecurseSubdirectories = true }))
         {
-            var hash = ComputeHash(file);
-            if (unpackedWADFilesStateDictionary.TryGetValue(file, out var unpackedWADFilesStateItem)
+            var hash = ComputeHash(filePath);
+            if (unpackedWADFilesStateDictionary.TryGetValue(filePath, out var unpackedWADFilesStateItem)
                 && unpackedWADFilesStateItem.Hash == hash)
             {
                 continue;
             }
 
-            _zwiftWadDecoder.Unpack(file, _unpackedWADFilesDirectory);
-            unpackedWADFilesStateDictionary[file] = new UnpackedWADFilesStateItem { FilePath = file, Hash = hash };
+            _zwiftWadDecoder.Unpack(filePath, _unpackedWADFilesDirectory);
+            unpackedWADFilesStateDictionary[filePath] = new UnpackedWADFilesStateItem { FilePath = filePath, Hash = hash };
         }
 
         var updatedUnpackedWADFilesStateList = JsonSerializer.Serialize(unpackedWADFilesStateDictionary.Values.ToList())!;
