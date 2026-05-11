@@ -4,51 +4,73 @@ namespace FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 
 public sealed record WellnessResponse
 {
-    public required string? Id { get; init; }
-    public required float? Ctl { get; init; }
-    public required float? Atl { get; init; }
-    public required float? RampRate { get; init; }
-    public required float? CtlLoad { get; init; }
-    public required float? AtlLoad { get; init; }
+    public string? Id { get; init; }
+    public float? Ctl { get; init; }
+    public float? Atl { get; init; }
+    public float? RampRate { get; init; }
+    public float? CtlLoad { get; init; }
+    public float? AtlLoad { get; init; }
     public required WellnessSportInfoResponse[]? SportInfo { get; init; }
-    public required DateTime? Updated { get; init; }
-    public required float? Weight { get; init; }
-    public required int? RestingHR { get; init; }
-    public required float? Hrv { get; init; }
-    public required float? HrvSDNN { get; init; }
-    public required WellnessMenstrualPhase? MenstrualPhase { get; init; }
-    public required WellnessMenstrualPhase? MenstrualPhasePredicted { get; init; }
-    public required int? KcalConsumed { get; init; }
-    public required int? SleepSecs { get; init; }
-    public required float? SleepScore { get; init; }
-    public required int? SleepQuality { get; init; }
-    public required float? AvgSleepingHR { get; init; }
-    public required int? Soreness { get; init; }
-    public required int? Fatigue { get; init; }
-    public required int? Stress { get; init; }
-    public required int? Mood { get; init; }
-    public required int? Motivation { get; init; }
-    public required int? Injury { get; init; }
-    public required float? SpO2 { get; init; }
-    public required int? Systolic { get; init; }
-    public required int? Diastolic { get; init; }
-    public required int? Hydration { get; init; }
-    public required float? HydrationVolume { get; init; }
-    public required float? Readiness { get; init; }
-    public required float? BaevskySI { get; init; }
-    public required float? BloodGlucose { get; init; }
-    public required float? Lactate { get; init; }
-    public required float? BodyFat { get; init; }
-    public required float? Abdomen { get; init; }
-    public required float? Vo2max { get; init; }
-    public required string? Comments { get; init; }
-    public required int? Steps { get; init; }
-    public required float? Respiration { get; init; }
-    public required bool? Locked { get; init; }
+    public DateTime? Updated { get; init; }
+    public float? Weight { get; init; }
+    public int? RestingHR { get; init; }
+    /** rMSSD */
+    public float? Hrv { get; init; }
+    public float? HrvSDNN { get; init; }
+    public WellnessMenstrualPhase? MenstrualPhase { get; init; }
+    public WellnessMenstrualPhase? MenstrualPhasePredicted { get; init; }
+    public int? KcalConsumed { get; init; }
+    public int? SleepSecs { get; init; }
+    public float? SleepScore { get; init; }
+    /** Poor(4), Avg(3), Good(2), Excellent(1) */
+    public int? SleepQuality { get; init; }
+    public float? AvgSleepingHR { get; init; }
+    /** None(0), Low(1), Avg(2), High(3), Extreme(4) */
+    public int? Soreness { get; init; }
+    /** None(0), Low(1), Avg(2), High(3), Extreme(4) */
+    public int? Fatigue { get; init; }
+    /** None(0), Low(1), Avg(2), High(3), Extreme(4) */
+    public int? Stress { get; init; }
+    /** Poor(4), Avg(3), Good(2), Excellent(1) */
+    public int? Mood { get; init; }
+    /** Poor(4), Avg(3), Good(2), Excellent(1) */
+    public int? Motivation { get; init; }
+    /** Injured(4), Poor(3), Niggle(2), Excellent(1) */
+    public int? Injury { get; init; }
+    /** 0-100% */
+    public float? SpO2 { get; init; }
+    /** blood pressure mmHg */
+    public int? Systolic { get; init; }
+    public int? Diastolic { get; init; }
+    /** Well Hydrated (1), Hydrated(2), Dehydrated(3), Very Dehydrated(4) */
+    public int? Hydration { get; init; }
+    /** litres consumed */
+    public float? HydrationVolume { get; init; }
+    public float? Readiness { get; init; }
+    public float? BaevskySI { get; init; }
+    /** mmol/L */
+    public float? BloodGlucose { get; init; }
+    /** mmol/L */
+    public float? Lactate { get; init; }
+    /** % */
+    public float? BodyFat { get; init; }
+    /** cm */
+    public float? Abdomen { get; init; }
+    /** ml/kg/min */
+    public float? Vo2max { get; init; }
+    public string? Comments { get; init; }
+    /** rMSSD */
+    public int? Steps { get; init; }
+    public float? Respiration { get; init; }
+    /** Updates via API and integrations ignored */
+    public bool? Locked { get; init; }
+    /** Indicates value was updated from athlete settings and is not authoritative */
+    public bool? TempWeight { get; init; }
+    public bool? TempRestingHR { get; init; }
 }
 
 public sealed record WellnessSportInfoResponse
 {
-    public required WellnessSportInfoType? Type { get; init; }
-    public required float? Eftp { get; init; }
+    public WellnessSportInfoType? Type { get; init; }
+    public float? Eftp { get; init; }
 }
