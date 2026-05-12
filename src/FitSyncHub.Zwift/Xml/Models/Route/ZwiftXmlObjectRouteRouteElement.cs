@@ -1,40 +1,10 @@
 ﻿using System.Xml;
 using System.Xml.Serialization;
 
-namespace FitSyncHub.Zwift.Providers;
-
-public sealed record ZwiftInGameRootXmlObject
-{
-    public required ZwiftInGameRouteXmlElementDTO Route { get; init; }
-    public required ZwiftInGameHomedataXmlElementDTO? Homedata { get; init; }
-}
-
-[XmlRoot(ElementName = "homedata")]
-public sealed class ZwiftInGameHomedataXmlElementDTO
-{
-
-    [XmlAttribute(AttributeName = "difficulty")]
-    public double Difficulty { get; set; }
-    [XmlAttribute(AttributeName = "duration")]
-    public int Duration { get; set; }
-    [XmlAttribute(AttributeName = "xp")]
-    public uint Xp { get; set; }
-    [XmlAttribute(AttributeName = "bikeRec")]
-    public bool BikeRec { get; set; }
-    [XmlAttribute(AttributeName = "workoutRec")]
-    public bool WorkoutRec { get; set; }
-    [XmlAttribute(AttributeName = "bikeType")]
-    public uint BikeType { get; set; }
-    [XmlAttribute(AttributeName = "runRec")]
-    public bool RunRec { get; set; }
-    [XmlAttribute(AttributeName = "publishedOn")]
-    public string? PublishedOn { get; set; }
-    [XmlAttribute(AttributeName = "rowRec")]
-    public bool RowRec { get; set; }
-}
+namespace FitSyncHub.Zwift.Xml.Models.Route;
 
 [XmlRoot(ElementName = "route")]
-public sealed class ZwiftInGameRouteXmlElementDTO
+public sealed class ZwiftXmlObjectRouteRouteElement
 {
     [XmlAttribute("name")]
     public required string Name

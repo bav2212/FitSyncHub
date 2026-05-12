@@ -43,6 +43,7 @@ public static class ZwiftModule
                 services.AddScoped<IZwiftRoutesProvider, ZwiftRoutesFromGameInfoProvider>();
             }
 
+            services.AddScoped<ZwiftWorldsXmlFilesProvider>();
             services.AddScoped<ZwiftWadDecoder>();
 
             services.AddScoped<ZwiftEventsService>();

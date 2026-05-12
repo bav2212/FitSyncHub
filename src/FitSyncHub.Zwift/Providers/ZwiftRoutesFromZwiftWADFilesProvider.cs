@@ -1,35 +1,14 @@
-﻿using System.Security.Cryptography;
-using System.Text.Json;
-using System.Xml;
-using System.Xml.Serialization;
-using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+﻿using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Providers.Abstractions;
+using FitSyncHub.Zwift.Xml;
+using FitSyncHub.Zwift.Xml.Models;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Providers;
 
 public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
 {
-    private readonly string _zwiftWorldsPath = @"C:\Program Files (x86)\Zwift\assets\Worlds";
-
-    private static readonly Dictionary<string, string> s_worldIdToNameMapping = new()
-    {
-        {"1",  "Watopia"},
-        {"2",  "Richmond"},
-        {"3",  "London"},
-        {"4",  "New York"},
-        {"5",  "Innsbruck"},
-        {"6",  "Bologna"},
-        {"7",  "Yorkshire"},
-        {"8",  "Crit City"},
-        {"9",  "Makuri Islands"},
-        {"10",  "France"},
-        {"11",  "Paris"},
-        {"12",  "Gravel Mountain"},
-        {"13",  "Scotland"},
-    };
-
     // to align with gameInfo endpoint
     private static readonly Dictionary<string, string> s_nameMapping = new()
     {
@@ -47,165 +26,47 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         {"The Pretzel", "Watopia Pretzel"},
     };
 
-    private readonly ZwiftWadDecoder _zwiftWadDecoder;
+    private readonly ZwiftWorldsXmlFilesProvider _zwiftWorldsXmlFilesProvider;
     private readonly ILogger<ZwiftRoutesFromZwiftWADFilesProvider> _logger;
-    private readonly string _unpackedWADFilesDirectory;
-    private readonly string _unpackedWADFilesStateFilePath;
 
     public ZwiftRoutesFromZwiftWADFilesProvider(
-        ZwiftWadDecoder zwiftWadDecoder,
+        ZwiftWorldsXmlFilesProvider zwiftWorldsXmlFilesProvider,
         ILogger<ZwiftRoutesFromZwiftWADFilesProvider> logger)
     {
-        _zwiftWadDecoder = zwiftWadDecoder;
+        _zwiftWorldsXmlFilesProvider = zwiftWorldsXmlFilesProvider;
         _logger = logger;
-
-        _unpackedWADFilesDirectory = Path.Combine(Path.GetTempPath(), "ZwiftWADFilesUnpacked");
-        _unpackedWADFilesStateFilePath = Path.Combine(_unpackedWADFilesDirectory, "state.json");
     }
 
     public async Task<List<ZwiftDataWorldRoutePair>> GetRoutesInfo(CancellationToken cancellationToken)
     {
-        if (!Directory.Exists(_unpackedWADFilesDirectory))
-        {
-            Directory.CreateDirectory(_unpackedWADFilesDirectory);
-        }
-
-        await UnpackWADFiles(cancellationToken);
-
-        var worldRouteFilePaths = Directory.EnumerateFiles(
-            Path.Combine(_unpackedWADFilesDirectory, "Worlds"),
-            "*.xml",
-            new EnumerationOptions { RecurseSubdirectories = true })
-            .Where(filePath =>
-            {
-                var pathParts = GetRelativePathParts(filePath);
-
-                return pathParts[0].StartsWith("world", StringComparison.OrdinalIgnoreCase)
-                    && pathParts[1] == "routes";
-            });
-
-        // TODO
-        // If need climb portal, use reference https://github.com/zoffline/zwift-offline/blob/master/scripts/get_climbs.py as reference
+        var worldRouteFilePaths = await _zwiftWorldsXmlFilesProvider.GetWorlsXmlFilesPaths(cancellationToken);
 
         return [.. ReadRouteFilesAndParse(worldRouteFilePaths)];
     }
 
-    private async Task UnpackWADFiles(CancellationToken cancellationToken)
+    private static IEnumerable<ZwiftDataWorldRoutePair> ReadRouteFilesAndParse(
+        List<ZwiftWorldsXmlFilesModel> worldsXmlFilesItems)
     {
-        Dictionary<string, UnpackedWADFilesStateItem> unpackedWADFilesStateDictionary = [];
-        if (File.Exists(_unpackedWADFilesStateFilePath))
+        var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRouteRoot>();
+
+        foreach (var worldsXmlFilesItem in worldsXmlFilesItems)
         {
-            var unpackedWADFilesStateJson = await File.ReadAllTextAsync(_unpackedWADFilesStateFilePath, cancellationToken);
-            var unpackedWADFilesStateList = JsonSerializer
-                .Deserialize<List<UnpackedWADFilesStateItem>>(unpackedWADFilesStateJson)!;
-            unpackedWADFilesStateDictionary = unpackedWADFilesStateList
-                .ToDictionary(x => x.FilePath, StringComparer.OrdinalIgnoreCase);
-        }
+            var worldName = worldsXmlFilesItem.WorldName;
 
-        //inspired by https://github.com/zoffline/zwift-offline/blob/master/scripts/get_start_lines.py#L29
-        // do it inside 'if block' cause service is singleton and _unpackedWADFilesDirectory will be the same during application run
-        foreach (var filePath in Directory.EnumerateFiles(_zwiftWorldsPath,
-            "data_1.wad", new EnumerationOptions() { RecurseSubdirectories = true }))
-        {
-            var hash = ComputeHash(filePath);
-            if (unpackedWADFilesStateDictionary.TryGetValue(filePath, out var unpackedWADFilesStateItem)
-                && unpackedWADFilesStateItem.Hash == hash)
+            foreach (var filePath in worldsXmlFilesItem.FilePaths)
             {
-                continue;
-            }
+                var zwiftInGameRoot = rootParser.Parse(filePath);
 
-            _zwiftWadDecoder.Unpack(filePath, _unpackedWADFilesDirectory);
-            unpackedWADFilesStateDictionary[filePath] = new UnpackedWADFilesStateItem { FilePath = filePath, Hash = hash };
-        }
-
-        var updatedUnpackedWADFilesStateList = JsonSerializer.Serialize(unpackedWADFilesStateDictionary.Values.ToList())!;
-        await File.WriteAllTextAsync(_unpackedWADFilesStateFilePath, updatedUnpackedWADFilesStateList, cancellationToken);
-    }
-
-    // move to common if need
-    private static string ComputeHash(string filePath)
-    {
-        using var md5 = MD5.Create();
-        using var stream = File.OpenRead(filePath);
-        var myHash = md5.ComputeHash(stream);
-
-        return Convert.ToBase64String(myHash);
-    }
-
-    private string[] GetRelativePathParts(string filePath)
-    {
-        var basePath = Path.Combine(_unpackedWADFilesDirectory, "Worlds");
-
-        return [.. Path.GetRelativePath(basePath, filePath).Split(Path.DirectorySeparatorChar)];
-    }
-
-    private IEnumerable<ZwiftDataWorldRoutePair> ReadRouteFilesAndParse(
-        IEnumerable<string> filePaths)
-    {
-        var routeSerializer = new XmlSerializer(typeof(ZwiftInGameRouteXmlElementDTO));
-        var homemadeSerializer = new XmlSerializer(typeof(ZwiftInGameHomedataXmlElementDTO));
-
-        foreach (var filePath in filePaths)
-        {
-            var worldId = GetRelativePathParts(filePath)[0][5..]; // trim "world"
-            var worldName = s_worldIdToNameMapping[worldId];
-
-            using var reader = XmlReader.Create(filePath, new XmlReaderSettings
-            {
-                IgnoreComments = true,
-                IgnoreWhitespace = true,
-                // THIS is the important part: allow multiple top-level elements
-                ConformanceLevel = ConformanceLevel.Fragment,
-            });
-
-            ZwiftInGameRouteXmlElementDTO? routeXmlDTO = default;
-            ZwiftInGameHomedataXmlElementDTO? homedataXmlDTO = default;
-
-            while (reader.Read())
-            {
-                if (reader.NodeType != XmlNodeType.Element)
+                yield return new ZwiftDataWorldRoutePair
                 {
-                    continue;
-                }
-
-                switch (reader.Name)
-                {
-                    case "route":
-                        {
-                            using var sub = reader.ReadSubtree();
-                            sub.Read(); // move into element
-                            routeXmlDTO = routeSerializer.Deserialize(sub) as ZwiftInGameRouteXmlElementDTO
-                                ?? throw new InvalidDataException("Can't deserialize route");
-                            break;
-                        }
-                    case "homedata":
-                        {
-                            using var sub = reader.ReadSubtree();
-                            sub.Read(); // move into element
-                            homedataXmlDTO = homemadeSerializer.Deserialize(sub) as ZwiftInGameHomedataXmlElementDTO
-                                ?? throw new InvalidDataException("Can't deserialize homedata");
-                            break;
-
-                        }
-                }
+                    WorldName = worldName,
+                    Route = MapZwiftInGameRootXmlDTOToRoute(zwiftInGameRoot)
+                };
             }
-
-            if (routeXmlDTO == null)
-            {
-                throw new InvalidDataException($"Route XML element not found in file {filePath}");
-            }
-
-            var zwiftInGameRoot = new ZwiftInGameRootXmlObject { Route = routeXmlDTO, Homedata = homedataXmlDTO };
-
-            yield return new ZwiftDataWorldRoutePair()
-            {
-                WorldName = worldName,
-                Route = MapZwiftInGameRootXmlDTOToRoute(zwiftInGameRoot)
-            };
         }
     }
 
-    private static ZwiftRouteModel MapZwiftInGameRootXmlDTOToRoute(ZwiftInGameRootXmlObject zwiftInGameRoot)
+    private static ZwiftRouteModel MapZwiftInGameRootXmlDTOToRoute(ZwiftXmlObjectRouteRoot zwiftInGameRoot)
     {
         var route = zwiftInGameRoot.Route;
         var homedata = zwiftInGameRoot.Homedata;
@@ -246,9 +107,5 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         };
     }
 
-    private sealed record UnpackedWADFilesStateItem
-    {
-        public required string FilePath { get; init; }
-        public required string Hash { get; init; }
-    }
+
 }
