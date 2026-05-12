@@ -75,7 +75,7 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
             cancellationToken);
 
         garminWorkoutActivities = [
-            .. garminWorkoutActivities.Where(x => !x.ActivityType.TypeKey.Contains("cycling", StringComparison.InvariantCultureIgnoreCase))
+            .. garminWorkoutActivities.Where(x => !x.ActivityType.TypeKey.Contains("indoor_cycling", StringComparison.InvariantCultureIgnoreCase))
         ];
 
         if (garminWorkoutActivities.Count != count)
