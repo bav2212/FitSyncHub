@@ -80,7 +80,7 @@ public sealed class GarminUploadToStravaHttpTriggerFunction
 
         if (garminWorkoutActivities.Count != count)
         {
-            return new BadRequestObjectResult($"Found {garminWorkoutActivities.Count} garminactivities, but specified {count} in request");
+            return new BadRequestObjectResult($"Found {garminWorkoutActivities.Count} garmin activities, but specified {count} in request");
         }
 
         var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(date, date) { Category = [EventCategory.Workout] }, cancellationToken);
