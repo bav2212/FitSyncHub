@@ -31,7 +31,7 @@ HashSet<string> functionsCalledByUser = [
     nameof(SyncIntervalsICUWithGarminHttpTriggerFunction),
     nameof(WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction),
     nameof(GarminWorkoutToIntervalsICUExporterHttpTriggerFunction),
-    nameof(GarminWorkoutUploadToStravaHttpTriggerFunction),
+    nameof(GarminUploadToStravaHttpTriggerFunction),
     nameof(MacroNutrientsCalculatorHttpTriggerFunction),
     nameof(LactateSyncHttpTriggerFunction),
     nameof(XertWorkoutToIntervalsICUExporterHttpTriggerFunction),

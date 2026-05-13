@@ -16,18 +16,18 @@ using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
 
-public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
+public sealed class GarminUploadToStravaHttpTriggerFunction
 {
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;
     private readonly IStravaHttpClient _stravaHttpClient;
-    private readonly ILogger<GarminWorkoutUploadToStravaHttpTriggerFunction> _logger;
+    private readonly ILogger<GarminUploadToStravaHttpTriggerFunction> _logger;
 
-    public GarminWorkoutUploadToStravaHttpTriggerFunction(
+    public GarminUploadToStravaHttpTriggerFunction(
         GarminConnectHttpClient garminConnectHttpClient,
         IntervalsIcuHttpClient intervalsIcuHttpClient,
         IStravaHttpClient stravaHttpClient,
-        ILogger<GarminWorkoutUploadToStravaHttpTriggerFunction> logger)
+        ILogger<GarminUploadToStravaHttpTriggerFunction> logger)
     {
         _garminConnectHttpClient = garminConnectHttpClient;
         _intervalsIcuHttpClient = intervalsIcuHttpClient;
@@ -35,9 +35,9 @@ public sealed class GarminWorkoutUploadToStravaHttpTriggerFunction
         _logger = logger;
     }
 
-    [Function(nameof(GarminWorkoutUploadToStravaHttpTriggerFunction))]
+    [Function(nameof(GarminUploadToStravaHttpTriggerFunction))]
     public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "garmin-workout-upload-to-strava")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "garmin-upload-to-strava")] HttpRequest req,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
