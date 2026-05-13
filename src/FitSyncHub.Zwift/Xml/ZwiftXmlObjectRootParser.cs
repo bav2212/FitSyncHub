@@ -1,13 +1,17 @@
 ﻿using System.Reflection;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using FitSyncHub.Zwift.Xml.Abstractions;
 
 namespace FitSyncHub.Zwift.Xml;
 
-public class ZwiftXmlObjectRootParser<T> where T : IZwiftXmlObjectRoot
+public class ZwiftXmlObjectRootParser<T> : IDisposable
+    where T : IZwiftXmlObjectRoot
 {
     private readonly Dictionary<string, XmlSerializer> _serializers = [];
+    private readonly List<UnknownXmlElementInfo> _unknownXmlElements = [];
+    private bool _disposedValue;
 
     public ZwiftXmlObjectRootParser()
     {
@@ -88,18 +92,112 @@ public class ZwiftXmlObjectRootParser<T> where T : IZwiftXmlObjectRoot
         }
     }
 
-    private static void SetHandlersToLogUnknownEvents(XmlSerializer serializer, string xmlPropertyName)
+    private void SetHandlersToLogUnknownEvents(XmlSerializer serializer, string xmlPropertyName)
     {
+
         serializer.UnknownAttribute += (sender, args) =>
-            Console.WriteLine("Property {0}: Unknown attribute {1}=\'{2}\'", xmlPropertyName, args.Attr.Name, args.Attr.Value);
+            _unknownXmlElements.Add(new UnknownXmlElementInfo
+            {
+                Reason = UnknownXmlElementReason.UnknownAttribute,
+                PropertyName = xmlPropertyName,
+                ElementName = args.Attr.Name,
+                ElementValue = args.Attr.Value
+            });
 
         serializer.UnknownNode += (sender, args) =>
-            Console.WriteLine("Property {0}: Unknown Node:{1}\t{2}", xmlPropertyName, args.Name, args.Text);
+        {
+            if (args.NodeType == XmlNodeType.Attribute)
+            {
+                return; // will be handled by UnknownAttribute
+            }
+
+            _unknownXmlElements.Add(new UnknownXmlElementInfo
+            {
+                Reason = UnknownXmlElementReason.UnknownNode,
+                PropertyName = xmlPropertyName,
+                ElementName = args.Name,
+                ElementValue = args.Text ?? throw new InvalidOperationException("Unknown node text is null")
+            });
+        };
 
         serializer.UnknownElement += (sender, args) =>
-            Console.WriteLine("Property {0}: Unknown Element:{1}\t{2}", xmlPropertyName, args.Element.Name, args.Element.InnerXml);
+            _unknownXmlElements.Add(new UnknownXmlElementInfo
+            {
+                Reason = UnknownXmlElementReason.UnknownElement,
+                PropertyName = xmlPropertyName,
+                ElementName = args.Element.Name,
+                ElementValue = args.Element.InnerXml
+            });
 
         serializer.UnreferencedObject += (sender, args) =>
-            Console.WriteLine("Property {0}: Unreferenced Object: {1}\t{2}", xmlPropertyName, args.UnreferencedId, args.UnreferencedObject.ToString());
+            _unknownXmlElements.Add(new UnknownXmlElementInfo
+            {
+                Reason = UnknownXmlElementReason.UnreferencedObject,
+                PropertyName = xmlPropertyName,
+                ElementName = args.UnreferencedId ?? throw new InvalidOperationException("Unreferenced ID is null"),
+                ElementValue = args.UnreferencedObject?.ToString() ?? throw new InvalidOperationException("Unreferenced object is null")
+            });
+    }
+
+    private void EnsureNoUnknownElements()
+    {
+        if (_unknownXmlElements.Count <= 0)
+        {
+            return;
+        }
+
+        var formmattedText = _unknownXmlElements
+            .GroupBy(x => new { x.Reason, x.PropertyName, x.ElementName })
+            .Select(x => new
+            {
+                x.Key.Reason,
+                x.Key.PropertyName,
+                x.Key.ElementName,
+                Values = x.Select(e => e.ElementValue).Distinct().ToArray()
+            })
+            .Aggregate(new StringBuilder(), (acc, curr) =>
+            {
+                acc.AppendLine($"Reason: {curr.Reason}, Property: {curr.PropertyName}, Element: {curr.ElementName}, Values: {string.Join(", ", curr.Values)}");
+                return acc;
+            }, sb => sb.ToString());
+
+        throw new InvalidDataException($"Unknown XML elements found during deserialization:{Environment.NewLine}{formmattedText}");
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+#if DEBUG
+                EnsureNoUnknownElements();
+#endif
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private enum UnknownXmlElementReason
+    {
+        UnknownAttribute,
+        UnknownNode,
+        UnknownElement,
+        UnreferencedObject
+    }
+
+    private readonly record struct UnknownXmlElementInfo
+    {
+        public required UnknownXmlElementReason Reason { get; init; }
+        public required string PropertyName { get; init; }
+        public required string ElementName { get; init; }
+        public required string ElementValue { get; init; }
     }
 }

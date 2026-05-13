@@ -47,7 +47,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
     private static IEnumerable<ZwiftDataWorldRoutePair> ReadRouteFilesAndParse(
         List<ZwiftWorldsXmlFilesModel> worldsXmlFilesItems)
     {
-        var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRouteRoot>();
+        using var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRouteRoot>();
 
         foreach (var worldsXmlFilesItem in worldsXmlFilesItems)
         {
@@ -106,6 +106,4 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             PublishedOn = publishedOn,
         };
     }
-
-
 }
