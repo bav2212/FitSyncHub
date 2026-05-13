@@ -79,7 +79,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             ? DateOnly.ParseExact(homedata.PublishedOn, "yyyy-MM-dd")
             : default(DateOnly?);
 
-        return new ZwiftRouteModel()
+        return new ZwiftRouteModel
         {
             Name = routeName,
             Id = route.NameHash,

@@ -1,6 +1,4 @@
-﻿using FitSyncHub.Common.Models;
-
-namespace FitSyncHub.Common.Helpers;
+﻿namespace FitSyncHub.Common.Helpers;
 
 public static class StringHelper
 {
