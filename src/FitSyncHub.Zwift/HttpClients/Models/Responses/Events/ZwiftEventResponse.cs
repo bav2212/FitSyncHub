@@ -21,7 +21,7 @@ public sealed record ZwiftEventResponse
     public required bool OverrideMapPreferences { get; init; }
     public required DateTime EventStart { get; init; }
     public required int DurationInSeconds { get; init; }
-    public required double DistanceInMeters { get; init; }
+    public required double? DistanceInMeters { get; init; }
     public required int? Laps { get; init; }
     public required bool PrivateEvent { get; init; }
     public required bool InvisibleToNonParticipants { get; init; }
