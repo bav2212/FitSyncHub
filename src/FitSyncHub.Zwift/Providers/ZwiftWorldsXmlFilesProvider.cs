@@ -42,7 +42,7 @@ public class ZwiftWorldsXmlFilesProvider
         _unpackedWADFilesStateFilePath = Path.Combine(_unpackedWADFilesDirectory, "state.json");
     }
 
-    public async Task<List<ZwiftWorldsXmlFilesModel>> GetWorlsXmlFilesPaths(CancellationToken cancellationToken)
+    public async Task<ZwiftXmlFilesModel> GetWorlsXmlFilesPaths(CancellationToken cancellationToken)
     {
         if (!Directory.Exists(_unpackedWADFilesDirectory))
         {
@@ -63,18 +63,30 @@ public class ZwiftWorldsXmlFilesProvider
                     && pathParts[1] == "routes";
             });
 
-        // TODO
-        // If need climb portal, use reference https://github.com/zoffline/zwift-offline/blob/master/scripts/get_climbs.py as reference
-
-
-        return [.. worldRouteFilePaths
-            .GroupBy(GetWorldIdFromFilePath)
-            .Select(x => new ZwiftWorldsXmlFilesModel
+        var regularRoutesPart = worldRouteFilePaths
+            .Select(x => new ZwiftXmlFilesModelRegularRoutes
             {
-                WorldId = x.Key,
-                WorldName = s_worldIdToNameMapping[x.Key],
-                FilePaths = [.. x]
-            })];
+                WorldName = s_worldIdToNameMapping[GetWorldIdFromFilePath(x)],
+                FilePath = x
+            })
+            .ToList();
+
+
+        var climbPortalFilePaths = Directory.EnumerateFiles(
+            Path.Combine(_unpackedWADFilesDirectory, "Worlds", "portal"),
+            "road_*.xml",
+            new EnumerationOptions { RecurseSubdirectories = true })
+            .Select(x => new ZwiftXmlFilesModelClimbPortalRoads
+            {
+                FilePath = x
+            })
+            .ToList();
+
+        return new ZwiftXmlFilesModel
+        {
+            RegularRoutes = regularRoutesPart,
+            ClimbPortalRoads = climbPortalFilePaths
+        };
     }
 
     private string GetWorldIdFromFilePath(string x)
@@ -97,8 +109,15 @@ public class ZwiftWorldsXmlFilesProvider
         //inspired by https://github.com/zoffline/zwift-offline/blob/master/scripts/get_start_lines.py#L29
         // do it inside 'if block' cause service is singleton and _unpackedWADFilesDirectory will be the same during application run
         foreach (var filePath in Directory.EnumerateFiles(_zwiftWorldsPath,
-            "data_1.wad", new EnumerationOptions() { RecurseSubdirectories = true }))
+            "*.wad", new EnumerationOptions() { RecurseSubdirectories = true }))
         {
+            var fileName = Path.GetFileName(filePath);
+
+            if (fileName != "data_1.wad" && fileName != "roads.wad")
+            {
+                continue;
+            }
+
             var hash = ComputeHash(filePath);
             if (unpackedWADFilesStateDictionary.TryGetValue(filePath, out var unpackedWADFilesStateItem)
                 && unpackedWADFilesStateItem.Hash == hash)
@@ -138,9 +157,22 @@ public class ZwiftWorldsXmlFilesProvider
     }
 }
 
-public sealed record ZwiftWorldsXmlFilesModel
+
+public sealed record ZwiftXmlFilesModel
 {
-    public required string WorldId { get; init; }
+    public required List<ZwiftXmlFilesModelRegularRoutes> RegularRoutes { get; init; }
+    public required List<ZwiftXmlFilesModelClimbPortalRoads> ClimbPortalRoads { get; init; }
+
+}
+
+
+public sealed record ZwiftXmlFilesModelRegularRoutes
+{
     public required string WorldName { get; init; }
-    public required List<string> FilePaths { get; init; }
+    public required string FilePath { get; init; }
+}
+
+public sealed record ZwiftXmlFilesModelClimbPortalRoads
+{
+    public required string FilePath { get; init; }
 }

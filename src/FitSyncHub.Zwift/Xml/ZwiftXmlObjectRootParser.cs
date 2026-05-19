@@ -111,12 +111,17 @@ public class ZwiftXmlObjectRootParser<T> : IDisposable
                 return; // will be handled by UnknownAttribute
             }
 
+            if (args.NodeType == XmlNodeType.Element)
+            {
+                return; // will be handled by UnknownELement
+            }
+
             _unknownXmlElements.Add(new UnknownXmlElementInfo
             {
                 Reason = UnknownXmlElementReason.UnknownNode,
                 PropertyName = xmlPropertyName,
                 ElementName = args.Name,
-                ElementValue = args.Text ?? throw new InvalidOperationException("Unknown node text is null")
+                ElementValue = args.Text ?? string.Empty
             });
         };
 
