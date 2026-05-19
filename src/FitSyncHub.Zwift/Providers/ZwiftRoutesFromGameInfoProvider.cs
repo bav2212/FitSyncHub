@@ -9,7 +9,7 @@ public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
 {
     private readonly Dictionary<string, string> _worldFriendlyNameMapping = new(StringComparer.OrdinalIgnoreCase)
     {
-        {"", "Climb Portal"},
+        {"", Constants.ZwiftClimbPortalWorldName},
         {"NEWYORK", "New York"},
         {"WATOPIA", "Watopia"},
         {"SCOTLAND", "Scotland"},
@@ -36,35 +36,46 @@ public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
     {
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
 
-        return [.. gameInfo.Maps.SelectMany(world => world.Routes.Select(route => new ZwiftDataWorldRoutePair
-        {
-            WorldName = _worldFriendlyNameMapping[world.Name],
-            Route = ConvertToZwiftRouteModel(route),
-        }))];
+        return [.. ConvertToZwiftRouteModel(gameInfo)];
     }
 
-    private static ZwiftRouteModel ConvertToZwiftRouteModel(ZwiftGameInfoRoute route)
+    private IEnumerable<ZwiftDataWorldRoutePair> ConvertToZwiftRouteModel(ZwiftGameInfoResponse gameInfo)
     {
-        var blockedForMeetups = route.BlockedForMeetups != 0;
-
-        return new ZwiftRouteModel
+        foreach (var map in gameInfo.Maps)
         {
-            Name = route.Name,
-            Id = route.Id,
-            DistanceInMeters = route.DistanceInMeters,
-            AscentInMeters = route.AscentInMeters,
-            LocKey = route.LocKey,
-            LevelLocked = route.LevelLocked,
-            PublicEventsOnly = route.PublicEventsOnly,
-            SupportedLaps = route.SupportedLaps,
-            LeadinAscentInMeters = route.LeadinAscentInMeters,
-            LeadinDistanceInMeters = route.LeadinDistanceInMeters,
-            BlockedForMeetups = blockedForMeetups,
-            Xp = route.Xp,
-            Duration = route.Duration,
-            Difficulty = route.Difficulty,
-            Sports = route.Sports,
-            PublishedOn = null,
-        };
+            var worldName = _worldFriendlyNameMapping[map.Name];
+            var isClimbPortal = worldName == Constants.ZwiftClimbPortalWorldName;
+
+            foreach (var route in map.Routes)
+            {
+                var blockedForMeetups = route.BlockedForMeetups != 0;
+                var distanceInMeters = isClimbPortal ? route.DistanceInMeters / 100 : route.DistanceInMeters;
+                var ascentInMeters = isClimbPortal ? route.AscentInMeters / 100 : route.AscentInMeters;
+
+                yield return new ZwiftDataWorldRoutePair
+                {
+                    WorldName = worldName,
+                    Route = new ZwiftRouteModel
+                    {
+                        Name = route.Name,
+                        Id = route.Id,
+                        DistanceInMeters = distanceInMeters,
+                        AscentInMeters = ascentInMeters,
+                        LocKey = route.LocKey,
+                        LevelLocked = route.LevelLocked,
+                        PublicEventsOnly = route.PublicEventsOnly,
+                        SupportedLaps = route.SupportedLaps,
+                        LeadinAscentInMeters = route.LeadinAscentInMeters,
+                        LeadinDistanceInMeters = route.LeadinDistanceInMeters,
+                        BlockedForMeetups = blockedForMeetups,
+                        Xp = route.Xp,
+                        Duration = route.Duration,
+                        Difficulty = route.Difficulty,
+                        Sports = route.Sports,
+                        PublishedOn = null,
+                    }
+                };
+            }
+        }
     }
 }

@@ -114,7 +114,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
 
             yield return new ZwiftDataWorldRoutePair
             {
-                WorldName = "Climb Portal",
+                WorldName = Constants.ZwiftClimbPortalWorldName,
                 Route = new ZwiftRouteModel
                 {
                     Name = roadMetadata.UserFacingName,
