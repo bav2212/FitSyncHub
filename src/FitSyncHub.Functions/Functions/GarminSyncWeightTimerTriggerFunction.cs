@@ -17,14 +17,12 @@ public class GarminSyncWeightTimerTriggerFunction
         _logger = logger;
     }
 
-    // uncomment when garmin api limits are no longer an issue on production
-    //#if !DEBUG
-    //    [Function(nameof(GarminSyncWeightTimerTriggerFunction))]
-    //#endif
+#if !DEBUG
+    [Function(nameof(GarminSyncWeightTimerTriggerFunction))]
+#endif
     public async Task Run(
         // run every day at 19 utc to avoid garmin api limits
         [TimerTrigger("0 0 19 * * *")] TimerInfo timer,
-
         CancellationToken cancellationToken)
     {
 #pragma warning disable CA1873 // Avoid potentially expensive logging
