@@ -3,8 +3,6 @@ using System.Text.Json;
 using FitSyncHub.IntervalsICU.HttpClients.Models;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Primitives;
 
 namespace FitSyncHub.IntervalsICU.HttpClients;
 
@@ -14,12 +12,7 @@ public partial class IntervalsIcuHttpClient
         DateOnly date,
         CancellationToken cancellationToken)
     {
-        var queryParams = new Dictionary<string, StringValues>()
-        {
-            { "date", $"{date:yyyy-MM-dd}" }
-        };
-
-        var requestUri = QueryHelpers.AddQueryString($"{AthleteBaseUrl}/wellness", queryParams);
+        var requestUri = $"{AthleteBaseUrl}/wellness/{date:yyyy-MM-dd}";
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
