@@ -58,13 +58,9 @@ public class ZwiftWorldsXmlFilesProvider
             .Where(filePath =>
             {
                 var pathParts = GetRelativePathParts(filePath);
-                if (pathParts.Length != 2)
-                {
-                    return false;
 
-                }
-
-                return pathParts[0].StartsWith("world", StringComparison.OrdinalIgnoreCase)
+                return pathParts.Length == 2
+                    && pathParts[0].StartsWith("world", StringComparison.OrdinalIgnoreCase)
                     && pathParts[1] == "routes";
             });
 
