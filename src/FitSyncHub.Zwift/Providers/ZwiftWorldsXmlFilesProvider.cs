@@ -59,7 +59,7 @@ public class ZwiftWorldsXmlFilesProvider
             {
                 var pathParts = GetRelativePathParts(filePath);
 
-                return pathParts.Length == 2
+                return pathParts.Length > 2
                     && pathParts[0].StartsWith("world", StringComparison.OrdinalIgnoreCase)
                     && pathParts[1] == "routes";
             });
