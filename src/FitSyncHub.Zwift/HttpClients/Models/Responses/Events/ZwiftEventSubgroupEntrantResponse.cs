@@ -8,11 +8,11 @@ public sealed record ZwiftEventSubgroupEntrantResponse
     public required string LastName { get; init; }
     public required bool Male { get; init; }
     public required string EventCategory { get; init; }
-    public required uint Age { get; init; }
+    public required int Age { get; init; }
     public required int BodyType { get; init; }
-    public required uint Height { get; init; }   // in mm
-    public required uint Weight { get; init; }   // in grams
-    public required uint Ftp { get; init; }
+    public required int Height { get; init; }   // in mm
+    public required int Weight { get; init; }   // in grams
+    public required int Ftp { get; init; }
     public required int AchievementLevel { get; init; }
     public required long TotalDistance { get; init; }          // meters
     public required long TotalDistanceClimbed { get; init; }   // meters

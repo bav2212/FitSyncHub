@@ -49,7 +49,7 @@ public sealed partial class ZwiftHttpClient
             ZwiftHttpClientGameInfoGenerationContext.Default.ZwiftGameInfoResponse)!;
     }
 
-    public async Task<List<PayloadSegmentResult>> GetSegmentResults(
+    public async Task<List<SegmentResult>> GetSegmentResults(
         long playerId,
         long segmentId,
         DateTime from,
@@ -59,7 +59,7 @@ public sealed partial class ZwiftHttpClient
         // -100 is max zwift api can handle
         var dateRanges = DateRange.GetDateRanges(from, to, TimeSpan.FromDays(-100));
 
-        List<PayloadSegmentResult> results = [];
+        List<SegmentResult> results = [];
         foreach (var dateRangeChunk in dateRanges.Chunk(5))
         {
             var tasks = dateRangeChunk
@@ -76,7 +76,7 @@ public sealed partial class ZwiftHttpClient
         // need to reorder cause task results can come in any order
         return [.. results.OrderBy(x => x.WorldTime)];
 
-        async Task<List<PayloadSegmentResult>> GetSegmentResultsForDateRangeAsync(DateRange dateRange)
+        async Task<List<SegmentResult>> GetSegmentResultsForDateRangeAsync(DateRange dateRange)
         {
             var queryParams = new Dictionary<string, StringValues>()
             {

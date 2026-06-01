@@ -80,7 +80,7 @@ public sealed record ZwiftEventRidersCompetitionMetricsResponseItem
     public required long Id { get; init; }
     public required string FirstName { get; init; }
     public required string LastName { get; init; }
-    public required uint Age { get; init; }
+    public required int Age { get; init; }
     public required double Weight { get; init; }
     public required double Height { get; init; }
     public required double FtpPerKg { get; init; }

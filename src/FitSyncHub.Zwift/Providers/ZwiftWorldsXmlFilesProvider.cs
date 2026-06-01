@@ -166,7 +166,6 @@ public sealed record ZwiftXmlFilesModel
 
 }
 
-
 public sealed record ZwiftXmlFilesModelRegularRoutes
 {
     public required string WorldName { get; init; }

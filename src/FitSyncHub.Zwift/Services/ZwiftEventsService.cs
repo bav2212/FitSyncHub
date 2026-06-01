@@ -117,8 +117,8 @@ public sealed record ZwiftEntrantResponseModel
     public required long Id { get; set; }
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
-    public required uint Age { get; set; }
-    public required uint WeightInGrams { get; set; }
-    public required uint HeightInMillimeters { get; set; }
-    public required uint Ftp { get; set; }
+    public required int Age { get; set; }
+    public required int WeightInGrams { get; set; }
+    public required int HeightInMillimeters { get; set; }
+    public required int Ftp { get; set; }
 }
