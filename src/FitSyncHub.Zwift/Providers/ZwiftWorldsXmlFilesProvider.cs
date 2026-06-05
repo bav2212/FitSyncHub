@@ -23,10 +23,12 @@ public class ZwiftWorldsXmlFilesProvider
         {"13",  "Scotland"},
     };
 
-    private readonly string _zwiftWorldsPath = @"C:\Program Files (x86)\Zwift\assets\Worlds";
+    private readonly string _zwiftInstallationPath = @"C:\Program Files (x86)\Zwift";
+    private readonly string _zwiftWorldsPath;
+
+    private readonly ILogger<ZwiftWorldsXmlFilesProvider> _logger;
 
     private readonly ZwiftWadDecoder _zwiftWadDecoder;
-    private readonly ILogger<ZwiftWorldsXmlFilesProvider> _logger;
 
     private readonly string _unpackedWADFilesDirectory;
     private readonly string _unpackedWADFilesStateFilePath;
@@ -37,6 +39,8 @@ public class ZwiftWorldsXmlFilesProvider
     {
         _zwiftWadDecoder = zwiftWadDecoder;
         _logger = logger;
+
+        _zwiftWorldsPath = Path.Combine(_zwiftInstallationPath, "assets", "Worlds");
 
         _unpackedWADFilesDirectory = Path.Combine(Path.GetTempPath(), "ZwiftWADFilesUnpacked");
         _unpackedWADFilesStateFilePath = Path.Combine(_unpackedWADFilesDirectory, "state.json");
@@ -163,7 +167,6 @@ public sealed record ZwiftXmlFilesModel
 {
     public required List<ZwiftXmlFilesModelRegularRoutes> RegularRoutes { get; init; }
     public required List<ZwiftXmlFilesModelClimbPortalRoads> ClimbPortalRoads { get; init; }
-
 }
 
 public sealed record ZwiftXmlFilesModelRegularRoutes

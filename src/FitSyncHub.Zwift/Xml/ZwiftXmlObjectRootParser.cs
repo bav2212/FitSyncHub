@@ -146,7 +146,7 @@ public class ZwiftXmlObjectRootParser<T> : IDisposable
 
     private void EnsureNoUnknownElements()
     {
-        if (_unknownXmlElements.Count <= 0)
+        if (_unknownXmlElements.Count == 0)
         {
             return;
         }
