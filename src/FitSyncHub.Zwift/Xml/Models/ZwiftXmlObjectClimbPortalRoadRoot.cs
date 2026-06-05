@@ -4,7 +4,6 @@ using FitSyncHub.Zwift.Xml.Abstractions;
 
 namespace FitSyncHub.Zwift.Xml.Models;
 
-
 public sealed class ZwiftXmlObjectClimbPortalRoadRoot : IZwiftXmlObjectRoot
 {
     public required ZwiftXmlObjectClimbPortalRoadWorldElement World { get; init; }

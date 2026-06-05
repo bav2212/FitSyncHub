@@ -26,7 +26,6 @@ public sealed record ZwiftRacingEventRiderRace
     public double? Max30 { get; init; }
 }
 
-
 public sealed record ZwiftRacingEventRiderClub
 {
     public int? ClubId { get; init; }

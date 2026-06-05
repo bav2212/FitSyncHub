@@ -61,7 +61,6 @@ public sealed class ZwiftRoutesService
     }
 }
 
-
 public sealed record ZwiftDataRoutesInfoModel
 {
     public required long Id { get; init; }

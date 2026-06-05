@@ -326,7 +326,6 @@ public enum ActivityIntervalType
     Work,
 }
 
-
 public sealed record ActivityIntervalGroup
 {
     /** First data point for this interval in the activity streams. Use this to index over stream data for an interval.

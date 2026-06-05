@@ -525,7 +525,6 @@ internal class FlammeRougeRacingHttpClient : IFlammeRougeRacingHttpClient
         return result;
     }
 
-
     private async IAsyncEnumerable<JsonElement> PullRiderData(
        int tableId,
        Dictionary<string, string> formData,
@@ -576,7 +575,6 @@ internal class FlammeRougeRacingHttpClient : IFlammeRougeRacingHttpClient
             start += Page;
         }
     }
-
 
     private async Task<string> GetWdtNonce(int tableId, CancellationToken cancellationToken)
     {

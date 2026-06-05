@@ -76,7 +76,6 @@ public class ZwiftWorldsXmlFilesProvider
             })
             .ToList();
 
-
         var climbPortalFilePaths = Directory.EnumerateFiles(
             Path.Combine(_unpackedWADFilesDirectory, "Worlds", "portal"),
             "road_*.xml",
@@ -161,7 +160,6 @@ public class ZwiftWorldsXmlFilesProvider
         public required string Hash { get; init; }
     }
 }
-
 
 public sealed record ZwiftXmlFilesModel
 {
