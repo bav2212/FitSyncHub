@@ -3,9 +3,7 @@ using System.Text;
 using FitSyncHub.Common.Models;
 using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients;
-using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
-using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Strava.HttpClients.Models.Requests;
 using Microsoft.AspNetCore.Http;
@@ -83,19 +81,8 @@ public sealed class GarminUploadToStravaHttpTriggerFunction
             return new BadRequestObjectResult($"Found {garminWorkoutActivities.Count} garmin activities, but specified {count} in request");
         }
 
-        var intervalsIcuEvents = await _intervalsIcuHttpClient.ListEvents(new(date, date) { Category = [EventCategory.Workout] }, cancellationToken);
-        intervalsIcuEvents = [..
-            intervalsIcuEvents.Where(x => !x.Type.Contains("cycling", StringComparison.InvariantCultureIgnoreCase))
-        ];
-
-        var tuples = garminWorkoutActivities.Select((garminWorkoutActivity, index) =>
-        {
-            var intervalsIcuPlannedEvent = intervalsIcuEvents.ElementAtOrDefault(index);
-            return (garminWorkoutActivity, intervalsIcuPlannedEvent);
-        });
-
         var sb = new StringBuilder();
-        foreach (var (garminWorkoutActivity, intervalsIcuPlannedEvent) in tuples)
+        foreach (var garminWorkoutActivity in garminWorkoutActivities)
         {
             var garminActivityId = garminWorkoutActivity.ActivityId;
             var garminActivityName = garminWorkoutActivity.ActivityName;
@@ -130,9 +117,7 @@ public sealed class GarminUploadToStravaHttpTriggerFunction
             _logger.LogInformation("Read {Size} bytes from file {EntryName}", memoryStream.Length, zipEntry.Name);
 #pragma warning restore CA1873 // Avoid potentially expensive logging
 
-            // prefer to use intervals.icu event name, because user can rename garmin activity to something like "Treadmill" or "Elliptical"
-            // but intervals.icu can be null if it was not planned
-            var activityName = intervalsIcuPlannedEvent?.Name ?? garminActivityName;
+            var activityName = garminActivityName;
 
             var uploadToStravaResult = await UploadToStrava(garminActivityId, activityName, uploadFileModel, cancellationToken);
             if (!uploadToStravaResult.Success)
@@ -146,11 +131,10 @@ public sealed class GarminUploadToStravaHttpTriggerFunction
             }
 
             var uploadToIntervalscuResult =
-                await UploadToIntervalsIcu(intervalsIcuPlannedEvent, garminActivityId, activityName, uploadFileModel, cancellationToken);
+                await UploadToIntervalsIcu(garminActivityId, activityName, uploadFileModel, cancellationToken);
             if (!uploadToIntervalscuResult.Success)
             {
                 sb.AppendLine(uploadToIntervalscuResult.Message);
-                continue;
             }
             else
             {
@@ -227,7 +211,7 @@ public sealed class GarminUploadToStravaHttpTriggerFunction
         return UploadResult.Succeed;
     }
 
-    private async Task<UploadResult> UploadToIntervalsIcu(EventResponse? intervalsIcuPlannedEvent,
+    private async Task<UploadResult> UploadToIntervalsIcu(
        long activityId,
        string activityName,
        FileModel uploadFileModel,
@@ -236,7 +220,6 @@ public sealed class GarminUploadToStravaHttpTriggerFunction
         var intervalsIcuCreatedActivity = await _intervalsIcuHttpClient.CreateActivity(uploadFileModel, new CreateActivityRequest
         {
             Name = activityName,
-            PairedEventId = intervalsIcuPlannedEvent?.Id,
             Description = $"Garmin Connect activityId: {activityId}",
             ExternalId = activityId.ToString(),
         }, cancellationToken);
