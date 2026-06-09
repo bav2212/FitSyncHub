@@ -1,6 +1,5 @@
 ﻿using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
-using FitSyncHub.Zwift.Providers.Abstractions;
 
 namespace FitSyncHub.Zwift.Services;
 
@@ -44,17 +43,16 @@ public class ZwiftRouteAchievementResolver
     public List<ZwiftGameInfoAchievement> GeneralAchievements { get; }
 
     public Dictionary<ZwiftRouteModel, ZwiftGameInfoAchievement?> MapRoutesToRouteAchievements(
-        List<ZwiftDataWorldRoutePair> dataWorldRoutePairs)
+        List<ZwiftRouteModel> routes)
     {
         var result = new Dictionary<ZwiftRouteModel, ZwiftGameInfoAchievement?>();
 
         var routeAchievementsDictionary = RouteAchievements
             .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
 
-        foreach (var dataWorldRoutePair in dataWorldRoutePairs)
+        foreach (var route in routes)
         {
-            var route = dataWorldRoutePair.Route;
-            var routeName = dataWorldRoutePair.Route.Name;
+            var routeName = route.Name;
 
             if (_routeNameToAchievementNameExceptions.TryGetValue(routeName, out var routeException))
             {
@@ -74,7 +72,7 @@ public class ZwiftRouteAchievementResolver
     }
 
     public Dictionary<ZwiftGameInfoAchievement, ZwiftRouteModel> MapRouteAchievementsToRoutes(
-        List<ZwiftDataWorldRoutePair> routes)
+        List<ZwiftRouteModel> routes)
     {
         return MapRoutesToRouteAchievements(routes)
             .Where(x => x.Value is not null)

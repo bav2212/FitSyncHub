@@ -71,7 +71,7 @@ public sealed class ZwiftGameInfoService
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
 
         var bikeFramesDictionary = gameInfo.BikeFrames.ToDictionary(x => x.Id, x => x);
-        var routesDictionary = routes.ToDictionary(x => x.Route.Id, x => x);
+        var routesDictionary = routes.ToDictionary(x => x.Id, x => x);
 
         var events = await _zwiftHttpClient.GetEventFeedFullRangeBuggy(new ZwiftEventFeedRequest
         {
@@ -92,7 +92,7 @@ public sealed class ZwiftGameInfoService
             {
                 Event = @event,
                 BikeFrame = bikeFrame,
-                Route = routeInfo.Route,
+                Route = routeInfo,
             });
         }
 

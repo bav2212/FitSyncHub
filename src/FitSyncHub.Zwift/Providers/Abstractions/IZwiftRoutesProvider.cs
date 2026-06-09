@@ -1,6 +1,8 @@
-﻿namespace FitSyncHub.Zwift.Providers.Abstractions;
+﻿using FitSyncHub.Zwift.Models;
+
+namespace FitSyncHub.Zwift.Providers.Abstractions;
 
 public interface IZwiftRoutesProvider
 {
-    Task<List<ZwiftDataWorldRoutePair>> GetRoutesInfo(CancellationToken cancellationToken);
+    Task<List<ZwiftRouteModel>> GetRoutesInfo(CancellationToken cancellationToken);
 }

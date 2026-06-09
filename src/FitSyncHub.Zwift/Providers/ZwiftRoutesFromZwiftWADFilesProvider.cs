@@ -37,7 +37,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         _logger = logger;
     }
 
-    public async Task<List<ZwiftDataWorldRoutePair>> GetRoutesInfo(CancellationToken cancellationToken)
+    public async Task<List<ZwiftRouteModel>> GetRoutesInfo(CancellationToken cancellationToken)
     {
         var worldRouteFilePaths = await _zwiftWorldsXmlFilesProvider.GetWorlsXmlFilesPaths(cancellationToken);
 
@@ -47,7 +47,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             ];
     }
 
-    private static IEnumerable<ZwiftDataWorldRoutePair> ReadRouteFilesAndParse(
+    private static IEnumerable<ZwiftRouteModel> ReadRouteFilesAndParse(
         List<ZwiftXmlFilesModelRegularRoutes> regularRoutes)
     {
         using var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRouteRoot>();
@@ -67,40 +67,37 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
                 ? DateOnly.ParseExact(homedata.PublishedOn, "yyyy-MM-dd")
                 : default(DateOnly?);
 
-            yield return new ZwiftDataWorldRoutePair
+            yield return new ZwiftRouteModel
             {
                 WorldName = regularRoute.WorldName,
-                Route = new ZwiftRouteModel
+                Name = routeName,
+                Id = route.NameHash,
+                DistanceInMeters = route.DistanceInMeters,
+                AscentInMeters = route.AscentInMeters,
+                LocKey = route.LocKey,
+                LevelLocked = route.LevelLocked,
+                PublicEventsOnly = route.EventOnly || route.ZwiftEventOnly,
+                SupportedLaps = route.SupportedLaps,
+                LeadinAscentInMeters = route.LeadInAscentInMeters,
+                LeadinDistanceInMeters = route.LeadInDistanceInMeters,
+                BlockedForMeetups = route.BlockedForMeetups,
+                Xp = homedata?.Xp ?? 0,
+                Duration = homedata?.Duration ?? 0,
+                Difficulty = homedata?.Difficulty ?? 0,
+                Sports = route.SportType switch
                 {
-                    Name = routeName,
-                    Id = route.NameHash,
-                    DistanceInMeters = route.DistanceInMeters,
-                    AscentInMeters = route.AscentInMeters,
-                    LocKey = route.LocKey,
-                    LevelLocked = route.LevelLocked,
-                    PublicEventsOnly = route.EventOnly || route.ZwiftEventOnly,
-                    SupportedLaps = route.SupportedLaps,
-                    LeadinAscentInMeters = route.LeadInAscentInMeters,
-                    LeadinDistanceInMeters = route.LeadInDistanceInMeters,
-                    BlockedForMeetups = route.BlockedForMeetups,
-                    Xp = homedata?.Xp ?? 0,
-                    Duration = homedata?.Duration ?? 0,
-                    Difficulty = homedata?.Difficulty ?? 0,
-                    Sports = route.SportType switch
-                    {
-                        -1 or 0 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running, ZwiftGameInfoSport.Rowing],
-                        1 => [ZwiftGameInfoSport.Cycling],
-                        2 => [ZwiftGameInfoSport.Running],
-                        3 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running],
-                        _ => throw new ArgumentException("Unknown sport type")
-                    },
-                    PublishedOn = publishedOn,
-                }
+                    -1 or 0 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running, ZwiftGameInfoSport.Rowing],
+                    1 => [ZwiftGameInfoSport.Cycling],
+                    2 => [ZwiftGameInfoSport.Running],
+                    3 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running],
+                    _ => throw new ArgumentException("Unknown sport type")
+                },
+                PublishedOn = publishedOn,
             };
         }
     }
 
-    private static IEnumerable<ZwiftDataWorldRoutePair> ReadClimbPortaldRouteFilesAndParse(
+    private static IEnumerable<ZwiftRouteModel> ReadClimbPortaldRouteFilesAndParse(
         List<ZwiftXmlFilesModelClimbPortalRoads> climbPortalRoads)
     {
         using var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectClimbPortalRoadRoot>();
@@ -112,35 +109,32 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             var road = climbPortalRoadRoot.World.Roads.Single();
             var roadMetadata = road.Metadata;
 
-            yield return new ZwiftDataWorldRoutePair
+            yield return new ZwiftRouteModel
             {
                 WorldName = Constants.ZwiftClimbPortalWorldName,
-                Route = new ZwiftRouteModel
+                Name = roadMetadata.UserFacingName,
+                Id = roadMetadata.Hash,
+                DistanceInMeters = roadMetadata.CourseLength / 100.0,
+                AscentInMeters = roadMetadata.CourseAscentF / 100.0,
+                LocKey = roadMetadata.PinIconPath,
+                LevelLocked = 0, // not present in this XML file
+                PublicEventsOnly = false, // not present in this XML file
+                SupportedLaps = false, // not present in this XML file
+                LeadinAscentInMeters = 0, // not present in this XML file
+                LeadinDistanceInMeters = 0, // not present in this XML file
+                BlockedForMeetups = false, // not present in this XML file
+                Xp = 0, // not present in this XML file
+                Duration = 0, // not present in this XML file
+                Difficulty = 0, // not present in this XML file
+                Sports = road.AllowedSport switch
                 {
-                    Name = roadMetadata.UserFacingName,
-                    Id = roadMetadata.Hash,
-                    DistanceInMeters = roadMetadata.CourseLength / 100.0,
-                    AscentInMeters = roadMetadata.CourseAscentF / 100.0,
-                    LocKey = roadMetadata.PinIconPath,
-                    LevelLocked = 0, // not present in this XML file
-                    PublicEventsOnly = false, // not present in this XML file
-                    SupportedLaps = false, // not present in this XML file
-                    LeadinAscentInMeters = 0, // not present in this XML file
-                    LeadinDistanceInMeters = 0, // not present in this XML file
-                    BlockedForMeetups = false, // not present in this XML file
-                    Xp = 0, // not present in this XML file
-                    Duration = 0, // not present in this XML file
-                    Difficulty = 0, // not present in this XML file
-                    Sports = road.AllowedSport switch
-                    {
-                        -1 or 0 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running, ZwiftGameInfoSport.Rowing],
-                        1 => [ZwiftGameInfoSport.Cycling],
-                        2 => [ZwiftGameInfoSport.Running],
-                        3 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running],
-                        _ => throw new ArgumentException("Unknown sport type")
-                    },
-                    PublishedOn = null, // not present in this XML file
-                }
+                    -1 or 0 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running, ZwiftGameInfoSport.Rowing],
+                    1 => [ZwiftGameInfoSport.Cycling],
+                    2 => [ZwiftGameInfoSport.Running],
+                    3 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running],
+                    _ => throw new ArgumentException("Unknown sport type")
+                },
+                PublishedOn = null, // not present in this XML file
             };
         }
     }

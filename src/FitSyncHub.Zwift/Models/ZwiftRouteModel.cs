@@ -5,6 +5,7 @@ namespace FitSyncHub.Zwift.Models;
 
 public sealed record ZwiftRouteModel
 {
+    public required string WorldName { get; init; }
     public required string Name { get; init; }
     public required long Id { get; init; }
     public required double DistanceInMeters { get; init; }

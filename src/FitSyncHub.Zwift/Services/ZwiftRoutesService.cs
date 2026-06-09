@@ -18,11 +18,9 @@ public sealed class ZwiftRoutesService
         var worldRoutePairs = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
 
         var result = worldRoutePairs
-          .Where(x => x.Route.Sports.Contains(ZwiftGameInfoSport.Cycling))
-          .Select(pair =>
+          .Where(x => x.Sports.Contains(ZwiftGameInfoSport.Cycling))
+          .Select(route =>
           {
-              var route = pair.Route;
-
               var restrictions = new List<string>();
               if (route.Sports.Count == 1 && route.Sports.Contains(ZwiftGameInfoSport.Running))
               {
@@ -44,7 +42,7 @@ public sealed class ZwiftRoutesService
               {
                   Id = route.Id,
                   Name = route.Name,
-                  WorldName = pair.WorldName,
+                  WorldName = route.WorldName,
                   Distance = Math.Round(route.DistanceInMeters / 1000, 1),
                   ElevationGain = Math.Round(route.AscentInMeters),
                   LeadIn = Math.Round(route.LeadinDistanceInMeters / 1000, 1),

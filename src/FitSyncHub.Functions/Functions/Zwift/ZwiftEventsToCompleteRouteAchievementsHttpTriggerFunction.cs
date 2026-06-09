@@ -89,6 +89,7 @@ public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 
             yield return new ZwiftEventsToCompleteRouteAchievementsResponse
             {
+                WorldName = route.WorldName,
                 RouteName = route.Name,
                 Events = events.ConvertAll(e =>
                 {
@@ -138,6 +139,7 @@ public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 
 public sealed record ZwiftEventsToCompleteRouteAchievementsResponse
 {
+    public required string WorldName { get; init; }
     public required string RouteName { get; init; }
     public required List<ZwiftEventsToCompleteRouteAchievementsEventItem> Events { get; init; }
 }

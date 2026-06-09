@@ -32,14 +32,14 @@ public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
         _zwiftHttpClient = zwiftHttpClient;
     }
 
-    public async Task<List<ZwiftDataWorldRoutePair>> GetRoutesInfo(CancellationToken cancellationToken)
+    public async Task<List<ZwiftRouteModel>> GetRoutesInfo(CancellationToken cancellationToken)
     {
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
 
         return [.. ConvertToZwiftRouteModel(gameInfo)];
     }
 
-    private IEnumerable<ZwiftDataWorldRoutePair> ConvertToZwiftRouteModel(ZwiftGameInfoResponse gameInfo)
+    private IEnumerable<ZwiftRouteModel> ConvertToZwiftRouteModel(ZwiftGameInfoResponse gameInfo)
     {
         foreach (var map in gameInfo.Maps)
         {
@@ -52,28 +52,25 @@ public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
                 var distanceInMeters = isClimbPortal ? route.DistanceInMeters / 100 : route.DistanceInMeters;
                 var ascentInMeters = isClimbPortal ? route.AscentInMeters / 100 : route.AscentInMeters;
 
-                yield return new ZwiftDataWorldRoutePair
+                yield return new ZwiftRouteModel
                 {
                     WorldName = worldName,
-                    Route = new ZwiftRouteModel
-                    {
-                        Name = route.Name,
-                        Id = route.Id,
-                        DistanceInMeters = distanceInMeters,
-                        AscentInMeters = ascentInMeters,
-                        LocKey = route.LocKey,
-                        LevelLocked = route.LevelLocked,
-                        PublicEventsOnly = route.PublicEventsOnly,
-                        SupportedLaps = route.SupportedLaps,
-                        LeadinAscentInMeters = route.LeadinAscentInMeters,
-                        LeadinDistanceInMeters = route.LeadinDistanceInMeters,
-                        BlockedForMeetups = blockedForMeetups,
-                        Xp = route.Xp,
-                        Duration = route.Duration,
-                        Difficulty = route.Difficulty,
-                        Sports = route.Sports,
-                        PublishedOn = null,
-                    }
+                    Name = route.Name,
+                    Id = route.Id,
+                    DistanceInMeters = distanceInMeters,
+                    AscentInMeters = ascentInMeters,
+                    LocKey = route.LocKey,
+                    LevelLocked = route.LevelLocked,
+                    PublicEventsOnly = route.PublicEventsOnly,
+                    SupportedLaps = route.SupportedLaps,
+                    LeadinAscentInMeters = route.LeadinAscentInMeters,
+                    LeadinDistanceInMeters = route.LeadinDistanceInMeters,
+                    BlockedForMeetups = blockedForMeetups,
+                    Xp = route.Xp,
+                    Duration = route.Duration,
+                    Difficulty = route.Difficulty,
+                    Sports = route.Sports,
+                    PublishedOn = null,
                 };
             }
         }
