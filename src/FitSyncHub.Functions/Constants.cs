@@ -11,7 +11,6 @@ public static class Constants
         public static class Containers
         {
             public const string DistributedCache = "DistributedCache";
-            public const string EverestingHOF = "EverestingHOF";
             public const string StravaOAuthData = "StravaOAuthData";
             public const string StravaSummaryActivity = "StravaSummaryActivity";
             public const string StravaWebhookEvent = "StravaWebhookEvent";
