@@ -151,7 +151,7 @@ public class ZwiftWorldsXmlFilesProvider
     {
         var basePath = Path.Combine(_unpackedWADFilesDirectory, "Worlds");
 
-        return [.. Path.GetRelativePath(basePath, filePath).Split(Path.DirectorySeparatorChar)];
+        return Path.GetRelativePath(basePath, filePath).Split(Path.DirectorySeparatorChar);
     }
 
     private sealed record UnpackedWADFilesStateItem
