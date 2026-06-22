@@ -11,6 +11,6 @@ public sealed record ZwiftAuthTokenModel
     public required string TokenType { get; init; }
     [JsonPropertyName("not-before-policy")]
     public required long NotBeforePolicy { get; init; }
-    public required Guid SessionState { get; init; }
+    public required string SessionState { get; init; }
     public required string Scope { get; init; }
 }
