@@ -221,11 +221,17 @@ public sealed record ActivityResponse
     /** Stride length in meters. */
     public double? AverageStride { get; init; }
     #region Custom fields
+    // JsonPropertyName cause custom fields are CamelCase in IntervalsICU API
     [JsonPropertyName("Lactate")]
     public double? Lactate { get; init; }
-
     [JsonPropertyName("HSIh")]
     public double? HeatLoad { get; init; }
+    [JsonPropertyName("OutsideAvgWeatherTemp")]
+    public double? OutsideAvgWeatherTemp { get; init; }
+    [JsonPropertyName("OutsideMinWeatherTemp")]
+    public double? OutsideMinWeatherTemp { get; init; }
+    [JsonPropertyName("OutsideMaxWeatherTemp")]
+    public double? OutsideMaxWeatherTemp { get; init; }
     #endregion Custom fields
 
     [JsonIgnore]

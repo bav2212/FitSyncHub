@@ -47,7 +47,11 @@ public static class PolylineHelper
             lat += latitudeChange;
             lng += longitudeChange;
 
-            coordinates.Add(new Coordinate(lat / factor, lng / factor));
+            coordinates.Add(new Coordinate
+            {
+                Latitude = lat / factor,
+                Longitude = lng / factor
+            });
         }
 
         return coordinates;

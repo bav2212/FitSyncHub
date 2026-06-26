@@ -11,6 +11,7 @@ using FitSyncHub.Functions.Services;
 using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
+using FitSyncHub.Weather;
 using FitSyncHub.Xert;
 using FitSyncHub.Youtube;
 using FitSyncHub.Zwift;
@@ -89,6 +90,7 @@ builder.Services.AddGarminConnectModule(builder.Configuration.GetSection("Garmin
 builder.Services.AddZwiftModule(builder.Configuration.GetSection("Zwift:Credentials"));
 builder.Services.AddYoutubeModule(builder.Configuration.GetSection("Youtube"));
 builder.Services.AddXertModule(builder.Configuration.GetSection("Xert"));
+builder.Services.AddWeatherModule(builder.Configuration.GetSection("Weather"));
 
 builder.Services.AddCosmosCache(cacheOptions =>
 {

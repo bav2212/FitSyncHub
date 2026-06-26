@@ -16,8 +16,16 @@ public sealed record ActivityUpdateRequest
     public uint? Feel { get; init; }
     public uint? IcuFtp { get; init; }
     #region Custom fields
+    // JsonPropertyName cause custom fields are CamelCase in IntervalsICU API
     [JsonPropertyName("Lactate")]
     public double? Lactate { get; init; }
+    [JsonPropertyName("OutsideAvgWeatherTemp")]
+    public double? OutsideAvgWeatherTemp { get; init; }
+    [JsonPropertyName("OutsideMinWeatherTemp")]
+    public double? OutsideMinWeatherTemp { get; init; }
+    [JsonPropertyName("OutsideMaxWeatherTemp")]
+    public double? OutsideMaxWeatherTemp { get; init; }
+
     #endregion Custom fields
 }
 

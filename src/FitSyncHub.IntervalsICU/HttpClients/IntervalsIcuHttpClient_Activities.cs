@@ -49,7 +49,7 @@ public partial class IntervalsIcuHttpClient
         return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse)!;
     }
 
-    public async Task UpdateActivity(
+    public async Task<ActivityResponse> UpdateActivity(
        string activityId,
        ActivityUpdateRequest model,
        CancellationToken cancellationToken)
@@ -59,6 +59,9 @@ public partial class IntervalsIcuHttpClient
         var jsonContent = JsonContent.Create(model, IntervalsActivityUpdateSourceGenerationContext.Default.ActivityUpdateRequest);
         var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);
         response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse)!;
     }
 
     public async Task<ActivityCreateResponse> CreateActivity(

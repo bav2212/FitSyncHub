@@ -30,6 +30,7 @@
     <ProjectReference Include="..\FitSyncHub.GarminConnect\FitSyncHub.GarminConnect.csproj" />
     <ProjectReference Include="..\FitSyncHub.IntervalsICU\FitSyncHub.IntervalsICU.csproj" />
     <ProjectReference Include="..\FitSyncHub.Strava\FitSyncHub.Strava.csproj" />
+    <ProjectReference Include="..\FitSyncHub.Weather\FitSyncHub.Weather.csproj" />
     <ProjectReference Include="..\FitSyncHub.Xert\FitSyncHub.Xert.csproj" />
     <ProjectReference Include="..\FitSyncHub.Youtube\FitSyncHub.Youtube.csproj" />
     <ProjectReference Include="..\FitSyncHub.Zwift\FitSyncHub.Zwift.csproj" />

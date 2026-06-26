@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Xert", "src\FitS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Youtube", "src\FitSyncHub.Youtube\FitSyncHub.Youtube.csproj", "{2B1E4585-D485-BF98-A9CB-9FBED56B78DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FitSyncHub.Weather", "src\FitSyncHub.Weather\FitSyncHub.Weather.csproj", "{118C3337-A7B3-F1FA-BACE-FBD2CA406AF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{2B1E4585-D485-BF98-A9CB-9FBED56B78DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B1E4585-D485-BF98-A9CB-9FBED56B78DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B1E4585-D485-BF98-A9CB-9FBED56B78DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{118C3337-A7B3-F1FA-BACE-FBD2CA406AF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{118C3337-A7B3-F1FA-BACE-FBD2CA406AF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{118C3337-A7B3-F1FA-BACE-FBD2CA406AF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{118C3337-A7B3-F1FA-BACE-FBD2CA406AF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,6 +107,7 @@ Global
 		{C40A8E26-61F9-D80C-3E44-399DB921CBF7} = {4F2169E7-30C9-4D10-A756-E8C787FED0DB}
 		{0943DAB8-3915-5758-85F9-9E2D11B09C32} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
 		{2B1E4585-D485-BF98-A9CB-9FBED56B78DE} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
+		{118C3337-A7B3-F1FA-BACE-FBD2CA406AF0} = {A94E1B54-DEDF-43BC-B926-AD45B69CD9F5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7625267B-BDC8-42BC-A028-0D457C18D56A}
