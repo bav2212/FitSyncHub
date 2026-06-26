@@ -24,7 +24,7 @@ public sealed record OpenMeteoHourlyUnits
 
 public sealed record OpenMeteoHourly
 {
-    public required DateTimeOffset[] Time { get; init; }
+    public required DateTime[] Time { get; init; }
     [JsonPropertyName("temperature_2m")]
     public required double[] Temperature2m { get; init; }
 }

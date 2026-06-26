@@ -87,11 +87,27 @@ internal sealed partial class CachedOpenMeteoHttpClient : IOpenMeteoHttpClient
 
     private static OpenMeteoResponse Convert(OpenMeteoRequest request, OpenMeteoResponse response)
     {
+        var targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById(response.Timezone);
+
         var startDateTimeOfDay = new DateTimeOffset(request.StartDate, TimeOnly.MinValue, TimeSpan.Zero);
         var endDateTimeOfDay = new DateTimeOffset(request.EndDate, TimeOnly.MaxValue, TimeSpan.Zero);
 
         var trimmedItems = response.Hourly.Time.Index()
-            .Where(x => x.Item >= startDateTimeOfDay && x.Item <= endDateTimeOfDay)
+            .Where(x =>
+            {
+                var dateTime = x.Item;
+                try
+                {
+                    var dateTimeOffset = TimeZoneInfo.ConvertTime(dateTime, targetTimeZone);
+
+                    return dateTimeOffset >= startDateTimeOfDay && dateTimeOffset <= endDateTimeOfDay;
+                }
+                catch (ArgumentException ex)
+                {
+                    // skip forward and backward time changes
+                    return false;
+                }
+            })
             .ToList();
 
         var trimmed = trimmedItems.Select(x => x.Index).ToList();

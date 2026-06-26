@@ -5,6 +5,6 @@ using FitSyncHub.Weather.HttpClients.Models.Responses;
 namespace FitSyncHub.Weather.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower,
-    Converters = [typeof(GMTDateTimeOffsetConverter)])]
+    Converters = [typeof(NoTimezoneDateTimeConverter)])]
 [JsonSerializable(typeof(OpenMeteoResponse))]
 internal sealed partial class OpenMeteoArchiveGenerationContext : JsonSerializerContext;

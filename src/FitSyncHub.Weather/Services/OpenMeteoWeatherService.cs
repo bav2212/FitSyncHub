@@ -54,14 +54,15 @@ internal sealed class OpenMeteoWeatherService : IWeatherService
         DateTimeOffset startTime,
         DateTimeOffset endTime)
     {
-        var time = openMeteoResponse.Hourly.Time;
-        var temperature = openMeteoResponse.Hourly.Temperature2m;
+        var targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById(openMeteoResponse.Timezone);
 
-        var zippedWeatherData = time.Zip(temperature).Select(x => new WeatherModel
-        {
-            Time = x.First,
-            Temperature = x.Second,
-        }).ToList();
+        var zippedWeatherData = openMeteoResponse.Hourly.Time
+            .Zip(openMeteoResponse.Hourly.Temperature2m)
+            .Select(x => new WeatherModel
+            {
+                Time = (DateTimeOffset)TimeZoneInfo.ConvertTime(x.First, targetTimeZone).ToUniversalTime(),
+                Temperature = x.Second,
+            }).ToList();
 
         var startTimeHourFloor = new DateTimeOffset(startTime.Year, startTime.Month, startTime.Day, startTime.Hour, 0, 0, startTime.Offset);
         var endTimeHourCeiling = new DateTimeOffset(endTime.Year, endTime.Month, endTime.Day, endTime.Hour + 1, 0, 0, endTime.Offset);
