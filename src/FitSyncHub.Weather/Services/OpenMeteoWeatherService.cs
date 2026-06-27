@@ -57,12 +57,12 @@ internal sealed class OpenMeteoWeatherService : IWeatherService
         var targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById(openMeteoResponse.Timezone);
 
         var zippedWeatherData = openMeteoResponse.Hourly.Time
-            .Zip(openMeteoResponse.Hourly.Temperature2m)
-            .Select(x => new WeatherModel
+            .Zip(openMeteoResponse.Hourly.Temperature2m, (time, temperature) => new WeatherModel
             {
-                Time = (DateTimeOffset)TimeZoneInfo.ConvertTime(x.First, targetTimeZone).ToUniversalTime(),
-                Temperature = x.Second,
-            }).ToList();
+                Time = (DateTimeOffset)TimeZoneInfo.ConvertTime(time, targetTimeZone).ToUniversalTime(),
+                Temperature = temperature,
+            })
+            .ToList();
 
         var startTimeHourFloor = new DateTimeOffset(startTime.Year, startTime.Month, startTime.Day, startTime.Hour, 0, 0, startTime.Offset);
         var endTimeHourCeiling = new DateTimeOffset(endTime.Year, endTime.Month, endTime.Day, endTime.Hour + 1, 0, 0, endTime.Offset);
