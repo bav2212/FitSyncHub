@@ -79,7 +79,9 @@ public sealed record ZwiftEventSubgroupResponse
     public required int Label { get; init; }
     public required string? SubgroupLabel { get; init; }
     public required int RulesId { get; init; }
-    public required int MapId { get; init; }
+    // can be null for unreleased routes, but should be present for released routes
+    // example, it was null for unreleased Paris routes
+    public required int? MapId { get; init; }
     public required long RouteId { get; init; }
     public required string? RouteUrl { get; init; }
     public required long? JerseyHash { get; init; }

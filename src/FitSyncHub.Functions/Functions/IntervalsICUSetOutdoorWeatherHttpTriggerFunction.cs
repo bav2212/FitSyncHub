@@ -37,17 +37,15 @@ public class IntervalsICUSetOutdoorWeatherHttpTriggerFunction
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        string? fromQueryParameter = req.Query["from"];
-        if (!DateOnly.TryParse(fromQueryParameter, out var fromDateOnly))
-        {
-            return new BadRequestObjectResult("Invalid or missing 'from' query parameter");
-        }
-
         string? toQueryParameter = req.Query["to"];
-        if (!DateOnly.TryParse(toQueryParameter, out var toDateOnly))
-        {
-            toDateOnly = DateOnly.FromDateTime(DateTime.Now);
-        }
+        var toDateOnly = DateOnly.TryParse(toQueryParameter, out var toDateOnlyParsed)
+            ? toDateOnlyParsed
+            : DateOnly.FromDateTime(DateTime.UtcNow);
+
+        string? fromQueryParameter = req.Query["from"];
+        var fromDateOnly = DateOnly.TryParse(fromQueryParameter, out var fromDateOnlyParsed)
+            ? fromDateOnlyParsed
+            : toDateOnly.AddDays(-7);
 
         string? latitudeQueryParameter = req.Query["lat"];
         if (!double.TryParse(latitudeQueryParameter, out var latitude))
@@ -82,6 +80,11 @@ public class IntervalsICUSetOutdoorWeatherHttpTriggerFunction
                 // do it for virtual rider only
                 .Where(x => x.Type == "VirtualRide")
                 .ToList();
+
+            if (activities.Count == 0)
+            {
+                break;
+            }
 
             await Implementation(activities, coordinate, cancellationToken);
 
