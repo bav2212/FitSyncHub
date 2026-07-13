@@ -1,6 +1,7 @@
 ﻿using FitSyncHub.Common.Abstractions;
 using FitSyncHub.Common.Extensions;
 using FitSyncHub.Common.Models;
+using FitSyncHub.IntervalsICU.Helpers;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
@@ -10,7 +11,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using DateTime = System.DateTime;
 
-namespace FitSyncHub.Functions.Functions;
+namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
 public class IntervalsICUSetOutdoorWeatherHttpTriggerFunction
 {
@@ -101,7 +102,7 @@ public class IntervalsICUSetOutdoorWeatherHttpTriggerFunction
         Coordinate coordinate,
         CancellationToken cancellationToken)
     {
-        foreach (var consecutiveActivities in GroupConsecutiveActivities(activities))
+        foreach (var consecutiveActivities in IntervalsIcuActivitiesHelper.GroupConsecutiveActivities(activities))
         {
             if (consecutiveActivities.All(activity => activity.OutsideAvgWeatherTemp.HasValue
                 || activity.OutsideMinWeatherTemp.HasValue
@@ -145,40 +146,5 @@ public class IntervalsICUSetOutdoorWeatherHttpTriggerFunction
                 OutsideMaxWeatherTemp = maxHistoricalTemperature
             }, cancellationToken);
         }
-    }
-
-    private static List<List<ActivityResponse>> GroupConsecutiveActivities(List<ActivityResponse> activities)
-    {
-        return [.. activities
-           .OrderBy(a => a.StartDateLocal)
-           .GroupBy(a => a.StartDateLocal.Date)
-           .SelectMany(dayGroup =>
-           {
-               var result = new List<List<ActivityResponse>>();
-               List<ActivityResponse>? currentGroup = null;
-
-               foreach (var activity in dayGroup.OrderBy(a => a.StartDateLocal))
-               {
-                   if (currentGroup == null)
-                   {
-                       currentGroup = [activity];
-                       result.Add(currentGroup);
-                       continue;
-                   }
-
-                   var lastActivity = currentGroup[^1];
-                   var gap = activity.EndTimeLocal - lastActivity.StartDateLocal;
-
-                   if (gap.TotalHours > 2)
-                   {
-                       currentGroup = [];
-                       result.Add(currentGroup);
-                   }
-
-                   currentGroup.Add(activity);
-               }
-
-               return result;
-           })];
     }
 }

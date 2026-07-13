@@ -1,4 +1,5 @@
 ﻿using FitSyncHub.Common.Extensions;
+using FitSyncHub.IntervalsICU.Helpers;
 using FitSyncHub.IntervalsICU.HttpClients;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
@@ -64,7 +65,7 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
 
     private async Task Implementation(List<ActivityResponse> activities, CancellationToken cancellationToken)
     {
-        foreach (var consecutiveActivities in GroupConsecutiveActivities(activities))
+        foreach (var consecutiveActivities in IntervalsIcuActivitiesHelper.GroupConsecutiveActivities(activities))
         {
             List<ActivityResponse> warmupActivities = [];
             List<ActivityResponse> cooldownActivities = [];
@@ -92,41 +93,6 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
             await UpdateActivitiesSubtypeIfNeed(warmupActivities, ActivitySubType.Warmup, cancellationToken);
             await UpdateActivitiesSubtypeIfNeed(cooldownActivities, ActivitySubType.Cooldown, cancellationToken);
         }
-    }
-
-    private static List<List<ActivityResponse>> GroupConsecutiveActivities(List<ActivityResponse> activities)
-    {
-        return [.. activities
-           .OrderBy(a => a.StartDateLocal)
-           .GroupBy(a => a.StartDateLocal.Date)
-           .SelectMany(dayGroup =>
-           {
-               var result = new List<List<ActivityResponse>>();
-               List<ActivityResponse>? currentGroup = null;
-
-               foreach (var activity in dayGroup.OrderBy(a => a.StartDateLocal))
-               {
-                   if (currentGroup == null)
-                   {
-                       currentGroup = [activity];
-                       result.Add(currentGroup);
-                       continue;
-                   }
-
-                   var lastActivity = currentGroup[^1];
-                   var gap = activity.EndTimeLocal - lastActivity.StartDateLocal;
-
-                   if (gap.TotalHours > 2)
-                   {
-                       currentGroup = [];
-                       result.Add(currentGroup);
-                   }
-
-                   currentGroup.Add(activity);
-               }
-
-               return result;
-           })];
     }
 
     private async Task UpdateActivitiesSubtypeIfNeed(
