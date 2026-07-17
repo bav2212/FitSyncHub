@@ -71,6 +71,7 @@ public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
                     Difficulty = route.Difficulty,
                     Sports = route.Sports,
                     PublishedOn = null,
+                    ExcludeFromGameDictionary = false, // this routes not present in response 
                 };
             }
         }

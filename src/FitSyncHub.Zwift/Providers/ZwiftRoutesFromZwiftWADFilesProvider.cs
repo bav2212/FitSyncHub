@@ -93,6 +93,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
                     _ => throw new ArgumentException("Unknown sport type")
                 },
                 PublishedOn = publishedOn,
+                ExcludeFromGameDictionary = route.ExcludeFromGameDictionary
             };
         }
     }
@@ -135,6 +136,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
                     _ => throw new ArgumentException("Unknown sport type")
                 },
                 PublishedOn = null, // not present in this XML file
+                ExcludeFromGameDictionary = roadMetadata.ExcludeFromDictionary,
             };
         }
     }

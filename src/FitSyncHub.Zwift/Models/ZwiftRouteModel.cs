@@ -22,6 +22,7 @@ public sealed record ZwiftRouteModel
     public required double Difficulty { get; init; }
     public required IReadOnlyList<ZwiftGameInfoSport> Sports { get; init; }
     public required DateOnly? PublishedOn { get; init; }
+    public required bool ExcludeFromGameDictionary { get; init; }
 
     [JsonIgnore]
     public double TotalDistanceInMeters => DistanceInMeters + LeadinAscentInMeters;

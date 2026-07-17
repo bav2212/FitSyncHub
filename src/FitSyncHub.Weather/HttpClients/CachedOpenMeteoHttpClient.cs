@@ -104,6 +104,7 @@ internal sealed partial class CachedOpenMeteoHttpClient : IOpenMeteoHttpClient
                 }
                 catch (ArgumentException ex)
                 {
+                    _ = ex;
                     // skip forward and backward time changes
                     return false;
                 }

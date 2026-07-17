@@ -64,33 +64,35 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
         {
             sb.AppendLine("Cycling routes:");
 
-            var statsLookup = achievementsState.CyclingRouteAchievementsToRouteMapping
-                .GroupBy(x => new
-                {
-                    x.Value.PublicEventsOnly
-                })
-                .ToDictionary(x => x.Key.PublicEventsOnly, g => new
-                {
-                    NonAchievedItems = g.Where(x => !x.Key.IsAchieved).Select(x => x.Value).ToList(),
-                    TotalCount = g.Count(),
-
-                });
-
             sb.AppendLine("Public Routes:");
-            sb.AppendLine(FormatRoutesSummary(publicEventsOnly: false));
+            sb.AppendLine(FormatRoutesSummary(x => !x.PublicEventsOnly && !x.ExcludeFromGameDictionary));
 
             sb.AppendLine();
 
             sb.AppendLine("EventOnly Routes:");
-            sb.AppendLine(FormatRoutesSummary(publicEventsOnly: true));
+            sb.AppendLine(FormatRoutesSummary(x => x.PublicEventsOnly && !x.ExcludeFromGameDictionary));
 
-            string FormatRoutesSummary(bool publicEventsOnly)
+            sb.AppendLine();
+
+            sb.AppendLine("ExcludeFromGameDictionary Routes:");
+            sb.AppendLine(FormatRoutesSummary(x => x.ExcludeFromGameDictionary));
+
+
+            string FormatRoutesSummary(Func<ZwiftRouteModel, bool> predicate)
             {
-                var lookupValue = statsLookup[publicEventsOnly];
+                var filteredRoutes = achievementsState.CyclingRouteAchievementsToRouteMapping
+                    .Where(x => predicate(x.Value))
+                    .ToList();
 
-                return lookupValue is not null
-                    ? ZwiftUncompletedAchievementsHttpTriggerFunction.FormatRoutesSummary(statsLookup[publicEventsOnly].NonAchievedItems, statsLookup[publicEventsOnly].TotalCount)
-                    : "";
+                if (filteredRoutes.Count == 0)
+                {
+                    return "";
+                }
+
+                var nonAchievedItems = filteredRoutes.Where(x => !x.Key.IsAchieved).Select(x => x.Value).ToList();
+                var totalCount = filteredRoutes.Count;
+
+                return ZwiftUncompletedAchievementsHttpTriggerFunction.FormatRoutesSummary(nonAchievedItems, totalCount);
             }
         }
 
