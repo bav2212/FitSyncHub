@@ -9,7 +9,7 @@ public sealed class GarminConnectSerializationUnitTest
     [ClassData(typeof(GarminActivityListTestData))]
     public async Task GarminActivitySearchResponse_Deserialization_WorkCorrectly(string garminActivityFilePath)
     {
-        var content = await File.ReadAllTextAsync(garminActivityFilePath);
+        var content = await File.ReadAllTextAsync(garminActivityFilePath, TestContext.Current.CancellationToken);
 
         JsonSerializer.Deserialize(content, GarminConnectActivityListSerializerContext.Default.GarminActivitySearchResponse);
     }
@@ -27,7 +27,7 @@ public sealed class GarminConnectSerializationUnitTest
     [ClassData(typeof(GarminActivityTestData))]
     public async Task GarminActivityResponse_Deserialization_WorkCorrectly(string garminActivityFilePath)
     {
-        var content = await File.ReadAllTextAsync(garminActivityFilePath);
+        var content = await File.ReadAllTextAsync(garminActivityFilePath, TestContext.Current.CancellationToken);
 
         JsonSerializer.Deserialize(content, GarminConnectActivitySerializerContext.Default.GarminActivityResponse);
     }

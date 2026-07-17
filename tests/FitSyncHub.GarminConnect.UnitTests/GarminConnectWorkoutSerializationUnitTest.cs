@@ -9,7 +9,7 @@ public sealed class GarminConnectWorkoutSerializationUnitTest
     [ClassData(typeof(GarminWorkoutTestData))]
     public async Task GarminConnectWorkoutResponse_Deserialization_WorkCorrectly(string filePath)
     {
-        var content = await File.ReadAllTextAsync(filePath);
+        var content = await File.ReadAllTextAsync(filePath, TestContext.Current.CancellationToken);
 
         var value = JsonSerializer.Deserialize(content,
             GarminConnectWorkoutSerializerContext.Default.GarminWorkoutResponse);

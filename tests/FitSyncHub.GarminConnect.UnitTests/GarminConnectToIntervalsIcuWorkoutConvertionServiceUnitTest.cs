@@ -14,7 +14,7 @@ public sealed class GarminConnectToIntervalsIcuWorkoutConvertionServiceUnitTest
     [Fact]
     public async Task GarminConnectToIntervalsIcuWorkoutConvertionService_Convertion_WorkCorrectly()
     {
-        var content = await File.ReadAllTextAsync("Data/Workouts/workout_9458067d-b80c-4eb1-aab4-691d5c9e3713.json");
+        var content = await File.ReadAllTextAsync("Data/Workouts/workout_9458067d-b80c-4eb1-aab4-691d5c9e3713.json", TestContext.Current.CancellationToken);
         var workoutResponse = JsonSerializer.Deserialize(content, GarminConnectWorkoutSerializerContext.Default.GarminWorkoutResponse)!;
 
         // Arrange
@@ -27,7 +27,7 @@ public sealed class GarminConnectToIntervalsIcuWorkoutConvertionServiceUnitTest
 
         var service = new GarminConnectToInternalWorkoutConverterService(accessor.Object);
 
-        var workout = await service.Convert(workoutResponse, default);
+        var workout = await service.Convert(workoutResponse, TestContext.Current.CancellationToken);
         var workoutSteps = workout.Steps;
 
         // has three groups
