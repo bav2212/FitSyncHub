@@ -64,21 +64,11 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
         {
             sb.AppendLine("Cycling routes:");
 
-            sb.AppendLine("Public Routes:");
-            sb.AppendLine(FormatRoutesSummary(x => !x.PublicEventsOnly && !x.ExcludeFromGameDictionary));
+            sb.AppendLine(FormatRoutesSummary("Public", x => !x.PublicEventsOnly && !x.ExcludeFromGameDictionary));
+            sb.AppendLine(FormatRoutesSummary("EventOnly", x => x.PublicEventsOnly && !x.ExcludeFromGameDictionary));
+            sb.AppendLine(FormatRoutesSummary("ExcludeFromGameDictionary", x => x.ExcludeFromGameDictionary));
 
-            sb.AppendLine();
-
-            sb.AppendLine("EventOnly Routes:");
-            sb.AppendLine(FormatRoutesSummary(x => x.PublicEventsOnly && !x.ExcludeFromGameDictionary));
-
-            sb.AppendLine();
-
-            sb.AppendLine("ExcludeFromGameDictionary Routes:");
-            sb.AppendLine(FormatRoutesSummary(x => x.ExcludeFromGameDictionary));
-
-
-            string FormatRoutesSummary(Func<ZwiftRouteModel, bool> predicate)
+            string FormatRoutesSummary(string prefix, Func<ZwiftRouteModel, bool> predicate)
             {
                 var filteredRoutes = achievementsState.CyclingRouteAchievementsToRouteMapping
                     .Where(x => predicate(x.Value))
@@ -86,22 +76,29 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
 
                 if (filteredRoutes.Count == 0)
                 {
-                    return "";
+                    return string.Empty;
                 }
 
                 var nonAchievedItems = filteredRoutes.Where(x => !x.Key.IsAchieved).Select(x => x.Value).ToList();
                 var totalCount = filteredRoutes.Count;
 
-                return ZwiftUncompletedAchievementsHttpTriggerFunction.FormatRoutesSummary(nonAchievedItems, totalCount);
+                if (nonAchievedItems.Count == 0)
+                {
+                    return string.Empty;
+                }
+
+                return ZwiftUncompletedAchievementsHttpTriggerFunction.FormatRoutesSummary(prefix, nonAchievedItems, totalCount);
             }
         }
 
         return new OkObjectResult(sb.ToString());
     }
 
-    private static string FormatRoutesSummary(List<ZwiftRouteModel> nonAchievedItems, int totalCount)
+    private static string FormatRoutesSummary(string prefix, List<ZwiftRouteModel> nonAchievedItems, int totalCount)
     {
         StringBuilder sb = new();
+
+        sb.AppendLine($"{prefix} routes:");
 
         sb.AppendLine($"\tAchieved: {totalCount - nonAchievedItems.Count}/{totalCount}");
         if (nonAchievedItems.Count != 0)
