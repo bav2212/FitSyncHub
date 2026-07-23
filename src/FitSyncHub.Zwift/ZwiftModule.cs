@@ -25,7 +25,7 @@ public static class ZwiftModule
             return services.AddZwiftModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection AddZwiftModule(Action<ZwiftAuthOptions> options)
+        public IServiceCollection AddZwiftModule(Action<ZwiftOptions> options)
         {
             services.Configure(options);
 

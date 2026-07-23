@@ -10,16 +10,16 @@ namespace FitSyncHub.Zwift.Auth;
 internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefresher
 {
     private readonly HttpClient _httpClient;
-    private readonly IOptions<ZwiftAuthOptions> _authOptions;
+    private readonly ZwiftOptions _zwiftOptions;
     private readonly ILogger<ZwiftAuthHttpClient> _logger;
 
     public ZwiftAuthHttpClient(
         HttpClient httpClient,
-        IOptions<ZwiftAuthOptions> authOptions,
+        IOptions<ZwiftOptions> zwiftOptions,
         ILogger<ZwiftAuthHttpClient> logger)
     {
         _httpClient = httpClient;
-        _authOptions = authOptions;
+        _zwiftOptions = zwiftOptions.Value;
         _logger = logger;
     }
 
@@ -30,8 +30,8 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
         const string Url = "/auth/realms/zwift/tokens/access/codes";
         var formParamets = new Dictionary<string, string>
         {
-            { "username", _authOptions.Value.Username },
-            { "password", _authOptions.Value.Password },
+            { "username", _zwiftOptions.Credentials.Username },
+            { "password", _zwiftOptions.Credentials.Password },
             { "grant_type", "password" },
             { "client_id", "Zwift_Mobile_Link" }
         };

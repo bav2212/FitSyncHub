@@ -86,8 +86,8 @@ builder.Services.AddStravaModule(builder.Configuration.GetSection("Strava"))
     .AddTokenStore<CosmosDbStravaOAuthTokenStore>();
 
 builder.Services.AddIntervalsIcuModule(builder.Configuration.GetSection("IntervalsICU"));
-builder.Services.AddGarminConnectModule(builder.Configuration.GetSection("GarminConnect:Credentials"));
-builder.Services.AddZwiftModule(builder.Configuration.GetSection("Zwift:Credentials"));
+builder.Services.AddGarminConnectModule(builder.Configuration.GetSection("GarminConnect"));
+builder.Services.AddZwiftModule(builder.Configuration.GetSection("Zwift"));
 builder.Services.AddYoutubeModule(builder.Configuration.GetSection("Youtube"));
 builder.Services.AddXertModule(builder.Configuration.GetSection("Xert"));
 builder.Services.AddWeatherModule(builder.Configuration.GetSection("Weather"));
