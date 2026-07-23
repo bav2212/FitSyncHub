@@ -7,14 +7,14 @@ namespace FitSyncHub.GarminConnect.HttpClients;
 
 public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 {
-    private readonly IGarminAuthProvider _garminAuthProvider;
+    private readonly IGarminTokenProvider _garminAuthProvider;
     private readonly IGarminTokenRefresher _garminTokenRefresher;
-    private readonly IGarminAuthCacheInvalidator _garminAuthCacheInvalidator;
+    private readonly IGarminTokenInvalidator _garminAuthCacheInvalidator;
 
     public GarminConnectAuthenticationDelegatingHandler(
-        IGarminAuthProvider garminAuthProvider,
+        IGarminTokenProvider garminAuthProvider,
         IGarminTokenRefresher garminTokenRefresher,
-        IGarminAuthCacheInvalidator garminAuthCacheInvalidator)
+        IGarminTokenInvalidator garminAuthCacheInvalidator)
     {
         _garminAuthProvider = garminAuthProvider;
         _garminTokenRefresher = garminTokenRefresher;
@@ -42,7 +42,7 @@ public class GarminConnectAuthenticationDelegatingHandler : DelegatingHandler
 
     private async Task<string> GetToken(CancellationToken ct)
     {
-        var authResult = await _garminAuthProvider.GetAuthResult(ct) ?? throw new GarminNotLoggedInException();
+        var authResult = await _garminAuthProvider.GetTokenModel(ct) ?? throw new GarminNotLoggedInException();
 
         if (!TokenExpiresSoon(authResult.DiToken))
         {

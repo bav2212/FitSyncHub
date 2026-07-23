@@ -1,31 +1,53 @@
-﻿using FitSyncHub.GarminConnect.Auth.Abstractions;
+﻿using System.Text.Json.Serialization;
+using FitSyncHub.GarminConnect.Auth.Abstractions;
+using FitSyncHub.GarminConnect.Auth.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
+
 
 namespace FitSyncHub.Functions.Functions;
 
 public class GarminLoginHttpTriggerFunction
 {
-    private readonly IGarminAuthService _garminAuthService;
+    private readonly IGarminTokenSetter _garminTokenSetter;
 
-    public GarminLoginHttpTriggerFunction(IGarminAuthService garminAuthService)
+    public GarminLoginHttpTriggerFunction(IGarminTokenSetter garminTokenSetter)
     {
-        _garminAuthService = garminAuthService;
+        _garminTokenSetter = garminTokenSetter;
     }
 
     [Function(nameof(GarminLoginHttpTriggerFunction))]
     public async Task<ActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "garmin/login")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "garmin/login")] HttpRequest req,
+        [FromBody] GarminDiTokenModelRequest request,
         CancellationToken cancellationToken)
     {
+        //run https://github.com/cyberjunky/python-garminconnect locally to get token and copy response to this method body
+
         _ = req;
 
-        var loginResult = await _garminAuthService.Login(cancellationToken);
+        var tokenModel = new GarminDiTokenModel
+        {
+            DiToken = request.DiToken,
+            DiRefreshToken = request.DiRefreshToken,
+            DiClientId = request.DiClientId
+        };
 
-        return loginResult.MfaRequired
-            // do not change text here, it is used in apple login shortcut
-            ? new OkObjectResult("MFA code required")
-            : new OkObjectResult("Ok");
+        await _garminTokenSetter.SetTokenModel(tokenModel, cancellationToken);
+
+        return new OkObjectResult("Ok");
     }
+
+    public sealed record GarminDiTokenModelRequest
+    {
+        [JsonPropertyName("di_token")]
+        public required string DiToken { get; init; }
+        [JsonPropertyName("di_refresh_token")]
+        public required string DiRefreshToken { get; init; }
+        [JsonPropertyName("di_client_id")]
+        public required string DiClientId { get; init; }
+    }
+
 }

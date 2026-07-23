@@ -5,5 +5,4 @@ namespace FitSyncHub.GarminConnect.JsonSerializerContexts;
 
 [JsonSourceGenerationOptions]
 [JsonSerializable(typeof(GarminDiTokenModel))]
-[JsonSerializable(typeof(GarminNeedsMfaClientState))]
 public partial class GarminAuthSerializerContext : JsonSerializerContext;

@@ -20,7 +20,7 @@ public static class GarminConnectModule
             return services.AddGarminConnectModule(options => configurationSection.Bind(options));
         }
 
-        public IServiceCollection AddGarminConnectModule(Action<GarminConnectAuthOptions> options)
+        public IServiceCollection AddGarminConnectModule(Action<GarminConnectOptions> options)
         {
             services.AddScoped<GarminConnectToIntervalsIcuRideWorkoutStepConverterInitializer>();
             services.AddScoped<GarminConnectToIntervalsIcuStrengthWorkoutStepConverterInitializer>();
@@ -43,17 +43,16 @@ public static class GarminConnectModule
         }
     }
 
-    private static void ConfigureAuth(IServiceCollection services, Action<GarminConnectAuthOptions> options)
+    private static void ConfigureAuth(IServiceCollection services, Action<GarminConnectOptions> options)
     {
         services.Configure(options);
 
-        services.AddHttpClient<GarminSsoHttpClient>();
         services.AddHttpClient<GarminDiHttpClient>();
 
-        services.AddScoped<IGarminAuthService, GarminAuthService>();
+        services.AddScoped<IGarminTokenSetter, GarminAuthService>();
         services.AddScoped<IGarminTokenRefresher, GarminAuthService>();
-        services.AddScoped<IGarminAuthProvider, GarminAuthService>();
-        services.AddScoped<IGarminAuthCacheInvalidator, GarminAuthService>();
+        services.AddScoped<IGarminTokenProvider, GarminAuthService>();
+        services.AddScoped<IGarminTokenInvalidator, GarminAuthService>();
     }
 
     private static Func<WorkoutType, IGarminConnectToIntervalsIcuWorkoutStepConverterInitializer> ConverterInitializerImplementationFactory(IServiceProvider sp)
