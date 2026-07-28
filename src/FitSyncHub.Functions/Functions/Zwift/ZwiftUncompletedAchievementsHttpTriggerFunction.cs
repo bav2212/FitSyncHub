@@ -64,11 +64,11 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
         {
             sb.AppendLine("Cycling routes:");
 
-            sb.AppendLine(FormatRoutesSummary("Public", x => !x.PublicEventsOnly && !x.ExcludeFromGameDictionary));
-            sb.AppendLine(FormatRoutesSummary("EventOnly", x => x.PublicEventsOnly && !x.ExcludeFromGameDictionary));
-            sb.AppendLine(FormatRoutesSummary("ExcludeFromGameDictionary", x => x.ExcludeFromGameDictionary));
+            FormatRoutesSummary("Public", x => !x.PublicEventsOnly && !x.ExcludeFromGameDictionary);
+            FormatRoutesSummary("EventOnly", x => x.PublicEventsOnly && !x.ExcludeFromGameDictionary);
+            FormatRoutesSummary("ExcludeFromGameDictionary", x => x.ExcludeFromGameDictionary);
 
-            string FormatRoutesSummary(string prefix, Func<ZwiftRouteModel, bool> predicate)
+            void FormatRoutesSummary(string prefix, Func<ZwiftRouteModel, bool> predicate)
             {
                 var filteredRoutes = achievementsState.CyclingRouteAchievementsToRouteMapping
                     .Where(x => predicate(x.Value))
@@ -76,7 +76,7 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
 
                 if (filteredRoutes.Count == 0)
                 {
-                    return string.Empty;
+                    return;
                 }
 
                 var nonAchievedItems = filteredRoutes.Where(x => !x.Key.IsAchieved).Select(x => x.Value).ToList();
@@ -84,10 +84,10 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
 
                 if (nonAchievedItems.Count == 0)
                 {
-                    return string.Empty;
+                    return;
                 }
 
-                return ZwiftUncompletedAchievementsHttpTriggerFunction.FormatRoutesSummary(prefix, nonAchievedItems, totalCount);
+                sb.AppendLine(ZwiftUncompletedAchievementsHttpTriggerFunction.FormatRoutesSummary(prefix, nonAchievedItems, totalCount));
             }
         }
 
