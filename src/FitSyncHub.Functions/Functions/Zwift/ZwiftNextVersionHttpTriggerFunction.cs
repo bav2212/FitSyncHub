@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Xml.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -37,25 +38,59 @@ public sealed class ZwiftNextVersionHttpTriggerFunction
             return new BadRequestObjectResult("previousVersion is not valid long number");
         }
 
-        List<int> existingVersions = [];
+        List<ZwiftNextVersionResponse> results = [];
         foreach (var chunk in Enumerable.Range(previousVersion + 1, 1000).Chunk(50).ToList())
         {
-            var tasks = chunk.Select(async x =>
+            var tasks = chunk.Select(version => GetZwiftNextVersionTask(version, cancellationToken));
+            await foreach (var task in Task.WhenEach(tasks))
             {
-                var response = await _httpClient.GetAsync($"https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.{x}.xml", cancellationToken);
-                if (response.IsSuccessStatusCode)
+                var item = await task;
+                if (item is not null)
                 {
-#pragma warning disable CA1873 // Avoid potentially expensive logging
-                    _logger.LogInformation("Version {Version} exists", x);
-                    existingVersions.Add(x);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
+                    results.Add(item);
                 }
-            })
-            .ToList();
-
-            await Task.WhenAll(tasks);
+            }
         }
 
-        return new OkObjectResult(existingVersions);
+        results = [.. results.OrderBy(x => x.Version)];
+
+        return new OkObjectResult(results);
+    }
+
+    private async Task<ZwiftNextVersionResponse?> GetZwiftNextVersionTask(int version, CancellationToken cancellationToken)
+    {
+        var requestUrl = $"https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.{version}.xml";
+
+        var response = await _httpClient.GetAsync(requestUrl, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        var responseContentXml = await response.Content.ReadAsStringAsync(cancellationToken);
+        var sversion = XElement.Parse(responseContentXml)
+               .Attribute("sversion")
+               ?.Value ?? throw new InvalidOperationException("Failed to get sversion");
+
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+        _logger.LogInformation("Version {Version} exists, SVersion: {SVersion}, URL: {Url}",
+            version,
+            sversion,
+            requestUrl);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
+
+        return new ZwiftNextVersionResponse
+        {
+            Version = version,
+            VersionName = sversion,
+            Url = requestUrl
+        };
+    }
+
+    public sealed class ZwiftNextVersionResponse
+    {
+        public required int Version { get; init; }
+        public required string VersionName { get; init; }
+        public required string Url { get; init; }
     }
 }
