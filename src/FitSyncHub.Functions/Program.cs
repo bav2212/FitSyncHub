@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Azure.Monitor.OpenTelemetry.Exporter;
 using FitSyncHub.Common;
 using FitSyncHub.Functions;
 using FitSyncHub.Functions.Functions;
@@ -54,9 +53,17 @@ builder.UseMiddleware<LogBadRequestMiddleware>();
 
 builder.Configuration.AddUserSecrets<Program>();
 
+var appInsightsConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+if (!string.IsNullOrWhiteSpace(appInsightsConnectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetryWorkerService(options =>
+    {
+        options.ConnectionString = appInsightsConnectionString;
+    });
+}
+
 if (builder.Environment.IsDevelopment())
 {
-    // keep simple logs
     builder.Logging.AddConsole();
 }
 
@@ -65,13 +72,12 @@ builder.Services
     .UseFunctionsWorkerDefaults()
     .WithTracing(tracing =>
     {
-        tracing.AddHttpClientInstrumentation();    // Trace outgoing HTTP calls
+        tracing.AddHttpClientInstrumentation();
     })
     .WithMetrics(metrics =>
     {
-        metrics.AddHttpClientInstrumentation();     //
-    })
-    .UseAzureMonitorExporter();
+        metrics.AddHttpClientInstrumentation();
+    });
 
 builder.Services
     .AddSingleton(_ => new CosmosClient(builder.Configuration[FitSyncHub.Functions.Constants.CosmosDb.ConnectionString], new()
