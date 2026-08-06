@@ -72,7 +72,7 @@ public class IntervalsICUSetOutdoorWeatherHttpTriggerFunction
         do
         {
             activitiesPortion = [.. await _intervalsIcuHttpClient.ListActivities(
-                new ListActivitiesQueryParams(oldest, newest) { Limit = Limit }, cancellationToken)];
+                new ActivityListQueryParams(oldest, newest) { Limit = Limit }, cancellationToken)];
 
             var activities = activitiesPortion
                 // skip strava activities

@@ -1,14 +1,14 @@
 ﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public sealed record ListActivitiesQueryParams
+public sealed record ActivityListQueryParams
 {
-    public ListActivitiesQueryParams(DateTime oldest, DateTime newest)
+    public ActivityListQueryParams(DateTime oldest, DateTime newest)
     {
         Oldest = oldest;
         Newest = newest;
     }
 
-    public ListActivitiesQueryParams(DateOnly oldest, DateOnly newest)
+    public ActivityListQueryParams(DateOnly oldest, DateOnly newest)
         : this(oldest.ToDateTime(TimeOnly.MinValue), newest.ToDateTime(TimeOnly.MaxValue))
     { }
 

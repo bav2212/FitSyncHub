@@ -217,7 +217,7 @@ public sealed class GarminUploadToStravaHttpTriggerFunction
        FileModel uploadFileModel,
        CancellationToken cancellationToken)
     {
-        var intervalsIcuCreatedActivity = await _intervalsIcuHttpClient.CreateActivity(uploadFileModel, new CreateActivityRequest
+        var intervalsIcuCreatedActivity = await _intervalsIcuHttpClient.CreateActivity(uploadFileModel, new ActivityCreateRequest
         {
             Name = activityName,
             Description = $"Garmin Connect activityId: {activityId}",

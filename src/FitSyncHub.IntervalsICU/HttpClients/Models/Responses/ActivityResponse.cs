@@ -184,7 +184,7 @@ public sealed record ActivityResponse
     public int? PaceLoad { get; init; }
     public ActivityHrLoadType? HrLoadType { get; init; }
     public ActivityPaceLoadType? PaceLoadType { get; init; }
-    public required List<string> Tags { get; init; }
+    public required List<string>? Tags { get; init; }
     public required List<ActivityAttachment> Attachments { get; init; }
     /** When the user stopped the device in seconds since the start time */
     public required List<int> RecordingStops { get; init; }

@@ -122,7 +122,7 @@ public sealed class LactateSyncHttpTriggerFunction
                     (sb, note) => sb.AppendLine(note),
                     sb => sb.ToString());
 
-            var addMessageRequestModel = new AddMessageRequest
+            var addMessageRequestModel = new MessageAddRequest
             {
                 Content = lactateNotes,
             };

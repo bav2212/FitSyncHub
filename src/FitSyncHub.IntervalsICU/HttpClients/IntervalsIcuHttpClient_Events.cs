@@ -11,7 +11,7 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 public partial class IntervalsIcuHttpClient
 {
     public async Task<IReadOnlyCollection<EventResponse>> ListEvents(
-      ListEventsQueryParams query,
+      EventListQueryParams query,
       CancellationToken cancellationToken)
     {
         var queryParams = new Dictionary<string, StringValues>()
@@ -59,13 +59,28 @@ public partial class IntervalsIcuHttpClient
         return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.EventResponse)!;
     }
 
+    public async Task<EventResponse> UpdateEvent(
+        int eventId,
+        EventUpdateRequest model,
+        CancellationToken cancellationToken)
+    {
+        var requestUri = $"{AthleteBaseUrl}/events/{eventId}";
+
+        var jsonContent = JsonContent.Create(model, IntervalsUpdateSourceGenerationContext.Default.EventUpdateRequest);
+        var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        return JsonSerializer.Deserialize(content, IntervalsIcuSnakeCaseSourceGenerationContext.Default.EventResponse)!;
+    }
+
     public async Task<EventResponse> CreateEvent(
-       CreateEventFromDescriptionRequest model,
+       EventCreateFromDescriptionRequest model,
        CancellationToken cancellationToken)
     {
         var requestUri = $"{AthleteBaseUrl}/events";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateEventFromDescriptionRequest);
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.EventCreateFromDescriptionRequest);
         var response = await _httpClient.PostAsync(requestUri, jsonContent, cancellationToken);
         response.EnsureSuccessStatusCode();
 
@@ -74,12 +89,12 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task<EventResponse> CreateEvent(
-       CreateEventFromFileRequest model,
+       EventCreateFromFileRequest model,
        CancellationToken cancellationToken)
     {
         var requestUri = $"{AthleteBaseUrl}/events";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateEventFromFileRequest);
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.EventCreateFromFileRequest);
         var response = await _httpClient.PostAsync(requestUri, jsonContent, cancellationToken);
         response.EnsureSuccessStatusCode();
 
@@ -88,7 +103,7 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task DeleteEvent(
-        DeleteEventRequest model,
+        EventDeleteRequest model,
         CancellationToken cancellationToken)
     {
         var queryParams = new Dictionary<string, StringValues>()

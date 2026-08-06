@@ -69,7 +69,7 @@ public class XertWorkoutToIntervalsICUExporterHttpTriggerFunction
 
         var base64EncodedWorkoutStructure = Convert.ToBase64String(Encoding.UTF8.GetBytes(zwo));
 
-        var createdEvent = await _intervalsIcuHttpClient.CreateEvent(new CreateEventFromFileRequest
+        var createdEvent = await _intervalsIcuHttpClient.CreateEvent(new EventCreateFromFileRequest
         {
             Category = EventCategory.Workout,
             Type = EventType.Ride,

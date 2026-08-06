@@ -16,7 +16,7 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 public partial class IntervalsIcuHttpClient
 {
     public async Task<IReadOnlyCollection<ActivityResponse?>> ListActivities(
-        ListActivitiesQueryParams query,
+        ActivityListQueryParams query,
         CancellationToken cancellationToken)
     {
         var queryParams = new Dictionary<string, StringValues>()
@@ -56,7 +56,7 @@ public partial class IntervalsIcuHttpClient
     {
         var requestUri = $"activity/{activityId}";
 
-        var jsonContent = JsonContent.Create(model, IntervalsActivityUpdateSourceGenerationContext.Default.ActivityUpdateRequest);
+        var jsonContent = JsonContent.Create(model, IntervalsUpdateSourceGenerationContext.Default.ActivityUpdateRequest);
         var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);
         response.EnsureSuccessStatusCode();
 
@@ -66,13 +66,13 @@ public partial class IntervalsIcuHttpClient
 
     public async Task<ActivityCreateResponse> CreateActivity(
         FileModel fileModel,
-        CreateActivityRequest createActivityRequest,
+        ActivityCreateRequest createActivityRequest,
         CancellationToken cancellationToken)
     {
         var requestUri = $"{AthleteBaseUrl}/activities";
 
         using var formData = FormDataContentHelper.CreateMultipartFormDataContent(
-            fileModel, createActivityRequest, IntervalsIcuSnakeCaseSourceGenerationContext.Default.CreateActivityRequest);
+            fileModel, createActivityRequest, IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityCreateRequest);
 
         // Send POST request
         var response = await _httpClient.PostAsync(requestUri, formData, cancellationToken);

@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public sealed record CreateEventFromDescriptionRequest : CreateEventRequestBase
+public sealed record EventCreateFromDescriptionRequest : EventCreateRequestBase
 {
     public required string Name { get; init; }
     public required string Description { get; init; }

@@ -44,8 +44,9 @@ public class IntervalsICUSubtypeFixHttpTriggerFunction
 
         do
         {
-            activitiesPortion = [.. await _intervalsIcuHttpClient.ListActivities(
-                new ListActivitiesQueryParams(oldest, newest) { Limit = Limit }, cancellationToken)];
+            activitiesPortion = [..
+                await _intervalsIcuHttpClient.ListActivities(new(oldest, newest) { Limit = Limit }, cancellationToken)
+            ];
 
             var activities = activitiesPortion
                 // skip strava activities

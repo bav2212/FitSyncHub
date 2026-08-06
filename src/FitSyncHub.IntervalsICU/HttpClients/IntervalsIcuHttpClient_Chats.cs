@@ -23,12 +23,12 @@ public partial class IntervalsIcuHttpClient
 
     public async Task AddMessage(
         string activityId,
-        AddMessageRequest model,
+        MessageAddRequest model,
         CancellationToken cancellationToken)
     {
         var requestUri = $"activity/{activityId}/messages";
 
-        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.AddMessageRequest);
+        var jsonContent = JsonContent.Create(model, IntervalsIcuSnakeCaseSourceGenerationContext.Default.MessageAddRequest);
         var response = await _httpClient.PostAsync(requestUri, jsonContent, cancellationToken);
 
         response.EnsureSuccessStatusCode();

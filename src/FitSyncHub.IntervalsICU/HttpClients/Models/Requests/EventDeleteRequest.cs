@@ -1,8 +1,8 @@
 ﻿namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public sealed record DeleteEventRequest
+public sealed record EventDeleteRequest
 {
-    public DeleteEventRequest(int eventId)
+    public EventDeleteRequest(int eventId)
     {
         EventId = eventId;
     }

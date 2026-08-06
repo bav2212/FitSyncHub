@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public sealed record CreateActivityRequest : IFormDataValue
+public sealed record ActivityCreateRequest : IFormDataValue
 {
     public string? Name { get; init; }
     public string? Description { get; init; }
