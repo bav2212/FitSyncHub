@@ -16,7 +16,8 @@ namespace FitSyncHub.Functions.Functions;
 
 public sealed class GarminWorkoutToIntervalsICUExporterHttpTriggerFunction
 {
-    private const string IntervalsIcuEventTagGarminConnect = "Garmin Connect";
+    // #GarminConnect without space cause intervals.icu duplicates "Garmin Connect" and "GarminConnect"
+    private const string IntervalsIcuEventTagGarminConnect = "GarminConnect";
     private readonly GarminConnectHttpClient _garminConnectHttpClient;
     private readonly GarminConnectToInternalWorkoutConverterService _converterService;
     private readonly IntervalsIcuHttpClient _intervalsIcuHttpClient;

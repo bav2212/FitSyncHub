@@ -288,7 +288,8 @@ public sealed class SyncIntervalsICUWithGarminHttpTriggerFunction
 
     private static bool IsRaceEvent(EventResponse linkedPairedEvent)
     {
-        return linkedPairedEvent.Tags is { } && linkedPairedEvent.Tags.Contains("Race");
+        // #race from lowercase cause intervals.icu duplicates "Race" and "race"
+        return linkedPairedEvent.Tags is { } && linkedPairedEvent.Tags.Contains("race");
     }
 
     private static List<IntervalsIcuActivityWithNewTss> CalculateNewTssForActivities(
