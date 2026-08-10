@@ -103,25 +103,25 @@ public sealed record ZwiftEventVELORatingResponseItem
         {
             Id = rider.Id,
             PublicId = rider.PublicId,
-            FirstName = rider.FirstName,
-            LastName = rider.LastName,
+            FirstName = rider.FirstName.Trim(),
+            LastName = rider.LastName.Trim(),
             Age = rider.Age,
             Weight = weigth,
             Height = height,
-            FtpPerKg = ftpPerKg,
-            Best5Sec = GetWkgValue(history, x => x.Wkg5),
-            Best15Sec = GetWkgValue(history, x => x.Wkg15),
-            Best30Sec = GetWkgValue(history, x => x.Wkg30),
-            Best1Min = GetWkgValue(history, x => x.Wkg60),
-            Best2Min = GetWkgValue(history, x => x.Wkg120),
-            Best5Min = GetWkgValue(history, x => x.Wkg300),
-            Best20Min = GetWkgValue(history, x => x.Wkg1200),
-            MaxVELO = maxVelo,
-            MinVELO = minVelo,
-            VELO = velo,
+            FtpPerKg = Math.Round(ftpPerKg, 2),
+            Best5Sec = GetRoundedWkgValue(history, x => x.Wkg5),
+            Best15Sec = GetRoundedWkgValue(history, x => x.Wkg15),
+            Best30Sec = GetRoundedWkgValue(history, x => x.Wkg30),
+            Best1Min = GetRoundedWkgValue(history, x => x.Wkg60),
+            Best2Min = GetRoundedWkgValue(history, x => x.Wkg120),
+            Best5Min = GetRoundedWkgValue(history, x => x.Wkg300),
+            Best20Min = GetRoundedWkgValue(history, x => x.Wkg1200),
+            MaxVELO = RoundVELO(maxVelo),
+            MinVELO = RoundVELO(minVelo),
+            VELO = RoundVELO(velo),
         };
 
-        static double? GetWkgValue(
+        static double? GetRoundedWkgValue(
             ZwiftRacingRiderResponse? history,
             Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
         {
@@ -130,12 +130,20 @@ public sealed record ZwiftEventVELORatingResponseItem
                 return default;
             }
 
-            return history.History
+            foreach (var item in history.History
                 .Select(wkgSelector)
                 .WhereNotNull()
-                .OrderByDescending(x => x)
-                .FirstOrNull();
+                .OrderByDescending(x => x))
+            {
+                // first item only, that's expected
+                return Math.Round(item, 2);
+            }
+
+            // null if no items
+            return default;
         }
+
+        static double? RoundVELO(double? input) => input.HasValue ? Math.Round(input.Value, 0) : null;
     }
 
     public required long Id { get; init; }
