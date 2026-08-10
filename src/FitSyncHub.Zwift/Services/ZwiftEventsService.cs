@@ -70,6 +70,7 @@ public sealed class ZwiftEventsService
         var result = entrants.Select(e => new ZwiftEntrantResponseModel
         {
             Id = e.Id,
+            PublicId = e.PublicId,
             FirstName = e.FirstName,
             LastName = e.LastName,
             Age = e.Age,
@@ -92,6 +93,7 @@ public sealed class ZwiftEventsService
         return [.. result, new ZwiftEntrantResponseModel
                 {
                     Id = profileMe.Id,
+                    PublicId = profileMe.PublicId,
                     FirstName = profileMe.FirstName,
                     LastName = profileMe.LastName,
                     Age = profileMe.Age,
@@ -115,6 +117,7 @@ public sealed record ZwiftPlayerCompetitionMetrics
 public sealed record ZwiftEntrantResponseModel
 {
     public required long Id { get; set; }
+    public required string PublicId { get; set; }
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public required int Age { get; set; }

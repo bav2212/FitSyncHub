@@ -49,5 +49,4 @@ public class GarminLoginHttpTriggerFunction
         [JsonPropertyName("di_client_id")]
         public required string DiClientId { get; init; }
     }
-
 }

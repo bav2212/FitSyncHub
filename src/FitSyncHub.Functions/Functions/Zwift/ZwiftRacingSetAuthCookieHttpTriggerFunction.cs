@@ -28,6 +28,6 @@ public sealed class ZwiftRacingSetAuthCookieHttpTriggerFunction
         }
 
         await _zwiftRacingService.SetCookie(cookie, cancellationToken);
-        return new OkResult();
+        return new OkObjectResult("Success");
     }
 }

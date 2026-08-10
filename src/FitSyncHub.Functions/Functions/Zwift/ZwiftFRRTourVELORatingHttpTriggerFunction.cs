@@ -166,6 +166,7 @@ public sealed class ZwiftFRRTourVELORatingHttpTriggerFunction
         return new ZwiftEventVELORatingResponseItem
         {
             Id = rider.Id,
+            PublicId = rider.PublicId,
             FirstName = rider.FirstName,
             LastName = rider.LastName,
             Age = rider.Age,

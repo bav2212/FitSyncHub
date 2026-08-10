@@ -92,6 +92,7 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
         return new ZwiftEventVELORatingResponseItem
         {
             Id = rider.Id,
+            PublicId = rider.PublicId,
             FirstName = rider.FirstName,
             LastName = rider.LastName,
             Age = rider.Age,
@@ -131,6 +132,10 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
 public sealed record ZwiftEventVELORatingResponseItem
 {
     public required long Id { get; init; }
+    public required string PublicId { get; init; }
+    public string ZwiftRacingUrl => $"https://zwiftracing.app/riders/{Id}";
+    public string ZwiftPowerUrl => $"https://zwiftpower.com/profile.php?z={Id}";
+    public string ZwiftUrl => $"https://zwift.com/athlete/{PublicId}";
     public required string FirstName { get; init; }
     public required string LastName { get; init; }
     public required int Age { get; init; }
