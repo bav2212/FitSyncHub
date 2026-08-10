@@ -78,6 +78,16 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
         var history = await _zwiftRacingHttpClient
                 .GetRiderHistory(rider.Id, year: year, cancellationToken);
 
+        return ZwiftEventVELORatingResponseItem.Initialize(rider, history);
+    }
+}
+
+public sealed record ZwiftEventVELORatingResponseItem
+{
+    public static ZwiftEventVELORatingResponseItem Initialize(
+        ZwiftEntrantResponseModel rider,
+        ZwiftRacingRiderResponse? history)
+    {
         var maxVelo = history?.History.Max(x => x.Rating);
         var minVelo = history?.History.Min(x => x.Rating);
         var velo = history?.History
@@ -110,27 +120,24 @@ public sealed class ZwiftEventVELORatingHttpTriggerFunction
             MinVELO = minVelo,
             VELO = velo,
         };
-    }
 
-    private static double? GetWkgValue(
-        ZwiftRacingRiderResponse? history,
-        Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
-    {
-        if (history == null)
+        static double? GetWkgValue(
+            ZwiftRacingRiderResponse? history,
+            Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
         {
-            return default;
+            if (history == null)
+            {
+                return default;
+            }
+
+            return history.History
+                .Select(wkgSelector)
+                .WhereNotNull()
+                .OrderByDescending(x => x)
+                .FirstOrNull();
         }
-
-        return history.History
-            .Select(wkgSelector)
-            .WhereNotNull()
-            .OrderByDescending(x => x)
-            .FirstOrNull();
     }
-}
 
-public sealed record ZwiftEventVELORatingResponseItem
-{
     public required long Id { get; init; }
     public required string PublicId { get; init; }
     public string ZwiftRacingUrl => $"https://zwiftracing.app/riders/{Id}";

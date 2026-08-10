@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using FitSyncHub.Common.Extensions;
 using FitSyncHub.Common.Helpers;
 using FitSyncHub.Zwift.HttpClients;
 using FitSyncHub.Zwift.HttpClients.Abstractions;
-using FitSyncHub.Zwift.HttpClients.Models.Responses.ZwiftRacing;
 using FitSyncHub.Zwift.Models.FRR;
+using FitSyncHub.Zwift.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -144,61 +143,26 @@ public sealed class ZwiftFRRTourVELORatingHttpTriggerFunction
         int year,
         CancellationToken cancellationToken)
     {
-        var historyTask = _zwiftRacingHttpClient.GetRiderHistory(riderId, year: year, cancellationToken);
-        var riderTask = _zwiftHttpClient.GetProfile(riderId, cancellationToken);
+        var getHistoryTask = _zwiftRacingHttpClient.GetRiderHistory(riderId, year: year, cancellationToken);
+        var getProfileTask = _zwiftHttpClient.GetProfile(riderId, cancellationToken);
 
-        await Task.WhenAll(historyTask, riderTask);
+        await Task.WhenAll(getHistoryTask, getProfileTask);
 
-        var history = await historyTask;
-        var rider = await riderTask;
+        var history = await getHistoryTask;
+        var profile = await getProfileTask;
 
-        var maxVelo = history?.History.Max(x => x.Rating);
-        var minVelo = history?.History.Min(x => x.Rating);
-        var velo = history?.History
-                .OrderByDescending(x => x.UpdatedAt)
-                .FirstOrDefault()?.Rating;
-
-        var weigth = rider.Weight / 1000.0;
-        var height = rider.Height / 1000.0;
-
-        var ftpPerKg = rider.Ftp / weigth;
-
-        return new ZwiftEventVELORatingResponseItem
+        var rider = new ZwiftEntrantResponseModel
         {
-            Id = rider.Id,
-            PublicId = rider.PublicId,
-            FirstName = rider.FirstName,
-            LastName = rider.LastName,
-            Age = rider.Age,
-            Weight = weigth,
-            Height = height,
-            FtpPerKg = ftpPerKg,
-            Best5Sec = GetWkgValue(history, x => x.Wkg5),
-            Best15Sec = GetWkgValue(history, x => x.Wkg15),
-            Best30Sec = GetWkgValue(history, x => x.Wkg30),
-            Best1Min = GetWkgValue(history, x => x.Wkg60),
-            Best2Min = GetWkgValue(history, x => x.Wkg120),
-            Best5Min = GetWkgValue(history, x => x.Wkg300),
-            Best20Min = GetWkgValue(history, x => x.Wkg1200),
-            MaxVELO = maxVelo,
-            MinVELO = minVelo,
-            VELO = velo,
+            Id = profile.Id,
+            PublicId = profile.PublicId,
+            FirstName = profile.FirstName,
+            LastName = profile.LastName,
+            Age = profile.Age,
+            WeightInGrams = profile.Weight,
+            HeightInMillimeters = profile.Height,
+            Ftp = profile.Ftp
         };
-    }
 
-    private static double? GetWkgValue(
-        ZwiftRacingRiderResponse? history,
-        Func<ZwiftRacingHistoryEntry, double?> wkgSelector)
-    {
-        if (history == null)
-        {
-            return default;
-        }
-
-        return history.History
-            .Select(wkgSelector)
-            .WhereNotNull()
-            .OrderByDescending(x => x)
-            .FirstOrNull();
+        return ZwiftEventVELORatingResponseItem.Initialize(rider, history);
     }
 }
