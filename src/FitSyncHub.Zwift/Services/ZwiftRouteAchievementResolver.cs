@@ -23,11 +23,12 @@ public class ZwiftRouteAchievementResolver
         { "TIRE-BOUCHON", "TIRE BOUCHON"},
         { "HANDFUL OF GRAVEL", "HANDFUL OF GRAVEL (CYCLING)"},
         { "HANDFUL OF GRAVEL RUN", "HANDFUL OF GRAVEL (RUNNING)"},
-        { "WATOPIA'S WAISTBAND", "WATOPIAS WAISTBAND"},
         { "RICHMOND 2015 WORLDS REVERSE", "RICHMOND UCI REVERSE"},
         { "CASTLE CRIT RUN", "CASTLE CRIT (RUNNING)"},
-        { "TRIPLE TWIST", "TRIPLE TWISTS"},
         { "PEAKY PAVÉ", "PEAKY PAVE"},
+        { "WHATYUMEZIWERELOST", "WHAT YUMEZI WERE LOST" }
+        // uncomment for v120
+        //{ "WHATYUMEZIWE'RELOST?", "WHAT YUMEZI WERE LOST" }
     };
 
     public ZwiftRouteAchievementResolver(List<ZwiftGameInfoAchievement> achievements)
@@ -49,6 +50,7 @@ public class ZwiftRouteAchievementResolver
 
         var routeAchievementsDictionary = RouteAchievements
             .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
+        var touchedRouteAchievementsKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var route in routes)
         {
@@ -61,11 +63,23 @@ public class ZwiftRouteAchievementResolver
 
             if (routeAchievementsDictionary.TryGetValue(routeName, out var value))
             {
+                touchedRouteAchievementsKeys.Add(routeName);
+
                 result[route] = value;
                 continue;
             }
 
             result[route] = null;
+        }
+
+        var untouchedRouteAchievements = routeAchievementsDictionary
+            .Where(x => !touchedRouteAchievementsKeys.Contains(x.Key))
+            .ToList();
+
+        if (untouchedRouteAchievements.Count != 0)
+        {
+            var untouchedRouteAchievementsNames = string.Join(", ", untouchedRouteAchievements.Select(x => x.Key));
+            throw new InvalidOperationException($"The following route achievements were not matched to any route: {untouchedRouteAchievementsNames}");
         }
 
         return result;
