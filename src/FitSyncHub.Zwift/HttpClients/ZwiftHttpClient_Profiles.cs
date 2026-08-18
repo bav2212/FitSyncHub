@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
+using FitSyncHub.Zwift.HttpClients.Models.Requests.Profiles;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Profiles;
 using FitSyncHub.Zwift.JsonSerializerContexts;
 using FitSyncHub.Zwift.Protobuf;
@@ -61,6 +63,31 @@ public sealed partial class ZwiftHttpClient
 
         var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
+        return PlayerProfiles.Parser.ParseFrom(stream);
+    }
+
+    public async Task<PlayerProfiles> SearchProfiles(
+        ZwiftSearchProfileRequest request,
+        CancellationToken cancellationToken)
+    {
+        var queryParams = new Dictionary<string, StringValues>
+        {
+            { "start", request.Start.ToString() },
+            { "limit", request.Limit.ToString() },
+            { "page", request.PageLimit.ToString() },
+        };
+
+        var url = QueryHelpers.AddQueryString("api/search/profiles", queryParams);
+
+        var content = JsonContent.Create(new
+        {
+            query = request.SearchText
+        });
+
+        var response = await _httpClientProto.PostAsync(url, content, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         return PlayerProfiles.Parser.ParseFrom(stream);
     }
 }
