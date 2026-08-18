@@ -43,22 +43,22 @@ public sealed class ZwiftProfilesSearchHttpTriggerFunction
         }
 
         return new OkObjectResult(
-            response.Profiles
+            new
+            {
+                Profiles = response.Profiles
                 // real account will be on the top
                 .OrderByDescending(x => x.AchievementLevel)
                 .Select(x => new
                 {
-                    Profiles = new
-                    {
-                        x.Id,
-                        x.FirstName,
-                        x.LastName,
-                        x.Age,
-                        Weigth = (x.Weight / 1000.0).ToString("0.00"),
-                        Height = (x.Height / 1000.0).ToString("0.00"),
-                        AchievementLevel = (x.AchievementLevel / 100.0).ToString("0.00"),
-                    }
+                    x.Id,
+                    x.FirstName,
+                    x.LastName,
+                    x.Age,
+                    Weigth = (x.Weight / 1000.0).ToString("0.00"),
+                    Height = (x.Height / 1000.0).ToString("0.00"),
+                    AchievementLevel = (x.AchievementLevel / 100.0).ToString("0.00"),
                 })
+            }
         );
     }
 }
