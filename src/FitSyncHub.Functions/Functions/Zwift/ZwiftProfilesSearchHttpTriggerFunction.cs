@@ -54,9 +54,9 @@ public sealed class ZwiftProfilesSearchHttpTriggerFunction
                     x.FirstName,
                     x.LastName,
                     x.Age,
-                    Weigth = (x.Weight / 1000.0).ToString("0.00"),
-                    Height = (x.Height / 1000.0).ToString("0.00"),
-                    AchievementLevel = (x.AchievementLevel / 100.0).ToString("0.00"),
+                    Weigth = Math.Round(x.Weight / 1000.0, 2),
+                    Height = Math.Round(x.Height / 1000.0, 2),
+                    AchievementLevel = Math.Round(x.AchievementLevel / 100.0, 2),
                 })
             }
         );
