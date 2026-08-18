@@ -48,13 +48,16 @@ public sealed class ZwiftProfilesSearchHttpTriggerFunction
                 .OrderByDescending(x => x.AchievementLevel)
                 .Select(x => new
                 {
-                    x.Id,
-                    x.FirstName,
-                    x.LastName,
-                    x.Age,
-                    Weigth = (x.Weight / 1000.0).ToString("0.00"),
-                    Height = (x.Height / 1000.0).ToString("0.00"),
-                    AchievementLevel = (x.AchievementLevel / 100.0).ToString("0.00"),
+                    Profiles = new
+                    {
+                        x.Id,
+                        x.FirstName,
+                        x.LastName,
+                        x.Age,
+                        Weigth = (x.Weight / 1000.0).ToString("0.00"),
+                        Height = (x.Height / 1000.0).ToString("0.00"),
+                        AchievementLevel = (x.AchievementLevel / 100.0).ToString("0.00"),
+                    }
                 })
         );
     }
