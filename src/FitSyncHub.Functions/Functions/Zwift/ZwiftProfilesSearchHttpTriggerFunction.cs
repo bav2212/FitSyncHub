@@ -51,12 +51,10 @@ public sealed class ZwiftProfilesSearchHttpTriggerFunction
                 .Select(x => new
                 {
                     x.Id,
-                    x.FirstName,
-                    x.LastName,
+                    Name = $"{x.FirstName} {x.LastName}",
                     x.Age,
                     Weigth = Math.Round(x.Weight / 1000.0, 2),
                     Height = Math.Round(x.Height / 1000.0, 2),
-                    AchievementLevel = Math.Round(x.AchievementLevel / 100.0, 2),
                 })
             }
         );
