@@ -46,6 +46,8 @@ public sealed class ZwiftProfileInfoHttpTriggerFunction
 
         return new OkObjectResult(new
         {
+            ZwiftRacingUrl = $"https://zwiftracing.app/riders/{profileId}",
+            ZwiftPowerUrl = $"https://zwiftpower.com/profile.php?z={profileId}",
             Profile = profile,
             LastActivities = activities
         });
