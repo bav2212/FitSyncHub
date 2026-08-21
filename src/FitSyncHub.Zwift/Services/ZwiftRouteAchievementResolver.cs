@@ -25,10 +25,7 @@ public class ZwiftRouteAchievementResolver
         { "HANDFUL OF GRAVEL RUN", "HANDFUL OF GRAVEL (RUNNING)"},
         { "RICHMOND 2015 WORLDS REVERSE", "RICHMOND UCI REVERSE"},
         { "CASTLE CRIT RUN", "CASTLE CRIT (RUNNING)"},
-        { "PEAKY PAVÉ", "PEAKY PAVE"},
-        { "WHATYUMEZIWERELOST", "WHAT YUMEZI WERE LOST" }
-        // uncomment for v120
-        //{ "WHATYUMEZIWE'RELOST?", "WHAT YUMEZI WERE LOST" }
+        { "PEAKY PAVÉ", "PEAKY PAVE"}
     };
 
     public ZwiftRouteAchievementResolver(List<ZwiftGameInfoAchievement> achievements)
