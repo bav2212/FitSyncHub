@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using FitSyncHub.Zwift.HttpClients.Models.Requests.Activities;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Activities;
 using FitSyncHub.Zwift.JsonSerializerContexts;
 using Microsoft.AspNetCore.WebUtilities;
@@ -9,18 +10,16 @@ namespace FitSyncHub.Zwift.HttpClients;
 public sealed partial class ZwiftHttpClient
 {
     public async Task<IReadOnlyCollection<ZwiftActivityOverview>> ListActivities(
-        long profileId,
-        int start = 0,
-        int limit = 20,
+        ZwiftListActivitiesRequest query,
         CancellationToken cancellationToken = default)
     {
         var queryParams = new Dictionary<string, StringValues>
         {
-            { "start", start.ToString() },
-            { "limit", limit.ToString() }
+            { "start", query.Start.ToString() },
+            { "limit", query.Limit.ToString() }
         };
 
-        var url = QueryHelpers.AddQueryString($"api/profiles/{profileId}/activities", queryParams);
+        var url = QueryHelpers.AddQueryString($"api/profiles/{query.ProfileId}/activities", queryParams);
 
         var response = await _httpClientJson.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();

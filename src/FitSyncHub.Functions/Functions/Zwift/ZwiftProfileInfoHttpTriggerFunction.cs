@@ -42,7 +42,10 @@ public sealed class ZwiftProfileInfoHttpTriggerFunction
             return new NotFoundObjectResult($"Profile with id {profileId} not found");
         }
 
-        var activities = await _zwiftHttpClient.ListActivities(profileId, cancellationToken: cancellationToken);
+        var activities = await _zwiftHttpClient.ListActivities(new()
+        {
+            ProfileId = profileId
+        }, cancellationToken);
 
         return new OkObjectResult(new
         {
