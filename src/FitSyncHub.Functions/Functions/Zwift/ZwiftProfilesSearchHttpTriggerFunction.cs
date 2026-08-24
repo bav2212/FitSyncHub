@@ -46,18 +46,20 @@ public sealed class ZwiftProfilesSearchHttpTriggerFunction
             new
             {
                 Profiles = response.Profiles
-                // real account will be on the top
-                .OrderByDescending(x => x.AchievementLevel)
-                .Select(x => new
-                {
-                    x.Id,
-                    x.FirstName,
-                    x.LastName,
-                    x.Age,
-                    AchievementLevel = x.AchievementLevel / 100.0,
-                    Weight = x.Weight / 1000.0,
-                    Height = x.Height / 1000.0,
-                })
+                    // real account will be on the top
+                    .OrderByDescending(x => x.AchievementLevel)
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.FirstName,
+                        x.LastName,
+                        x.Age,
+                        AchievementLevel = x.AchievementLevel / 100.0,
+                        Weight = x.Weight / 1000.0,
+                        Height = x.Height / 1000.0,
+                        ZwiftRacingUrl = $"https://zwiftracing.app/riders/{x.Id}",
+                        ZwiftPowerUrl = $"https://zwiftpower.com/profile.php?z={x.Id}",
+                    })
             }
         );
     }
