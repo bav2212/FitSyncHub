@@ -179,6 +179,10 @@ public enum ZwiftPlayerType
     Zac = 7,
     ProTriathlete = 8,
     ProRunner = 9,
+    PacerBot = 10,
+    Broadcaster = 11,
+    CommunityLeader = 12,
+    RideLeader = 13,
 }
 
 [JsonConverter(typeof(JsonStringEnumConverterSnakeCaseUpper<ZwiftActivityPrivacyType>))]
