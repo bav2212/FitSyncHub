@@ -36,6 +36,18 @@ public sealed partial class ZwiftHttpClient
         return [.. achievements.Achievements_.Select(x => x.Id)];
     }
 
+    public async Task<DropInWorldList> GetDropInWorldList(CancellationToken cancellationToken)
+    {
+        const string Url = "relay/dropin";
+
+        var response = await _httpClientProto.GetAsync(Url, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        return DropInWorldList.Parser.ParseFrom(stream);
+    }
+
     public async Task<ZwiftGameInfoResponse> GetGameInfo(CancellationToken cancellationToken)
     {
         const string Url = "api/game_info";
