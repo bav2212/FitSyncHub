@@ -7,16 +7,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="3.36.0" />
-        <PackageReference Include="Grpc.Tools" Version="2.83.0">
+        <PackageReference Include="Google.Protobuf" Version="3.36.2" />
+        <PackageReference Include="Grpc.Tools" Version="2.84.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
-        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.12" />
-        <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.11" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />
-        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.9.0" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.13.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.13" />
+        <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.12" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
         <PackageReference Include="Scrutor" Version="7.0.0" />
     </ItemGroup>
 

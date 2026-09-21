@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Strava.HttpClients.Models.Requests;
@@ -15,8 +15,8 @@ public sealed class StravaUpdateActivityService
     private readonly string? _cityBikeGearId;
     private readonly ILogger<StravaUpdateActivityService> _logger;
 
-    // change it to false if want to show all virtual rides, but want to hide warmups/cooldowns anyway 
-    private readonly bool _shouldHideAllVirtualRides = true;
+    // change to show/hide all virtual rides, but want to hide warmups/cooldowns anyway 
+    private readonly bool _shouldHideAllVirtualRides = false;
 
     public StravaUpdateActivityService(
         IStravaHttpClient stravaHttpClient,
