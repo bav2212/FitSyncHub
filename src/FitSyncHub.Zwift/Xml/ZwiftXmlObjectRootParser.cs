@@ -9,7 +9,13 @@ namespace FitSyncHub.Zwift.Xml;
 public class ZwiftXmlObjectRootParser<T> : IDisposable
     where T : IZwiftXmlObjectRoot
 {
-    private readonly Dictionary<string, XmlSerializer> _serializers = [];
+    private record XmlSerializerWithPropertyInfoTuple
+    {
+        public required XmlSerializer XmlSerializer { get; init; }
+        public required PropertyInfo PropertyInfo { get; init; }
+    }
+
+    private readonly Dictionary<string, XmlSerializerWithPropertyInfoTuple> _xmlPropertyMapping = [];
     private readonly List<UnknownXmlElementInfo> _unknownXmlElements = [];
     private bool _disposedValue;
 
@@ -17,13 +23,18 @@ public class ZwiftXmlObjectRootParser<T> : IDisposable
     {
         foreach (var propertyInfo in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            var propertyName = propertyInfo.Name;
-            var xmlPropertyName = char.ToLower(propertyName[0]) + propertyName[1..];
+            var xmlRootAttribute = propertyInfo.PropertyType.GetCustomAttribute<XmlRootAttribute>()
+                ?? throw new Exception("set xml root attibute");
+            var xmlPropertyName = xmlRootAttribute.ElementName;
 
             var serializer = new XmlSerializer(propertyInfo.PropertyType);
             SetHandlersToLogUnknownEvents(serializer, xmlPropertyName);
 
-            _serializers[xmlPropertyName] = serializer;
+            _xmlPropertyMapping[xmlPropertyName] = new XmlSerializerWithPropertyInfoTuple
+            {
+                XmlSerializer = serializer,
+                PropertyInfo = propertyInfo
+            };
         }
     }
 
@@ -48,18 +59,25 @@ public class ZwiftXmlObjectRootParser<T> : IDisposable
 
             var xmlElementName = reader.Name;
 
-            if (_serializers.TryGetValue(xmlElementName, out var serializer))
+            if (_xmlPropertyMapping.TryGetValue(xmlElementName, out var tuple))
             {
                 using var sub = reader.ReadSubtree();
                 sub.Read(); // move into element
 
-                var deserializedObject = serializer.Deserialize(sub)
+                var deserializedObject = tuple.XmlSerializer.Deserialize(sub)
                     ?? throw new InvalidDataException($"Can't deserialize {xmlElementName}");
 
-                var propertyInfo = typeof(T).GetProperty(
-                        char.ToUpper(xmlElementName[0]) + xmlElementName[1..],
-                        BindingFlags.Public | BindingFlags.Instance);
-                propertyInfo?.SetValue(result, deserializedObject);
+                tuple.PropertyInfo?.SetValue(result, deserializedObject);
+            }
+            else
+            {
+                _unknownXmlElements.Add(new UnknownXmlElementInfo
+                {
+                    ElementName = xmlElementName,
+                    ElementValue = reader.Value,
+                    PropertyName = "",
+                    Reason = UnknownXmlElementReason.UnknownElement
+                });
             }
         }
 
@@ -68,33 +86,32 @@ public class ZwiftXmlObjectRootParser<T> : IDisposable
         return result;
     }
 
-    public static void ValidateRequiredMembers(T obj)
+    public void ValidateRequiredMembers(T obj)
     {
-        var type = obj.GetType();
-
-        var requiredProperties = type
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.IsDefined(typeof(System.Runtime.CompilerServices.RequiredMemberAttribute), inherit: true));
-
-        foreach (var prop in requiredProperties)
+        foreach (var (_, tuple) in _xmlPropertyMapping)
         {
-            var value = prop.GetValue(obj);
+            var propertyInfo = tuple.PropertyInfo;
+            if (!propertyInfo.IsDefined(typeof(System.Runtime.CompilerServices.RequiredMemberAttribute), inherit: true))
+            {
+                continue;
+            }
+
+            var value = propertyInfo.GetValue(obj);
 
             var missing = value == null ||
-                (prop.PropertyType.IsValueType &&
-                value.Equals(Activator.CreateInstance(prop.PropertyType)));
+                (propertyInfo.PropertyType.IsValueType &&
+                value.Equals(Activator.CreateInstance(propertyInfo.PropertyType)));
 
             if (missing)
             {
                 throw new InvalidOperationException(
-                    $"Required property '{prop.Name}' is not set.");
+                    $"Required property '{propertyInfo.Name}' is not set.");
             }
         }
     }
 
     private void SetHandlersToLogUnknownEvents(XmlSerializer serializer, string xmlPropertyName)
     {
-
         serializer.UnknownAttribute += (sender, args) =>
             _unknownXmlElements.Add(new UnknownXmlElementInfo
             {

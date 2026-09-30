@@ -41,3 +41,4 @@ public sealed class ZwiftXmlObjectRouteHomedataElement
     [XmlAttribute(AttributeName = "speedScaledMeetupLeadinAscentInMeters")]
     public double SpeedScaledMeetupLeadinAscentInMeters { get; set; }
 }
+
