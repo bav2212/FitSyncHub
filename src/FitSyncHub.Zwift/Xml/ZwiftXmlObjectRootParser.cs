@@ -42,7 +42,14 @@ public class ZwiftXmlObjectRootParser<T> : IDisposable
     {
         var result = Activator.CreateInstance<T>();
 
-        using var reader = XmlReader.Create(filePath, new XmlReaderSettings
+        var xml = File.ReadAllText(filePath);
+        var declaration = xml.IndexOf("<?xml", StringComparison.Ordinal);
+        if (declaration > 0)
+        {
+            xml = xml[declaration..];
+        }
+
+        using var reader = XmlReader.Create(new StringReader(xml), new XmlReaderSettings
         {
             IgnoreComments = true,
             IgnoreWhitespace = true,

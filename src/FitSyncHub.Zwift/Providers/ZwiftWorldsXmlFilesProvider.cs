@@ -17,10 +17,10 @@ public class ZwiftWorldsXmlFilesProvider
         {"7",  "Yorkshire"},
         {"8",  "Crit City"},
         {"9",  "Makuri Islands"},
-        {"10",  "France"},
-        {"11",  "Paris"},
-        {"12",  "Gravel Mountain"},
-        {"13",  "Scotland"},
+        {"10", "France"},
+        {"11", "Paris"},
+        {"12", "Gravel Mountain"},
+        {"13", "Scotland"},
     };
 
     private readonly string _zwiftInstallationPath = @"C:\Program Files (x86)\Zwift";
@@ -55,47 +55,101 @@ public class ZwiftWorldsXmlFilesProvider
 
         await UnpackWADFiles(cancellationToken);
 
-        var worldRouteFilePaths = Directory.EnumerateFiles(
-            Path.Combine(_unpackedWADFilesDirectory, "Worlds"),
-            "*.xml",
-            new EnumerationOptions { RecurseSubdirectories = true })
-            .Where(filePath =>
-            {
-                var pathParts = GetRelativePathParts(filePath);
 
-                return pathParts.Length > 2
-                    && pathParts[0].StartsWith("world", StringComparison.OrdinalIgnoreCase)
-                    && pathParts[1] == "routes";
-            });
+        var worldsDictionary = new Dictionary<long, ZwiftXmlFilesWorldData>();
+        var climbPortalRoads = new List<ZwiftXmlFilesRoadItem>();
 
-        var regularRoutesPart = worldRouteFilePaths
-            .Select(x => new ZwiftXmlFilesModelRegularRoutes
-            {
-                WorldName = s_worldIdToNameMapping[GetWorldIdFromFilePath(x)],
-                FilePath = x
-            })
-            .ToList();
+        var filePaths = Directory.EnumerateFiles(Path.Combine(_unpackedWADFilesDirectory, "Worlds"),
+                "*.xml", new EnumerationOptions { RecurseSubdirectories = true });
 
-        var climbPortalFilePaths = Directory.EnumerateFiles(
-            Path.Combine(_unpackedWADFilesDirectory, "Worlds", "portal"),
-            "road_*.xml",
-            new EnumerationOptions { RecurseSubdirectories = true })
-            .Select(x => new ZwiftXmlFilesModelClimbPortalRoads
+        foreach (var filePath in filePaths)
+        {
+            var pathParts = GetRelativePathParts(filePath);
+            var isWorldRelatedFilePath = pathParts.Length > 0
+                && pathParts[0].StartsWith("world", StringComparison.OrdinalIgnoreCase)
+                && s_worldIdToNameMapping.ContainsKey(pathParts[0][5..]);
+
+            var isWorldRoadFilePath = isWorldRelatedFilePath
+                && pathParts[1] == "road.xml";
+
+            var isWorldRoadStyleFilePath = isWorldRelatedFilePath
+                && pathParts[1] == "roadstyle.xml";
+
+            var isWorldRouteFilePath = isWorldRelatedFilePath
+                && pathParts.Length > 2
+                && pathParts[1] == "routes";
+
+            if (isWorldRelatedFilePath)
             {
-                FilePath = x
-            })
-            .ToList();
+                var (worldId, worldName) = GetWorldInfoFromFilePath(pathParts);
+
+                if (!worldsDictionary.TryGetValue(worldId, out var worldData))
+                {
+                    worldData = new ZwiftXmlFilesWorldData
+                    {
+                        WorldId = worldId,
+                        WorldName = worldName,
+                        RegularRoutes = []
+                    };
+                    worldsDictionary[worldId] = worldData;
+                }
+
+
+                if (isWorldRoadFilePath)
+                {
+                    worldData.Road = new ZwiftXmlFilesRoadItem
+                    {
+                        FilePath = filePath
+                    };
+                    continue;
+                }
+
+                if (isWorldRoadStyleFilePath)
+                {
+                    worldData.RoadStyle = new ZwiftXmlFilesRoadItem
+                    {
+                        FilePath = filePath
+                    };
+                    continue;
+                }
+
+                if (isWorldRouteFilePath)
+                {
+                    worldData.RegularRoutes.Add(new ZwiftXmlFilesRoadItem
+                    {
+                        FilePath = filePath
+                    });
+
+                    continue;
+                }
+            }
+
+            var isClimbPortalFilePath = pathParts[0] == "portal"
+                && pathParts.Length > 1
+                && pathParts[1].StartsWith("road_", StringComparison.OrdinalIgnoreCase);
+            if (isClimbPortalFilePath)
+            {
+                climbPortalRoads.Add(new ZwiftXmlFilesRoadItem
+                {
+                    FilePath = filePath
+                });
+                continue;
+            }
+        }
 
         return new ZwiftXmlFilesModel
         {
-            RegularRoutes = regularRoutesPart,
-            ClimbPortalRoads = climbPortalFilePaths
+            Worlds = worldsDictionary.Values.ToList(),
+            ClimbPortalRoads = climbPortalRoads
         };
     }
 
-    private string GetWorldIdFromFilePath(string x)
+    private static (uint worldId, string worldName) GetWorldInfoFromFilePath(string[] pathParts)
     {
-        return GetRelativePathParts(x)[0][5..]; // trim "world"
+        var worldId = pathParts[0][5..]; // trim "world"
+        var worldName = s_worldIdToNameMapping[worldId];
+
+        return (uint.Parse(worldId), worldName);
     }
 
     private async Task UnpackWADFiles(CancellationToken cancellationToken)
@@ -163,17 +217,21 @@ public class ZwiftWorldsXmlFilesProvider
 
 public sealed record ZwiftXmlFilesModel
 {
-    public required List<ZwiftXmlFilesModelRegularRoutes> RegularRoutes { get; init; }
-    public required List<ZwiftXmlFilesModelClimbPortalRoads> ClimbPortalRoads { get; init; }
+    public required List<ZwiftXmlFilesWorldData> Worlds { get; init; }
+    public required List<ZwiftXmlFilesRoadItem> ClimbPortalRoads { get; init; }
 }
 
-public sealed record ZwiftXmlFilesModelRegularRoutes
+public sealed record ZwiftXmlFilesWorldData
 {
-    public required string WorldName { get; init; }
-    public required string FilePath { get; init; }
+    public required uint WorldId { get; set; }
+    public required string WorldName { get; set; }
+    public ZwiftXmlFilesRoadItem Road { get; set; } = null!;
+    public ZwiftXmlFilesRoadItem RoadStyle { get; set; } = null!;
+    public required List<ZwiftXmlFilesRoadItem> RegularRoutes { get; set; }
+
 }
 
-public sealed record ZwiftXmlFilesModelClimbPortalRoads
+public sealed record ZwiftXmlFilesRoadItem
 {
     public required string FilePath { get; init; }
 }

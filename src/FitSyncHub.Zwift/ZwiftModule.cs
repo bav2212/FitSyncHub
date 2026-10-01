@@ -7,6 +7,7 @@ using FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
 using FitSyncHub.Zwift.Options;
 using FitSyncHub.Zwift.Providers;
 using FitSyncHub.Zwift.Providers.Abstractions;
+using FitSyncHub.Zwift.Sauce;
 using FitSyncHub.Zwift.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,6 +46,8 @@ public static class ZwiftModule
 
             services.AddScoped<ZwiftWorldsXmlFilesProvider>();
             services.AddScoped<ZwiftWadDecoder>();
+
+            services.AddScoped<ZwiftSauceService>();
 
             services.AddScoped<ZwiftEventsService>();
             services.AddScoped<ZwiftGameInfoService>();
