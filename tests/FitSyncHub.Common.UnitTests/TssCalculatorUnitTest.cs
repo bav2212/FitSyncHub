@@ -28,7 +28,7 @@ public sealed class TssCalculatorUnitTest
     {
         public TssTestData()
         {
-            foreach (var activityRootDirectoryPath in Directory.EnumerateDirectories("FitData"))
+            foreach (var activityRootDirectoryPath in Directory.EnumerateDirectories("Data\\FitData"))
             {
                 var files = Directory.EnumerateFiles(activityRootDirectoryPath);
 

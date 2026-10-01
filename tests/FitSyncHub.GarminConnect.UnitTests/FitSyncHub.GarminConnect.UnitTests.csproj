@@ -31,9 +31,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Data/**/**">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+        <None Include="../../test-data/Garmin/**/*"
+              CopyToOutputDirectory="PreserveNewest"
+              LinkBase="Data" />
     </ItemGroup>
 
 </Project>

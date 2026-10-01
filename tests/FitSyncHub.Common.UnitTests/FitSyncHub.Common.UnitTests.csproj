@@ -31,9 +31,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="FitData/**/**">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+        <None Include="../../test-data/Common/**/*"
+              CopyToOutputDirectory="PreserveNewest"
+              LinkBase="Data" />
     </ItemGroup>
 
 </Project>
