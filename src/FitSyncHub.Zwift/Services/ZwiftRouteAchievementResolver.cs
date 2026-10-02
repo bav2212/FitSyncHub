@@ -25,7 +25,9 @@ public class ZwiftRouteAchievementResolver
         { "HANDFUL OF GRAVEL RUN", "HANDFUL OF GRAVEL (RUNNING)"},
         { "RICHMOND 2015 WORLDS REVERSE", "RICHMOND UCI REVERSE"},
         { "CASTLE CRIT RUN", "CASTLE CRIT (RUNNING)"},
-        { "PEAKY PAVÉ", "PEAKY PAVE"}
+        { "PEAKY PAVÉ", "PEAKY PAVE"},
+        { "CLASSIQUE", "LONDON CLASSIQUE"},
+        { "CLASSIQUE REVERSE", "LONDON CLASSIQUE REVERSE"},
     };
 
     public ZwiftRouteAchievementResolver(List<ZwiftGameInfoAchievement> achievements)
