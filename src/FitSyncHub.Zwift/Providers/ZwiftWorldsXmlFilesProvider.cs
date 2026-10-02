@@ -66,8 +66,7 @@ public class ZwiftWorldsXmlFilesProvider
         {
             var pathParts = GetRelativePathParts(filePath);
             var isWorldRelatedFilePath = pathParts.Length > 0
-                && pathParts[0].StartsWith("world", StringComparison.OrdinalIgnoreCase)
-                && s_worldIdToNameMapping.ContainsKey(pathParts[0][5..]);
+                && pathParts[0].StartsWith("world", StringComparison.OrdinalIgnoreCase);
 
             var isWorldRoadFilePath = isWorldRelatedFilePath
                 && pathParts[1] == "road.xml";
@@ -169,11 +168,23 @@ public class ZwiftWorldsXmlFilesProvider
         foreach (var filePath in Directory.EnumerateFiles(_zwiftWorldsPath,
             "*.wad", new EnumerationOptions() { RecurseSubdirectories = true }))
         {
-            var fileName = Path.GetFileName(filePath);
-
+            var pathParts = GetRelativePathParts(filePath);
+            var fileName = pathParts[^1];
             if (fileName != "data_1.wad" && fileName != "roads.wad")
             {
                 continue;
+            }
+
+            var isWorldRelatedFilePath = pathParts.Length > 0
+                && pathParts[^2].StartsWith("world", StringComparison.OrdinalIgnoreCase)
+                && pathParts[^2] != "Worlds";
+            if (isWorldRelatedFilePath)
+            {
+                var worldId = pathParts[^2][5..]; // trim "world"
+                if (!s_worldIdToNameMapping.ContainsKey(worldId))
+                {
+                    continue;
+                }
             }
 
             var hash = ComputeHash(filePath);
