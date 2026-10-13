@@ -16,24 +16,22 @@ public sealed class ZwiftSauceService
     };
 
     private readonly ZwiftWorldsXmlFilesProvider _zwiftWorldsXmlFilesProvider;
-    private readonly string _sauceRepoBasePath;
+    private readonly string _sauceDataPath;
 
     public ZwiftSauceService(ZwiftWorldsXmlFilesProvider zwiftWorldsXmlFilesProvider)
     {
         _zwiftWorldsXmlFilesProvider = zwiftWorldsXmlFilesProvider;
-        _sauceRepoBasePath = Environment.GetEnvironmentVariable("SAUCE_REPO_BASE_PATH")
-            ?? throw new InvalidOperationException("SAUCE_REPO_BASE_PATH environment variable is not set.");
+        _sauceDataPath = Environment.GetEnvironmentVariable("SAUCE_DATA_PATH")
+            ?? throw new InvalidOperationException("SAUCE_DATA_PATH environment variable is not set.");
 
     }
 
     public async Task InitializeSauceData(CancellationToken cancellationToken)
     {
-        if (!Directory.Exists(_sauceRepoBasePath))
+        if (!Directory.Exists(_sauceDataPath))
         {
-            throw new InvalidOperationException($"SAUCE_REPO_BASE_PATH '{_sauceRepoBasePath}' does not exist.");
+            throw new InvalidOperationException($"SAUCE_DATA_PATH '{_sauceDataPath}' does not exist.");
         }
-
-        var sauceDataPath = Path.Join(_sauceRepoBasePath, "shared", "deps", "data");
 
         var worldRouteFilePaths = await _zwiftWorldsXmlFilesProvider.GetWorlsXmlFilesPaths(cancellationToken);
 
@@ -49,7 +47,7 @@ public sealed class ZwiftSauceService
             var roads = ZwiftSauceRoadConverter.Convert(zwiftParsedRoad, zwiftParsedRoadStyle);
 
             var json = JsonSerializer.Serialize(roads, _jsonOptions);
-            var path = @$"{sauceDataPath}\worlds\{world.WorldId}\roads.json";
+            var path = @$"{_sauceDataPath}\worlds\{world.WorldId}\roads.json";
             await File.WriteAllTextAsync(path, json, cancellationToken);
 
             resultRoads.AddRange(roads);
@@ -68,7 +66,7 @@ public sealed class ZwiftSauceService
         }
 
         var routesJson = JsonSerializer.Serialize(result, _jsonOptions);
-        var routesPath = @$"{sauceDataPath}\routes.json";
+        var routesPath = @$"{_sauceDataPath}\routes.json";
         await File.WriteAllTextAsync(routesPath, routesJson, cancellationToken);
     }
 }

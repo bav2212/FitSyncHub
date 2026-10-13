@@ -15,7 +15,9 @@ public class ZwiftSauceDataHttpTriggerFunction
         _zwiftSauceService = zwiftSauceService;
     }
 
+#if DEBUG
     [Function(nameof(ZwiftSauceDataHttpTriggerFunction))]
+#endif
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = "sauce-data")] HttpRequest req,
         CancellationToken cancellationToken)
@@ -24,6 +26,6 @@ public class ZwiftSauceDataHttpTriggerFunction
 
         await _zwiftSauceService.InitializeSauceData(cancellationToken);
 
-        return new OkObjectResult("");
+        return new OkObjectResult("Ok");
     }
 }
