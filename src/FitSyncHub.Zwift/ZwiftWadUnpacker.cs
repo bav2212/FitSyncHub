@@ -53,7 +53,7 @@ public sealed class ZwiftWadDecoder
 
     public void Unpack(string filename, string outFolder)
     {
-        using var inFile = new FileStream(filename, FileMode.Open, FileAccess.Read);
+        using var inFile = File.OpenRead(filename);
         using var temp = new MemoryStream();
 
         Decode(inFile, temp);
