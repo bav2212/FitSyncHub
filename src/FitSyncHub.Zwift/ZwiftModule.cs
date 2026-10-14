@@ -2,7 +2,6 @@
 using FitSyncHub.Zwift.Auth;
 using FitSyncHub.Zwift.Auth.Abstractions;
 using FitSyncHub.Zwift.HttpClients;
-using FitSyncHub.Zwift.HttpClients.Abstractions;
 using FitSyncHub.Zwift.HttpClients.DelegatingHandlers;
 using FitSyncHub.Zwift.Options;
 using FitSyncHub.Zwift.Providers;
@@ -65,8 +64,6 @@ public static class ZwiftModule
             ConfigureZwiftHttpClient(services);
 
             services.AddScoped<ZwiftRacingService>();
-            services.AddHttpClient<IFlammeRougeRacingHttpClient, FlammeRougeRacingHttpClient>();
-            services.Decorate<IFlammeRougeRacingHttpClient, FlammeRougeRacingHttpClientCached>();
 
             services.AddTransient<ZwiftRacingAuthDelegatingHandler>();
             services.AddHttpClient<ZwiftRacingHttpClient>(client => client.BaseAddress = new Uri("https://www.zwiftracing.app"))

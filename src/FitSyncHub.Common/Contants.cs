@@ -10,6 +10,5 @@ public static class Constants
         public const string ZwiftAuthTokenModel = "zwift-auth-token-model";
         public const string GarminDiTokenModel = "garmin-di-token-model";
         public const string ZwiftRacingAuthCookie = "zwift-racing-auth-cookie";
-        public const string FlammeRougeRacingTourRegisteredRiderIdsPrefix = "frr-tour-registered-rider-ids";
     }
 }
