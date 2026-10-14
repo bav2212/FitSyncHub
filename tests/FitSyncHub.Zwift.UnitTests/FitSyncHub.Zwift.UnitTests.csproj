@@ -13,13 +13,13 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
         <PackageReference Include="Moq" Version="4.21.0" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
+        <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="xunit.v3" Version="4.0.1" />
+        <PackageReference Include="xunit.v3" Version="4.0.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -27,9 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="../../test-data/Zwift/**/*"
-              CopyToOutputDirectory="PreserveNewest"
-              LinkBase="Data" />
+        <None Include="../../test-data/Zwift/**/*" CopyToOutputDirectory="PreserveNewest" LinkBase="Data" />
     </ItemGroup>
 
     <ItemGroup>

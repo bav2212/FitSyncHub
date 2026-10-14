@@ -10,8 +10,8 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.9.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="3.1.2" />
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.10.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="3.2.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.52.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.51.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.CosmosDB" Version="4.16.1" />
@@ -20,8 +20,8 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.OpenTelemetry" Version="1.2.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Cosmos" Version="1.8.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.12" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="4.15.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.16.1" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
     <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
