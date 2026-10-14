@@ -1,4 +1,5 @@
-﻿using FitSyncHub.IntervalsICU.Models;
+﻿using FitSyncHub.Common.Extensions;
+using FitSyncHub.IntervalsICU.Models;
 using HtmlAgilityPack;
 
 namespace FitSyncHub.IntervalsICU.Services;
@@ -47,19 +48,20 @@ public class WhatsOnZwiftScraperService
             .ToList()
             ?? throw new InvalidDataException("No view workout buttons found");
 
-        return viewWorkoutButtons
-            .ConvertAll(x => x.Attributes["href"].Value);
+        return [.. viewWorkoutButtons
+            .Select(x => x.Attributes["href"]?.Value)
+            .WhereNotNull()];
     }
 
     private static IEnumerable<string> ParseNameSegments(HtmlDocument htmlPageDoc)
     {
-        var breadcrumbs = htmlPageDoc.DocumentNode
-            .SelectSingleNode("//nav[@aria-label=\"Breadcrumbs\"]") ?? throw new InvalidDataException("No breadcrumbs containers");
+        var breadcrumbs = htmlPageDoc.DocumentNode.SelectSingleNode("//nav[@aria-label=\"Breadcrumbs\"]")
+            ?? throw new InvalidDataException("No breadcrumbs containers");
 
         var breadcrumbSegments = breadcrumbs.InnerText
             .Replace("\n", "")
             .Split("&raquo;", StringSplitOptions.TrimEntries)
-            .Select(x => HtmlEntity.DeEntitize(x)!);
+            .Select(x => HtmlEntity.DeEntitize(x));
 
         return breadcrumbSegments.Skip(1);
     }

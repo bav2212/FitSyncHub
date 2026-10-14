@@ -22,12 +22,10 @@ public sealed class ZwiftRoadStyleXmlModelUnitTest
     public void DeserializesRoadStyleWorld(string roadFilePath)
     {
         ZwiftXmlObjectRoadStyleRoot roadStyle;
-#pragma warning disable IDE0063 // Use simple 'using' statement
         using (var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadStyleRoot>())
         {
             roadStyle = rootParser.Parse(roadFilePath);
         }
-#pragma warning restore IDE0063 // Use simple 'using' statement
 
         Assert.NotNull(roadStyle.Version);
         Assert.Equal(1u, roadStyle.Version.Value);

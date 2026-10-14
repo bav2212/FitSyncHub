@@ -9,6 +9,5 @@ public static class Constants
         public const string XertOauth2TokenModel = "xert-oauth2-token-model";
         public const string ZwiftAuthTokenModel = "zwift-auth-token-model";
         public const string GarminDiTokenModel = "garmin-di-token-model";
-        public const string ZwiftRacingAuthCookie = "zwift-racing-auth-cookie";
     }
 }

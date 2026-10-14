@@ -12,7 +12,7 @@ public static class FormDataContentHelper
         TValue value,
         JsonTypeInfo<TValue> jsonTypeInfo) where TValue : IFormDataValue
     {
-        var serializedObject = JsonSerializer.Serialize(value, jsonTypeInfo)!;
+        var serializedObject = JsonSerializer.Serialize(value, jsonTypeInfo);
         var jsonDocument = JsonDocument.Parse(serializedObject);
 
         var formData = new MultipartFormDataContent

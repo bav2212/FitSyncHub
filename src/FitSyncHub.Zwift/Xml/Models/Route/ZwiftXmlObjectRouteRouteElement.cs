@@ -10,7 +10,7 @@ public sealed class ZwiftXmlObjectRouteRouteElement
     public required string Name
     {
         get;
-        set => field = value!.Trim();
+        set => field = value.Trim();
     }
 
     [XmlAttribute("eventPaddocks")]

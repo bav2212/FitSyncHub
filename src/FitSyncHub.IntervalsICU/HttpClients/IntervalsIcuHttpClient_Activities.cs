@@ -31,7 +31,7 @@ public partial class IntervalsIcuHttpClient
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return [.. FilterStravaActivitiesAndDeserialize(content)];
     }
@@ -122,7 +122,7 @@ public partial class IntervalsIcuHttpClient
         foreach (var jsonObject in jsonDocument.RootElement.EnumerateArray())
         {
             var activitySource = jsonObject.GetProperty("source")
-                .Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivitySource)!;
+                .Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivitySource);
             if (activitySource == ActivitySource.Strava)
             {
                 // return null for strava activities, but we need it in pagination
@@ -130,7 +130,7 @@ public partial class IntervalsIcuHttpClient
                 continue;
             }
 
-            yield return jsonObject.Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse)!;
+            yield return jsonObject.Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse);
         }
     }
 }

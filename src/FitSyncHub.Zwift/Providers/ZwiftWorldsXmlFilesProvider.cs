@@ -138,7 +138,7 @@ public class ZwiftWorldsXmlFilesProvider
 
         return new ZwiftXmlFilesModel
         {
-            Worlds = worldsDictionary.Values.ToList(),
+            Worlds = [.. worldsDictionary.Values],
             ClimbPortalRoads = climbPortalRoads
         };
     }
@@ -239,7 +239,6 @@ public sealed record ZwiftXmlFilesWorldData
     public ZwiftXmlFilesRoadItem Road { get; set; } = null!;
     public ZwiftXmlFilesRoadItem RoadStyle { get; set; } = null!;
     public required List<ZwiftXmlFilesRoadItem> RegularRoutes { get; set; }
-
 }
 
 public sealed record ZwiftXmlFilesRoadItem

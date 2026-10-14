@@ -39,7 +39,6 @@ HashSet<string> functionsCalledByUser = [
     nameof(ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction),
     nameof(ZwiftProfilesSearchHttpTriggerFunction),
     nameof(ZwiftEventsWithPreselectedBikeHttpTriggerFunction),
-    nameof(ZwiftEventVELORatingHttpTriggerFunction),
     nameof(ZwiftUncompletedAchievementsHttpTriggerFunction),
     nameof(YoutubeRedirectToLiveChatHttpTriggerFunction),
 ];
