@@ -10,10 +10,33 @@ namespace FitSyncHub.Zwift.UnitTests;
 
 public sealed class ZwiftSauceRouteConverterUnitTest
 {
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver
+        {
+            Modifiers =
+            {
+                static typeInfo =>
+                {
+                    if (typeInfo.Kind != JsonTypeInfoKind.Object)
+                    {
+                        return;
+                    }
+
+                    foreach (var propertyInfo in typeInfo.Properties)
+                    {
+                        propertyInfo.IsRequired = false;
+                    }
+                }
+            }
+        }
+    };
+
     [Theory]
     [ClassData(typeof(TestData))]
     public async Task ManifestConversion_WorkCorrectly(
-        uint worldId, string xmlPath, ZwiftSauceRouteManifest[] expectedManifest)
+        uint worldId, string xmlPath, string expectedManifestJson)
     {
         using var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRouteRoot>();
         var zwiftInGameRoot = rootParser.Parse(xmlPath);
@@ -22,35 +45,13 @@ public sealed class ZwiftSauceRouteConverterUnitTest
             .Convert(zwiftInGameRoot, worldId)
             .Manifest;
 
+        var expectedManifest = JsonSerializer.Deserialize<ZwiftSauceRouteManifest[]>(expectedManifestJson, _jsonSerializerOptions);
+
         Assert.Equivalent(expectedManifest, actual);
     }
 
-    private sealed class TestData : TheoryData<uint, string, ZwiftSauceRouteManifest[]>
+    private sealed class TestData : TheoryData<uint, string, string>
     {
-        private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            {
-                Modifiers =
-                {
-                    static typeInfo =>
-                    {
-                        if (typeInfo.Kind != JsonTypeInfoKind.Object)
-                        {
-                            return;
-                        }
-
-                        foreach (var propertyInfo in typeInfo.Properties)
-                        {
-                            // Strip IsRequired constraint from every property.
-                            propertyInfo.IsRequired = false;
-                        }
-                    }
-                }
-            }
-        };
-
         public TestData()
         {
             var routesJsonPath = @"Data\Sauce\routes.json";
@@ -58,21 +59,21 @@ public sealed class ZwiftSauceRouteConverterUnitTest
 
             var rootElement = JsonDocument.Parse(jsonRaw);
 
-            Dictionary<long, ZwiftSauceRouteManifest[]> sauceRouteManifests = [];
+            Dictionary<long, string> sauceRouteManifestJsons = [];
             foreach (var routeItem in rootElement.RootElement.EnumerateArray())
             {
                 var routeId = routeItem.GetProperty("id").GetInt64();
-                var expectedRouteManifests = routeItem.GetProperty("manifest").Deserialize<ZwiftSauceRouteManifest[]>(_jsonSerializerOptions)!;
+                var expectedRouteManifestJson = routeItem.GetProperty("manifest").GetRawText();
 
-                sauceRouteManifests[routeId] = expectedRouteManifests;
+                sauceRouteManifestJsons[routeId] = expectedRouteManifestJson;
             }
 
             var zwiftRoutePaths = Directory.EnumerateFiles(@"Data\Zwift\Worlds", "routes*.xml",
                 new EnumerationOptions() { RecurseSubdirectories = true }).ToArray();
 
-            if (sauceRouteManifests.Count != zwiftRoutePaths.Length)
+            if (sauceRouteManifestJsons.Count != zwiftRoutePaths.Length)
             {
-                throw new InvalidOperationException($"The number of route manifests ({sauceRouteManifests.Count}) does not match the number of route XML files ({zwiftRoutePaths.Length}).");
+                throw new InvalidOperationException($"The number of route manifests ({sauceRouteManifestJsons.Count}) does not match the number of route XML files ({zwiftRoutePaths.Length}).");
             }
 
             foreach (var zwiftRoutefilePath in zwiftRoutePaths)
@@ -106,7 +107,7 @@ public sealed class ZwiftSauceRouteConverterUnitTest
                     }
                 }
 
-                Add(worldId, zwiftRoutefilePath, sauceRouteManifests[routeId]);
+                Add(worldId, zwiftRoutefilePath, sauceRouteManifestJsons[routeId]);
             }
         }
     }
