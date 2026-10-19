@@ -50,14 +50,39 @@ public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
         }
 
         string? fromQueryParameter = req.Query["from"];
-        var from = DateOnly.TryParse(fromQueryParameter, out var fromDateOnly)
-            ? new DateTimeOffset(new DateTime(fromDateOnly, TimeOnly.MinValue))
-            : DateTimeOffset.UtcNow;
+        DateTimeOffset from;
+        if (string.IsNullOrWhiteSpace(fromQueryParameter))
+        {
+            from = DateTimeOffset.UtcNow;
+        }
+        else if (DateOnly.TryParseExact(fromQueryParameter, "yyyy-MM-dd", out var fromDateOnly))
+        {
+            from = new DateTimeOffset(new DateTime(fromDateOnly, TimeOnly.MinValue));
+        }
+        else
+        {
+            return new BadRequestObjectResult("Can not parse 'from' date");
+        }
 
         string? toQueryParameter = req.Query["to"];
-        var to = DateOnly.TryParse(toQueryParameter, out var toDateOnly)
-            ? new DateTimeOffset(new DateTime(toDateOnly, TimeOnly.MaxValue))
-            : from.AddDays(7);
+        DateTimeOffset to;
+        if (string.IsNullOrWhiteSpace(toQueryParameter))
+        {
+            to = from.AddDays(7);
+        }
+        else if (DateOnly.TryParseExact(toQueryParameter, "yyyy-MM-dd", out var toDateOnly))
+        {
+            to = new DateTimeOffset(new DateTime(toDateOnly, TimeOnly.MaxValue));
+        }
+        else
+        {
+            return new BadRequestObjectResult("Can not parse 'to' date");
+        }
+
+        if (to < from)
+        {
+            return new BadRequestObjectResult("'to' should be bigger then 'from'");
+        }
 
         string? forceQueryParameter = req.Query["force"];
         var force = bool.TryParse(forceQueryParameter, out var parsedForce) && parsedForce;
