@@ -74,7 +74,7 @@ public sealed record ZwiftSauceRoute
     public required uint? Xp { get; set; }
     [JsonConverter(typeof(BoolAsNumberConverter))]
     public required bool ZwiftEventOnly { get; set; }
-    public required int CourseId { get; set; }
+    public required uint CourseId { get; set; }
     public required ZwiftSauceRouteArch[] Arches { get; set; }
     public required ZwiftSauceRouteSegment[] Segments { get; set; }
 }
