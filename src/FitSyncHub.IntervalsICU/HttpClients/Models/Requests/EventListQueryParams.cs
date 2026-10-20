@@ -17,4 +17,11 @@ public sealed record EventListQueryParams
     public DateOnly Newest { get; }
     public EventCategory[]? Category { get; init; }
     public int? Limit { get; init; }
+    public int? CalendarId { get; init; }
+    public string? Ext { get; init; }
+    public double? PowerRange { get; init; }
+    public double? HrRange { get; init; }
+    public double? PaceRange { get; init; }
+    public string? Locale { get; init; }
+    public bool? Resolve { get; init; }
 }

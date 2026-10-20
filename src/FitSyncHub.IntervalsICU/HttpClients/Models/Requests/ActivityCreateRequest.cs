@@ -6,6 +6,7 @@ public sealed record ActivityCreateRequest : IFormDataValue
 {
     public string? Name { get; init; }
     public string? Description { get; init; }
+    public string? DeviceName { get; init; }
     public string? ExternalId { get; init; }
     public int? PairedEventId { get; init; }
 }

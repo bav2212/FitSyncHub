@@ -36,6 +36,41 @@ public partial class IntervalsIcuHttpClient
             queryParams.Add("limit", query.Limit.Value.ToString());
         }
 
+        if (query.CalendarId.HasValue)
+        {
+            queryParams.Add("calendar_id", query.CalendarId.Value.ToString());
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Ext))
+        {
+            queryParams.Add("ext", query.Ext);
+        }
+
+        if (query.PowerRange.HasValue)
+        {
+            queryParams.Add("powerRange", query.PowerRange.Value.ToString());
+        }
+
+        if (query.HrRange.HasValue)
+        {
+            queryParams.Add("hrRange", query.HrRange.Value.ToString());
+        }
+
+        if (query.PaceRange.HasValue)
+        {
+            queryParams.Add("paceRange", query.PaceRange.Value.ToString());
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Locale))
+        {
+            queryParams.Add("locale", query.Locale);
+        }
+
+        if (query.Resolve.HasValue)
+        {
+            queryParams.Add("resolve", query.Resolve.Value.ToString());
+        }
+
         var requestUri = QueryHelpers.AddQueryString($"{AthleteBaseUrl}/events", queryParams);
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
@@ -103,7 +138,7 @@ public partial class IntervalsIcuHttpClient
     }
 
     public async Task DeleteEvent(
-        EventDeleteRequest model,
+        EventDeleteQueryParams model,
         CancellationToken cancellationToken)
     {
         var queryParams = new Dictionary<string, StringValues>()
