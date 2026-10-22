@@ -13,6 +13,41 @@ public sealed class ZwiftGameInfoService
     private readonly ZwiftHttpClient _zwiftHttpClient;
     private readonly IZwiftRoutesProvider _zwiftRoutesProvider;
     private readonly ILogger<ZwiftGameInfoService> _logger;
+    private readonly HashSet<long> _knownCyclingRouteIdsWithoutAchievements = [
+        2843604888,  //  Bologna-Bologna Time Trial
+        2875658892,  //  Crit City-The Bell Lap
+        2136907048,  //  France-France Classic Fondo
+        4149936043,  //  France-Climb Portal-Mont Saint-Michel
+        3101693166,  //  Innsbruck-InnsbruckConti
+        474781994,   //  London-Greater London Loop Reverse
+        1230300449,  //  London-Leith Hill After Party
+        1788889233,  //  London-London Loop Reverse
+        2165880404,  //  London-London 8 Reverse
+        3569674525,  //  London-Keith Hill After Party
+        3976402826,  //  London-Greatest London Loop Reverse
+        352245150,   //  New York-Gotham Grind Reverse
+        1763213625,  //  New York-The Highline Reverse
+        2436095601,  //  New York-2022 Cycling Esports World Championships Route
+        3687251774,  //  New York-Grand Central Circuit Reverse
+        3774003351,  //  New York-LaGuardia Loop Reverse
+        4194352271,  //  Richmond-Cobbled Climbs Reverse
+        242381847,   //  Watopia-Zwift Gran Fondo
+        387309391,   //  Watopia-Volcano Climb After Party
+        1327147942,  //  Watopia-Zwift Gran Fondo 2022
+        1397026382,  //  Watopia-Volcano Flat Reverse
+        2218409282,  //  Watopia-WBR Climbing Series
+        2681889340,  //  Watopia-Climb Portal -Volcano
+        2900074211,  //  Watopia-Zwift Medio Fondo 2022
+        2967612381,  //  Watopia-Road To Ruins Reverse
+        3030004732,  //  Watopia-Power to the Portal
+        3368626651,  //  Watopia-Zwift Bambino Fondo 2022
+        3621162212,  //  Watopia-Zwift Bambino Fondo
+        3748780161,  //  Watopia-Zwift Medio Fondo
+        3811569265,  //  Watopia-Flat Route Reverse
+        4107844490,  //  Watopia-Big Loop Reverse
+        4263172118,  //  Watopia-Three Sisters Reverse
+        620436060,   //  Yorkshire-Harrogate Circuit Reverse
+    ];
 
     public ZwiftGameInfoService(
         ZwiftHttpClient zwiftHttpClient,
@@ -36,11 +71,23 @@ public sealed class ZwiftGameInfoService
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
         var userAchievements = (await _zwiftHttpClient.GetPlayerAchievements(cancellationToken)).ToHashSet();
 
-        var routesWithUncompletedAchievementsDictionary = zwiftAchievementsResolver
+        var mappedCyclingRoutesToRouteAchievements = zwiftAchievementsResolver
             .MapRoutesToRouteAchievements(routes)
             // filter only cycling routes
-            .Where(x => x.Key.Sports.Contains(ZwiftGameInfoSport.Cycling)
-                && x.Value is not null && !userAchievements.Contains(x.Value.Id))
+            .Where(x => x.Key.Sports.Contains(ZwiftGameInfoSport.Cycling))
+            .ToList();
+
+        var routesWithUncompletedAchievementsDictionary = mappedCyclingRoutesToRouteAchievements
+            .Where(x =>
+            {
+                var isNewRouteCouldPotentialyHaveArchievement = x.Value is null
+                    && !_knownCyclingRouteIdsWithoutAchievements.Contains(x.Key.Id);
+
+                var routeWithUncompletedAchievements = x.Value is not null
+                    && !userAchievements.Contains(x.Value.Id);
+
+                return isNewRouteCouldPotentialyHaveArchievement || routeWithUncompletedAchievements;
+            })
             .Select(x => x.Key)
             .ToDictionary(x => x.Id, x => x);
 
