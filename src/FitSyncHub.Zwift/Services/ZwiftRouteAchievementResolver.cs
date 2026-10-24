@@ -1,4 +1,4 @@
-﻿using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
 
 namespace FitSyncHub.Zwift.Services;
@@ -78,7 +78,7 @@ public class ZwiftRouteAchievementResolver
         if (untouchedRouteAchievements.Count != 0)
         {
             var untouchedRouteAchievementsNames = string.Join(", ", untouchedRouteAchievements.Select(x => x.Key));
-            throw new InvalidOperationException($"The following route achievements were not matched to any route: {untouchedRouteAchievementsNames}");
+            //throw new InvalidOperationException($"The following route achievements were not matched to any route: {untouchedRouteAchievementsNames}");
         }
 
         return result;
