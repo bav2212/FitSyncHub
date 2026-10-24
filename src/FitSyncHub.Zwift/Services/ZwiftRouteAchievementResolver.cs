@@ -1,4 +1,4 @@
-using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
+﻿using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
 
 namespace FitSyncHub.Zwift.Services;
@@ -30,6 +30,12 @@ public class ZwiftRouteAchievementResolver
         { "CLASSIQUE REVERSE", "LONDON CLASSIQUE REVERSE"},
     };
 
+    public ZwiftRouteAchievementResolver(List<ZwiftGameInfoAchievement> achievements, bool throwOnUntouchedRouteAchievements)
+        : this(achievements)
+    {
+        ThrowOnUntouchedRouteAchievements = throwOnUntouchedRouteAchievements;
+    }
+
     public ZwiftRouteAchievementResolver(List<ZwiftGameInfoAchievement> achievements)
     {
         var isRouteAchievementsLookup = achievements
@@ -41,6 +47,7 @@ public class ZwiftRouteAchievementResolver
 
     public List<ZwiftGameInfoAchievement> RouteAchievements { get; }
     public List<ZwiftGameInfoAchievement> GeneralAchievements { get; }
+    public bool ThrowOnUntouchedRouteAchievements { get; }
 
     public Dictionary<ZwiftRouteModel, ZwiftGameInfoAchievement?> MapRoutesToRouteAchievements(
         List<ZwiftRouteModel> routes)
@@ -75,10 +82,10 @@ public class ZwiftRouteAchievementResolver
             .Where(x => !touchedRouteAchievementsKeys.Contains(x.Key))
             .ToList();
 
-        if (untouchedRouteAchievements.Count != 0)
+        if (untouchedRouteAchievements.Count != 0 && ThrowOnUntouchedRouteAchievements)
         {
             var untouchedRouteAchievementsNames = string.Join(", ", untouchedRouteAchievements.Select(x => x.Key));
-            //throw new InvalidOperationException($"The following route achievements were not matched to any route: {untouchedRouteAchievementsNames}");
+            throw new InvalidOperationException($"The following route achievements were not matched to any route: {untouchedRouteAchievementsNames}");
         }
 
         return result;

@@ -4,6 +4,7 @@ using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Providers.Abstractions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Services;
@@ -13,6 +14,7 @@ public sealed class ZwiftGameInfoService
     private readonly ZwiftHttpClient _zwiftHttpClient;
     private readonly IZwiftRoutesProvider _zwiftRoutesProvider;
     private readonly ILogger<ZwiftGameInfoService> _logger;
+    private readonly bool _isDevelopment;
     private readonly HashSet<long> _knownCyclingRouteIdsWithoutAchievements = [
         2843604888,  //  Bologna-Bologna Time Trial
         2875658892,  //  Crit City-The Bell Lap
@@ -52,11 +54,13 @@ public sealed class ZwiftGameInfoService
     public ZwiftGameInfoService(
         ZwiftHttpClient zwiftHttpClient,
         IZwiftRoutesProvider zwiftRoutesProvider,
-        ILogger<ZwiftGameInfoService> logger)
+        ILogger<ZwiftGameInfoService> logger,
+        IHostEnvironment hostingEnvironment)
     {
         _zwiftHttpClient = zwiftHttpClient;
         _zwiftRoutesProvider = zwiftRoutesProvider;
         _logger = logger;
+        _isDevelopment = hostingEnvironment.IsDevelopment();
     }
 
     public async Task<Dictionary<ZwiftRouteModel, List<ZwiftEventResponse>>> GetUncompletedRouteToEventsMappingAchievements(
@@ -66,7 +70,7 @@ public sealed class ZwiftGameInfoService
     {
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
 
-        var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements);
+        var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements, _isDevelopment);
 
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
         var userAchievements = (await _zwiftHttpClient.GetPlayerAchievements(cancellationToken)).ToHashSet();
@@ -152,7 +156,7 @@ public sealed class ZwiftGameInfoService
         var profileMe = await _zwiftHttpClient.GetProfileMe(cancellationToken);
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
 
-        var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements);
+        var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements, _isDevelopment);
 
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
         var userAchievements = (await _zwiftHttpClient.GetPlayerAchievements(cancellationToken)).ToHashSet();
