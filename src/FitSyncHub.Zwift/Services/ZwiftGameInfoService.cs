@@ -101,16 +101,22 @@ public sealed class ZwiftGameInfoService
             To = to,
         }, cancellationToken);
 
-        var eventsToRouteMapping = events
+
+        var eventsRouteIdToEventDictionary = events
+            .SelectMany(e => e.EventSubgroups.Select(es => new { es.RouteId, e, }))
+            .GroupBy(x => x.RouteId)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.e).DistinctBy(x => x.Id).ToList());
+
+        var eventsToRouteMapping = eventsRouteIdToEventDictionary
             .Join(routesWithUncompletedAchievementsDictionary,
-                x => x.RouteId,
                 x => x.Key,
-                (@event, route) => new { Event = @event, Route = route.Value })
+                x => x.Key,
+                (eventKV, routeKV) => new { Events = eventKV.Value, Route = routeKV.Value })
             .ToList();
 
         return eventsToRouteMapping
             .GroupBy(x => x.Route)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.Event).ToList());
+            .ToDictionary(g => g.Key, g => g.SelectMany(x => x.Events).ToList());
     }
 
     public async Task<List<ZwiftEventWithPreselectedBikeTuple>> GetZwiftEventsWithPreselectedBike(
@@ -133,18 +139,22 @@ public sealed class ZwiftGameInfoService
         List<ZwiftEventWithPreselectedBikeTuple> result = [];
         foreach (var @event in events)
         {
-            var bikeFrame = @event.BikeHash is not null && bikeFramesDictionary.TryGetValue(@event.BikeHash.Value, out var value1)
-                ? value1
-                : null;
-
-            var routeInfo = routesDictionary[@event.RouteId];
-
-            result.Add(new()
+            foreach (var eventSubgroup in @event.EventSubgroups)
             {
-                Event = @event,
-                BikeFrame = bikeFrame,
-                Route = routeInfo,
-            });
+                var bikeFrame = eventSubgroup.BikeHash is not null && bikeFramesDictionary.TryGetValue(eventSubgroup.BikeHash.Value, out var value1)
+                    ? value1
+                    : null;
+
+                var routeInfo = routesDictionary[eventSubgroup.RouteId];
+
+                result.Add(new()
+                {
+                    EventId = @event.Id,
+                    EventSubgroup = eventSubgroup,
+                    BikeFrame = bikeFrame,
+                    Route = routeInfo,
+                });
+            }
         }
 
         return result;
@@ -208,7 +218,8 @@ public sealed record MappedUncompletedAchievementsModel
 
 public sealed record ZwiftEventWithPreselectedBikeTuple
 {
-    public required ZwiftEventResponse Event { get; init; }
+    public required long EventId { get; init; }
+    public required ZwiftEventSubgroupResponse EventSubgroup { get; init; }
     public required ZwiftGameInfoBikeFrame? BikeFrame { get; init; }
     public required ZwiftRouteModel Route { get; init; }
 }

@@ -91,51 +91,54 @@ public sealed class ZwiftEventsWithPreselectedBikeHttpTriggerFunction
             yield return new ZwiftEventsWithPreselectedBikeResponse
             {
                 BikeFrame = bikeFrame.Name,
-                Events = [.. item.Select(x =>
-                {
-                    var e = x.Event;
-                    var route = x.Route;
-
-                    var eventStartTime = TimeZoneInfo.ConvertTimeFromUtc(e.EventStart, timezone);
-                    var eventStartOffset = new DateTimeOffset(eventStartTime, timezone.GetUtcOffset(e.EventStart));
-
-                    double distanceImMeters;
-                    double? elevation;
-                    // can be null or 0
-                    if (e.Laps is { } eventLaps && eventLaps > 0)
+                Events = [.. item
+                    .Select(x =>
                     {
-                        distanceImMeters = route.LeadinDistanceInMeters + (route.DistanceInMeters * eventLaps);
-                        elevation = route.LeadinAscentInMeters + (route.AscentInMeters * eventLaps);
-                    }
-                    // can be null or 0
-                    else if (e.DistanceInMeters is { } eventDistanceInMeters && eventDistanceInMeters > 0)
-                    {
-                        distanceImMeters = eventDistanceInMeters;
-                        elevation = default;
-                    }
-                    else
-                    {
-                        distanceImMeters = route.TotalDistanceInMeters;
-                        elevation = route.TotalAscentInMeters;
-                    }
+                        var eventSubgroup = x.EventSubgroup;
+                        var route = x.Route;
 
-                    var item = new ZwiftEventsWithPreselectedBikeEventItem
-                    {
-                        EventStart = eventStartOffset,
-                        EventName = e.Name,
-                        Id = e.Id,
-                        RouteName = route.Name,
-                        Distance = Math.Round(distanceImMeters / 1000.0, 1),
-                        Elevation = elevation is null ? null : Math.Round(elevation.Value),
-                    };
+                        var eventStartTime = TimeZoneInfo.ConvertTimeFromUtc(eventSubgroup.EventSubgroupStart, timezone);
+                        var eventStartOffset = new DateTimeOffset(eventStartTime, timezone.GetUtcOffset(eventSubgroup.EventSubgroupStart));
 
-                    if (e.DurationInSeconds > 0)
-                    {
-                        item = item with { DurationInSeconds = e.DurationInSeconds };
-                    }
+                        double distanceImMeters;
+                        double? elevation;
+                        // can be null or 0
+                        if (eventSubgroup.Laps is { } eventLaps && eventLaps > 0)
+                        {
+                            distanceImMeters = route.LeadinDistanceInMeters + (route.DistanceInMeters * eventLaps);
+                            elevation = route.LeadinAscentInMeters + (route.AscentInMeters * eventLaps);
+                        }
+                        // can be null or 0
+                        else if (eventSubgroup.DistanceInMeters is { } eventDistanceInMeters && eventDistanceInMeters > 0)
+                        {
+                            distanceImMeters = eventDistanceInMeters;
+                            elevation = default;
+                        }
+                        else
+                        {
+                            distanceImMeters = route.TotalDistanceInMeters;
+                            elevation = route.TotalAscentInMeters;
+                        }
 
-                    return item;
-                })]
+                        var item = new ZwiftEventsWithPreselectedBikeEventItem
+                        {
+                            EventStart = eventStartOffset,
+                            EventName = eventSubgroup.Name,
+                            Id = x.EventId,
+                            RouteName = route.Name,
+                            Distance = Math.Round(distanceImMeters / 1000.0, 1),
+                            Elevation = elevation is null ? null : Math.Round(elevation.Value),
+                        };
+
+                        if (eventSubgroup.DurationInSeconds > 0)
+                        {
+                            item = item with { DurationInSeconds = eventSubgroup.DurationInSeconds };
+                        }
+
+                        return item;
+                    })
+                    .DistinctBy(x => new { x.Id, x.RouteName})
+                ]
             };
         }
     }
