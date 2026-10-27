@@ -36,15 +36,21 @@ public sealed class ZwiftSauceService
         var worldRouteFilePaths = await _zwiftWorldsXmlFilesProvider.GetWorlsXmlFilesPaths(cancellationToken);
 
         using var roadParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadRoot>();
+        using var entitiesParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectEntitiesRoot>();
         using var roadStyleParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadStyleRoot>();
         List<ZwiftSauceRoad> resultRoads = [];
 
         foreach (var world in worldRouteFilePaths.Worlds)
         {
             var zwiftParsedRoad = roadParser.Parse(world.Road.FilePath);
+            var zwiftParsedEntities = entitiesParser.Parse(world.Entities.FilePath);
             var zwiftParsedRoadStyle = roadStyleParser.Parse(world.RoadStyle.FilePath);
 
-            var roads = ZwiftSauceRoadConverter.Convert(zwiftParsedRoad, zwiftParsedRoadStyle);
+            var roads = ZwiftSauceRoadConverter.Convert(
+                zwiftParsedRoad,
+                zwiftParsedEntities,
+                zwiftParsedRoadStyle,
+                world.WorldId);
 
             var json = JsonSerializer.Serialize(roads, _jsonOptions);
             var path = @$"{_sauceDataPath}\worlds\{world.WorldId}\roads.json";

@@ -71,6 +71,9 @@ public class ZwiftWorldsXmlFilesProvider
             var isWorldRoadFilePath = isWorldRelatedFilePath
                 && pathParts[1] == "road.xml";
 
+            var isWorldEntitiesFilePath = isWorldRelatedFilePath
+                && pathParts[1] == "entities.xml";
+
             var isWorldRoadStyleFilePath = isWorldRelatedFilePath
                 && pathParts[1] == "roadstyle.xml";
 
@@ -97,6 +100,15 @@ public class ZwiftWorldsXmlFilesProvider
                 if (isWorldRoadFilePath)
                 {
                     worldData.Road = new ZwiftXmlFilesRoadItem
+                    {
+                        FilePath = filePath
+                    };
+                    continue;
+                }
+
+                if (isWorldEntitiesFilePath)
+                {
+                    worldData.Entities = new ZwiftXmlFilesRoadItem
                     {
                         FilePath = filePath
                     };
@@ -237,6 +249,7 @@ public sealed record ZwiftXmlFilesWorldData
     public required uint WorldId { get; set; }
     public required string WorldName { get; set; }
     public ZwiftXmlFilesRoadItem Road { get; set; } = null!;
+    public ZwiftXmlFilesRoadItem Entities { get; set; } = null!;
     public ZwiftXmlFilesRoadItem RoadStyle { get; set; } = null!;
     public required List<ZwiftXmlFilesRoadItem> RegularRoutes { get; set; }
 }
