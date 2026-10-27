@@ -109,7 +109,7 @@ public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
             // can ride non-public events anytime, do not need to list them
             if (!route.PublicEventsOnly)
             {
-                //continue;
+                continue;
             }
 
             yield return new ZwiftEventsToCompleteRouteAchievementsResponse
