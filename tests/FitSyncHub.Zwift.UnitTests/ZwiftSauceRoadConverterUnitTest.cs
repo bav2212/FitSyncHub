@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using FitSyncHub.Zwift.Sauce;
 using FitSyncHub.Zwift.Xml;
 using FitSyncHub.Zwift.Xml.Models;
@@ -8,33 +7,8 @@ namespace FitSyncHub.Zwift.UnitTests;
 
 public sealed class ZwiftSauceRoadConverterUnitTest
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver
-        {
-            Modifiers =
-                {
-                    static typeInfo =>
-                    {
-                        if (typeInfo.Kind != JsonTypeInfoKind.Object)
-                        {
-                            return;
-                        }
-
-                        foreach (var propertyInfo in typeInfo.Properties)
-                        {
-                            // Strip IsRequired constraint from every property.
-                            propertyInfo.IsRequired = false;
-                        }
-                    }
-                }
-        }
-    };
-
-
     [Theory]
-    [ClassData(typeof(TestData))]
+    [MemberData(nameof(ZwiftSauceConverterTestData.Roads), MemberType = typeof(ZwiftSauceConverterTestData))]
     public void WorkCorrectly(
         uint worldId, string zwiftWorldRoadPath, string zwiftWorldRoadStylePath, string expectedSauceRoadPath)
     {
@@ -47,7 +21,9 @@ public sealed class ZwiftSauceRoadConverterUnitTest
         var actual = ZwiftSauceRoadConverter.Convert(worldId, parsedRoad, parsedRoadStyle);
 
         var sauceRoadJson = File.ReadAllText(expectedSauceRoadPath);
-        var sauceRoads = JsonSerializer.Deserialize<ZwiftSauceRoad[]>(sauceRoadJson, _jsonSerializerOptions)!;
+        var sauceRoads = JsonSerializer.Deserialize<ZwiftSauceRoad[]>(
+            sauceRoadJson,
+            ZwiftSauceConverterHelper.JsonSerializerOptions)!;
         var expected = sauceRoads
             .Select(road => road with { Segments = [] })
             .ToArray();
@@ -82,48 +58,4 @@ public sealed class ZwiftSauceRoadConverterUnitTest
         Assert.True(passedPercentage > 88, $"Passed styles {passedPercentage}% of tests, which is below the 88% threshold.");
     }
 
-    private sealed class TestData : TheoryData<uint, string, string, string>
-    {
-        public TestData()
-        {
-            var sauceWorldsPath = @"Data\Sauce\worlds";
-            var sauceWorldRoadPaths = Directory
-                .EnumerateFiles(sauceWorldsPath,
-                    "roads.json", new EnumerationOptions() { RecurseSubdirectories = true })
-                .ToArray();
-
-            Dictionary<uint, string> worldIdToSauceWorldRoadPath = [];
-            foreach (var sauceWorldRoadPath in sauceWorldRoadPaths)
-            {
-                var pathParts = sauceWorldRoadPath.Split(Path.DirectorySeparatorChar);
-
-                var worldId = uint.Parse(pathParts[^2]);
-                worldIdToSauceWorldRoadPath[worldId] = sauceWorldRoadPath;
-            }
-
-            var zwiftRoads = Directory.EnumerateFiles(@"Data\Zwift\Worlds", "road.xml",
-                new EnumerationOptions() { RecurseSubdirectories = true }).ToArray();
-
-            Dictionary<uint, string> worldIdToZwiftWorldRoadPath = [];
-            foreach (var zwiftRoadPath in zwiftRoads)
-            {
-                var pathParts = zwiftRoadPath.Split(Path.DirectorySeparatorChar);
-                var worldPathId = pathParts[^2]; // Adjust index as needed
-                var worldId = uint.Parse(worldPathId[5..]); // Assuming worldId is in the format "worldX"
-
-                worldIdToZwiftWorldRoadPath[worldId] = zwiftRoadPath;
-            }
-
-
-            foreach (var worldId in worldIdToSauceWorldRoadPath.Keys)
-            {
-                var zwiftRoadPath = worldIdToZwiftWorldRoadPath[worldId];
-                var sauceRoadPath = worldIdToSauceWorldRoadPath[worldId];
-
-                var roadStylePath = Path.Combine(Path.GetDirectoryName(zwiftRoadPath)!, "roadstyle.xml");
-
-                Add(worldId, zwiftRoadPath, roadStylePath, sauceRoadPath);
-            }
-        }
-    }
 }
