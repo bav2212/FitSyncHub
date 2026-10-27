@@ -1,6 +1,5 @@
-using System.Globalization;
+﻿using System.Globalization;
 using FitSyncHub.Zwift.Xml.Models;
-using FitSyncHub.Zwift.Xml.Models.Entities;
 using FitSyncHub.Zwift.Xml.Models.Road;
 
 namespace FitSyncHub.Zwift.Sauce;
@@ -8,11 +7,12 @@ namespace FitSyncHub.Zwift.Sauce;
 public class ZwiftSauceRoadConverter
 {
     public static ZwiftSauceRoad[] Convert(
+        uint worldId,
         ZwiftXmlObjectRoadRoot zwiftRoadRoot,
-        ZwiftXmlObjectEntitiesRoot zwiftEntities,
-        ZwiftXmlObjectRoadStyleRoot zwiftRoadStyleRoot,
-        uint worldId)
+        ZwiftXmlObjectRoadStyleRoot zwiftRoadStyleRoot)
     {
+        _ = worldId;
+
         var zwiftRoadStylesDictionary = zwiftRoadStyleRoot.Roads.Segments
             .Select((x, index) => new { Index = index, Style = x.Style! })
             .ToDictionary(x => x.Index, x => x.Style);
@@ -29,89 +29,11 @@ public class ZwiftSauceRoadConverter
             Path = [.. road.Entities
                 .Where(entity => entity.Type == "ENTITY_TYPE_ROADNODE" && entity.Position is not null)
                 .Select(entity => CreatePathPoint(entity))],
-            Segments = [.. CreateSegments(road, zwiftEntities.World.Entities.TimingArches, worldId)],
+            Segments = [],
             SplineType = road.SplineType ?? "CatmullRom",
             Sports = GetSports(road.AllowedSport),
             Styles = GetStyles(road, zwiftRoadStylesDictionary)
         })];
-    }
-
-    private static IEnumerable<ZwiftSauceSegment> CreateSegments(ZwiftXmlObjectRoadWorldRoadElement road,
-        IReadOnlyList<ZwiftXmlObjectEntitiesTimingArchElement> timingArches,
-        uint worldId)
-    {
-        foreach (var timingArch in timingArches.Where(arch => arch.RoadId == road.Id))
-        {
-            if (IsSegmentDirectionAvailable(timingArch, reverse: false) &&
-                (!timingArch.EnableForwardSpecified || timingArch.EnableForward))
-            {
-                yield return CreateSegment(timingArch, worldId, reverse: false);
-            }
-
-            if (IsSegmentDirectionAvailable(timingArch, reverse: true) &&
-                (!timingArch.EnableBackwardSpecified || timingArch.EnableBackward))
-            {
-                yield return CreateSegment(timingArch, worldId, reverse: true);
-            }
-        }
-    }
-
-    private static bool IsSegmentDirectionAvailable(
-        ZwiftXmlObjectEntitiesTimingArchElement timingArch,
-        bool reverse)
-    {
-        return (reverse
-                ? timingArch.OverrideNetworkHashReverseSpecified &&
-                    timingArch.ArchSegmentDistanceReverseSpecified &&
-                    timingArch.StartLineSplineTimeReverseSpecified
-                : timingArch.OverrideNetworkHashForwardSpecified &&
-                    timingArch.ArchSegmentDistanceForwardSpecified &&
-                    timingArch.StartLineSplineTimeForwardSpecified) &&
-            timingArch.RoadTimeSpecified &&
-            timingArch.ArchColorSpecified;
-    }
-
-    private static ZwiftSauceSegment CreateSegment(
-        ZwiftXmlObjectEntitiesTimingArchElement timingArch,
-        uint worldId,
-        bool reverse)
-    {
-        var id = reverse ? timingArch.OverrideNetworkHashReverse : timingArch.OverrideNetworkHashForward;
-        var name = reverse
-            ? timingArch.ArchFriendlyNameReverse ?? timingArch.ArchFriendlyName ?? timingArch.Name
-            : timingArch.ArchFriendlyName ?? timingArch.Name;
-
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new InvalidDataException("Timing arch is missing its display name.");
-        }
-
-        if (reverse && !name.EndsWith(" Reverse", StringComparison.Ordinal))
-        {
-            name += " Reverse";
-        }
-
-        var distance = reverse
-            ? timingArch.ArchSegmentDistanceReverse
-            : timingArch.ArchSegmentDistanceForward;
-        var roadStart = reverse
-            ? timingArch.StartLineSplineTimeReverse
-            : timingArch.StartLineSplineTimeForward;
-
-        return new ZwiftSauceSegment
-        {
-            ArchId = timingArch.ArchIdSpecified ? timingArch.ArchId : null,
-            Color = $"#{timingArch.ArchColor.ToString("x8", CultureInfo.InvariantCulture)}",
-            Distance = Math.Round(distance * 1000, 3),
-            GivesPowerUp = !timingArch.GivesPowerUpSpecified || timingArch.GivesPowerUp,
-            Id = id.ToString(CultureInfo.InvariantCulture),
-            Name = name,
-            Reverse = reverse,
-            RoadFinish = timingArch.RoadTime,
-            RoadId = timingArch.RoadId,
-            RoadStart = roadStart,
-            WorldId = worldId
-        };
     }
 
     private static ZwiftSauceRoadStyle[] GetStyles(

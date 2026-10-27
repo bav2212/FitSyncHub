@@ -38,25 +38,33 @@ public sealed class ZwiftSauceService
         using var roadParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadRoot>();
         using var entitiesParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectEntitiesRoot>();
         using var roadStyleParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadStyleRoot>();
-        List<ZwiftSauceRoad> resultRoads = [];
 
         foreach (var world in worldRouteFilePaths.Worlds)
         {
             var zwiftParsedRoad = roadParser.Parse(world.Road.FilePath);
-            var zwiftParsedEntities = entitiesParser.Parse(world.Entities.FilePath);
             var zwiftParsedRoadStyle = roadStyleParser.Parse(world.RoadStyle.FilePath);
 
             var roads = ZwiftSauceRoadConverter.Convert(
+                world.WorldId,
                 zwiftParsedRoad,
-                zwiftParsedEntities,
-                zwiftParsedRoadStyle,
-                world.WorldId);
+                zwiftParsedRoadStyle);
 
             var json = JsonSerializer.Serialize(roads, _jsonOptions);
             var path = @$"{_sauceDataPath}\worlds\{world.WorldId}\roads.json";
             await File.WriteAllTextAsync(path, json, cancellationToken);
+        }
 
-            resultRoads.AddRange(roads);
+        foreach (var world in worldRouteFilePaths.Worlds)
+        {
+            var zwiftParsedEntities = entitiesParser.Parse(world.Entities.FilePath);
+
+            var segments = ZwiftSauceSegmentsConverter.Convert(
+                world.WorldId,
+                zwiftParsedEntities);
+
+            var json = JsonSerializer.Serialize(segments, _jsonOptions);
+            var path = @$"{_sauceDataPath}\worlds\{world.WorldId}\segments.json";
+            await File.WriteAllTextAsync(path, json, cancellationToken);
         }
 
         using var routeParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRouteRoot>();

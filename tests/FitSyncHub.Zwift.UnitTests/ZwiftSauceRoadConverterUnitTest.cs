@@ -36,18 +36,15 @@ public sealed class ZwiftSauceRoadConverterUnitTest
     [Theory]
     [ClassData(typeof(TestData))]
     public void WorkCorrectly(
-        uint worldId, string zwiftWorldRoadPath, string zwiftWorldEntitiesPath, string zwiftWorldRoadStylePath, string expectedSauceRoadPath)
+        uint worldId, string zwiftWorldRoadPath, string zwiftWorldRoadStylePath, string expectedSauceRoadPath)
     {
         using var roadParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadRoot>();
         var parsedRoad = roadParser.Parse(zwiftWorldRoadPath);
 
-        using var entitiesParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectEntitiesRoot>();
-        var parsedEntities = entitiesParser.Parse(zwiftWorldEntitiesPath);
-
         using var roadStyleParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadStyleRoot>();
         var parsedRoadStyle = roadStyleParser.Parse(zwiftWorldRoadStylePath);
 
-        var actual = ZwiftSauceRoadConverter.Convert(parsedRoad, parsedEntities, parsedRoadStyle, worldId);
+        var actual = ZwiftSauceRoadConverter.Convert(worldId, parsedRoad, parsedRoadStyle);
 
         var sauceRoadJson = File.ReadAllText(expectedSauceRoadPath);
         var sauceRoads = JsonSerializer.Deserialize<ZwiftSauceRoad[]>(sauceRoadJson, _jsonSerializerOptions)!;
@@ -68,7 +65,7 @@ public sealed class ZwiftSauceRoadConverterUnitTest
             Assert.Equal(expected[index].SplineType, actual[index].SplineType);
             Assert.Equal(expected[index].Sports, actual[index].Sports);
             Assert.Equivalent(expected[index].Path, actual[index].Path, strict: true);
-            Assert.All(actual[index].Segments, segment => Assert.Equal(worldId, segment.WorldId));
+            Assert.Empty(actual[index].Segments);
 
             try
             {
@@ -85,50 +82,7 @@ public sealed class ZwiftSauceRoadConverterUnitTest
         Assert.True(passedPercentage > 88, $"Passed styles {passedPercentage}% of tests, which is below the 88% threshold.");
     }
 
-    [Fact]
-    public void ConvertsTimingArchToSauceSegment()
-    {
-        using var roadParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadRoot>();
-        using var entitiesParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectEntitiesRoot>();
-        using var roadStyleParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRoadStyleRoot>();
-
-        var road = roadParser.Parse(@"Data\Zwift\Worlds\world10\road.xml");
-        var entities = entitiesParser.Parse(@"Data\Zwift\Worlds\world10\entities.xml");
-        var roadStyle = roadStyleParser.Parse(@"Data\Zwift\Worlds\world10\roadstyle.xml");
-        var roads = ZwiftSauceRoadConverter.Convert(road, entities, roadStyle, worldId: 10);
-
-        var segment = Assert.Single(
-            Assert.Single(roads, item => item.Id == 26).Segments,
-            item => item.Id == "1065225773");
-
-        Assert.Equal(13, segment.ArchId);
-        Assert.Equal("#ff0000ff", segment.Color);
-        Assert.Equal(17099.699, segment.Distance);
-        Assert.False(segment.GivesPowerUp);
-        Assert.Equal("Mostly Ventoux", segment.Name);
-        Assert.False(segment.Reverse);
-        Assert.Equal(0.9923937415, segment.RoadFinish);
-        Assert.Equal(26, segment.RoadId);
-        Assert.Equal(0.5587273156, segment.RoadStart);
-        Assert.Equal(10u, segment.WorldId);
-
-        var reverseSegment = Assert.Single(
-            Assert.Single(roads, item => item.Id == 130).Segments,
-            item => item.Id == "-9223372035791775504");
-
-        Assert.Equal(9, reverseSegment.ArchId);
-        Assert.Equal("#ff00b700", reverseSegment.Color);
-        Assert.Equal(300, reverseSegment.Distance);
-        Assert.True(reverseSegment.GivesPowerUp);
-        Assert.Equal("Sprint du Cratère Reverse", reverseSegment.Name);
-        Assert.True(reverseSegment.Reverse);
-        Assert.Equal(0.8597555308, reverseSegment.RoadFinish);
-        Assert.Equal(130, reverseSegment.RoadId);
-        Assert.Equal(0.8992045065, reverseSegment.RoadStart);
-        Assert.Equal(10u, reverseSegment.WorldId);
-    }
-
-    private sealed class TestData : TheoryData<uint, string, string, string, string>
+    private sealed class TestData : TheoryData<uint, string, string, string>
     {
         public TestData()
         {
@@ -166,10 +120,9 @@ public sealed class ZwiftSauceRoadConverterUnitTest
                 var zwiftRoadPath = worldIdToZwiftWorldRoadPath[worldId];
                 var sauceRoadPath = worldIdToSauceWorldRoadPath[worldId];
 
-                var entitiesPath = Path.Combine(Path.GetDirectoryName(zwiftRoadPath)!, "entities.xml");
                 var roadStylePath = Path.Combine(Path.GetDirectoryName(zwiftRoadPath)!, "roadstyle.xml");
 
-                Add(worldId, zwiftRoadPath, entitiesPath, roadStylePath, sauceRoadPath);
+                Add(worldId, zwiftRoadPath, roadStylePath, sauceRoadPath);
             }
         }
     }
