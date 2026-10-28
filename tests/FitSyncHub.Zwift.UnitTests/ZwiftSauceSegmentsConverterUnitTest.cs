@@ -18,13 +18,13 @@ public sealed class ZwiftSauceSegmentsConverterUnitTest
         var actual = ZwiftSauceSegmentsConverter.Convert(worldId, parsedEntities);
 
         var sauceSegmentsJson = File.ReadAllText(expectedSauceSegmentsPath);
-        var expected = DeserialzizeSegments(sauceSegmentsJson).ToArray();
+        var expected = DeserializeSegments(sauceSegmentsJson).ToArray();
 
         Assert.Equal(expected.Length, actual.Length);
         Assert.Equivalent(expected, actual);
     }
 
-    private static IEnumerable<ZwiftSauceSegment> DeserialzizeSegments(string sauceSegmentsJson)
+    private static IEnumerable<ZwiftSauceSegment> DeserializeSegments(string sauceSegmentsJson)
     {
         var jsonDocument = JsonDocument.Parse(sauceSegmentsJson);
         if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array)
