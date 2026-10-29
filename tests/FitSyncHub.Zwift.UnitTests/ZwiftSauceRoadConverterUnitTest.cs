@@ -56,6 +56,6 @@ public sealed class ZwiftSauceRoadConverterUnitTest
         // temp till will get new styles test data, then we can remove this check and just assert that all styles are equal
         var passedPercentage = (double)passed / expected.Length * 100;
         Assert.True(passedPercentage > 88, $"Passed styles {passedPercentage}% of tests, which is below the 88% threshold.");
+        Console.WriteLine($"Passed: {passed} of {expected.Length} tests, {Math.Round(passedPercentage, 2)}%");
     }
-
 }

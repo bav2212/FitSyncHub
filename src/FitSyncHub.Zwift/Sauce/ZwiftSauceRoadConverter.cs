@@ -41,91 +41,54 @@ public class ZwiftSauceRoadConverter
         Dictionary<int, string> styleMapping)
     {
         var defaultStyleId = road.DefaultStyle;
-        var defaultStyle = defaultStyleId.HasValue && styleMapping.TryGetValue(defaultStyleId.Value, out var mappedDefaultStyle)
-            ? mappedDefaultStyle
-            : null;
-
-        var roadMarkers = road.Entities
-            .Where(entity => entity.Type == "ENTITY_TYPE_ROADMARKER" && entity.StyleSpecified && styleMapping.ContainsKey(entity.Style))
-            .ToList();
-
-        if (roadMarkers.Count == 0 || (defaultStyleId.HasValue && roadMarkers.All(marker => marker.Style == defaultStyleId.Value)))
-        {
-            return defaultStyle is not null && defaultStyle != "NORMAL"
-                ? [new ZwiftSauceRoadStyle { Start = -1, End = 2, Style = defaultStyle }]
-                : [];
-        }
-
-        var styleMarkers = roadMarkers
-            .Where(marker => marker.Style != defaultStyleId)
-            .Select(marker => (
-                Start: marker.RoadTime1Specified ? marker.RoadTime1 : -1,
-                End: marker.RoadTime2Specified ? marker.RoadTime2 : 2,
-                StyleId: marker.Style,
-                Style: styleMapping[marker.Style]))
-            .OrderBy(marker => marker.Start)
-            .ToList();
-
-        if (styleMarkers.Count == 0)
-        {
-            return defaultStyle is not null && defaultStyle != "NORMAL"
-                ? [new ZwiftSauceRoadStyle { Start = -1, End = 2, Style = defaultStyle }]
-                : [];
-        }
-
-        var normalizedStyles = new List<ZwiftSauceRoadStyle>();
-        for (var index = 0; index < styleMarkers.Count; index++)
-        {
-            var (Start, End, StyleId, Style) = styleMarkers[index];
-            var end = index + 1 < styleMarkers.Count
-                ? Math.Min(End, styleMarkers[index + 1].Start)
-                : End;
-
-            if (end > Start)
+        var styles = road.Entities
+            .Where(entity => entity.Type == "ENTITY_TYPE_ROADMARKER"
+                && entity.StyleSpecified
+                && styleMapping.ContainsKey(entity.Style)
+                && entity.Style != defaultStyleId)
+            .Select(entity => new ZwiftSauceRoadStyle
             {
-                normalizedStyles.Add(new ZwiftSauceRoadStyle
-                {
-                    Start = Start,
-                    End = end,
-                    Style = Style,
-                });
+                Start = entity.RoadTime1Specified ? entity.RoadTime1 : -1,
+                End = entity.RoadTime2Specified ? entity.RoadTime2 : 2,
+                Style = styleMapping[entity.Style]
+            })
+            .ToArray();
+
+        if (defaultStyleId.HasValue
+            && styleMapping.TryGetValue(defaultStyleId.Value, out var defaultStyle)
+            && defaultStyle != "NORMAL")
+        {
+            if (styles.Length == 0)
+            {
+                return [new ZwiftSauceRoadStyle { Start = -1, End = 2, Style = defaultStyle }];
             }
-        }
 
-        if (defaultStyle is not null && defaultStyle != "NORMAL" && styleMarkers.Any(marker => marker.Style != defaultStyle))
-        {
-            var cursor = -1d;
-            foreach (var marker in normalizedStyles.OrderBy(marker => marker.Start))
+            var mergedStyles = new List<ZwiftSauceRoadStyle>();
+            foreach (var style in styles.OrderBy(item => item.Start))
             {
-                if (marker.Start > cursor)
+                var previous = mergedStyles.LastOrDefault();
+                if (previous is not null
+                    && previous.Style == style.Style
+                    && style.Start <= previous.End)
                 {
-                    normalizedStyles.Add(new ZwiftSauceRoadStyle { Start = cursor, End = marker.Start, Style = defaultStyle });
+                    mergedStyles[^1] = previous with { End = Math.Max(previous.End, style.End) };
                 }
-
-                cursor = Math.Max(cursor, marker.End);
+                else
+                {
+                    mergedStyles.Add(style);
+                }
             }
 
+            var cursor = mergedStyles.Max(item => item.End);
             if (cursor < 2)
             {
-                normalizedStyles.Add(new ZwiftSauceRoadStyle { Start = cursor, End = 2, Style = defaultStyle });
+                mergedStyles.Add(new ZwiftSauceRoadStyle { Start = cursor, End = 2, Style = defaultStyle });
             }
+
+            return [.. mergedStyles.OrderBy(item => item.Start)];
         }
 
-        var mergedStyles = new List<ZwiftSauceRoadStyle>();
-        foreach (var style in normalizedStyles.OrderBy(style => style.Start))
-        {
-            var previous = mergedStyles.LastOrDefault();
-            if (previous is not null && previous.Style == style.Style && style.Start <= previous.End)
-            {
-                mergedStyles[^1] = previous with { End = Math.Max(previous.End, style.End) };
-            }
-            else
-            {
-                mergedStyles.Add(style);
-            }
-        }
-
-        return [.. mergedStyles];
+        return styles;
     }
 
     private static ZwiftSauceRoadPathPoint CreatePathPoint(ZwiftXmlObjectRoadWorldRoadEntityElement entity)
