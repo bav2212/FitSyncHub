@@ -20,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="protobuf\zwift.proto" />
+        <Protobuf Include="protobuf\*.proto" />
     </ItemGroup>
 
     <ItemGroup>

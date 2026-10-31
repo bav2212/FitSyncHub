@@ -73,7 +73,7 @@ public sealed class ZwiftGameInfoService
         var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements, _isDevelopment);
 
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
-        var userAchievements = (await _zwiftHttpClient.GetPlayerAchievements(cancellationToken)).ToHashSet();
+        var userAchievements = await GetUnlockedCoreAchievements(cancellationToken);
 
         var mappedCyclingRoutesToRouteAchievements = zwiftAchievementsResolver
             .MapRoutesToRouteAchievements(routes)
@@ -169,7 +169,7 @@ public sealed class ZwiftGameInfoService
         var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements, _isDevelopment);
 
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
-        var userAchievements = (await _zwiftHttpClient.GetPlayerAchievements(cancellationToken)).ToHashSet();
+        var userAchievements = await GetUnlockedCoreAchievements(cancellationToken);
 
         var mappedRouteAchievementsToRoutes = zwiftAchievementsResolver.MapRouteAchievementsToRoutes(routes);
 
@@ -199,6 +199,11 @@ public sealed class ZwiftGameInfoService
                 IsAchieved = userAchievements.Contains(achievement.Id)
             };
         }
+    }
+    private async Task<HashSet<int>> GetUnlockedCoreAchievements(CancellationToken cancellationToken)
+    {
+        var response = await _zwiftHttpClient.GetPlayerAchievements(cancellationToken);
+        return [.. response.Achievements_.Select(x => x.Id)];
     }
 }
 

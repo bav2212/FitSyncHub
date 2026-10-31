@@ -22,7 +22,7 @@ public sealed partial class ZwiftHttpClient
         _logger = logger;
     }
 
-    public async Task<List<int>> GetPlayerAchievements(CancellationToken cancellationToken)
+    public async Task<Achievements> GetPlayerAchievements(CancellationToken cancellationToken)
     {
         const string Url = "achievement/loadPlayerAchievements";
 
@@ -32,8 +32,20 @@ public sealed partial class ZwiftHttpClient
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
         var achievements = Achievements.Parser.ParseFrom(stream);
+        return achievements;
+    }
 
-        return [.. achievements.Achievements_.Select(x => x.Id)];
+    public async Task<LoadPlayerRouteCompletionAchievementsResponse> GetRouteCompletionAchievements(CancellationToken cancellationToken)
+    {
+        const string Url = "achievement/route-completion-achievements";
+
+        var response = await _httpClientProto.GetAsync(Url, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        var achievements = LoadPlayerRouteCompletionAchievementsResponse.Parser.ParseFrom(stream);
+        return achievements;
     }
 
     public async Task<DropInWorldList> GetDropInWorldList(CancellationToken cancellationToken)
