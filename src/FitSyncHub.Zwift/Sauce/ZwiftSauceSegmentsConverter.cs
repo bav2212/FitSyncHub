@@ -10,7 +10,7 @@ public class ZwiftSauceSegmentsConverter
         uint worldId,
         ZwiftXmlObjectEntitiesRoot zwiftEntities)
     {
-        return CreateSegments(worldId, zwiftEntities.World.Entities.TimingArches).ToArray();
+        return [.. CreateSegments(worldId, zwiftEntities.World.Entities.TimingArches)];
     }
 
     private static IEnumerable<ZwiftSauceSegment> CreateSegments(

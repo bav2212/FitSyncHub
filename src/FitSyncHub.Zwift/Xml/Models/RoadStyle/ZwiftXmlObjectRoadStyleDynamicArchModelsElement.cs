@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace FitSyncHub.Zwift.Xml.Models.RoadStyle;
-
 
 [XmlRoot("dynamicArchModels")]
 public sealed class ZwiftXmlObjectRoadStyleDynamicArchModelsElement

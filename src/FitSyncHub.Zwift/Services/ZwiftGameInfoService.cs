@@ -101,7 +101,6 @@ public sealed class ZwiftGameInfoService
             To = to,
         }, cancellationToken);
 
-
         var eventsRouteIdToEventDictionary = events
             .SelectMany(e => e.EventSubgroups.Select(es => new { es.RouteId, e, }))
             .GroupBy(x => x.RouteId)
@@ -118,7 +117,6 @@ public sealed class ZwiftGameInfoService
             .GroupBy(x => x.Route)
             .ToDictionary(g => g.Key, g => g.SelectMany(x => x.Events).ToList());
     }
-
 
     public async Task<MappedUncompletedAchievementsModel> GetAchievementsState(
         CancellationToken cancellationToken)
@@ -160,6 +158,7 @@ public sealed class ZwiftGameInfoService
             };
         }
     }
+
     private async Task<HashSet<int>> GetUnlockedCoreAchievements(CancellationToken cancellationToken)
     {
         var response = await _zwiftHttpClient.GetPlayerAchievements(cancellationToken);

@@ -55,7 +55,6 @@ public class ZwiftWorldsXmlFilesProvider
 
         await UnpackWADFiles(cancellationToken);
 
-
         var worldsDictionary = new Dictionary<long, ZwiftXmlFilesWorldData>();
         var climbPortalRoads = new List<ZwiftXmlFilesRoadItem>();
 
@@ -95,7 +94,6 @@ public class ZwiftWorldsXmlFilesProvider
                     };
                     worldsDictionary[worldId] = worldData;
                 }
-
 
                 if (isWorldRoadFilePath)
                 {

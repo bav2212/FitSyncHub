@@ -96,7 +96,6 @@ public class ZwiftSauceRouteConverter
         return zwiftSauceRoute;
     }
 
-
     private static ZwiftSauceRouteSegment[] InitSegments(ZwiftXmlObjectRouteRoot zwiftInGameRoot)
     {
         return [];

@@ -52,7 +52,6 @@ internal sealed partial class CachedOpenMeteoHttpClient : IOpenMeteoHttpClient
             EndDate = newEndDate
         };
 
-
         if (!Directory.Exists(_cacheFolderPath))
         {
             Directory.CreateDirectory(_cacheFolderPath);

@@ -15,25 +15,24 @@ public sealed class ZwiftXmlObjectEntitiesWorldElement
 
 public sealed class ZwiftXmlObjectEntitiesElement
 {
-    private static readonly XmlSerializer TimingArchSerializer = new(typeof(ZwiftXmlObjectEntitiesTimingArchElement));
+    private static readonly XmlSerializer s_timingArchSerializer = new(typeof(ZwiftXmlObjectEntitiesTimingArchElement));
     private IReadOnlyList<ZwiftXmlObjectEntitiesTimingArchElement>? _timingArches;
 
     [XmlAnyElement]
     public XmlElement[] EntityElements { get; set; } = [];
 
     [XmlIgnore]
-    public IReadOnlyList<ZwiftXmlObjectEntitiesTimingArchElement> TimingArches =>
-        _timingArches ??= EntityElements
+    public IReadOnlyList<ZwiftXmlObjectEntitiesTimingArchElement> TimingArches
+        => _timingArches ??= [.. EntityElements
             .Where(element =>
                 element.LocalName == "ent" &&
                 element.GetAttribute("type") == "ENTITY_TYPE_TIMINGARCH")
-            .Select(DeserializeTimingArch)
-            .ToArray();
+            .Select(DeserializeTimingArch)];
 
     private static ZwiftXmlObjectEntitiesTimingArchElement DeserializeTimingArch(XmlElement element)
     {
         using var reader = new XmlNodeReader(element);
-        return (ZwiftXmlObjectEntitiesTimingArchElement?)TimingArchSerializer.Deserialize(reader)
+        return (ZwiftXmlObjectEntitiesTimingArchElement?)s_timingArchSerializer.Deserialize(reader)
             ?? throw new InvalidDataException("Unable to deserialize timing-arch entity.");
     }
 }
