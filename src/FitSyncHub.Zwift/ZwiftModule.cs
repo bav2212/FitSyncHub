@@ -50,6 +50,7 @@ public static class ZwiftModule
 
             services.AddScoped<ZwiftEventsService>();
             services.AddScoped<ZwiftGameInfoService>();
+            services.AddScoped<ZwiftPreselectedBikesService>();
             services.AddScoped<ZwiftRoutesService>();
 
             services.AddHttpClient<IZwiftAuthenticator, ZwiftAuthHttpClient>(

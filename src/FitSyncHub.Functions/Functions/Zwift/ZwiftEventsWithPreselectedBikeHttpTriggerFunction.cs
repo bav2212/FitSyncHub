@@ -5,19 +5,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using static FitSyncHub.Zwift.Services.ZwiftPreselectedBikesService;
 
 namespace FitSyncHub.Functions.Functions.Zwift;
 
 public sealed class ZwiftEventsWithPreselectedBikeHttpTriggerFunction
 {
-    private readonly ZwiftGameInfoService _zwiftGameInfoService;
+    private readonly ZwiftPreselectedBikesService _zwiftPreselectedBikesService;
     private readonly ILogger<ZwiftEventsWithPreselectedBikeHttpTriggerFunction> _logger;
 
     public ZwiftEventsWithPreselectedBikeHttpTriggerFunction(
-        ZwiftGameInfoService zwiftGameInfoService,
+        ZwiftPreselectedBikesService zwiftPreselectedBikesService,
         ILogger<ZwiftEventsWithPreselectedBikeHttpTriggerFunction> logger)
     {
-        _zwiftGameInfoService = zwiftGameInfoService;
+        _zwiftPreselectedBikesService = zwiftPreselectedBikesService;
         _logger = logger;
     }
 
@@ -65,8 +66,8 @@ public sealed class ZwiftEventsWithPreselectedBikeHttpTriggerFunction
             return new BadRequestObjectResult("Date range should not exceed 7 days, set 'force'=true in query to proceed");
         }
 
-        var zwiftEventsWithPreselectedBike = await _zwiftGameInfoService
-            .GetZwiftEventsWithPreselectedBike(from, to, cancellationToken);
+        var zwiftEventsWithPreselectedBike = await _zwiftPreselectedBikesService
+            .GetEvents(from, to, cancellationToken);
 
         var result = Convert(zwiftEventsWithPreselectedBike, timezone)
             .OrderBy(x => x.BikeFrame)
@@ -76,7 +77,7 @@ public sealed class ZwiftEventsWithPreselectedBikeHttpTriggerFunction
     }
 
     private static IEnumerable<ZwiftEventsWithPreselectedBikeResponse> Convert(
-        List<ZwiftEventWithPreselectedBikeTuple> zwiftEventsWithPreselectedBike,
+        List<ZwiftEventWithPreselectedBikeResponse> zwiftEventsWithPreselectedBike,
         TimeZoneInfo timezone)
     {
         var groupedByBikeFrame = zwiftEventsWithPreselectedBike
