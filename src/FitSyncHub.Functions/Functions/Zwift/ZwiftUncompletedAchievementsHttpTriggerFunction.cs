@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Services;
+using FitSyncHub.Zwift.Services.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -10,12 +10,12 @@ namespace FitSyncHub.Functions.Functions.Zwift;
 
 public class ZwiftUncompletedAchievementsHttpTriggerFunction
 {
-    private readonly ZwiftGameInfoService _zwiftGameInfoService;
+    private readonly ZwiftAchievementsService _zwiftAchievementsService;
 
     public ZwiftUncompletedAchievementsHttpTriggerFunction(
-        ZwiftGameInfoService zwiftGameInfoService)
+        ZwiftAchievementsService zwiftAchievementsService)
     {
-        _zwiftGameInfoService = zwiftGameInfoService;
+        _zwiftAchievementsService = zwiftAchievementsService;
     }
 
     [Function(nameof(ZwiftUncompletedAchievementsHttpTriggerFunction))]
@@ -25,7 +25,7 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
     {
         _ = req;
 
-        var achievementsState = await _zwiftGameInfoService.GetAchievementsState(cancellationToken);
+        var achievementsState = await _zwiftAchievementsService.GetAchievementProgress(cancellationToken);
         var sb = new StringBuilder();
 
         sb.AppendLine($"Achievements level (xp): {achievementsState.AchievementLevel:0.00}");
@@ -36,13 +36,6 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
             sb.AppendLine("General achievements:");
 
             var generalAchievements = achievementsState.GeneralAchievements;
-
-            // Exclude running achievements
-            generalAchievements = [.. achievementsState.GeneralAchievements
-                .Where(x => !x.Achievement.ImageUrl.Contains("Run", StringComparison.OrdinalIgnoreCase))];
-
-            // Exclude achievements that are not possible to achieve anymore
-            generalAchievements = [.. generalAchievements.Where(x => x.Achievement.Id is < 347 or > 471)];
 
             sb.AppendLine($"\tAchieved (excluding running and not possible to achieve anymore): {generalAchievements.Count(x => x.IsAchieved)}/{generalAchievements.Count}");
 
@@ -55,28 +48,23 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
 
             foreach (var unachievedGeneralAchievement in unachievedGeneralAchievements)
             {
-                sb.AppendLine($"\t- {unachievedGeneralAchievement.Achievement.Name}");
+                sb.AppendLine($"\t- {unachievedGeneralAchievement.Name}");
             }
             sb.AppendLine();
         }
 
-        if (achievementsState.CyclingRouteAchievementsToRouteMapping.Count != 0)
+        if (achievementsState.RouteAchievements.Count != 0)
         {
             sb.AppendLine("Cycling routes:");
 
-            FormatRoutesSummary("Public", x => !x.PublicEventsOnly && !x.ExcludeFromGameDictionary);
-            FormatRoutesSummary("EventOnly", x => x.PublicEventsOnly && !x.ExcludeFromGameDictionary);
-            FormatRoutesSummary("ExcludeFromGameDictionary", x => x.ExcludeFromGameDictionary);
-
-            void FormatRoutesSummary(string prefix, Func<ZwiftRouteModel, bool> predicate)
+            foreach (var item in achievementsState.RouteAchievements)
             {
-                var filteredRoutes = achievementsState.CyclingRouteAchievementsToRouteMapping
-                    .Where(x => predicate(x.Value))
-                    .ToList();
+                var type = item.Type;
+                var filteredRoutes = item.Routes;
 
                 if (filteredRoutes.Count == 0)
                 {
-                    return;
+                    continue;
                 }
 
                 var nonAchievedItems = filteredRoutes.Where(x => !x.Key.IsAchieved).Select(x => x.Value).ToList();
@@ -84,17 +72,18 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
 
                 if (nonAchievedItems.Count == 0)
                 {
-                    return;
+                    continue;
                 }
 
-                sb.AppendLine(ZwiftUncompletedAchievementsHttpTriggerFunction.FormatRoutesSummary(prefix, nonAchievedItems, totalCount));
+                sb.AppendLine(FormatRoutesSummary(type, nonAchievedItems, totalCount));
+
             }
         }
 
         return new OkObjectResult(sb.ToString());
     }
 
-    private static string FormatRoutesSummary(string prefix, List<ZwiftRouteModel> nonAchievedItems, int totalCount)
+    private static string FormatRoutesSummary(string prefix, List<ZwiftRouteAchievementInfo> nonAchievedItems, int totalCount)
     {
         StringBuilder sb = new();
 
@@ -108,18 +97,25 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
 
         foreach (var route in nonAchievedItems.OrderBy(x => x.PublishedOn))
         {
-            var totalDistanceKm = Math.Round(route.TotalDistanceInMeters / 1000.0, 1);
-            var totalElevation = Math.Round(route.TotalAscentInMeters, 0);
+            sb.Append($"\t- {route.Name}");
 
-            sb.Append($"\t- {route.Name} ({totalDistanceKm}km, {totalElevation}m)");
+            if (route.TotalDistanceInMeters.HasValue && route.TotalAscentInMeters.HasValue)
+            {
+                var totalDistanceKm = Math.Round(route.TotalDistanceInMeters.Value / 1000.0, 1);
+                var totalElevation = Math.Round(route.TotalAscentInMeters.Value, 0);
+                sb.Append($" ({totalDistanceKm}km, {totalElevation}m)");
+            }
+
             if (route.PublicEventsOnly)
             {
                 sb.Append(", events only");
             }
+
             if (route.PublishedOn.HasValue && route.PublishedOn > DateOnly.FromDateTime(DateTime.Today))
             {
                 sb.Append($", will published on {route.PublishedOn:yyyy-MM-dd}");
             }
+
             sb.AppendLine();
         }
 

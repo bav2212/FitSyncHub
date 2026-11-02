@@ -49,7 +49,7 @@ public static class ZwiftModule
             services.AddScoped<ZwiftSauceService>();
 
             services.AddScoped<ZwiftEventsService>();
-            services.AddScoped<ZwiftGameInfoService>();
+            services.AddScoped<ZwiftAchievementsService>();
             services.AddScoped<ZwiftPreselectedBikesService>();
             services.AddScoped<ZwiftRoutesService>();
 

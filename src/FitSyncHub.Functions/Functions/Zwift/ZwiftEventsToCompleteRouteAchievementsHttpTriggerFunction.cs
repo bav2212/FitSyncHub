@@ -12,14 +12,14 @@ namespace FitSyncHub.Functions.Functions.Zwift;
 
 public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
 {
-    private readonly ZwiftGameInfoService _zwiftGameInfoService;
+    private readonly ZwiftAchievementsService _zwiftAchievementsService;
     private readonly ILogger<ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction> _logger;
 
     public ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction(
-        ZwiftGameInfoService zwiftGameInfoService,
+        ZwiftAchievementsService zwiftAchievementsService,
         ILogger<ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction> logger)
     {
-        _zwiftGameInfoService = zwiftGameInfoService;
+        _zwiftAchievementsService = zwiftAchievementsService;
         _logger = logger;
     }
 
@@ -92,8 +92,8 @@ public sealed class ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction
             return new BadRequestObjectResult("Date range should not exceed 7 days, set 'force'=true in query to proceed");
         }
 
-        var cyclingRouteToEventMapping = await _zwiftGameInfoService
-            .GetUncompletedRouteToEventsMappingAchievements(from, to, cancellationToken);
+        var cyclingRouteToEventMapping = await _zwiftAchievementsService
+            .GetEventsForUncompletedRouteAchievements(from, to, cancellationToken);
 
         var result = Convert(cyclingRouteToEventMapping, timezone).ToList();
 

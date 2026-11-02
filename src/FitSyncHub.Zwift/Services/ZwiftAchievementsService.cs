@@ -4,16 +4,17 @@ using FitSyncHub.Zwift.HttpClients.Models.Responses.Events;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Providers.Abstractions;
+using FitSyncHub.Zwift.Services.Achievements;
+using FitSyncHub.Zwift.Services.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Services;
 
-public sealed class ZwiftGameInfoService
+public sealed class ZwiftAchievementsService
 {
     private readonly ZwiftHttpClient _zwiftHttpClient;
     private readonly IZwiftRoutesProvider _zwiftRoutesProvider;
-    private readonly ILogger<ZwiftGameInfoService> _logger;
     private readonly bool _isDevelopment;
     private readonly HashSet<long> _knownCyclingRouteIdsWithoutAchievements = [
         2843604888,  //  Bologna-Bologna Time Trial
@@ -51,19 +52,18 @@ public sealed class ZwiftGameInfoService
         620436060,   //  Yorkshire-Harrogate Circuit Reverse
     ];
 
-    public ZwiftGameInfoService(
+    public ZwiftAchievementsService(
         ZwiftHttpClient zwiftHttpClient,
         IZwiftRoutesProvider zwiftRoutesProvider,
-        ILogger<ZwiftGameInfoService> logger,
+        ILogger<ZwiftAchievementsService> logger,
         IHostEnvironment hostingEnvironment)
     {
         _zwiftHttpClient = zwiftHttpClient;
         _zwiftRoutesProvider = zwiftRoutesProvider;
-        _logger = logger;
         _isDevelopment = hostingEnvironment.IsDevelopment();
     }
 
-    public async Task<Dictionary<ZwiftRouteModel, List<ZwiftEventResponse>>> GetUncompletedRouteToEventsMappingAchievements(
+    public async Task<Dictionary<ZwiftRouteModel, List<ZwiftEventResponse>>> GetEventsForUncompletedRouteAchievements(
         DateTimeOffset from,
         DateTimeOffset to,
         CancellationToken cancellationToken)
@@ -118,7 +118,7 @@ public sealed class ZwiftGameInfoService
             .ToDictionary(g => g.Key, g => g.SelectMany(x => x.Events).ToList());
     }
 
-    public async Task<MappedUncompletedAchievementsModel> GetAchievementsState(
+    public async Task<ZwiftAchievementProgress> GetAchievementProgress(
         CancellationToken cancellationToken)
     {
         var profileMe = await _zwiftHttpClient.GetProfileMe(cancellationToken);
@@ -129,34 +129,14 @@ public sealed class ZwiftGameInfoService
         var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
         var userAchievements = await GetUnlockedCoreAchievements(cancellationToken);
 
-        var mappedRouteAchievementsToRoutes = zwiftAchievementsResolver.MapRouteAchievementsToRoutes(routes);
+        var routeCompletionAchievements = await _zwiftHttpClient.GetRouteCompletionAchievements(cancellationToken);
 
-        return new MappedUncompletedAchievementsModel
-        {
-            AchievementLevel = profileMe.AchievementLevel / 100.0,
-            CyclingRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Cycling),
-            RunningRouteAchievementsToRouteMapping = GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport.Running),
-            GeneralAchievements = [.. zwiftAchievementsResolver.GeneralAchievements.Select(ConvertToZwiftGameInfoAchievementState)]
-        };
-
-        Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> GetRouteAchievementsToRouteMappingForSport(ZwiftGameInfoSport sport)
-        {
-            return mappedRouteAchievementsToRoutes
-                .Where(x => x.Value.Sports.Contains(sport))
-                .ToDictionary(
-                    x => ConvertToZwiftGameInfoAchievementState(x.Key),
-                    x => x.Value
-                );
-        }
-
-        ZwiftGameInfoAchievementState ConvertToZwiftGameInfoAchievementState(ZwiftGameInfoAchievement achievement)
-        {
-            return new ZwiftGameInfoAchievementState
-            {
-                Achievement = achievement,
-                IsAchieved = userAchievements.Contains(achievement.Id)
-            };
-        }
+        return new ZwiftAchievementProgressConverter(
+            profileMe,
+            zwiftAchievementsResolver,
+            routes,
+            userAchievements,
+            routeCompletionAchievements).Convert();
     }
 
     private async Task<HashSet<int>> GetUnlockedCoreAchievements(CancellationToken cancellationToken)
@@ -164,18 +144,4 @@ public sealed class ZwiftGameInfoService
         var response = await _zwiftHttpClient.GetPlayerAchievements(cancellationToken);
         return [.. response.Achievements_.Select(x => x.Id)];
     }
-}
-
-public sealed record ZwiftGameInfoAchievementState
-{
-    public required ZwiftGameInfoAchievement Achievement { get; init; }
-    public required bool IsAchieved { get; init; }
-}
-
-public sealed record MappedUncompletedAchievementsModel
-{
-    public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> CyclingRouteAchievementsToRouteMapping { get; init; }
-    public required Dictionary<ZwiftGameInfoAchievementState, ZwiftRouteModel> RunningRouteAchievementsToRouteMapping { get; init; }
-    public required List<ZwiftGameInfoAchievementState> GeneralAchievements { get; init; }
-    public required double AchievementLevel { get; init; }
 }

@@ -1,7 +1,7 @@
 ﻿using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
 
-namespace FitSyncHub.Zwift.Services;
+namespace FitSyncHub.Zwift.Services.Achievements;
 
 public class ZwiftRouteAchievementResolver
 {
