@@ -99,12 +99,9 @@ public class ZwiftUncompletedAchievementsHttpTriggerFunction
         {
             sb.Append($"\t- {route.Name}");
 
-            if (route.TotalDistanceInMeters.HasValue && route.TotalAscentInMeters.HasValue)
-            {
-                var totalDistanceKm = Math.Round(route.TotalDistanceInMeters.Value / 1000.0, 1);
-                var totalElevation = Math.Round(route.TotalAscentInMeters.Value, 0);
-                sb.Append($" ({totalDistanceKm}km, {totalElevation}m)");
-            }
+            var totalDistanceKm = Math.Round(route.TotalDistanceInMeters / 1000.0, 1);
+            var totalElevation = Math.Round(route.TotalAscentInMeters, 0);
+            sb.Append($" ({totalDistanceKm}km, {totalElevation}m)");
 
             if (route.PublicEventsOnly)
             {

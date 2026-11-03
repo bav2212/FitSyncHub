@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text.Json;
+using FitSyncHub.Zwift.HttpClients;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Providers;
@@ -29,31 +30,33 @@ public class ZwiftWorldsXmlFilesProvider
     private readonly ILogger<ZwiftWorldsXmlFilesProvider> _logger;
 
     private readonly ZwiftWadDecoder _zwiftWadDecoder;
-
+    private readonly ZwiftMochiHttpClient _zwiftMochiHttpClient;
     private readonly string _unpackedWADFilesDirectory;
     private readonly string _unpackedWADFilesStateFilePath;
+    private readonly string _mochiFilesDirectory;
+    private readonly string _mochiStateFilePath;
 
     public ZwiftWorldsXmlFilesProvider(
         ZwiftWadDecoder zwiftWadDecoder,
+        ZwiftMochiHttpClient zwiftMochiHttpClient,
         ILogger<ZwiftWorldsXmlFilesProvider> logger)
     {
         _zwiftWadDecoder = zwiftWadDecoder;
+        _zwiftMochiHttpClient = zwiftMochiHttpClient;
         _logger = logger;
 
         _zwiftWorldsPath = Path.Combine(_zwiftInstallationPath, "assets", "Worlds");
 
         _unpackedWADFilesDirectory = Path.Combine(Path.GetTempPath(), "ZwiftWADFilesUnpacked");
         _unpackedWADFilesStateFilePath = Path.Combine(_unpackedWADFilesDirectory, "state.json");
+        _mochiFilesDirectory = Path.Combine(_unpackedWADFilesDirectory, "Mochi");
+        _mochiStateFilePath = Path.Combine(_unpackedWADFilesDirectory, "mochi_state.json");
     }
 
     public async Task<ZwiftXmlFilesModel> GetWorlsXmlFilesPaths(CancellationToken cancellationToken)
     {
-        if (!Directory.Exists(_unpackedWADFilesDirectory))
-        {
-            Directory.CreateDirectory(_unpackedWADFilesDirectory);
-        }
-
         await UnpackWADFiles(cancellationToken);
+        await LoadMochiFiles(cancellationToken);
 
         var worldsDictionary = new Dictionary<long, ZwiftXmlFilesWorldData>();
         var climbPortalRoads = new List<ZwiftXmlFilesRoadItem>();
@@ -146,11 +149,70 @@ public class ZwiftWorldsXmlFilesProvider
             }
         }
 
+        var mochiFilePaths = Directory
+            .EnumerateFiles(_mochiFilesDirectory, "*.xml", new EnumerationOptions { RecurseSubdirectories = true })
+            .Select(x => new ZwiftXmlFilesRoadItem { FilePath = x })
+            .ToList();
+
         return new ZwiftXmlFilesModel
         {
             Worlds = [.. worldsDictionary.Values],
-            ClimbPortalRoads = climbPortalRoads
+            ClimbPortalRoads = climbPortalRoads,
+            MochiRoads = mochiFilePaths
         };
+    }
+
+    private async Task LoadMochiFiles(CancellationToken cancellationToken)
+    {
+        if (!Directory.Exists(_mochiFilesDirectory))
+        {
+            Directory.CreateDirectory(_mochiFilesDirectory);
+        }
+
+        Dictionary<string, MochiRoadStateItem> mochiRideNameToRoadSizeMapping = [];
+        if (File.Exists(_mochiStateFilePath))
+        {
+            var mochiStateJson = await File.ReadAllTextAsync(_mochiStateFilePath, cancellationToken);
+            var mochiStateList = JsonSerializer
+                .Deserialize<List<MochiRoadStateItem>>(mochiStateJson)!;
+            mochiRideNameToRoadSizeMapping = mochiStateList
+                .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
+        }
+
+        var mochiCatalogResponse = await _zwiftMochiHttpClient.GetMochiCatalogResponse(cancellationToken);
+        foreach (var mochiCatalogCollections in mochiCatalogResponse.Collections)
+        {
+            foreach (var mochiCatalogRide in mochiCatalogCollections.Rides)
+            {
+                if (mochiCatalogRide is not { } || mochiCatalogRide.Route is not { } || mochiCatalogRide.Name is not { })
+                {
+                    continue;
+                }
+
+                var key = mochiCatalogRide.Name;
+                if (mochiRideNameToRoadSizeMapping.TryGetValue(key, out var mochiRideRoadStateItem)
+                    && mochiRideRoadStateItem.Crc == mochiCatalogRide.Route.Crc
+                    && mochiRideRoadStateItem.Size == mochiCatalogRide.Route.Size)
+                {
+                    _logger.LogWarning("Do not need to load mochi file again: {MochiRideName}", key);
+                    continue;
+                }
+
+                var destination = Path.Combine(_mochiFilesDirectory, $"route_{mochiCatalogRide.Name}.xml");
+                await _zwiftMochiHttpClient.DownloadMochiItem(mochiCatalogRide.Route, destination, cancellationToken);
+                await Task.Delay(100, cancellationToken); // Add a small delay to avoid overwhelming the server)
+
+                mochiRideNameToRoadSizeMapping[mochiCatalogRide.Name] = new MochiRoadStateItem
+                {
+                    Name = mochiCatalogRide.Name,
+                    Crc = mochiCatalogRide.Route.Crc,
+                    Size = mochiCatalogRide.Route.Size
+                };
+            }
+        }
+
+        var updatedMochiStateList = JsonSerializer.Serialize(mochiRideNameToRoadSizeMapping.Values.ToList())!;
+        await File.WriteAllTextAsync(_mochiStateFilePath, updatedMochiStateList, cancellationToken);
     }
 
     private static (uint worldId, string worldName) GetWorldInfoFromFilePath(string[] pathParts)
@@ -163,6 +225,11 @@ public class ZwiftWorldsXmlFilesProvider
 
     private async Task UnpackWADFiles(CancellationToken cancellationToken)
     {
+        if (!Directory.Exists(_unpackedWADFilesDirectory))
+        {
+            Directory.CreateDirectory(_unpackedWADFilesDirectory);
+        }
+
         Dictionary<string, UnpackedWADFilesStateItem> unpackedWADFilesStateDictionary = [];
         if (File.Exists(_unpackedWADFilesStateFilePath))
         {
@@ -234,12 +301,20 @@ public class ZwiftWorldsXmlFilesProvider
         public required string FilePath { get; init; }
         public required string Hash { get; init; }
     }
+
+    private sealed record MochiRoadStateItem
+    {
+        public required string Name { get; init; }
+        public required long Crc { get; init; }
+        public required long Size { get; init; }
+    }
 }
 
 public sealed record ZwiftXmlFilesModel
 {
     public required List<ZwiftXmlFilesWorldData> Worlds { get; init; }
     public required List<ZwiftXmlFilesRoadItem> ClimbPortalRoads { get; init; }
+    public required List<ZwiftXmlFilesRoadItem> MochiRoads { get; init; }
 }
 
 public sealed record ZwiftXmlFilesWorldData

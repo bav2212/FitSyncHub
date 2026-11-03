@@ -36,21 +36,24 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
         _zwiftWorldsXmlFilesProvider = zwiftWorldsXmlFilesProvider;
         _logger = logger;
     }
+    public async Task<List<ZwiftRouteModel>> GetRegularRoutes(CancellationToken cancellationToken)
+        => (await GetRoutes(cancellationToken)).RegularRoutes;
 
-    public async Task<List<ZwiftRouteModel>> GetRoutesInfo(CancellationToken cancellationToken)
+    public async Task<ZwiftParsedRoutesResponse> GetRoutes(CancellationToken cancellationToken)
     {
         var worldRouteFilePaths = await _zwiftWorldsXmlFilesProvider.GetWorlsXmlFilesPaths(cancellationToken);
 
-        return [
-            .. ReadClimbPortaldRouteFilesAndParse(worldRouteFilePaths.ClimbPortalRoads),
-            .. ReadRouteFilesAndParse(worldRouteFilePaths.Worlds)
-            ];
+        return new ZwiftParsedRoutesResponse
+        {
+            ClimbPortalRoutes = [.. ReadClimbPortaldRouteFilesAndParse(worldRouteFilePaths.ClimbPortalRoads)],
+            RegularRoutes = [.. ReadRouteFilesAndParse(worldRouteFilePaths.Worlds)],
+            MochiRoutes = [.. ReadVideoRouteFilesAndParse(worldRouteFilePaths.MochiRoads)],
+        };
     }
 
     private static IEnumerable<ZwiftRouteModel> ReadRouteFilesAndParse(
         List<ZwiftXmlFilesWorldData> worlds)
     {
-
         using var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRouteRoot>();
 
         foreach (var world in worlds)
@@ -59,46 +62,21 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             {
                 var zwiftInGameRoot = rootParser.Parse(regularRoute.FilePath);
 
-                var route = zwiftInGameRoot.Route;
-                var homedata = zwiftInGameRoot.Homedata;
-
-                var routeName = s_nameMapping.TryGetValue(route.Name, out var mappedName)
-                    ? mappedName
-                    : route.Name;
-
-                var publishedOn = !string.IsNullOrWhiteSpace(homedata?.PublishedOn)
-                    ? DateOnly.ParseExact(homedata.PublishedOn, "yyyy-MM-dd")
-                    : default(DateOnly?);
-
-                yield return new ZwiftRouteModel
-                {
-                    WorldName = world.WorldName,
-                    Name = routeName,
-                    Id = route.NameHash,
-                    DistanceInMeters = route.DistanceInMeters,
-                    AscentInMeters = route.AscentInMeters,
-                    LocKey = route.LocKey,
-                    LevelLocked = route.LevelLocked,
-                    PublicEventsOnly = route.EventOnly || route.ZwiftEventOnly,
-                    SupportedLaps = route.SupportedLaps,
-                    LeadinAscentInMeters = route.LeadInAscentInMeters,
-                    LeadinDistanceInMeters = route.LeadInDistanceInMeters,
-                    BlockedForMeetups = route.BlockedForMeetups,
-                    Xp = homedata?.Xp ?? 0,
-                    Duration = homedata?.Duration ?? 0,
-                    Difficulty = homedata?.Difficulty ?? 0,
-                    Sports = route.SportType switch
-                    {
-                        -1 or 0 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running, ZwiftGameInfoSport.Rowing],
-                        1 => [ZwiftGameInfoSport.Cycling],
-                        2 => [ZwiftGameInfoSport.Running],
-                        3 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running],
-                        _ => throw new ArgumentException("Unknown sport type")
-                    },
-                    PublishedOn = publishedOn,
-                    ExcludeFromGameDictionary = route.ExcludeFromGameDictionary
-                };
+                yield return ConvertZwiftInGameRoot(world.WorldName, zwiftInGameRoot);
             }
+        }
+    }
+
+    private static IEnumerable<ZwiftRouteModel> ReadVideoRouteFilesAndParse(
+       List<ZwiftXmlFilesRoadItem> videoRoads)
+    {
+        using var rootParser = new ZwiftXmlObjectRootParser<ZwiftXmlObjectRouteRoot>();
+
+        foreach (var videoRoad in videoRoads)
+        {
+            var zwiftInGameRoot = rootParser.Parse(videoRoad.FilePath);
+
+            yield return ConvertZwiftInGameRoot("Mochi", zwiftInGameRoot);
         }
     }
 
@@ -144,4 +122,48 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
             };
         }
     }
+
+    private static ZwiftRouteModel ConvertZwiftInGameRoot(string worldName, ZwiftXmlObjectRouteRoot zwiftInGameRoot)
+    {
+        var route = zwiftInGameRoot.Route;
+        var homedata = zwiftInGameRoot.Homedata;
+
+        var routeName = s_nameMapping.TryGetValue(route.Name, out var mappedName)
+            ? mappedName
+            : route.Name;
+
+        var publishedOn = !string.IsNullOrWhiteSpace(homedata?.PublishedOn)
+            ? DateOnly.ParseExact(homedata.PublishedOn, "yyyy-MM-dd")
+            : default(DateOnly?);
+
+        return new ZwiftRouteModel
+        {
+            WorldName = worldName,
+            Name = routeName,
+            Id = route.NameHash,
+            DistanceInMeters = route.DistanceInMeters,
+            AscentInMeters = route.AscentInMeters,
+            LocKey = route.LocKey,
+            LevelLocked = route.LevelLocked,
+            PublicEventsOnly = route.EventOnly || route.ZwiftEventOnly,
+            SupportedLaps = route.SupportedLaps,
+            LeadinAscentInMeters = route.LeadInAscentInMeters,
+            LeadinDistanceInMeters = route.LeadInDistanceInMeters,
+            BlockedForMeetups = route.BlockedForMeetups,
+            Xp = homedata?.Xp ?? 0,
+            Duration = homedata?.Duration ?? 0,
+            Difficulty = homedata?.Difficulty ?? 0,
+            Sports = route.SportType switch
+            {
+                -1 or 0 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running, ZwiftGameInfoSport.Rowing],
+                1 => [ZwiftGameInfoSport.Cycling],
+                2 => [ZwiftGameInfoSport.Running],
+                3 => [ZwiftGameInfoSport.Cycling, ZwiftGameInfoSport.Running],
+                _ => throw new ArgumentException("Unknown sport type")
+            },
+            PublishedOn = publishedOn,
+            ExcludeFromGameDictionary = route.ExcludeFromGameDictionary
+        };
+    }
 }
+

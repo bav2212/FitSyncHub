@@ -26,7 +26,7 @@ public sealed class ZwiftPreselectedBikesService
         CancellationToken cancellationToken)
     {
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
-        var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
+        var routes = await _zwiftRoutesProvider.GetRegularRoutes(cancellationToken);
 
         var bikeFramesDictionary = gameInfo.BikeFrames.ToDictionary(x => x.Id, x => x);
         var routesDictionary = routes.ToDictionary(x => x.Id, x => x);

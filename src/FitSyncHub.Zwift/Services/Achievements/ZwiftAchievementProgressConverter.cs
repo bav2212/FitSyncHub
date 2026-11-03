@@ -1,6 +1,7 @@
 ﻿using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Protobuf;
+using FitSyncHub.Zwift.Providers.Abstractions;
 using FitSyncHub.Zwift.Services.Models;
 
 namespace FitSyncHub.Zwift.Services.Achievements;
@@ -9,14 +10,14 @@ public sealed class ZwiftAchievementProgressConverter
 {
     private readonly PlayerProfile _profileMe;
     private readonly ZwiftRouteAchievementResolver _zwiftAchievementsResolver;
-    private readonly List<ZwiftRouteModel> _routes;
+    private readonly ZwiftParsedRoutesResponse _routes;
     private readonly HashSet<int> _userAchievements;
     private readonly LoadPlayerRouteCompletionAchievementsResponse _routeCompletionAchievements;
 
     public ZwiftAchievementProgressConverter(
         PlayerProfile profileMe,
         ZwiftRouteAchievementResolver zwiftAchievementsResolver,
-        List<ZwiftRouteModel> routes,
+        ZwiftParsedRoutesResponse routes,
         HashSet<int> userAchievements,
         LoadPlayerRouteCompletionAchievementsResponse routeCompletionAchievements)
     {
@@ -42,18 +43,18 @@ public sealed class ZwiftAchievementProgressConverter
         {
             AchievementLevel = _profileMe.AchievementLevel / 100.0,
             RouteAchievements = [.. ConvertRouteAchievements()],
-            GeneralAchievements = [.. generalAchievements.Select(ConvertToAchievementStatus)]
+            GeneralAchievements = [.. generalAchievements.Select(ConvertAchievement)]
         };
     }
 
     private IEnumerable<ZwiftRouteAchievementGroup> ConvertRouteAchievements()
     {
-        var mappedRouteAchievementsToRoutes = _zwiftAchievementsResolver.MapRouteAchievementsToRoutes(_routes);
+        var mappedRouteAchievementsToRoutes = _zwiftAchievementsResolver.MapRouteAchievementsToRoutes(_routes.RegularRoutes);
 
         var routeAchievementsToRouteMapping = mappedRouteAchievementsToRoutes
             .Where(x => x.Value.Sports.Contains(ZwiftGameInfoSport.Cycling))
             .ToDictionary(
-                x => ConvertToAchievementStatus(x.Key),
+                x => ConvertAchievement(x.Key),
                 x => x.Value
             );
 
@@ -69,18 +70,19 @@ public sealed class ZwiftAchievementProgressConverter
             Type = "Video",
             Routes = _routeCompletionAchievements.Achievements
                 .Where(x => x.Sport == AchievementSport.Cycling)
-                .ToDictionary(
-                    x => new ZwiftAchievementStatus { Name = x.AnalyticsName, IsAchieved = x.Unlocked },
-                    x => new ZwiftRouteAchievementInfo
+                .Join(_routes.MochiRoutes,
+                    x => x.RouteHash,
+                    x => (ulong)x.Id,
+                    (achievement, route) => new
                     {
-                        Name = x.DisplayTitle,
-                        PublicEventsOnly = false,
-                        PublishedOn = null,
-                        // temp
-                        TotalAscentInMeters = null,
-                        // temp
-                        TotalDistanceInMeters = null,
+                        Achievement = new ZwiftAchievementStatus { Name = achievement.AnalyticsName, IsAchieved = achievement.Unlocked },
+                        Route = ConvertRoute(route) with
+                        {
+                            // temp to have pretty name
+                            Name = achievement.DisplayTitle
+                        },
                     })
+                .ToDictionary(x => x.Achievement, x => x.Route)
         };
     }
 
@@ -108,21 +110,23 @@ public sealed class ZwiftAchievementProgressConverter
         return new ZwiftRouteAchievementGroup
         {
             Type = type,
-            Routes = filteredRoutes.ToDictionary(
-                x => x.Key,
-                x => new ZwiftRouteAchievementInfo
-                {
-                    Name = x.Value.Name,
-                    PublicEventsOnly = x.Value.PublicEventsOnly,
-                    PublishedOn = x.Value.PublishedOn,
-                    TotalAscentInMeters = x.Value.TotalAscentInMeters,
-                    TotalDistanceInMeters = x.Value.TotalDistanceInMeters,
-                }
-            )
+            Routes = filteredRoutes.ToDictionary(x => x.Key, x => ConvertRoute(x.Value))
         };
     }
 
-    private ZwiftAchievementStatus ConvertToAchievementStatus(ZwiftGameInfoAchievement achievement)
+    private static ZwiftRouteAchievementInfo ConvertRoute(ZwiftRouteModel route)
+    {
+        return new ZwiftRouteAchievementInfo
+        {
+            Name = route.Name,
+            PublicEventsOnly = route.PublicEventsOnly,
+            PublishedOn = route.PublishedOn,
+            TotalAscentInMeters = route.TotalAscentInMeters,
+            TotalDistanceInMeters = route.TotalDistanceInMeters,
+        };
+    }
+
+    private ZwiftAchievementStatus ConvertAchievement(ZwiftGameInfoAchievement achievement)
     {
         return new ZwiftAchievementStatus
         {

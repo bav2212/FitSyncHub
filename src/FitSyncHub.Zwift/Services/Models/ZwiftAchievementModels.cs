@@ -23,9 +23,7 @@ public sealed record ZwiftRouteAchievementInfo
 {
     public required string Name { get; init; }
     public required DateOnly? PublishedOn { get; init; }
-    // temp
-    public required double? TotalDistanceInMeters { get; init; }
-    // temp
-    public required double? TotalAscentInMeters { get; init; }
+    public required double TotalDistanceInMeters { get; init; }
+    public required double TotalAscentInMeters { get; init; }
     public required bool PublicEventsOnly { get; init; }
 }

@@ -62,6 +62,9 @@ public static class ZwiftModule
             AddZwiftAuthResiliencePipeline(services);
 
             services.AddHttpClient<ZwiftHttpClientUnauthorized>();
+            services.AddHttpClient<ZwiftMochiHttpClient>(
+                client => client.BaseAddress = new Uri("https://loveturtle.zwift.com/1.0.1/"));
+
             ConfigureZwiftHttpClient(services);
 
             return services;

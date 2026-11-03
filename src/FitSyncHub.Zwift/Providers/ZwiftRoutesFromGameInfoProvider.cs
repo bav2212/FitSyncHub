@@ -1,5 +1,4 @@
 ﻿using FitSyncHub.Zwift.HttpClients;
-using FitSyncHub.Zwift.HttpClients.Models.Responses.GameInfo;
 using FitSyncHub.Zwift.Models;
 using FitSyncHub.Zwift.Providers.Abstractions;
 
@@ -32,15 +31,16 @@ public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
         _zwiftHttpClient = zwiftHttpClient;
     }
 
-    public async Task<List<ZwiftRouteModel>> GetRoutesInfo(CancellationToken cancellationToken)
+    public async Task<List<ZwiftRouteModel>> GetRegularRoutes(CancellationToken cancellationToken)
+        => (await GetRoutes(cancellationToken)).RegularRoutes;
+
+    public async Task<ZwiftParsedRoutesResponse> GetRoutes(CancellationToken cancellationToken)
     {
+        List<ZwiftRouteModel> climbPortalRoutes = [];
+        List<ZwiftRouteModel> regularRoutes = [];
+
         var gameInfo = await _zwiftHttpClient.GetGameInfo(cancellationToken);
 
-        return [.. ConvertToZwiftRouteModel(gameInfo)];
-    }
-
-    private IEnumerable<ZwiftRouteModel> ConvertToZwiftRouteModel(ZwiftGameInfoResponse gameInfo)
-    {
         foreach (var map in gameInfo.Maps)
         {
             var worldName = _worldFriendlyNameMapping[map.Name];
@@ -52,7 +52,7 @@ public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
                 var distanceInMeters = isClimbPortal ? route.DistanceInMeters / 100 : route.DistanceInMeters;
                 var ascentInMeters = isClimbPortal ? route.AscentInMeters / 100 : route.AscentInMeters;
 
-                yield return new ZwiftRouteModel
+                var routeModel = new ZwiftRouteModel
                 {
                     WorldName = worldName,
                     Name = route.Name,
@@ -73,7 +73,17 @@ public sealed class ZwiftRoutesFromGameInfoProvider : IZwiftRoutesProvider
                     PublishedOn = null,
                     ExcludeFromGameDictionary = false, // this routes not present in response 
                 };
+
+                var addToList = isClimbPortal ? climbPortalRoutes : regularRoutes;
+                addToList.Add(routeModel);
             }
         }
+
+        return new ZwiftParsedRoutesResponse()
+        {
+            ClimbPortalRoutes = climbPortalRoutes,
+            RegularRoutes = regularRoutes,
+            MochiRoutes = [],
+        };
     }
 }

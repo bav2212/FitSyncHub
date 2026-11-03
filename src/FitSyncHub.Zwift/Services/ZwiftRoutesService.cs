@@ -15,42 +15,44 @@ public sealed class ZwiftRoutesService
     public async Task<List<ZwiftDataRoutesInfoModel>> GetRoutesInfo(
         CancellationToken cancellationToken)
     {
-        var worldRoutePairs = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
+        var routesResponse = await _zwiftRoutesProvider.GetRoutes(cancellationToken);
 
-        var result = worldRoutePairs
-          .Where(x => x.Sports.Contains(ZwiftGameInfoSport.Cycling))
-          .Select(route =>
-          {
-              var restrictions = new List<string>();
-              if (route.Sports.Count == 1 && route.Sports.Contains(ZwiftGameInfoSport.Running))
-              {
-                  restrictions.Add("Run Only");
-              }
 
-              if (route.PublicEventsOnly)
-              {
-                  restrictions.Add("Event Only");
-              }
+        var result = routesResponse
+            .AllRoutes
+            .Where(x => x.Sports.Contains(ZwiftGameInfoSport.Cycling))
+            .Select(route =>
+            {
+                var restrictions = new List<string>();
+                if (route.Sports.Count == 1 && route.Sports.Contains(ZwiftGameInfoSport.Running))
+                {
+                    restrictions.Add("Run Only");
+                }
 
-              if (route.LevelLocked > 1)
-              {
-                  restrictions.Add($"Level {route.LevelLocked}+");
+                if (route.PublicEventsOnly)
+                {
+                    restrictions.Add("Event Only");
+                }
 
-              }
+                if (route.LevelLocked > 1)
+                {
+                    restrictions.Add($"Level {route.LevelLocked}+");
 
-              return new ZwiftDataRoutesInfoModel
-              {
-                  Id = route.Id,
-                  Name = route.Name,
-                  WorldName = route.WorldName,
-                  Distance = Math.Round(route.DistanceInMeters / 1000, 1),
-                  ElevationGain = Math.Round(route.AscentInMeters),
-                  LeadIn = Math.Round(route.LeadinDistanceInMeters / 1000, 1),
-                  LeadInElevationGain = Math.Round(route.LeadinAscentInMeters),
-                  Restrictions = restrictions.Count != 0 ? string.Join(", ", restrictions) : null,
-                  PublishedOn = route.PublishedOn,
-              };
-          });
+                }
+
+                return new ZwiftDataRoutesInfoModel
+                {
+                    Id = route.Id,
+                    Name = route.Name,
+                    WorldName = route.WorldName,
+                    Distance = Math.Round(route.DistanceInMeters / 1000, 1),
+                    ElevationGain = Math.Round(route.AscentInMeters),
+                    LeadIn = Math.Round(route.LeadinDistanceInMeters / 1000, 1),
+                    LeadInElevationGain = Math.Round(route.LeadinAscentInMeters),
+                    Restrictions = restrictions.Count != 0 ? string.Join(", ", restrictions) : null,
+                    PublishedOn = route.PublishedOn,
+                };
+            });
 
         return [.. result
             .OrderBy(x => x.WorldName)

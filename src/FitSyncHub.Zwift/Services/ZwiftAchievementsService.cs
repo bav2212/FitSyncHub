@@ -72,7 +72,7 @@ public sealed class ZwiftAchievementsService
 
         var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements, _isDevelopment);
 
-        var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
+        var routes = await _zwiftRoutesProvider.GetRegularRoutes(cancellationToken);
         var userAchievements = await GetUnlockedCoreAchievements(cancellationToken);
 
         var mappedCyclingRoutesToRouteAchievements = zwiftAchievementsResolver
@@ -126,7 +126,7 @@ public sealed class ZwiftAchievementsService
 
         var zwiftAchievementsResolver = new ZwiftRouteAchievementResolver(gameInfo.Achievements, _isDevelopment);
 
-        var routes = await _zwiftRoutesProvider.GetRoutesInfo(cancellationToken);
+        var routes = await _zwiftRoutesProvider.GetRoutes(cancellationToken);
         var userAchievements = await GetUnlockedCoreAchievements(cancellationToken);
 
         var routeCompletionAchievements = await _zwiftHttpClient.GetRouteCompletionAchievements(cancellationToken);
