@@ -63,7 +63,7 @@ public static class ZwiftModule
 
             services.AddHttpClient<ZwiftHttpClientUnauthorized>();
             services.AddHttpClient<ZwiftMochiHttpClient>(
-                client => client.BaseAddress = new Uri("https://loveturtle.zwift.com/1.0.1/"));
+                client => client.BaseAddress = new Uri("https://loveturtle.zwift.com/1.0.2/"));
 
             ConfigureZwiftHttpClient(services);
 
