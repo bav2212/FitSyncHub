@@ -210,8 +210,8 @@ public class ZwiftSauceRouteConverter
 
             for (var groupIndex = firstGroupIndex; groupIndex < routeGroups.Count; groupIndex++)
             {
-                var routeGroup = routeGroups[groupIndex];
-                var group = routeGroup.Entries;
+                var (entries, startsAfterTimeWrap) = routeGroups[groupIndex];
+                var group = entries;
                 var firstEntry = group[0];
                 if (firstEntry.Road != checkpoint.Road || firstEntry.Dir != checkpoint.Dir)
                 {
@@ -223,7 +223,7 @@ public class ZwiftSauceRouteConverter
                 var reverse = !firstEntry.Dir;
                 var endsAtTimeWrap = groupIndex + 1 < routeGroups.Count
                     && routeGroups[groupIndex + 1].StartsAfterTimeWrap;
-                if (routeGroup.StartsAfterTimeWrap)
+                if (startsAfterTimeWrap)
                 {
                     if (reverse)
                     {

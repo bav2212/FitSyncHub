@@ -60,6 +60,7 @@ dotnet_style_null_propagation = true:suggestion
 dotnet_style_explicit_tuple_names = true:suggestion
 
 # IDE2000: Avoid multiple blank lines
+dotnet_style_allow_multiple_blank_lines_experimental = false
 dotnet_diagnostic.IDE2000.severity = error
 
 # Non-private static fields are PascalCase

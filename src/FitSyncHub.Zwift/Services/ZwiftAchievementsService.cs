@@ -7,7 +7,6 @@ using FitSyncHub.Zwift.Providers.Abstractions;
 using FitSyncHub.Zwift.Services.Achievements;
 using FitSyncHub.Zwift.Services.Models;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Services;
 
@@ -55,7 +54,6 @@ public sealed class ZwiftAchievementsService
     public ZwiftAchievementsService(
         ZwiftHttpClient zwiftHttpClient,
         IZwiftRoutesProvider zwiftRoutesProvider,
-        ILogger<ZwiftAchievementsService> logger,
         IHostEnvironment hostingEnvironment)
     {
         _zwiftHttpClient = zwiftHttpClient;

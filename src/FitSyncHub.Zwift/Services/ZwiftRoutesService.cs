@@ -17,7 +17,6 @@ public sealed class ZwiftRoutesService
     {
         var routesResponse = await _zwiftRoutesProvider.GetRoutes(cancellationToken);
 
-
         var result = routesResponse
             .AllRoutes
             .Where(x => x.Sports.Contains(ZwiftGameInfoSport.Cycling))
