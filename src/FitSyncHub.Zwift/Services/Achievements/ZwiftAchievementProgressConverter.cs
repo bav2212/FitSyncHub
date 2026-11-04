@@ -65,24 +65,33 @@ public sealed class ZwiftAchievementProgressConverter
         yield return CreateCoreRouteAchievementModel(
             routeAchievementsToRouteMapping, "ExcludeFromGameDictionary", x => x.ExcludeFromGameDictionary);
 
-        yield return new ZwiftRouteAchievementGroup
-        {
-            Type = "Video",
-            Routes = _routeCompletionAchievements.Achievements
-                .Where(x => x.Sport == AchievementSport.Cycling)
-                .Join(_routes.MochiRoutes,
-                    x => x.RouteHash,
-                    x => (ulong)x.Id,
-                    (achievement, route) => new
-                    {
-                        Achievement = new ZwiftAchievementStatus { Name = achievement.AnalyticsName, IsAchieved = achievement.Unlocked },
-                        Route = ConvertRoute(route) with
+        var mochiRoutesById = _routes.MochiRoutes.ToDictionary(x => x.Id, x => x);
+        var videAchievementGroupRoutes = _routeCompletionAchievements.Achievements
+            .Where(x => x.Sport == AchievementSport.Cycling)
+            .Select(achievement => new
+            {
+                Achievement = new ZwiftAchievementStatus { Name = achievement.AnalyticsName, IsAchieved = achievement.Unlocked },
+                // temp hack to have some data for the video routes, since we don't have the route data in the game info API
+                Route = mochiRoutesById.TryGetValue((long)achievement.RouteHash, out var route)
+                        ? ConvertRoute(route) with
                         {
                             // temp to have pretty name
                             Name = achievement.DisplayTitle
-                        },
-                    })
-                .ToDictionary(x => x.Achievement, x => x.Route)
+                        }
+                        : new()
+                        {
+                            Name = achievement.DisplayTitle,
+                            PublicEventsOnly = false,
+                            PublishedOn = null,
+                            TotalAscentInMeters = 0,
+                            TotalDistanceInMeters = 0
+                        }
+            }).ToDictionary(x => x.Achievement, x => x.Route);
+
+        yield return new ZwiftRouteAchievementGroup
+        {
+            Type = "Video",
+            Routes = videAchievementGroupRoutes
         };
     }
 
