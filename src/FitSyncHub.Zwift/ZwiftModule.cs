@@ -53,11 +53,14 @@ public static class ZwiftModule
             services.AddScoped<ZwiftPreselectedBikesService>();
             services.AddScoped<ZwiftRoutesService>();
 
-            services.AddHttpClient<IZwiftAuthenticator, ZwiftAuthHttpClient>(
+            services.AddHttpClient(Constants.ZwiftAuthHttpClient,
                 client => client.BaseAddress = new Uri("https://secure.zwift.com"));
+
+            services.AddScoped<IZwiftAuthenticator, ZwiftAuthHttpClient>();
             services.Decorate<IZwiftAuthenticator, ZwiftAuthHttpClientCached>();
-            services.AddTransient<IZwiftTokenRefresher, ZwiftAuthHttpClient>();
-            services.AddTransient<IZwiftAuthCacheInvalidator, ZwiftAuthHttpClientCached>();
+            services.AddScoped<IZwiftTokenRefresher, ZwiftAuthHttpClient>();
+
+            services.AddTransient<IZwiftAuthCacheInvalidator, ZwiftAuthCacheInvalidator>();
 
             AddZwiftAuthResiliencePipeline(services);
 

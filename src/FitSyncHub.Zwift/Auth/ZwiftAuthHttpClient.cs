@@ -12,13 +12,14 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
     private readonly HttpClient _httpClient;
     private readonly ZwiftOptions _zwiftOptions;
     private readonly ILogger<ZwiftAuthHttpClient> _logger;
+    private const string Url = "/auth/realms/zwift/protocol/openid-connect/token";
 
     public ZwiftAuthHttpClient(
-        HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         IOptions<ZwiftOptions> zwiftOptions,
         ILogger<ZwiftAuthHttpClient> logger)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient(Constants.ZwiftAuthHttpClient);
         _zwiftOptions = zwiftOptions.Value;
         _logger = logger;
     }
@@ -27,13 +28,12 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
     {
         _logger.LogInformation("Starting authentication process...");
 
-        const string Url = "/auth/realms/zwift/tokens/access/codes";
         var formParamets = new Dictionary<string, string>
         {
+            { "client_id", "Zwift Game Client" },
+            { "grant_type", "password" },
             { "username", _zwiftOptions.Credentials.Username },
             { "password", _zwiftOptions.Credentials.Password },
-            { "grant_type", "password" },
-            { "client_id", "Zwift_Mobile_Link" }
         };
 
         var formContent = new FormUrlEncodedContent(formParamets);
@@ -58,9 +58,9 @@ internal sealed class ZwiftAuthHttpClient : IZwiftAuthenticator, IZwiftTokenRefr
         _logger.LogInformation("Starting token refresh with refresh token: {Token}", token.RefreshToken);
 #pragma warning restore CA1873 // Avoid potentially expensive logging
 
-        const string Url = "/auth/realms/zwift/tokens/access/codes";
         var formParamets = new Dictionary<string, string>
         {
+            { "client_id", "Zwift Game Client" },
             { "grant_type", "refresh_token" },
             { "refresh_token", token.RefreshToken },
         };

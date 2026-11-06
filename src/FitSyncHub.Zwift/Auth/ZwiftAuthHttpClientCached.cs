@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Auth;
 
-internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAuthCacheInvalidator
+internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator
 {
     private readonly IDistributedCacheService _distributedCacheService;
     private readonly IZwiftAuthenticator _zwiftAuthenticator;
@@ -63,12 +63,5 @@ internal sealed class ZwiftAuthHttpClientCached : IZwiftAuthenticator, IZwiftAut
 
         var expiryDate = jwtSecurityToken.ValidTo;
         return expiryDate > DateTime.UtcNow;
-    }
-
-    public async Task Invalidate(CancellationToken cancellationToken)
-    {
-        await _distributedCacheService.RemoveAsync(
-            Common.Constants.CacheKeys.ZwiftAuthTokenModel,
-            cancellationToken);
     }
 }

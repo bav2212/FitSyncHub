@@ -3,6 +3,7 @@
 internal static class Constants
 {
     public const string ZwiftAuthResiliencePipeline = nameof(ZwiftAuthResiliencePipeline);
+    public const string ZwiftAuthHttpClient = nameof(ZwiftAuthHttpClient);
     public const string ZwiftHttpClientJson = nameof(ZwiftHttpClientJson);
     public const string ZwiftHttpClientProto = nameof(ZwiftHttpClientProto);
 
