@@ -7,27 +7,18 @@ public class ZwiftRouteAchievementResolver
 {
     private readonly Dictionary<string, string> _routeNameToAchievementNameExceptions = new(StringComparer.OrdinalIgnoreCase)
     {
-        { "2018 WORLDS SHORT LAP", "2018 UCI WORLDS SHORT LAP"},
         { "RICHMOND UCI WORLDS", "2015 UCI WORLDS COURSE"},
-        { "WATOPIA HILLY ROUTE", "HILLY ROUTE"},
+        { "2018 WORLDS SHORT LAP", "2018 UCI WORLDS SHORT LAP"},
         { "2019 WORLDS HARROGATE CIRCUIT", "2019 UCI WORLDS HARROGATE CIRCUIT"},
-        { "WATOPIA PRETZEL", "THE PRETZEL"},
-        { "WATOPIA MOUNTAIN ROUTE", "MOUNTAIN ROUTE"},
-        { "WATOPIA MOUNTAIN 8", "MOUNTAIN 8"},
-        { "WATOPIA FIGURE 8", "FIGURE 8"},
-        { "WATOPIA FIGURE 8 REVERSE", "FIGURE 8 REVERSE"},
-        { "WATOPIA FLAT ROUTE", "FLAT ROUTE"},
-        { "LONDON PRL HALF", "THE PRL HALF"},
-        { "LONDON PRL FULL", "THE PRL FULL"},
         { "CASSE-PATTES", "CASSE PATTES"},
-        { "TIRE-BOUCHON", "TIRE BOUCHON"},
+        { "CASTLE CRIT RUN", "CASTLE CRIT (RUNNING)"},
         { "HANDFUL OF GRAVEL", "HANDFUL OF GRAVEL (CYCLING)"},
         { "HANDFUL OF GRAVEL RUN", "HANDFUL OF GRAVEL (RUNNING)"},
-        { "RICHMOND 2015 WORLDS REVERSE", "RICHMOND UCI REVERSE"},
-        { "CASTLE CRIT RUN", "CASTLE CRIT (RUNNING)"},
-        { "PEAKY PAVÉ", "PEAKY PAVE"},
         { "CLASSIQUE", "LONDON CLASSIQUE"},
         { "CLASSIQUE REVERSE", "LONDON CLASSIQUE REVERSE"},
+        { "PEAKY PAVÉ", "PEAKY PAVE"},
+        { "RICHMOND 2015 WORLDS REVERSE", "RICHMOND UCI REVERSE"},
+        { "TIRE-BOUCHON", "TIRE BOUCHON"},
     };
 
     public ZwiftRouteAchievementResolver(List<ZwiftGameInfoAchievement> achievements, bool throwOnUntouchedRouteAchievements)

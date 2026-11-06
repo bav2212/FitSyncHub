@@ -12,18 +12,7 @@ public sealed class ZwiftRoutesFromZwiftWADFilesProvider : IZwiftRoutesProvider
     // to align with gameInfo endpoint
     private static readonly Dictionary<string, string> s_nameMapping = new()
     {
-        {"Classique", "London Classique"},
-        {"Classique Reverse", "London Classique Reverse"},
-        {"The PRL Half", "London PRL Half"},
-        {"The PRL Full", "London PRL FULL"},
         {"2015 Worlds Course", "Richmond UCI Worlds"},
-        {"Hilly Route", "Watopia Hilly Route"},
-        {"Flat Route", "Watopia Flat Route"},
-        {"Figure 8 Reverse", "Watopia Figure 8 Reverse"},
-        {"Figure 8", "Watopia Figure 8"},
-        {"Mountain Route", "Watopia Mountain Route"},
-        {"Mountain 8", "Watopia Mountain 8"},
-        {"The Pretzel", "Watopia Pretzel"},
     };
 
     private readonly ZwiftWorldsXmlFilesProvider _zwiftWorldsXmlFilesProvider;
