@@ -54,7 +54,7 @@ public sealed class ZwiftEventRidersCompetitionMetricsHttpTriggerFunction
 
             var weigth = rider.WeightInGrams / 1000.0;
             var height = rider.HeightInMillimeters / 1000.0;
-            var ftpPerKg = rider.Ftp / weigth;
+            var ftpPerKg = Math.Round(rider.Ftp / weigth, 2);
 
             items.Add(new ZwiftEventRidersCompetitionMetricsResponseItem
             {
