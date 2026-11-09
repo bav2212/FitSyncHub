@@ -1,6 +1,8 @@
 ﻿using System.Security.Cryptography;
 using System.Text.Json;
 using FitSyncHub.Zwift.HttpClients;
+using FitSyncHub.Zwift.HttpClients.Models.Responses.Mochi;
+using FitSyncHub.Zwift.JsonSerializerContexts;
 using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Zwift.Providers;
@@ -35,6 +37,7 @@ public class ZwiftWorldsXmlFilesProvider
     private readonly string _unpackedWADFilesStateFilePath;
     private readonly string _mochiFilesDirectory;
     private readonly string _mochiStateFilePath;
+    private readonly string _mochiCatalogResponseFilePath;
 
     public ZwiftWorldsXmlFilesProvider(
         ZwiftWadDecoder zwiftWadDecoder,
@@ -51,18 +54,17 @@ public class ZwiftWorldsXmlFilesProvider
         _unpackedWADFilesStateFilePath = Path.Combine(_unpackedWADFilesDirectory, "state.json");
         _mochiFilesDirectory = Path.Combine(_unpackedWADFilesDirectory, "Mochi");
         _mochiStateFilePath = Path.Combine(_unpackedWADFilesDirectory, "mochi_state.json");
+
+        var mochiCatalogVersionUnderScore = Constants.MochiCatalogVersion.Replace('.', '_');
+        _mochiCatalogResponseFilePath = Path.Combine(_unpackedWADFilesDirectory, $"mochi_catalog_response_{mochiCatalogVersionUnderScore}.json");
     }
 
     public async Task<ZwiftXmlFilesModel> GetWorlsXmlFilesPaths(CancellationToken cancellationToken)
     {
-        await UnpackWADFiles(cancellationToken);
-        await LoadMochiFiles(cancellationToken);
+        var filePaths = await GetWorldsXmlFiles(cancellationToken);
 
         var worldsDictionary = new Dictionary<long, ZwiftXmlFilesWorldData>();
         var climbPortalRoads = new List<ZwiftXmlFilesRoadItem>();
-
-        var filePaths = Directory.EnumerateFiles(Path.Combine(_unpackedWADFilesDirectory, "Worlds"),
-                "*.xml", new EnumerationOptions { RecurseSubdirectories = true });
 
         foreach (var filePath in filePaths)
         {
@@ -149,10 +151,7 @@ public class ZwiftWorldsXmlFilesProvider
             }
         }
 
-        var mochiFilePaths = Directory
-            .EnumerateFiles(_mochiFilesDirectory, "*.xml", new EnumerationOptions { RecurseSubdirectories = true })
-            .Select(x => new ZwiftXmlFilesRoadItem { FilePath = x })
-            .ToList();
+        var mochiFilePaths = await GetMochiFiles(cancellationToken);
 
         return new ZwiftXmlFilesModel
         {
@@ -162,7 +161,7 @@ public class ZwiftWorldsXmlFilesProvider
         };
     }
 
-    private async Task LoadMochiFiles(CancellationToken cancellationToken)
+    private async Task<List<ZwiftXmlFilesRoadItem>> GetMochiFiles(CancellationToken cancellationToken)
     {
         if (!Directory.Exists(_mochiFilesDirectory))
         {
@@ -179,7 +178,23 @@ public class ZwiftWorldsXmlFilesProvider
                 .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
         }
 
-        var mochiCatalogResponse = await _zwiftMochiHttpClient.GetMochiCatalogResponse(cancellationToken);
+        MochiCatalogResponse mochiCatalogResponse;
+        if (File.Exists(_mochiCatalogResponseFilePath))
+        {
+            var mochiCatalogResponseJson = await File.ReadAllTextAsync(_mochiCatalogResponseFilePath, cancellationToken);
+            mochiCatalogResponse = JsonSerializer.Deserialize(
+                mochiCatalogResponseJson,
+                MochiCatalogGenerationContext.Default.MochiCatalogResponse)!;
+        }
+        else
+        {
+            mochiCatalogResponse = await _zwiftMochiHttpClient.GetMochiCatalogResponse(cancellationToken);
+            var mochiCatalogResponseJson = JsonSerializer.Serialize(
+                mochiCatalogResponse,
+                MochiCatalogGenerationContext.Default.MochiCatalogResponse);
+            await File.WriteAllTextAsync(_mochiCatalogResponseFilePath, mochiCatalogResponseJson, cancellationToken);
+        }
+
         foreach (var mochiCatalogCollections in mochiCatalogResponse.Collections)
         {
             foreach (var mochiCatalogRide in mochiCatalogCollections.Rides)
@@ -213,6 +228,11 @@ public class ZwiftWorldsXmlFilesProvider
 
         var updatedMochiStateList = JsonSerializer.Serialize(mochiRideNameToRoadSizeMapping.Values.ToList())!;
         await File.WriteAllTextAsync(_mochiStateFilePath, updatedMochiStateList, cancellationToken);
+
+        return [.. Directory
+            .EnumerateFiles(_mochiFilesDirectory, "*.xml", new EnumerationOptions { RecurseSubdirectories = true })
+            .Select(x => new ZwiftXmlFilesRoadItem { FilePath = x })];
+
     }
 
     private static (uint worldId, string worldName) GetWorldInfoFromFilePath(string[] pathParts)
@@ -223,7 +243,7 @@ public class ZwiftWorldsXmlFilesProvider
         return (uint.Parse(worldId), worldName);
     }
 
-    private async Task UnpackWADFiles(CancellationToken cancellationToken)
+    private async Task<IEnumerable<string>> GetWorldsXmlFiles(CancellationToken cancellationToken)
     {
         if (!Directory.Exists(_unpackedWADFilesDirectory))
         {
@@ -277,6 +297,9 @@ public class ZwiftWorldsXmlFilesProvider
 
         var updatedUnpackedWADFilesStateList = JsonSerializer.Serialize(unpackedWADFilesStateDictionary.Values.ToList())!;
         await File.WriteAllTextAsync(_unpackedWADFilesStateFilePath, updatedUnpackedWADFilesStateList, cancellationToken);
+
+        var worldsDirectory = Path.Combine(_unpackedWADFilesDirectory, "Worlds");
+        return [.. Directory.EnumerateFiles(worldsDirectory, "*.xml", new EnumerationOptions { RecurseSubdirectories = true })];
     }
 
     // move to common if need
