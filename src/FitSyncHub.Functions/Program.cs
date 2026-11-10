@@ -11,7 +11,6 @@ using FitSyncHub.GarminConnect;
 using FitSyncHub.IntervalsICU;
 using FitSyncHub.Strava;
 using FitSyncHub.Weather;
-using FitSyncHub.Xert;
 using FitSyncHub.Youtube;
 using FitSyncHub.Zwift;
 using Microsoft.Azure.Cosmos;
@@ -34,7 +33,6 @@ HashSet<string> functionsCalledByUser = [
     nameof(GarminUploadToStravaHttpTriggerFunction),
     nameof(MacroNutrientsCalculatorHttpTriggerFunction),
     nameof(LactateSyncHttpTriggerFunction),
-    nameof(XertWorkoutToIntervalsICUExporterHttpTriggerFunction),
     nameof(ZwiftEventRidersCompetitionMetricsHttpTriggerFunction),
     nameof(ZwiftEventsToCompleteRouteAchievementsHttpTriggerFunction),
     nameof(ZwiftProfilesSearchHttpTriggerFunction),
@@ -96,7 +94,6 @@ builder.Services.AddIntervalsIcuModule(builder.Configuration.GetSection("Interva
 builder.Services.AddGarminConnectModule(builder.Configuration.GetSection("GarminConnect"));
 builder.Services.AddZwiftModule(builder.Configuration.GetSection("Zwift"));
 builder.Services.AddYoutubeModule(builder.Configuration.GetSection("Youtube"));
-builder.Services.AddXertModule(builder.Configuration.GetSection("Xert"));
 builder.Services.AddWeatherModule(builder.Configuration.GetSection("Weather"));
 
 builder.Services.AddCosmosCache(cacheOptions =>

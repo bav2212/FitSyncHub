@@ -6,7 +6,6 @@ public static class Constants
     {
         public const string GarminLastWeightResponse = "garmin-last-weight-response";
         public const string LactateLastSyncedDate = "lactate-last-synced-date";
-        public const string XertOauth2TokenModel = "xert-oauth2-token-model";
         public const string ZwiftAuthTokenModel = "zwift-auth-token-model";
         public const string GarminDiTokenModel = "garmin-di-token-model";
     }
