@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Azure.Functions.Sdk/1.0.2">
   <PropertyGroup>
       <TargetFramework>net11.0</TargetFramework>
+      <AzureFunctionsVersion>v4</AzureFunctionsVersion>
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
       <UserSecretsId>2fdb2003-312a-494c-948d-92de42255595</UserSecretsId>
