@@ -1,10 +1,9 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using FitSyncHub.Functions.Data.Entities;
 using FitSyncHub.Strava.Abstractions;
 using FitSyncHub.Strava.HttpClients.Models.Requests;
 using FitSyncHub.Strava.HttpClients.Models.Responses.Activities;
 using FitSyncHub.Strava.Options;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace FitSyncHub.Functions.Services;

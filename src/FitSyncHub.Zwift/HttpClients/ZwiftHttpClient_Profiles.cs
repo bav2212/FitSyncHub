@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
+﻿using System.Text.Json;
 using FitSyncHub.Zwift.HttpClients.Models.Requests.Profiles;
 using FitSyncHub.Zwift.HttpClients.Models.Responses.Profiles;
 using FitSyncHub.Zwift.JsonSerializerContexts;
