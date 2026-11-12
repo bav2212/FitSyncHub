@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
+﻿using System.Text.Json;
 using FitSyncHub.Common.Helpers;
 using FitSyncHub.Common.Models;
 using FitSyncHub.Functions.JsonSerializerContexts;

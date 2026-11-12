@@ -8,7 +8,6 @@ using FitSyncHub.IntervalsICU.HttpClients.Models.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;
@@ -149,7 +148,12 @@ public sealed class IntervalsICUChangeFTPHttpTriggerFunction
        uint ftp,
        FitMessages mergedFitMessages)
     {
-        var mergedTss = TssCalculator.Calculate(mergedFitMessages, ftp)!.Tss;
+        var mergedTss = TssCalculator.Calculate(mergedFitMessages, ftp) switch
+        {
+            CalculateTssResult result => result.Tss,
+            NoMovingPowerData => throw new InvalidOperationException("Cannot calculate TSS without moving power data"),
+            InvalidFtp invalidFtp => throw new InvalidOperationException($"FTP must be positive; received {invalidFtp.Ftp}")
+        };
         var activitiesTss = activities.Sum(x => x.PowerLoad!.Value);
 
         var deltaTssToAdd = mergedTss - activitiesTss;

@@ -1,6 +1,5 @@
 ﻿using FitSyncHub.Functions.Services;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions;
 

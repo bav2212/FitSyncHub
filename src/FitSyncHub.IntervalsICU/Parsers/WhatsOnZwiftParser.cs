@@ -94,7 +94,7 @@ public static class WhatsOnZwiftParser
 
         if (!match.Success)
         {
-            throw new Exception("Line format not recognized: " + line);
+            throw new FormatException("Line format not recognized: " + line);
         }
 
         var time = ConvertTime(match);
@@ -174,14 +174,7 @@ public static class WhatsOnZwiftParser
         var hours = string.IsNullOrEmpty(hoursMatch) ? default : int.Parse(hoursMatch);
         var minutes = string.IsNullOrEmpty(minutesMatch) ? default : int.Parse(minutesMatch);
 
-        try
-        {
-            var seconds = string.IsNullOrEmpty(secondsMatch) ? default : int.Parse(secondsMatch);
-            return new TimeSpan(hours, minutes, seconds);
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        var seconds = string.IsNullOrEmpty(secondsMatch) ? default : int.Parse(secondsMatch);
+        return new TimeSpan(hours, minutes, seconds);
     }
 }

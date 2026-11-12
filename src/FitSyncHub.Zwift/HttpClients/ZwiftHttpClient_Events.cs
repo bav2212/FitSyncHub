@@ -35,11 +35,9 @@ public sealed partial class ZwiftHttpClient
             ["sport"] = "CYCLING"
         };
 
-        var pages = 0;
-        var done = false;
         string? cursor = null;
-
-        while (!done)
+outer:
+        for (var pages = 0; ; pages++)
         {
             if (cursor != null)
             {
@@ -57,17 +55,15 @@ public sealed partial class ZwiftHttpClient
                 ZwiftHttpClientEventsGenerationContext.Default.ZwiftEventFeedResponse);
             if (page?.Data == null)
             {
-                break;
+                break outer;
             }
-            pages++;
 
             foreach (var item in page.Data)
             {
                 var ev = item.Event;
                 if (ev.EventStart > to)
                 {
-                    done = true;
-                    break;
+                    break outer;
                 }
 
                 results.TryAdd(ev.Id, ev);
@@ -75,18 +71,18 @@ public sealed partial class ZwiftHttpClient
 
             if (page.Data.Count == 0 || (page.Data.Count < limit))
             {
-                break;
+                break outer;
             }
 
             if (pageLimit.HasValue && pages >= pageLimit)
             {
-                break;
+                break outer;
             }
 
             if (pages > MaxRequests)
             {
                 _logger.LogWarning("To much pages to iterate. Stopping to avoid some block from Zwift");
-                break;
+                break outer;
             }
 
             cursor = page.Cursor;
@@ -172,12 +168,8 @@ public sealed partial class ZwiftHttpClient
         const long TakeCount = 100;
         const int MaxRequests = 10;
 
-        var pages = 0;
-        var done = false;
-
         var results = new Dictionary<long, ZwiftEventSubgroupEntrantResponse>();
-
-        for (var start = 0; !done; start++, pages++)
+        for (int start = 0, pages = 0; ; start++, pages++)
         {
             if (pages >= MaxRequests)
             {
@@ -208,7 +200,7 @@ public sealed partial class ZwiftHttpClient
 
             if (page.Count == 0 || (page.Count < TakeCount))
             {
-                done = true;
+                break;
             }
         }
 

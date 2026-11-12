@@ -19,20 +19,30 @@ public partial class WhatsOnZwiftToIntervalsIcuService
         _logger = logger;
     }
 
-    public async Task<WhatsOnZwiftToIntervalsIcuConvertResult> ScrapeAndConvertToIntervalsIcu(
+    public async Task<WhatsOnZwiftConversionResult> ScrapeAndConvertToIntervalsIcu(
         Uri workoutUri, CancellationToken cancellationToken)
     {
-        var scrapeResult = await _whatsOnZwiftScraper.ScrapeWorkoutStructure(workoutUri, cancellationToken);
-
-        var workout = WhatsOnZwiftParser.Parse(scrapeResult.WorkoutList);
-        var workoutDescription = new IntervalsIcuWorkoutBuilder()
-            .Build(workout);
-
-        return new WhatsOnZwiftToIntervalsIcuConvertResult
+        try
         {
-            IntervalsIcuWorkoutDescription = workoutDescription,
-            FileInfo = GetFileNameInfo([.. scrapeResult.NameSegments])
-        };
+            var scrapeResult = await _whatsOnZwiftScraper.ScrapeWorkoutStructure(workoutUri, cancellationToken);
+
+            var workout = WhatsOnZwiftParser.Parse(scrapeResult.WorkoutList);
+            var workoutDescription = new IntervalsIcuWorkoutBuilder()
+                .Build(workout);
+
+            return new WhatsOnZwiftToIntervalsIcuConvertResult
+            {
+                IntervalsIcuWorkoutDescription = workoutDescription,
+                FileInfo = GetFileNameInfo([.. scrapeResult.NameSegments])
+            };
+        }
+        catch (Exception ex) when (ex is InvalidDataException
+            or FormatException
+            or OverflowException
+            or ArgumentOutOfRangeException)
+        {
+            return new WhatsOnZwiftConversionError(ex.Message);
+        }
     }
 
     private WhatsOnZwiftToIntervalsIcuConvertFileInfo GetFileNameInfo(string[] nameSegments)
@@ -65,7 +75,7 @@ public partial class WhatsOnZwiftToIntervalsIcuService
             return (weekName, workoutName);
         }
 
-        throw new NotImplementedException();
+        throw new InvalidDataException("Unexpected workout breadcrumb structure");
     }
 
     private static bool TryGetDay(string workoutName, out int dayNumber)
@@ -103,7 +113,7 @@ public partial class WhatsOnZwiftToIntervalsIcuService
             return WhatsOnZwiftToIntervalsIcuWeek.CreatePreparationWeek();
         }
 
-        throw new NotImplementedException();
+        throw new InvalidDataException("Unexpected workout week segment");
     }
 
     [GeneratedRegex(@"^(Week\s(?<week_number>\d+))$|^(?<week_zero>Week 0 Prep)$")]

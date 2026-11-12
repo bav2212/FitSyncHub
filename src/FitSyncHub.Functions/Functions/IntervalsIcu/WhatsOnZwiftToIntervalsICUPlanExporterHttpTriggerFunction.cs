@@ -4,7 +4,6 @@ using FitSyncHub.IntervalsICU.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 namespace FitSyncHub.Functions.Functions.IntervalsIcu;
@@ -42,23 +41,37 @@ public sealed class WhatsOnZwiftToIntervalsICUPlanExporterHttpTriggerFunction
             return new BadRequestObjectResult("wrong url");
         }
 
+        List<string> links;
         try
         {
-            var links = await _whatsOnZwiftScraper.ScrapeWorkoutPlanLinks(planUri, cancellationToken);
-            var items = await ScrapeWorkoutsAndConvertToIntervalsIcu(links, cancellationToken)
-                .ToListAsync(cancellationToken);
-
-            await _intervalsIcuStorageService.Store(items, request.FolderId, cancellationToken);
-            return new OkObjectResult("Stored plan");
+            links = await _whatsOnZwiftScraper.ScrapeWorkoutPlanLinks(planUri, cancellationToken);
         }
-        catch (Exception ex)
+        catch (InvalidDataException ex)
         {
-            _logger.LogError(ex, "Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
+            _logger.LogWarning(ex, "Cannot read WhatsOnZwift plan");
             return new BadRequestObjectResult("Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
         }
+
+        List<WhatsOnZwiftToIntervalsIcuConvertResult> items = [];
+        await foreach (var conversion in ScrapeWorkoutsAndConvertToIntervalsIcu(links, cancellationToken)
+            .WithCancellation(cancellationToken))
+        {
+            switch (conversion)
+            {
+                case WhatsOnZwiftToIntervalsIcuConvertResult item:
+                    items.Add(item);
+                    break;
+                case WhatsOnZwiftConversionError error:
+                    _logger.LogWarning("Cannot convert WhatsOnZwift plan workout: {Reason}", error.Message);
+                    return new BadRequestObjectResult("Cannot convert and store WhatsOnZwift plan to Intervals.ICU plan");
+            }
+        }
+
+        await _intervalsIcuStorageService.Store(items, request.FolderId, cancellationToken);
+        return new OkObjectResult("Stored plan");
     }
 
-    private async IAsyncEnumerable<WhatsOnZwiftToIntervalsIcuConvertResult> ScrapeWorkoutsAndConvertToIntervalsIcu(
+    private async IAsyncEnumerable<WhatsOnZwiftConversionResult> ScrapeWorkoutsAndConvertToIntervalsIcu(
         List<string> links,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {

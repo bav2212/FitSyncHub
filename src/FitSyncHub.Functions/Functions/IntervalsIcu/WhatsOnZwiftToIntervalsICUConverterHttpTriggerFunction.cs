@@ -1,9 +1,9 @@
 ﻿using System.Text;
+using FitSyncHub.IntervalsICU.Models;
 using FitSyncHub.IntervalsICU.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Functions.IntervalsIcu;
 
@@ -38,20 +38,26 @@ public sealed class WhatsOnZwiftToIntervalsICUConverterHttpTriggerFunction
             return new BadRequestObjectResult("wrong url");
         }
 
-        try
-        {
-            var workout = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(uri, cancellationToken);
+        var conversion = await _zwiftToIntervalsIcuService.ScrapeAndConvertToIntervalsIcu(uri, cancellationToken);
 
-            var result = new StringBuilder();
-            result.AppendLine($"{workout.FileInfo.Name}\n");
-            result.AppendLine(workout.IntervalsIcuWorkoutDescription);
-
-            return new OkObjectResult(result.ToString());
-        }
-        catch (Exception ex)
+        return conversion switch
         {
-            _logger.LogError(ex, "Cannot convert WhatsOnZwift workout to Intervals.ICU workout");
-            return new BadRequestObjectResult("Cannot convert WhatsOnZwift workout to Intervals.ICU workout");
-        }
+            WhatsOnZwiftToIntervalsIcuConvertResult workout => CreateSuccessResponse(workout),
+            WhatsOnZwiftConversionError error => CreateErrorResponse(error)
+        };
+    }
+
+    private static OkObjectResult CreateSuccessResponse(WhatsOnZwiftToIntervalsIcuConvertResult workout)
+    {
+        var result = new StringBuilder();
+        result.AppendLine($"{workout.FileInfo.Name}\n");
+        result.AppendLine(workout.IntervalsIcuWorkoutDescription);
+        return new OkObjectResult(result.ToString());
+    }
+
+    private BadRequestObjectResult CreateErrorResponse(WhatsOnZwiftConversionError error)
+    {
+        _logger.LogWarning("Cannot convert WhatsOnZwift workout to Intervals.ICU workout: {Reason}", error.Message);
+        return new BadRequestObjectResult("Cannot convert WhatsOnZwift workout to Intervals.ICU workout");
     }
 }

@@ -9,7 +9,6 @@ using FitSyncHub.Strava.HttpClients.Models.Requests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using DateTime = System.DateTime;
 
 namespace FitSyncHub.Functions.Functions;

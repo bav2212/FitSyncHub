@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using FitSyncHub.IntervalsICU.HttpClients.Models;
+﻿using FitSyncHub.IntervalsICU.HttpClients.Models;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
 namespace FitSyncHub.IntervalsICU.HttpClients;

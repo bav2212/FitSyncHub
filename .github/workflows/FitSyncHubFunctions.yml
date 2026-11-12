@@ -8,24 +8,28 @@ on:
 env:
   AZURE_FUNCTIONAPP_NAME: FitSyncHubFunctionsApp
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
-  DOTNET_VERSION: 10.0.x
+  DOTNET_VERSION: 11.0.x
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout GitHub Action'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 'Resolve Project Dependencies Using Dotnet'
+    - name: 'Publish Functions App'
       shell: bash
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build src/FitSyncHub.Functions --configuration Release --output ./output
+        dotnet publish src/FitSyncHub.Functions/FitSyncHub.Functions.csproj --configuration Release --output ./output
+        test -f ./output/host.json
+        test -f ./output/worker.config.json
+        test -f ./output/extensions.json
+        test -f ./output/.azurefunctions/Microsoft.Azure.WebJobs.Extensions.FunctionMetadataLoader.dll
         popd
 
     - name: Deploy to Azure Function App

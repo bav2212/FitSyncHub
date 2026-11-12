@@ -5,8 +5,13 @@ namespace FitSyncHub.Common;
 
 public static class TssCalculator
 {
-    public static CalculateTssResult? Calculate(FitMessages fitMessages, double ftp)
+    public static TssCalculationResult Calculate(FitMessages fitMessages, double ftp)
     {
+        if (ftp <= 0)
+        {
+            return new InvalidFtp(ftp);
+        }
+
         var powerPoints = fitMessages.RecordMesgs
             //For moving time for the whole activity Intervals.icu uses the speed if available with anything >= 0.05 m/s (0.18 km/h) considered moving. 
             .Where(x => x.GetSpeed() >= 0.05)
@@ -17,15 +22,15 @@ public static class TssCalculator
             })
             .ToList();
 
-        if (powerPoints.Count == 0 || ftp <= 0)
+        if (powerPoints.Count == 0)
         {
-            return default;
+            return new NoMovingPowerData();
         }
 
         return Calculate(powerPoints, ftp);
     }
 
-    private static CalculateTssResult? Calculate(List<FitMessageRawPowerAndTime> fitData, double ftp)
+    private static CalculateTssResult Calculate(List<FitMessageRawPowerAndTime> fitData, double ftp)
     {
         // can't use timestamps, cause it could be pauses during ride
         var totalDuration = fitData.Count;
@@ -91,3 +96,9 @@ public sealed record CalculateTssResult
     public required double Tss { get; init; }
     public required int Duration { get; init; }
 }
+
+public sealed record NoMovingPowerData;
+
+public sealed record InvalidFtp(double Ftp);
+
+public readonly union TssCalculationResult(CalculateTssResult, NoMovingPowerData, InvalidFtp);

@@ -3,7 +3,6 @@ using FitSyncHub.GarminConnect.HttpClients;
 using FitSyncHub.GarminConnect.JsonSerializerContexts;
 using FitSyncHub.GarminConnect.Models.Responses;
 using FitSyncHub.Strava.Abstractions;
-using Microsoft.Extensions.Logging;
 
 namespace FitSyncHub.Functions.Services;
 
