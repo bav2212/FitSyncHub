@@ -5,7 +5,7 @@ namespace FitSyncHub.GarminConnect.Models.Responses.Workout;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(GarminWorkoutExecutableStepResponse), "ExecutableStepDTO")]
 [JsonDerivedType(typeof(GarminWorkoutRepeatGroupResponse), "RepeatGroupDTO")]
-public abstract record GarminWorkoutStepBase
+public closed record GarminWorkoutStepBase
 {
     public int? StepOrder { get; init; }
     public GarminWorkoutStepTypeResponse StepType { get; init; } = default!;

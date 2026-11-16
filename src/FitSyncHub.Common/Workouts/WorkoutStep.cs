@@ -1,6 +1,6 @@
 ﻿namespace FitSyncHub.Common.Workouts;
 
-public abstract record WorkoutStep
+public closed record WorkoutStep
 {
     public required WorkoutStepType Type { get; init; }
 }

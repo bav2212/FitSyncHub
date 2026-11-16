@@ -2,7 +2,7 @@
 
 namespace FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
 
-public abstract record EventCreateRequestBase
+public closed record EventCreateRequestBase
 {
     private DateTime _startDateLocal;
     public required DateTime StartDateLocal
