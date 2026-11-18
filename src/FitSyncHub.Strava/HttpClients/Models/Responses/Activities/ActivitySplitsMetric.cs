@@ -8,6 +8,7 @@ public sealed record ActivitySplitsMetric
     public int? MovingTime { get; init; }
     public int? Split { get; init; }
     public float? AverageSpeed { get; init; }
+    public float? AverageHeartrate { get; init; }
     public object? AverageGradeAdjustedSpeed { get; init; }
     public int? PaceZone { get; init; }
 }

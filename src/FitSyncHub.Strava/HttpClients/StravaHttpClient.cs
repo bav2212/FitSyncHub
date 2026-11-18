@@ -87,8 +87,11 @@ public class StravaHttpClient : IStravaHttpClient
         };
 
         var requestUri = QueryHelpers.AddQueryString($"activities/{activityId}", queryParams);
-        var activity = await _httpClient.GetFromJsonAsync(requestUri, StravaHttpClientSerializerContext.Default.ActivityModelResponse, cancellationToken);
+        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
 
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        var activity = JsonSerializer.Deserialize(content, StravaHttpClientSerializerContext.Default.ActivityModelResponse);
         return activity!;
     }
 

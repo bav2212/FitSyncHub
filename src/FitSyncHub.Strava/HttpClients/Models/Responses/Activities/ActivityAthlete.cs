@@ -3,5 +3,6 @@
 public sealed record ActivityAthlete
 {
     public int? Id { get; init; }
+    public string? IdStr { get; init; }
     public int? ResourceState { get; init; }
 }

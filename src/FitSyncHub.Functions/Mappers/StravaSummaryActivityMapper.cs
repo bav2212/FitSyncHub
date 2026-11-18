@@ -29,6 +29,11 @@ internal sealed partial class StravaSummaryActivityMapper
     [MapperIgnoreSource(nameof(ActivityModelResponse.FromAcceptedTag))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.HeartrateOptOut))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.HideFromHome))]
+    [MapperIgnoreSource(nameof(ActivityModelResponse.IdStr))]
+    [MapperIgnoreSource(nameof(ActivityModelResponse.Tags))]
+    [MapperIgnoreSource(nameof(ActivityModelResponse.Laps))]
+    [MapperIgnoreSource(nameof(ActivityModelResponse.Gear))]
+    [MapperIgnoreSource(nameof(ActivityModelResponse.SportImageVisibility))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.PerceivedExertion))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.Photos))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.PreferPerceivedExertion))]
@@ -38,7 +43,8 @@ internal sealed partial class StravaSummaryActivityMapper
     [MapperIgnoreSource(nameof(ActivityModelResponse.SplitsStandard))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.StatsVisibility))]
     [MapperIgnoreSource(nameof(ActivityModelResponse.UploadIdStr))]
-    [MapperIgnoreTarget(nameof(StravaSummaryActivityData.AverageHeartrate))]
-    [MapperIgnoreTarget(nameof(StravaSummaryActivityData.MaxHeartrate))]
     public partial StravaSummaryActivityData ActivityResponseToSummaryDataModel(ActivityModelResponse activity);
+
+    [MapperIgnoreSource(nameof(ActivityAthlete.IdStr))]
+    private partial StravaSummaryActivityAthlete AthleteResponseToDataModel(ActivityAthlete athlete);
 }

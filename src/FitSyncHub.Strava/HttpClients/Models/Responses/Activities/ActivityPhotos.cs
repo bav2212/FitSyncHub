@@ -2,6 +2,7 @@
 
 public sealed record ActivityPhotos
 {
-    public object? Primary { get; init; }
+    public ActivityPhoto? Primary { get; init; }
+    public bool? UsePrimaryPhoto { get; init; }
     public int? Count { get; init; }
 }

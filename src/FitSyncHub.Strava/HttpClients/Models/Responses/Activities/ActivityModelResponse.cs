@@ -14,6 +14,8 @@ public sealed record ActivityModelResponse
     public string? Type { get; init; }
     public required SportType SportType { get; init; }
     public long? Id { get; init; }
+    public string? IdStr { get; init; }
+    public System.Text.Json.JsonElement[]? Tags { get; init; }
     public DateTime? StartDate { get; init; }
     public DateTime? StartDateLocal { get; init; }
     [JsonPropertyName("timezone")]
@@ -49,6 +51,8 @@ public sealed record ActivityModelResponse
     public float? Kilojoules { get; init; }
     public bool? DeviceWatts { get; init; }
     public bool? HasHeartrate { get; init; }
+    public float? AverageHeartrate { get; init; }
+    public float? MaxHeartrate { get; init; }
     public bool? HeartrateOptOut { get; init; }
     public bool? DisplayHideHeartrateOption { get; init; }
     [JsonPropertyName("elev_high")]
@@ -67,12 +71,15 @@ public sealed record ActivityModelResponse
     public float? Calories { get; init; }
     public string? PerceivedExertion { get; init; }
     public bool? PreferPerceivedExertion { get; init; }
-    public object[]? SegmentEfforts { get; init; }
+    public ActivitySegmentEffort[]? SegmentEfforts { get; init; }
+    public ActivityLap[]? Laps { get; init; }
+    public ActivityGear? Gear { get; init; }
     public ActivitySplitsMetric[]? SplitsMetric { get; init; }
     public ActivitySplitsStandard[]? SplitsStandard { get; init; }
     public ActivityPhotos? Photos { get; init; }
     public required ActivityStatsVisibility[] StatsVisibility { get; init; }
     public bool? HideFromHome { get; init; }
+    public string? SportImageVisibility { get; init; }
     public string? DeviceName { get; init; }
     public string? EmbedToken { get; init; }
     public string? PrivateNote { get; init; }
