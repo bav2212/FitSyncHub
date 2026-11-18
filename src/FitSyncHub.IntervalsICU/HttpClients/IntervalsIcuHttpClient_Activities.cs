@@ -114,6 +114,31 @@ public partial class IntervalsIcuHttpClient
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task<List<ActivityStream>> ListStreamsForActivity(
+        string activityId,
+        CancellationToken cancellationToken)
+    {
+        var requestUri = $"activity/{activityId}/streams";
+
+        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken)!;
+        return JsonSerializer.Deserialize(content, IntervalsActivityStreamsSourceGenerationContext.Default.ListActivityStream)!;
+    }
+
+    public async Task UpdateStreamsForActivity(
+        string activityId,
+        List<ActivityStream> model,
+        CancellationToken cancellationToken)
+    {
+        var requestUri = $"activity/{activityId}/streams";
+
+        var jsonContent = JsonContent.Create(model, IntervalsActivityStreamsSourceGenerationContext.Default.ListActivityStream);
+        var response = await _httpClient.PutAsync(requestUri, jsonContent, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
     private static IEnumerable<ActivityResponse?> FilterStravaActivitiesAndDeserialize(string content)
     {
         var jsonDocument = JsonDocument.Parse(content);
