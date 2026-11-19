@@ -169,7 +169,7 @@ public sealed class LactateSyncHttpTriggerFunction
         List<ActivityResponse> intervalsIcuActivities, LactateResult lactateResult)
     {
         var lactateResultActivity = intervalsIcuActivities
-            .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndTimeLocal);
+            .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndDateLocal);
         if (lactateResultActivity is not null)
         {
             return lactateResultActivity;
@@ -177,7 +177,7 @@ public sealed class LactateSyncHttpTriggerFunction
 
         // If lactate result is not found in any activity, try to find it in the next 10 minutes of the activity
         return intervalsIcuActivities
-            .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndTimeLocal.AddMinutes(10))
+            .SingleOrDefault(x => lactateResult.Time >= x.StartDateLocal && lactateResult.Time <= x.EndDateLocal.AddMinutes(10))
             ?? throw new InvalidDataException("Could not map all lactate results to activities");
     }
 

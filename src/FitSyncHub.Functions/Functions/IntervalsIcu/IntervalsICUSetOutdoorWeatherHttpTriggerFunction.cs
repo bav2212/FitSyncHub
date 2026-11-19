@@ -118,7 +118,7 @@ public class IntervalsICUSetOutdoorWeatherHttpTriggerFunction
 
             var startDateOffset = new DateTimeOffset(startDate, TimeSpan.Zero);
 
-            var endDate = consecutiveActivities.Max(x => x.EndTimeLocal);
+            var endDate = consecutiveActivities.Max(x => x.EndDateLocal);
             var endDateOffset = new DateTimeOffset(endDate, TimeSpan.FromHours(localDelta.TotalHours));
 
             endDateOffset = endDateOffset.UtcDateTime.ToUniversalTime();

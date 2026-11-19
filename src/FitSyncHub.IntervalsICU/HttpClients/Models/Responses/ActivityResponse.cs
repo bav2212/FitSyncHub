@@ -235,7 +235,9 @@ public sealed record ActivityResponse
     #endregion Custom fields
 
     [JsonIgnore]
-    public DateTime EndTimeLocal => StartDateLocal.AddSeconds(ElapsedTime);
+    public DateTime EndDate => StartDate.AddSeconds(ElapsedTime);
+    [JsonIgnore]
+    public DateTime EndDateLocal => StartDateLocal.AddSeconds(ElapsedTime);
 
     [JsonIgnore]
     public bool IsRide => Type.Contains("Ride");

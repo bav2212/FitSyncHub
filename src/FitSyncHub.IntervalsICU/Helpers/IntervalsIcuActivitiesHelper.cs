@@ -24,7 +24,7 @@ public class IntervalsIcuActivitiesHelper
                    }
 
                    var lastActivity = currentGroup[^1];
-                   var gap = activity.EndTimeLocal - lastActivity.StartDateLocal;
+                   var gap = activity.EndDateLocal - lastActivity.StartDateLocal;
 
                    if (gap.TotalHours > 2)
                    {
