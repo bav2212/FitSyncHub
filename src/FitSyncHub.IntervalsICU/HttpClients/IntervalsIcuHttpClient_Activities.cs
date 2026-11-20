@@ -32,7 +32,7 @@ public partial class IntervalsIcuHttpClient
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return [.. FilterStravaActivitiesAndDeserialize(content)];
+        return [.. DeserializeActivities(content)];
     }
 
     public async Task<ActivityResponse> GetActivity(
@@ -139,7 +139,7 @@ public partial class IntervalsIcuHttpClient
         response.EnsureSuccessStatusCode();
     }
 
-    private static IEnumerable<ActivityResponse?> FilterStravaActivitiesAndDeserialize(string content)
+    private static IEnumerable<ActivityResponse?> DeserializeActivities(string content)
     {
         var jsonDocument = JsonDocument.Parse(content);
 
@@ -150,7 +150,7 @@ public partial class IntervalsIcuHttpClient
             if (activitySource == ActivitySource.Strava)
             {
                 // return null for strava activities, but we need it in pagination
-                yield return null; // Skip Strava activities
+                yield return null;
                 continue;
             }
 
