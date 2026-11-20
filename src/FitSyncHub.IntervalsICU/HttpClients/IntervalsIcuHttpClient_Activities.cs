@@ -1,8 +1,10 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Linq.Expressions;
+using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text.Json;
 using FitSyncHub.Common.Helpers;
 using FitSyncHub.Common.Models;
+using FitSyncHub.IntervalsICU.Helpers;
 using FitSyncHub.IntervalsICU.HttpClients.Models;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Common;
 using FitSyncHub.IntervalsICU.HttpClients.Models.Requests;
@@ -14,9 +16,31 @@ namespace FitSyncHub.IntervalsICU.HttpClients;
 
 public partial class IntervalsIcuHttpClient
 {
-    public async Task<IReadOnlyCollection<ActivityResponse?>> ListActivities(
+    public Task<IReadOnlyCollection<ActivityResponse?>> ListActivities(
         ActivityListQueryParams query,
         CancellationToken cancellationToken)
+    {
+        return ListActivitiesCore(query, fields: null,
+                static row => row.Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse),
+                cancellationToken);
+    }
+
+    public Task<IReadOnlyCollection<T?>> ListActivities<T>(
+        ActivityListQueryParams query,
+        Expression<Func<ActivityResponse, T>> selector,
+        CancellationToken cancellationToken)
+        where T : class
+    {
+        var (fields, deserialize) = ActivityResponseProjection.Create(selector);
+        return ListActivitiesCore(query, fields, deserialize, cancellationToken);
+    }
+
+    private async Task<IReadOnlyCollection<T?>> ListActivitiesCore<T>(
+        ActivityListQueryParams query,
+        string? fields,
+        Func<JsonElement, T?> deserialize,
+        CancellationToken cancellationToken)
+        where T : class
     {
         var queryParams = new Dictionary<string, StringValues>()
         {
@@ -25,14 +49,19 @@ public partial class IntervalsIcuHttpClient
             { "limit",  query.Limit.ToString() },
         };
 
+        if (fields is not null)
+        {
+            queryParams.Add("fields", fields);
+        }
+
         var requestUri = QueryHelpers.AddQueryString($"{AthleteBaseUrl}/activities", queryParams);
 
-        var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+        using var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return [.. DeserializeActivities(content)];
+        return DeserializeActivities(content, deserialize);
     }
 
     public async Task<ActivityResponse> GetActivity(
@@ -116,9 +145,21 @@ public partial class IntervalsIcuHttpClient
 
     public async Task<List<ActivityStream>> ListStreamsForActivity(
         string activityId,
+        ActivityStreamsListQueryParams query,
         CancellationToken cancellationToken)
     {
-        var requestUri = $"activity/{activityId}/streams";
+        var queryParams = new Dictionary<string, StringValues>();
+        if (query.Types is not null)
+        {
+            queryParams.Add("types", string.Join(",", query.Types));
+        }
+
+        if (query.IncludeDefaults.HasValue)
+        {
+            queryParams.Add("includeDefaults", $"{query.IncludeDefaults.Value}");
+        }
+
+        var requestUri = QueryHelpers.AddQueryString($"activity/{activityId}/streams", queryParams);
 
         var response = await _httpClient.GetAsync(requestUri, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -139,22 +180,22 @@ public partial class IntervalsIcuHttpClient
         response.EnsureSuccessStatusCode();
     }
 
-    private static IEnumerable<ActivityResponse?> DeserializeActivities(string content)
+    private static IReadOnlyCollection<T?> DeserializeActivities<T>(
+        string content, Func<JsonElement, T?> deserialize)
+        where T : class
     {
-        var jsonDocument = JsonDocument.Parse(content);
+        using var jsonDocument = JsonDocument.Parse(content);
+        var rows = jsonDocument.RootElement;
+        var activities = new List<T?>(rows.GetArrayLength());
 
-        foreach (var jsonObject in jsonDocument.RootElement.EnumerateArray())
+        foreach (var row in rows.EnumerateArray())
         {
-            var activitySource = jsonObject.GetProperty("source")
+            var activitySource = row.GetProperty("source")
                 .Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivitySource);
-            if (activitySource == ActivitySource.Strava)
-            {
-                // return null for strava activities, but we need it in pagination
-                yield return null;
-                continue;
-            }
-
-            yield return jsonObject.Deserialize(IntervalsIcuSnakeCaseSourceGenerationContext.Default.ActivityResponse);
+            // Keep Strava placeholders so the count still reflects the full page.
+            activities.Add(activitySource == ActivitySource.Strava ? null : deserialize(row));
         }
+
+        return activities;
     }
 }

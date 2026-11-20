@@ -235,11 +235,14 @@ public sealed record ActivityResponse
     #endregion Custom fields
 
     [JsonIgnore]
+    [JsonProjectionDependsOn(nameof(StartDate), nameof(ElapsedTime))]
     public DateTime EndDate => StartDate.AddSeconds(ElapsedTime);
     [JsonIgnore]
+    [JsonProjectionDependsOn(nameof(StartDateLocal), nameof(ElapsedTime))]
     public DateTime EndDateLocal => StartDateLocal.AddSeconds(ElapsedTime);
 
     [JsonIgnore]
+    [JsonProjectionDependsOn(nameof(Type))]
     public bool IsRide => Type.Contains("Ride");
 }
 
